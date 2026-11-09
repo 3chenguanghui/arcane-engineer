@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>烬 · 技能特效三档分级 · 同屏对比</title>
+<style>
+  html, body { margin: 0; padding: 0; background: #07090d; overflow: hidden; }
+  canvas { display: block; margin: 0 auto; }
+  #perf {
+    position: fixed; left: 12px; bottom: 10px; color: #8fa4bd;
+    font: 12px/1.5 "Consolas", monospace; white-space: pre; pointer-events: none;
+  }
+  #hint {
+    position: fixed; right: 12px; bottom: 10px; color: #5c6b7d;
+    font: 12px/1.5 "Microsoft YaHei", sans-serif; pointer-events: none;
+  }
+</style>
+</head>
+<body>
+<canvas id="cv" width="1440" height="1300"></canvas>
+<div id="perf">measuring…</div>
+<div id="hint">?tier=off 关闭分级（=改前）· ?autoshot=before|after&amp;freeze=1 供截图脚本使用</div>
+<script>
+/* ============================================================
+   烬 · 技能特效三档分级 · 同屏同背景对比页
+   ------------------------------------------------------------
+   目的：在同一帧、同一背景、同一技能下，把
+         普通技(T0) / 精英技(T1) / 首领技(T2)
+   按「尺寸 / 亮度 / 颜色 / 粒子密度」四个维度同时拉开，
+   供改前/改后对比截图使用。本页零依赖、不读主文件。
+   ============================================================ */
+
+const QS = new URLSearchParams(location.search);
+const TIER_ON = QS.get('tier') !== 'off';
+const AUTOSHOT = QS.get('autoshot');          // before / after / null
+const FREEZE = QS.get('freeze') === '1';
+const FREEZE_AT = 110 / 1000;                 // 齐射后 110ms 冻结（粒子位置可复现）
+
+const W = 1440, H = 1300;
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+
+/* 三档参数表（唯一口径，见 SKILL_TIER_PATCH.md 2.2）
+   before 模式 = 主文件当前行为：尺寸/颜色/层数都不随档位变，只有粒子数变 */
+const PARAM_BEFORE = [
+  { name: '普通技', r: 40, layers: 1, hues: [196], alpha: 0.62, count: 8,  speed: 140, psize: 1.6, life: 0.20 },
+  { name: '精英技', r: 40, layers: 1, hues: [196], alpha: 0.62, count: 20, speed: 140, psize: 1.6, life: 0.20 },
+  { name: '首领技', r: 40, layers: 1, hues: [196], alpha: 0.62, count: 60, speed: 140, psize: 1.6, life: 0.20 }
+];
+
+const PARAM_AFTER = [
+  { name: '普通技 · T0', r: 40,  layers: 1, hues: [196],            alpha: 0.62, count: 10, speed: 140, psize: 1.6, life: 0.20, core: 0 },
+  { name: '精英技 · T1', r: 74,  layers: 3, hues: [196, 224],       alpha: 0.95, count: 26, speed: 210, psize: 2.1, life: 0.34, core: 18 },
+  { name: '首领技 · T2', r: 104, layers: 5, hues: [196, 224, 251], alpha: 1.30, count: 58, speed: 300, psize: 2.6, life: 0.52, core: 46 }
+];
+
+const LANES = [330, 720, 1110];   // 三个施法点，同一水平线
+const LANE_Y = 700;
+const BASE_HUE = 196;             // 三档共用同一技能本色，保证“颜色维度”是唯一变量
+
+/**
+ * 确定性伪随机：保证 before / after 两次运行的粒子角度完全一致
+ * @param {number} seed 种子
+ * @returns {function(): number} 0~1 随机数
+ */
+function mulberry32(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a += 0x6D2B79F5;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * 生成一次施法的完整特效数据（环 + 粒子）
+ * @param {Object} p 档位参数
+ * @param {number} laneIdx 车道序号（用于错开随机种子）
+ * @returns {Object} 特效对象
+ */
+function buildFx(p, laneIdx) {
+  const rnd = mulberry32(9001 + laneIdx * 77);
+  const parts = [];
+  for (let i = 0; i < p.count; i += 1) {
+    const a = rnd() * Math.PI * 2;
+    const sp = p.speed * (0.55 + rnd() * 0.75);
+    const hue = p.hues[i % p.hues.length];
+    parts.push({ a, sp, hue, size: p.psize * (0.7 + rnd() * 0.9), life: p.life * (0.8 + rnd() * 0.5) });
+  }
+  return { p, parts, t: 0 };
+}
+
+/**
+ * 画背景：三档共用同一张背景，保证对比只差特效
+ * @returns {void}
+ */
+function drawBg() {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0b0f16');
+  g.addColorStop(0.55, '#10161f');
+  g.addColorStop(1, '#070a0e');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+
+  // 地砖网格（与游戏战斗房同色系）
+  ctx.strokeStyle = 'rgba(90,120,150,0.07)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= W; x += 80) {
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+  for (let y = 220; y <= H; y += 80) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // 地面明暗 + 暗角，避免中心过亮干扰判断
+  const fl = ctx.createLinearGradient(0, 520, 0, H);
+  fl.addColorStop(0, 'rgba(40,58,80,0.0)');
+  fl.addColorStop(0.5, 'rgba(30,44,62,0.20)');
+  fl.addColorStop(1, 'rgba(8,12,18,0.55)');
+  ctx.fillStyle = fl;
+  ctx.fillRect(0, 520, W, H - 520);
+}
+
+/**
+ * 绘制一条车道的单帧特效
+ * @param {Object} fx 特效对象
+ * @param {number} cx 车道中心 x
+ * @returns {void}
+ */
+function drawFx(fx, cx) {
+  const p = fx.p;
+  const t = fx.t;
+  const cy = LANE_Y;
+
+  // 冲击环：按 layers 递增半径与亮度，形成“层叠”而非“单层刷白”
+  for (let i = 0; i < p.layers; i += 1) {
+    const k = p.layers === 1 ? 1 : (i / (p.layers - 1));
+    const rr = p.r * (0.55 + 0.45 * k) * (1 + t * 0.9);
+    const a = Math.max(0, p.alpha * (1 - t / p.life) * (0.55 + 0.45 * k));
+    ctx.strokeStyle = `hsla(${p.hues[i % p.hues.length]}, 92%, ${58 + i * 6}%, ${a})`;
+    ctx.lineWidth = p.layers === 1 ? 3 : 2.2;
+    ctx.beginPath();
+    ctx.arc(cx, cy, rr, 0, Math.PI * 2);
+    ctx.stroke();
+  }
+
+  // 白芯：精英/首领才有的“核心过曝”，普通技没有
+  if (p.core > 0) {
+    const ca = Math.max(0, 0.95 * (1 - t / (p.life * 0.55)));
+    const cg = ctx.createRadialGradient(cx, cy, 0, cx, cy, p.core * (1 + t * 2));
+    cg.addColorStop(0, `rgba(255,255,255,${ca})`);
+    cg.addColorStop(0.35, `hsla(${p.hues[0]},100%,80%,${ca * 0.55})`);
+    cg.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = cg;
+    ctx.beginPath();
+    ctx.arc(cx, cy, p.core * (1 + t * 2), 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // 粒子
+  for (const q of fx.parts) {
+    if (q.life <= 0) continue;
+    const d = q.sp * (t * 1.6);
+    const px = cx + Math.cos(q.a) * d;
+    const py = cy + Math.sin(q.a) * d;
+    const a = Math.max(0, Math.min(1, q.life / (p.life * 0.7)));
+    ctx.fillStyle = `hsla(${q.hue}, 96%, 68%, ${a})`;
+    ctx.beginPath();
+    ctx.arc(px, py, q.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/**
+ * 画车道标题与读数，方便“挡住颜色只看尺寸”也能分档
+ * @param {Object} p 档位参数
+ * @param {number} i 车道序号
+ * @returns {void}
+ */
+function drawLabel(p, i) {
+  const cx = LANES[i];
+  ctx.textAlign = 'center';
+  ctx.fillStyle = 'rgba(190,215,240,0.92)';
+  ctx.font = '700 26px "Microsoft YaHei", sans-serif';
+  ctx.fillText(p.name, cx, 470);
+  ctx.fillStyle = 'rgba(150,178,205,0.75)';
+  ctx.font = '15px "Consolas", monospace';
+  ctx.fillText(`R ${Math.round(p.r)}px · ${p.layers}层 · ${p.count}片 · ${p.hues.length}色`, cx, 502);
+}
+
+/**
+ * 主循环：固定时间步推进三档特效，记录每帧 JS 耗时
+ * @returns {void}
+ */
+const FIXED_DT = 1 / 60;
+let elapsed = 0;
+let frozen = false;
+let perfSamples = [];
+let frameNo = 0;
+const mode = (AUTOSHOT === 'before') ? 'before' : (AUTOSHOT === 'after' ? 'after' : (TIER_ON ? 'after' : 'before'));
+const PARAMS = (mode === 'after') ? PARAM_AFTER : PARAM_BEFORE;
+const FX = PARAMS.map((p, i) => buildFx(p, i));
+
+function tick() {
+  const t0 = performance.now();
+  if (!frozen) {
+    elapsed += FIXED_DT;
+    FX.forEach((fx) => {
+      fx.t = Math.min(elapsed, fx.p.life);
+      fx.parts.forEach((q) => { q.life = Math.max(0, fx.p.life * 1.2 - elapsed); });
+    });
+  }
+
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  drawBg();
+  FX.forEach((fx, i) => {
+    drawFx(fx, LANES[i]);
+    drawLabel(fx.p, i);
+  });
+
+  // 顶部说明条：同一技能、同一背景，只有档位不同
+  ctx.textAlign = 'left';
+  ctx.fillStyle = 'rgba(140,165,190,0.8)';
+  ctx.font = '15px "Consolas", monospace';
+  ctx.fillText(`mode=${mode}  tier=${TIER_ON ? 'on' : 'off'}  skill=同色同技  t=${elapsed.toFixed(3)}s`, 24, 44);
+
+  perfSamples.push(performance.now() - t0);
+  frameNo += 1;
+
+  if (FREEZE && elapsed >= FREEZE_AT) {
+    frozen = true;
+    window.__shotReady = true;
+  }
+
+  if (frameNo >= 120 && !window.__perfDone) {
+    window.__perfDone = true;
+    const s = perfSamples.slice(6).sort((a, b) => a - b);
+    const q = (p) => s[Math.min(s.length - 1, Math.floor(s.length * p))];
+    const peak = Math.max(...FX.map((f) => f.parts.length));
+    window.__perfInfo = {
+      mode,
+      p50: +q(0.5).toFixed(3),
+      p95: +q(0.95).toFixed(3),
+      peakParticles: peak,
+      totalParticles: FX.reduce((n, f) => n + f.parts.length, 0),
+      frames: s.length
+    };
+    document.getElementById('perf').textContent =
+      `mode=${mode}\np50=${window.__perfInfo.p50}ms  p95=${window.__perfInfo.p95}ms\n` +
+      `粒子峰值=${peak}/车道  合计=${window.__perfInfo.totalParticles}  上限=300\n` +
+      `环层=${PARAMS.map((p) => p.layers).join('/')}  半径=${PARAMS.map((p) => p.r).join('/')}`;
+  }
+
+  requestAnimationFrame(tick);
+}
+
+requestAnimationFrame(tick);
+</script>
+</body>
+</html>

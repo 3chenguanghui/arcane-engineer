@@ -1,0 +1,2186 @@
+{
+  "meta": {
+    "runs": 400,
+    "talentRuns": 100,
+    "seed": 20261108
+  },
+  "chars": {
+    "ember": {
+      "runs": 400,
+      "survival3": 264,
+      "survival3Rate": 0.66,
+      "time3Avg": 300.69534090909144,
+      "time3N": 264,
+      "clear10": 135,
+      "clear10Rate": 0.3375,
+      "reach20Rate": 0.3,
+      "clear20Rate": 0.3,
+      "perFloor": {
+        "1": {
+          "enter": 400,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 400,
+          "bossSec": 67.37707499999993,
+          "bossDeaths": 0
+        },
+        "2": {
+          "enter": 400,
+          "deaths": 60,
+          "deathRate": 0.15,
+          "causes": {
+            "boss": 58,
+            "elite": 2
+          },
+          "bossFights": 398,
+          "bossSec": 62.83309045226142,
+          "bossDeaths": 58
+        },
+        "3": {
+          "enter": 340,
+          "deaths": 76,
+          "deathRate": 0.2235294117647059,
+          "causes": {
+            "boss": 51,
+            "elite": 23,
+            "battle": 2
+          },
+          "bossFights": 315,
+          "bossSec": 59.81336507936515,
+          "bossDeaths": 51
+        },
+        "4": {
+          "enter": 264,
+          "deaths": 39,
+          "deathRate": 0.14772727272727273,
+          "causes": {
+            "elite": 10,
+            "boss": 27,
+            "battle": 2
+          },
+          "bossFights": 252,
+          "bossSec": 60.70190476190477,
+          "bossDeaths": 27
+        },
+        "5": {
+          "enter": 225,
+          "deaths": 44,
+          "deathRate": 0.19555555555555557,
+          "causes": {
+            "boss": 28,
+            "elite": 16
+          },
+          "bossFights": 209,
+          "bossSec": 61.4565071770335,
+          "bossDeaths": 28
+        },
+        "6": {
+          "enter": 181,
+          "deaths": 15,
+          "deathRate": 0.08287292817679558,
+          "causes": {
+            "elite": 6,
+            "battle": 1,
+            "boss": 8
+          },
+          "bossFights": 174,
+          "bossSec": 72.82373563218391,
+          "bossDeaths": 8
+        },
+        "7": {
+          "enter": 166,
+          "deaths": 17,
+          "deathRate": 0.10240963855421686,
+          "causes": {
+            "elite": 5,
+            "boss": 12
+          },
+          "bossFights": 161,
+          "bossSec": 64.38211180124226,
+          "bossDeaths": 12
+        },
+        "8": {
+          "enter": 149,
+          "deaths": 7,
+          "deathRate": 0.04697986577181208,
+          "causes": {
+            "boss": 5,
+            "elite": 2
+          },
+          "bossFights": 147,
+          "bossSec": 65.74673469387758,
+          "bossDeaths": 5
+        },
+        "9": {
+          "enter": 142,
+          "deaths": 5,
+          "deathRate": 0.035211267605633804,
+          "causes": {
+            "boss": 3,
+            "elite": 2
+          },
+          "bossFights": 140,
+          "bossSec": 67.48407142857144,
+          "bossDeaths": 3
+        },
+        "10": {
+          "enter": 137,
+          "deaths": 2,
+          "deathRate": 0.014598540145985401,
+          "causes": {
+            "elite": 1,
+            "boss": 1
+          },
+          "bossFights": 136,
+          "bossSec": 68.57448529411765,
+          "bossDeaths": 1
+        },
+        "11": {
+          "enter": 135,
+          "deaths": 1,
+          "deathRate": 0.007407407407407408,
+          "causes": {
+            "elite": 1
+          },
+          "bossFights": 134,
+          "bossSec": 70.26291044776114,
+          "bossDeaths": 0
+        },
+        "12": {
+          "enter": 134,
+          "deaths": 3,
+          "deathRate": 0.022388059701492536,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 134,
+          "bossSec": 80.93805970149253,
+          "bossDeaths": 3
+        },
+        "13": {
+          "enter": 131,
+          "deaths": 4,
+          "deathRate": 0.030534351145038167,
+          "causes": {
+            "boss": 4
+          },
+          "bossFights": 131,
+          "bossSec": 72.50312977099237,
+          "bossDeaths": 4
+        },
+        "14": {
+          "enter": 127,
+          "deaths": 1,
+          "deathRate": 0.007874015748031496,
+          "causes": {
+            "elite": 1
+          },
+          "bossFights": 126,
+          "bossSec": 74.51849206349208,
+          "bossDeaths": 0
+        },
+        "15": {
+          "enter": 126,
+          "deaths": 1,
+          "deathRate": 0.007936507936507936,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 126,
+          "bossSec": 75.5895238095238,
+          "bossDeaths": 1
+        },
+        "16": {
+          "enter": 125,
+          "deaths": 1,
+          "deathRate": 0.008,
+          "causes": {
+            "elite": 1
+          },
+          "bossFights": 124,
+          "bossSec": 76.82838709677421,
+          "bossDeaths": 0
+        },
+        "17": {
+          "enter": 124,
+          "deaths": 4,
+          "deathRate": 0.03225806451612903,
+          "causes": {
+            "boss": 4
+          },
+          "bossFights": 124,
+          "bossSec": 77.22911290322583,
+          "bossDeaths": 4
+        },
+        "18": {
+          "enter": 120,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 120,
+          "bossSec": 90.82716666666673,
+          "bossDeaths": 0
+        },
+        "19": {
+          "enter": 120,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 120,
+          "bossSec": 88.44191666666666,
+          "bossDeaths": 0
+        },
+        "20": {
+          "enter": 120,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 120,
+          "bossSec": 49.706000000000024,
+          "bossDeaths": 0
+        }
+      },
+      "dips": [
+        {
+          "pair": "1→2",
+          "delta": -4.5
+        },
+        {
+          "pair": "2→3",
+          "delta": -3
+        },
+        {
+          "pair": "6→7",
+          "delta": -8.4
+        },
+        {
+          "pair": "12→13",
+          "delta": -8.4
+        },
+        {
+          "pair": "19→20",
+          "delta": -38.7
+        }
+      ],
+      "dipCount": 5
+    },
+    "frost": {
+      "runs": 400,
+      "survival3": 303,
+      "survival3Rate": 0.7575,
+      "time3Avg": 332.3128712871284,
+      "time3N": 303,
+      "clear10": 186,
+      "clear10Rate": 0.465,
+      "reach20Rate": 0.385,
+      "clear20Rate": 0.385,
+      "perFloor": {
+        "1": {
+          "enter": 400,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 400,
+          "bossSec": 75.18604999999977,
+          "bossDeaths": 0
+        },
+        "2": {
+          "enter": 400,
+          "deaths": 34,
+          "deathRate": 0.085,
+          "causes": {
+            "boss": 33,
+            "elite": 1
+          },
+          "bossFights": 399,
+          "bossSec": 71.66701754385964,
+          "bossDeaths": 33
+        },
+        "3": {
+          "enter": 366,
+          "deaths": 63,
+          "deathRate": 0.1721311475409836,
+          "causes": {
+            "boss": 47,
+            "elite": 16
+          },
+          "bossFights": 350,
+          "bossSec": 66.58740000000002,
+          "bossDeaths": 47
+        },
+        "4": {
+          "enter": 303,
+          "deaths": 33,
+          "deathRate": 0.10891089108910891,
+          "causes": {
+            "boss": 24,
+            "elite": 9
+          },
+          "bossFights": 294,
+          "bossSec": 67.56170068027204,
+          "bossDeaths": 24
+        },
+        "5": {
+          "enter": 270,
+          "deaths": 27,
+          "deathRate": 0.1,
+          "causes": {
+            "elite": 9,
+            "boss": 18
+          },
+          "bossFights": 261,
+          "bossSec": 68.16444444444441,
+          "bossDeaths": 18
+        },
+        "6": {
+          "enter": 243,
+          "deaths": 16,
+          "deathRate": 0.06584362139917696,
+          "causes": {
+            "boss": 10,
+            "elite": 5,
+            "battle": 1
+          },
+          "bossFights": 237,
+          "bossSec": 79.93278481012659,
+          "bossDeaths": 10
+        },
+        "7": {
+          "enter": 227,
+          "deaths": 9,
+          "deathRate": 0.039647577092511016,
+          "causes": {
+            "boss": 6,
+            "elite": 3
+          },
+          "bossFights": 224,
+          "bossSec": 70.8596875,
+          "bossDeaths": 6
+        },
+        "8": {
+          "enter": 218,
+          "deaths": 18,
+          "deathRate": 0.08256880733944955,
+          "causes": {
+            "boss": 14,
+            "elite": 2,
+            "battle": 2
+          },
+          "bossFights": 214,
+          "bossSec": 71.63710280373836,
+          "bossDeaths": 14
+        },
+        "9": {
+          "enter": 200,
+          "deaths": 11,
+          "deathRate": 0.055,
+          "causes": {
+            "elite": 4,
+            "boss": 6,
+            "battle": 1
+          },
+          "bossFights": 195,
+          "bossSec": 73.78917948717945,
+          "bossDeaths": 6
+        },
+        "10": {
+          "enter": 189,
+          "deaths": 3,
+          "deathRate": 0.015873015873015872,
+          "causes": {
+            "boss": 2,
+            "elite": 1
+          },
+          "bossFights": 188,
+          "bossSec": 75.88739361702125,
+          "bossDeaths": 2
+        },
+        "11": {
+          "enter": 186,
+          "deaths": 3,
+          "deathRate": 0.016129032258064516,
+          "causes": {
+            "battle": 1,
+            "elite": 1,
+            "boss": 1
+          },
+          "bossFights": 184,
+          "bossSec": 77.66277173913043,
+          "bossDeaths": 1
+        },
+        "12": {
+          "enter": 183,
+          "deaths": 8,
+          "deathRate": 0.04371584699453552,
+          "causes": {
+            "boss": 7,
+            "elite": 1
+          },
+          "bossFights": 182,
+          "bossSec": 90.13120879120872,
+          "bossDeaths": 7
+        },
+        "13": {
+          "enter": 175,
+          "deaths": 4,
+          "deathRate": 0.022857142857142857,
+          "causes": {
+            "boss": 2,
+            "elite": 2
+          },
+          "bossFights": 173,
+          "bossSec": 80.79005780346822,
+          "bossDeaths": 2
+        },
+        "14": {
+          "enter": 171,
+          "deaths": 6,
+          "deathRate": 0.03508771929824561,
+          "causes": {
+            "boss": 5,
+            "elite": 1
+          },
+          "bossFights": 170,
+          "bossSec": 81.66905882352943,
+          "bossDeaths": 5
+        },
+        "15": {
+          "enter": 165,
+          "deaths": 3,
+          "deathRate": 0.01818181818181818,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 165,
+          "bossSec": 83.1841818181818,
+          "bossDeaths": 3
+        },
+        "16": {
+          "enter": 162,
+          "deaths": 3,
+          "deathRate": 0.018518518518518517,
+          "causes": {
+            "boss": 2,
+            "elite": 1
+          },
+          "bossFights": 161,
+          "bossSec": 85.39236024844716,
+          "bossDeaths": 2
+        },
+        "17": {
+          "enter": 159,
+          "deaths": 2,
+          "deathRate": 0.012578616352201259,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 159,
+          "bossSec": 86.78842767295599,
+          "bossDeaths": 2
+        },
+        "18": {
+          "enter": 157,
+          "deaths": 3,
+          "deathRate": 0.01910828025477707,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 157,
+          "bossSec": 101.40738853503186,
+          "bossDeaths": 3
+        },
+        "19": {
+          "enter": 154,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 154,
+          "bossSec": 98.13058441558438,
+          "bossDeaths": 0
+        },
+        "20": {
+          "enter": 154,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 154,
+          "bossSec": 55.23577922077921,
+          "bossDeaths": 0
+        }
+      },
+      "dips": [
+        {
+          "pair": "1→2",
+          "delta": -3.5
+        },
+        {
+          "pair": "2→3",
+          "delta": -5.1
+        },
+        {
+          "pair": "6→7",
+          "delta": -9.1
+        },
+        {
+          "pair": "12→13",
+          "delta": -9.3
+        },
+        {
+          "pair": "18→19",
+          "delta": -3.3
+        },
+        {
+          "pair": "19→20",
+          "delta": -42.9
+        }
+      ],
+      "dipCount": 6
+    },
+    "frostA": {
+      "runs": 400,
+      "survival3": 294,
+      "survival3Rate": 0.735,
+      "time3Avg": 329.29887755102027,
+      "time3N": 294,
+      "clear10": 169,
+      "clear10Rate": 0.4225,
+      "reach20Rate": 0.3525,
+      "clear20Rate": 0.3525,
+      "perFloor": {
+        "1": {
+          "enter": 400,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 400,
+          "bossSec": 75.15922499999976,
+          "bossDeaths": 0
+        },
+        "2": {
+          "enter": 400,
+          "deaths": 40,
+          "deathRate": 0.1,
+          "causes": {
+            "boss": 39,
+            "elite": 1
+          },
+          "bossFights": 399,
+          "bossSec": 70.73228070175439,
+          "bossDeaths": 39
+        },
+        "3": {
+          "enter": 360,
+          "deaths": 66,
+          "deathRate": 0.18333333333333332,
+          "causes": {
+            "battle": 4,
+            "boss": 43,
+            "elite": 19
+          },
+          "bossFights": 337,
+          "bossSec": 66.32732937685462,
+          "bossDeaths": 43
+        },
+        "4": {
+          "enter": 294,
+          "deaths": 38,
+          "deathRate": 0.1292517006802721,
+          "causes": {
+            "elite": 9,
+            "boss": 29
+          },
+          "bossFights": 285,
+          "bossSec": 66.64673684210517,
+          "bossDeaths": 29
+        },
+        "5": {
+          "enter": 256,
+          "deaths": 31,
+          "deathRate": 0.12109375,
+          "causes": {
+            "elite": 11,
+            "boss": 20
+          },
+          "bossFights": 245,
+          "bossSec": 67.59644897959183,
+          "bossDeaths": 20
+        },
+        "6": {
+          "enter": 225,
+          "deaths": 19,
+          "deathRate": 0.08444444444444445,
+          "causes": {
+            "boss": 15,
+            "elite": 4
+          },
+          "bossFights": 221,
+          "bossSec": 79.20420814479634,
+          "bossDeaths": 15
+        },
+        "7": {
+          "enter": 206,
+          "deaths": 9,
+          "deathRate": 0.043689320388349516,
+          "causes": {
+            "battle": 1,
+            "boss": 7,
+            "elite": 1
+          },
+          "bossFights": 204,
+          "bossSec": 70.79235294117643,
+          "bossDeaths": 7
+        },
+        "8": {
+          "enter": 197,
+          "deaths": 16,
+          "deathRate": 0.08121827411167512,
+          "causes": {
+            "elite": 3,
+            "boss": 11,
+            "battle": 2
+          },
+          "bossFights": 192,
+          "bossSec": 71.45828125000001,
+          "bossDeaths": 11
+        },
+        "9": {
+          "enter": 181,
+          "deaths": 10,
+          "deathRate": 0.055248618784530384,
+          "causes": {
+            "elite": 4,
+            "boss": 5,
+            "battle": 1
+          },
+          "bossFights": 176,
+          "bossSec": 73.7178977272727,
+          "bossDeaths": 5
+        },
+        "10": {
+          "enter": 171,
+          "deaths": 2,
+          "deathRate": 0.011695906432748537,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 171,
+          "bossSec": 75.29666666666667,
+          "bossDeaths": 2
+        },
+        "11": {
+          "enter": 169,
+          "deaths": 7,
+          "deathRate": 0.04142011834319527,
+          "causes": {
+            "elite": 3,
+            "battle": 1,
+            "boss": 3
+          },
+          "bossFights": 165,
+          "bossSec": 76.87454545454547,
+          "bossDeaths": 3
+        },
+        "12": {
+          "enter": 162,
+          "deaths": 6,
+          "deathRate": 0.037037037037037035,
+          "causes": {
+            "boss": 6
+          },
+          "bossFights": 162,
+          "bossSec": 89.22487654320982,
+          "bossDeaths": 6
+        },
+        "13": {
+          "enter": 156,
+          "deaths": 4,
+          "deathRate": 0.02564102564102564,
+          "causes": {
+            "boss": 2,
+            "elite": 2
+          },
+          "bossFights": 154,
+          "bossSec": 80.31941558441558,
+          "bossDeaths": 2
+        },
+        "14": {
+          "enter": 152,
+          "deaths": 1,
+          "deathRate": 0.006578947368421052,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 152,
+          "bossSec": 82.01249999999999,
+          "bossDeaths": 1
+        },
+        "15": {
+          "enter": 151,
+          "deaths": 2,
+          "deathRate": 0.013245033112582781,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 151,
+          "bossSec": 82.85132450331125,
+          "bossDeaths": 2
+        },
+        "16": {
+          "enter": 149,
+          "deaths": 4,
+          "deathRate": 0.026845637583892617,
+          "causes": {
+            "boss": 3,
+            "elite": 1
+          },
+          "bossFights": 148,
+          "bossSec": 84.84256756756756,
+          "bossDeaths": 3
+        },
+        "17": {
+          "enter": 145,
+          "deaths": 3,
+          "deathRate": 0.020689655172413793,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 145,
+          "bossSec": 86.71441379310343,
+          "bossDeaths": 3
+        },
+        "18": {
+          "enter": 142,
+          "deaths": 1,
+          "deathRate": 0.007042253521126761,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 142,
+          "bossSec": 101.69225352112674,
+          "bossDeaths": 1
+        },
+        "19": {
+          "enter": 141,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 141,
+          "bossSec": 98.21936170212764,
+          "bossDeaths": 0
+        },
+        "20": {
+          "enter": 141,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 141,
+          "bossSec": 55.33787234042551,
+          "bossDeaths": 0
+        }
+      },
+      "dips": [
+        {
+          "pair": "1→2",
+          "delta": -4.4
+        },
+        {
+          "pair": "2→3",
+          "delta": -4.4
+        },
+        {
+          "pair": "6→7",
+          "delta": -8.4
+        },
+        {
+          "pair": "12→13",
+          "delta": -8.9
+        },
+        {
+          "pair": "18→19",
+          "delta": -3.5
+        },
+        {
+          "pair": "19→20",
+          "delta": -42.9
+        }
+      ],
+      "dipCount": 6
+    },
+    "frostB": {
+      "runs": 400,
+      "survival3": 260,
+      "survival3Rate": 0.65,
+      "time3Avg": 327.38480769230773,
+      "time3N": 260,
+      "clear10": 157,
+      "clear10Rate": 0.3925,
+      "reach20Rate": 0.34,
+      "clear20Rate": 0.34,
+      "perFloor": {
+        "1": {
+          "enter": 400,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 400,
+          "bossSec": 75.18604999999977,
+          "bossDeaths": 0
+        },
+        "2": {
+          "enter": 400,
+          "deaths": 65,
+          "deathRate": 0.1625,
+          "causes": {
+            "boss": 62,
+            "elite": 3
+          },
+          "bossFights": 397,
+          "bossSec": 69.15682619647355,
+          "bossDeaths": 62
+        },
+        "3": {
+          "enter": 335,
+          "deaths": 75,
+          "deathRate": 0.22388059701492538,
+          "causes": {
+            "elite": 25,
+            "boss": 49,
+            "battle": 1
+          },
+          "bossFights": 309,
+          "bossSec": 65.55783171521036,
+          "bossDeaths": 49
+        },
+        "4": {
+          "enter": 260,
+          "deaths": 32,
+          "deathRate": 0.12307692307692308,
+          "causes": {
+            "boss": 20,
+            "elite": 12
+          },
+          "bossFights": 248,
+          "bossSec": 66.53915322580642,
+          "bossDeaths": 20
+        },
+        "5": {
+          "enter": 228,
+          "deaths": 24,
+          "deathRate": 0.10526315789473684,
+          "causes": {
+            "boss": 17,
+            "elite": 7
+          },
+          "bossFights": 221,
+          "bossSec": 67.53950226244343,
+          "bossDeaths": 17
+        },
+        "6": {
+          "enter": 204,
+          "deaths": 22,
+          "deathRate": 0.10784313725490197,
+          "causes": {
+            "elite": 3,
+            "boss": 17,
+            "battle": 2
+          },
+          "bossFights": 199,
+          "bossSec": 78.99396984924621,
+          "bossDeaths": 17
+        },
+        "7": {
+          "enter": 182,
+          "deaths": 14,
+          "deathRate": 0.07692307692307693,
+          "causes": {
+            "boss": 9,
+            "battle": 1,
+            "elite": 4
+          },
+          "bossFights": 177,
+          "bossSec": 70.98677966101691,
+          "bossDeaths": 9
+        },
+        "8": {
+          "enter": 168,
+          "deaths": 7,
+          "deathRate": 0.041666666666666664,
+          "causes": {
+            "boss": 5,
+            "elite": 1,
+            "battle": 1
+          },
+          "bossFights": 166,
+          "bossSec": 72.45849397590365,
+          "bossDeaths": 5
+        },
+        "9": {
+          "enter": 161,
+          "deaths": 3,
+          "deathRate": 0.018633540372670808,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 161,
+          "bossSec": 74.47559006211179,
+          "bossDeaths": 3
+        },
+        "10": {
+          "enter": 158,
+          "deaths": 1,
+          "deathRate": 0.006329113924050633,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 158,
+          "bossSec": 75.59082278481013,
+          "bossDeaths": 1
+        },
+        "11": {
+          "enter": 157,
+          "deaths": 1,
+          "deathRate": 0.006369426751592357,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 157,
+          "bossSec": 77.20178343949044,
+          "bossDeaths": 1
+        },
+        "12": {
+          "enter": 156,
+          "deaths": 5,
+          "deathRate": 0.03205128205128205,
+          "causes": {
+            "boss": 5
+          },
+          "bossFights": 156,
+          "bossSec": 89.43865384615381,
+          "bossDeaths": 5
+        },
+        "13": {
+          "enter": 151,
+          "deaths": 2,
+          "deathRate": 0.013245033112582781,
+          "causes": {
+            "elite": 1,
+            "boss": 1
+          },
+          "bossFights": 150,
+          "bossSec": 80.52920000000005,
+          "bossDeaths": 1
+        },
+        "14": {
+          "enter": 149,
+          "deaths": 5,
+          "deathRate": 0.03355704697986577,
+          "causes": {
+            "boss": 3,
+            "battle": 1,
+            "elite": 1
+          },
+          "bossFights": 147,
+          "bossSec": 81.8087074829932,
+          "bossDeaths": 3
+        },
+        "15": {
+          "enter": 144,
+          "deaths": 5,
+          "deathRate": 0.034722222222222224,
+          "causes": {
+            "boss": 4,
+            "elite": 1
+          },
+          "bossFights": 143,
+          "bossSec": 82.2477622377622,
+          "bossDeaths": 4
+        },
+        "16": {
+          "enter": 139,
+          "deaths": 2,
+          "deathRate": 0.014388489208633094,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 139,
+          "bossSec": 84.44820143884887,
+          "bossDeaths": 2
+        },
+        "17": {
+          "enter": 137,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 137,
+          "bossSec": 86.45408759124086,
+          "bossDeaths": 0
+        },
+        "18": {
+          "enter": 137,
+          "deaths": 1,
+          "deathRate": 0.0072992700729927005,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 137,
+          "bossSec": 100.91058394160582,
+          "bossDeaths": 1
+        },
+        "19": {
+          "enter": 136,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 136,
+          "bossSec": 97.54720588235291,
+          "bossDeaths": 0
+        },
+        "20": {
+          "enter": 136,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 136,
+          "bossSec": 54.97036764705882,
+          "bossDeaths": 0
+        }
+      },
+      "dips": [
+        {
+          "pair": "1→2",
+          "delta": -6
+        },
+        {
+          "pair": "2→3",
+          "delta": -3.6
+        },
+        {
+          "pair": "6→7",
+          "delta": -8
+        },
+        {
+          "pair": "12→13",
+          "delta": -8.9
+        },
+        {
+          "pair": "18→19",
+          "delta": -3.4
+        },
+        {
+          "pair": "19→20",
+          "delta": -42.6
+        }
+      ],
+      "dipCount": 6
+    },
+    "volt": {
+      "runs": 400,
+      "survival3": 285,
+      "survival3Rate": 0.7125,
+      "time3Avg": 300.84382456140344,
+      "time3N": 285,
+      "clear10": 160,
+      "clear10Rate": 0.4,
+      "reach20Rate": 0.36,
+      "clear20Rate": 0.36,
+      "perFloor": {
+        "1": {
+          "enter": 400,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 400,
+          "bossSec": 68.11249999999977,
+          "bossDeaths": 0
+        },
+        "2": {
+          "enter": 400,
+          "deaths": 57,
+          "deathRate": 0.1425,
+          "causes": {
+            "boss": 56,
+            "elite": 1
+          },
+          "bossFights": 399,
+          "bossSec": 65.47172932330825,
+          "bossDeaths": 56
+        },
+        "3": {
+          "enter": 343,
+          "deaths": 58,
+          "deathRate": 0.16909620991253643,
+          "causes": {
+            "elite": 16,
+            "boss": 41,
+            "battle": 1
+          },
+          "bossFights": 326,
+          "bossSec": 61.81837423312885,
+          "bossDeaths": 41
+        },
+        "4": {
+          "enter": 285,
+          "deaths": 40,
+          "deathRate": 0.14035087719298245,
+          "causes": {
+            "boss": 27,
+            "elite": 12,
+            "battle": 1
+          },
+          "bossFights": 272,
+          "bossSec": 62.00426470588236,
+          "bossDeaths": 27
+        },
+        "5": {
+          "enter": 245,
+          "deaths": 35,
+          "deathRate": 0.14285714285714285,
+          "causes": {
+            "elite": 15,
+            "boss": 19,
+            "battle": 1
+          },
+          "bossFights": 229,
+          "bossSec": 63.24393013100441,
+          "bossDeaths": 19
+        },
+        "6": {
+          "enter": 210,
+          "deaths": 17,
+          "deathRate": 0.08095238095238096,
+          "causes": {
+            "elite": 3,
+            "boss": 14
+          },
+          "bossFights": 207,
+          "bossSec": 73.00657004830917,
+          "bossDeaths": 14
+        },
+        "7": {
+          "enter": 193,
+          "deaths": 12,
+          "deathRate": 0.06217616580310881,
+          "causes": {
+            "elite": 3,
+            "boss": 7,
+            "battle": 2
+          },
+          "bossFights": 188,
+          "bossSec": 65.76239361702126,
+          "bossDeaths": 7
+        },
+        "8": {
+          "enter": 181,
+          "deaths": 7,
+          "deathRate": 0.03867403314917127,
+          "causes": {
+            "boss": 7
+          },
+          "bossFights": 181,
+          "bossSec": 67.02209944751384,
+          "bossDeaths": 7
+        },
+        "9": {
+          "enter": 174,
+          "deaths": 7,
+          "deathRate": 0.040229885057471264,
+          "causes": {
+            "boss": 5,
+            "elite": 2
+          },
+          "bossFights": 172,
+          "bossSec": 68.64360465116279,
+          "bossDeaths": 5
+        },
+        "10": {
+          "enter": 167,
+          "deaths": 7,
+          "deathRate": 0.041916167664670656,
+          "causes": {
+            "boss": 5,
+            "elite": 2
+          },
+          "bossFights": 165,
+          "bossSec": 69.3601212121212,
+          "bossDeaths": 5
+        },
+        "11": {
+          "enter": 160,
+          "deaths": 2,
+          "deathRate": 0.0125,
+          "causes": {
+            "boss": 1,
+            "elite": 1
+          },
+          "bossFights": 159,
+          "bossSec": 71.6518867924528,
+          "bossDeaths": 1
+        },
+        "12": {
+          "enter": 158,
+          "deaths": 3,
+          "deathRate": 0.0189873417721519,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 158,
+          "bossSec": 83.3811392405064,
+          "bossDeaths": 3
+        },
+        "13": {
+          "enter": 155,
+          "deaths": 1,
+          "deathRate": 0.0064516129032258064,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 155,
+          "bossSec": 74.28864516129033,
+          "bossDeaths": 1
+        },
+        "14": {
+          "enter": 154,
+          "deaths": 1,
+          "deathRate": 0.006493506493506494,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 154,
+          "bossSec": 75.70285714285717,
+          "bossDeaths": 1
+        },
+        "15": {
+          "enter": 153,
+          "deaths": 2,
+          "deathRate": 0.013071895424836602,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 153,
+          "bossSec": 76.80679738562092,
+          "bossDeaths": 2
+        },
+        "16": {
+          "enter": 151,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 151,
+          "bossSec": 77.98874172185431,
+          "bossDeaths": 0
+        },
+        "17": {
+          "enter": 151,
+          "deaths": 2,
+          "deathRate": 0.013245033112582781,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 151,
+          "bossSec": 79.6466225165563,
+          "bossDeaths": 2
+        },
+        "18": {
+          "enter": 149,
+          "deaths": 5,
+          "deathRate": 0.03355704697986577,
+          "causes": {
+            "boss": 4,
+            "elite": 1
+          },
+          "bossFights": 148,
+          "bossSec": 91.67945945945944,
+          "bossDeaths": 4
+        },
+        "19": {
+          "enter": 144,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 144,
+          "bossSec": 89.75076388888887,
+          "bossDeaths": 0
+        },
+        "20": {
+          "enter": 144,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 144,
+          "bossSec": 50.69659722222221,
+          "bossDeaths": 0
+        }
+      },
+      "dips": [
+        {
+          "pair": "2→3",
+          "delta": -3.7
+        },
+        {
+          "pair": "6→7",
+          "delta": -7.2
+        },
+        {
+          "pair": "12→13",
+          "delta": -9.1
+        },
+        {
+          "pair": "19→20",
+          "delta": -39.1
+        }
+      ],
+      "dipCount": 4
+    },
+    "voltA": {
+      "runs": 400,
+      "survival3": 294,
+      "survival3Rate": 0.735,
+      "time3Avg": 302.3024829931973,
+      "time3N": 294,
+      "clear10": 196,
+      "clear10Rate": 0.49,
+      "reach20Rate": 0.435,
+      "clear20Rate": 0.435,
+      "perFloor": {
+        "1": {
+          "enter": 400,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 400,
+          "bossSec": 68.13477499999976,
+          "bossDeaths": 0
+        },
+        "2": {
+          "enter": 400,
+          "deaths": 55,
+          "deathRate": 0.1375,
+          "causes": {
+            "boss": 54,
+            "elite": 1
+          },
+          "bossFights": 399,
+          "bossSec": 65.62155388471176,
+          "bossDeaths": 54
+        },
+        "3": {
+          "enter": 345,
+          "deaths": 51,
+          "deathRate": 0.14782608695652175,
+          "causes": {
+            "elite": 16,
+            "boss": 34,
+            "battle": 1
+          },
+          "bossFights": 328,
+          "bossSec": 62.59676829268297,
+          "bossDeaths": 34
+        },
+        "4": {
+          "enter": 294,
+          "deaths": 34,
+          "deathRate": 0.11564625850340136,
+          "causes": {
+            "boss": 24,
+            "elite": 9,
+            "battle": 1
+          },
+          "bossFights": 284,
+          "bossSec": 62.629542253521144,
+          "bossDeaths": 24
+        },
+        "5": {
+          "enter": 260,
+          "deaths": 26,
+          "deathRate": 0.1,
+          "causes": {
+            "elite": 12,
+            "boss": 13,
+            "battle": 1
+          },
+          "bossFights": 247,
+          "bossSec": 64.06850202429153,
+          "bossDeaths": 13
+        },
+        "6": {
+          "enter": 234,
+          "deaths": 13,
+          "deathRate": 0.05555555555555555,
+          "causes": {
+            "elite": 3,
+            "boss": 10
+          },
+          "bossFights": 231,
+          "bossSec": 74.17999999999999,
+          "bossDeaths": 10
+        },
+        "7": {
+          "enter": 221,
+          "deaths": 7,
+          "deathRate": 0.03167420814479638,
+          "causes": {
+            "boss": 4,
+            "elite": 2,
+            "battle": 1
+          },
+          "bossFights": 218,
+          "bossSec": 66.6256880733945,
+          "bossDeaths": 4
+        },
+        "8": {
+          "enter": 214,
+          "deaths": 5,
+          "deathRate": 0.02336448598130841,
+          "causes": {
+            "boss": 5
+          },
+          "bossFights": 214,
+          "bossSec": 67.69004672897199,
+          "bossDeaths": 5
+        },
+        "9": {
+          "enter": 209,
+          "deaths": 7,
+          "deathRate": 0.03349282296650718,
+          "causes": {
+            "boss": 5,
+            "elite": 2
+          },
+          "bossFights": 207,
+          "bossSec": 68.98589371980677,
+          "bossDeaths": 5
+        },
+        "10": {
+          "enter": 202,
+          "deaths": 6,
+          "deathRate": 0.0297029702970297,
+          "causes": {
+            "boss": 4,
+            "elite": 2
+          },
+          "bossFights": 200,
+          "bossSec": 69.79664999999999,
+          "bossDeaths": 4
+        },
+        "11": {
+          "enter": 196,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 196,
+          "bossSec": 71.70683673469381,
+          "bossDeaths": 0
+        },
+        "12": {
+          "enter": 196,
+          "deaths": 3,
+          "deathRate": 0.015306122448979591,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 196,
+          "bossSec": 83.38811224489805,
+          "bossDeaths": 3
+        },
+        "13": {
+          "enter": 193,
+          "deaths": 1,
+          "deathRate": 0.0051813471502590676,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 193,
+          "bossSec": 74.13963730569948,
+          "bossDeaths": 1
+        },
+        "14": {
+          "enter": 192,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 192,
+          "bossSec": 75.72692708333331,
+          "bossDeaths": 0
+        },
+        "15": {
+          "enter": 192,
+          "deaths": 2,
+          "deathRate": 0.010416666666666666,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 192,
+          "bossSec": 76.87192708333329,
+          "bossDeaths": 2
+        },
+        "16": {
+          "enter": 190,
+          "deaths": 2,
+          "deathRate": 0.010526315789473684,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 190,
+          "bossSec": 78.1132105263158,
+          "bossDeaths": 2
+        },
+        "17": {
+          "enter": 188,
+          "deaths": 3,
+          "deathRate": 0.015957446808510637,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 188,
+          "bossSec": 79.90010638297869,
+          "bossDeaths": 3
+        },
+        "18": {
+          "enter": 185,
+          "deaths": 9,
+          "deathRate": 0.04864864864864865,
+          "causes": {
+            "boss": 9
+          },
+          "bossFights": 185,
+          "bossSec": 91.57416216216212,
+          "bossDeaths": 9
+        },
+        "19": {
+          "enter": 176,
+          "deaths": 2,
+          "deathRate": 0.011363636363636364,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 176,
+          "bossSec": 90.30499999999999,
+          "bossDeaths": 2
+        },
+        "20": {
+          "enter": 174,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 174,
+          "bossSec": 51.01379310344824,
+          "bossDeaths": 0
+        }
+      },
+      "dips": [
+        {
+          "pair": "2→3",
+          "delta": -3
+        },
+        {
+          "pair": "6→7",
+          "delta": -7.6
+        },
+        {
+          "pair": "12→13",
+          "delta": -9.2
+        },
+        {
+          "pair": "19→20",
+          "delta": -39.3
+        }
+      ],
+      "dipCount": 4
+    },
+    "voltB": {
+      "runs": 400,
+      "survival3": 267,
+      "survival3Rate": 0.6675,
+      "time3Avg": 299.1077153558051,
+      "time3N": 267,
+      "clear10": 145,
+      "clear10Rate": 0.3625,
+      "reach20Rate": 0.3325,
+      "clear20Rate": 0.3325,
+      "perFloor": {
+        "1": {
+          "enter": 400,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 400,
+          "bossSec": 68.11249999999977,
+          "bossDeaths": 0
+        },
+        "2": {
+          "enter": 400,
+          "deaths": 66,
+          "deathRate": 0.165,
+          "causes": {
+            "boss": 65,
+            "elite": 1
+          },
+          "bossFights": 399,
+          "bossSec": 64.24799498746864,
+          "bossDeaths": 65
+        },
+        "3": {
+          "enter": 334,
+          "deaths": 67,
+          "deathRate": 0.20059880239520958,
+          "causes": {
+            "elite": 24,
+            "boss": 42,
+            "battle": 1
+          },
+          "bossFights": 309,
+          "bossSec": 61.80789644012946,
+          "bossDeaths": 42
+        },
+        "4": {
+          "enter": 267,
+          "deaths": 43,
+          "deathRate": 0.16104868913857678,
+          "causes": {
+            "boss": 29,
+            "elite": 14
+          },
+          "bossFights": 253,
+          "bossSec": 61.553636363636365,
+          "bossDeaths": 29
+        },
+        "5": {
+          "enter": 224,
+          "deaths": 33,
+          "deathRate": 0.14732142857142858,
+          "causes": {
+            "elite": 16,
+            "boss": 17
+          },
+          "bossFights": 208,
+          "bossSec": 63.25701923076925,
+          "bossDeaths": 17
+        },
+        "6": {
+          "enter": 191,
+          "deaths": 19,
+          "deathRate": 0.09947643979057591,
+          "causes": {
+            "elite": 2,
+            "battle": 4,
+            "boss": 13
+          },
+          "bossFights": 185,
+          "bossSec": 74.51599999999998,
+          "bossDeaths": 13
+        },
+        "7": {
+          "enter": 172,
+          "deaths": 8,
+          "deathRate": 0.046511627906976744,
+          "causes": {
+            "boss": 5,
+            "elite": 3
+          },
+          "bossFights": 169,
+          "bossSec": 66.26934911242604,
+          "bossDeaths": 5
+        },
+        "8": {
+          "enter": 164,
+          "deaths": 7,
+          "deathRate": 0.042682926829268296,
+          "causes": {
+            "boss": 4,
+            "battle": 1,
+            "elite": 2
+          },
+          "bossFights": 161,
+          "bossSec": 67.35757763975157,
+          "bossDeaths": 4
+        },
+        "9": {
+          "enter": 157,
+          "deaths": 6,
+          "deathRate": 0.03821656050955414,
+          "causes": {
+            "boss": 6
+          },
+          "bossFights": 157,
+          "bossSec": 68.52242038216562,
+          "bossDeaths": 6
+        },
+        "10": {
+          "enter": 151,
+          "deaths": 6,
+          "deathRate": 0.039735099337748346,
+          "causes": {
+            "battle": 1,
+            "elite": 1,
+            "boss": 4
+          },
+          "bossFights": 149,
+          "bossSec": 69.62134228187922,
+          "bossDeaths": 4
+        },
+        "11": {
+          "enter": 145,
+          "deaths": 1,
+          "deathRate": 0.006896551724137931,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 145,
+          "bossSec": 71.78206896551721,
+          "bossDeaths": 1
+        },
+        "12": {
+          "enter": 144,
+          "deaths": 1,
+          "deathRate": 0.006944444444444444,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 144,
+          "bossSec": 83.44305555555562,
+          "bossDeaths": 1
+        },
+        "13": {
+          "enter": 143,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 143,
+          "bossSec": 74.34545454545456,
+          "bossDeaths": 0
+        },
+        "14": {
+          "enter": 143,
+          "deaths": 1,
+          "deathRate": 0.006993006993006993,
+          "causes": {
+            "boss": 1
+          },
+          "bossFights": 143,
+          "bossSec": 75.47832167832169,
+          "bossDeaths": 1
+        },
+        "15": {
+          "enter": 142,
+          "deaths": 2,
+          "deathRate": 0.014084507042253521,
+          "causes": {
+            "boss": 2
+          },
+          "bossFights": 142,
+          "bossSec": 76.52204225352112,
+          "bossDeaths": 2
+        },
+        "16": {
+          "enter": 140,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 140,
+          "bossSec": 77.84392857142858,
+          "bossDeaths": 0
+        },
+        "17": {
+          "enter": 140,
+          "deaths": 4,
+          "deathRate": 0.02857142857142857,
+          "causes": {
+            "boss": 4
+          },
+          "bossFights": 140,
+          "bossSec": 79.3575714285714,
+          "bossDeaths": 4
+        },
+        "18": {
+          "enter": 136,
+          "deaths": 3,
+          "deathRate": 0.022058823529411766,
+          "causes": {
+            "boss": 3
+          },
+          "bossFights": 136,
+          "bossSec": 92.00588235294116,
+          "bossDeaths": 3
+        },
+        "19": {
+          "enter": 133,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 133,
+          "bossSec": 89.79142857142854,
+          "bossDeaths": 0
+        },
+        "20": {
+          "enter": 133,
+          "deaths": 0,
+          "deathRate": 0,
+          "causes": {},
+          "bossFights": 133,
+          "bossSec": 50.73345864661653,
+          "bossDeaths": 0
+        }
+      },
+      "dips": [
+        {
+          "pair": "1→2",
+          "delta": -3.9
+        },
+        {
+          "pair": "6→7",
+          "delta": -8.2
+        },
+        {
+          "pair": "12→13",
+          "delta": -9.1
+        },
+        {
+          "pair": "19→20",
+          "delta": -39.1
+        }
+      ],
+      "dipCount": 4
+    }
+  },
+  "talent": {
+    "ember": {
+      "T0": {
+        "hp": 95,
+        "damageMul": 1.08,
+        "takenMul": 1
+      },
+      "T1": {
+        "hp": 105,
+        "damageMul": 1.2906,
+        "takenMul": 0.84
+      },
+      "T2": {
+        "hp": 105,
+        "damageMul": 1.458,
+        "takenMul": 0.84
+      },
+      "T3": {
+        "hp": 105,
+        "damageMul": 1.458,
+        "takenMul": 0.7
+      }
+    },
+    "frost": {
+      "T0": {
+        "hp": 110,
+        "damageMul": 1,
+        "takenMul": 1
+      },
+      "T1": {
+        "hp": 120,
+        "damageMul": 1.195,
+        "takenMul": 0.84
+      },
+      "T2": {
+        "hp": 120,
+        "damageMul": 1.35,
+        "takenMul": 0.84
+      },
+      "T3": {
+        "hp": 120,
+        "damageMul": 1.35,
+        "takenMul": 0.7
+      }
+    },
+    "frostA": {
+      "T0": {
+        "hp": 110,
+        "damageMul": 1,
+        "takenMul": 1
+      },
+      "T1": {
+        "hp": 120,
+        "damageMul": 1.195,
+        "takenMul": 0.84
+      },
+      "T2": {
+        "hp": 120,
+        "damageMul": 1.35,
+        "takenMul": 0.84
+      },
+      "T3": {
+        "hp": 120,
+        "damageMul": 1.35,
+        "takenMul": 0.7
+      }
+    },
+    "frostB": {
+      "T0": {
+        "hp": 105,
+        "damageMul": 1,
+        "takenMul": 1
+      },
+      "T1": {
+        "hp": 115,
+        "damageMul": 1.195,
+        "takenMul": 0.84
+      },
+      "T2": {
+        "hp": 115,
+        "damageMul": 1.35,
+        "takenMul": 0.84
+      },
+      "T3": {
+        "hp": 115,
+        "damageMul": 1.35,
+        "takenMul": 0.7
+      }
+    },
+    "volt": {
+      "T0": {
+        "hp": 100,
+        "damageMul": 1,
+        "takenMul": 1
+      },
+      "T1": {
+        "hp": 110,
+        "damageMul": 1.195,
+        "takenMul": 0.84
+      },
+      "T2": {
+        "hp": 110,
+        "damageMul": 1.35,
+        "takenMul": 0.84
+      },
+      "T3": {
+        "hp": 110,
+        "damageMul": 1.35,
+        "takenMul": 0.7
+      }
+    },
+    "voltA": {
+      "T0": {
+        "hp": 100,
+        "damageMul": 1,
+        "takenMul": 1
+      },
+      "T1": {
+        "hp": 110,
+        "damageMul": 1.195,
+        "takenMul": 0.84
+      },
+      "T2": {
+        "hp": 110,
+        "damageMul": 1.35,
+        "takenMul": 0.84
+      },
+      "T3": {
+        "hp": 110,
+        "damageMul": 1.35,
+        "takenMul": 0.7
+      }
+    },
+    "voltB": {
+      "T0": {
+        "hp": 95,
+        "damageMul": 1,
+        "takenMul": 1
+      },
+      "T1": {
+        "hp": 105,
+        "damageMul": 1.195,
+        "takenMul": 0.84
+      },
+      "T2": {
+        "hp": 105,
+        "damageMul": 1.35,
+        "takenMul": 0.84
+      },
+      "T3": {
+        "hp": 105,
+        "damageMul": 1.35,
+        "takenMul": 0.7
+      }
+    }
+  },
+  "talentRuns": {
+    "ember": {
+      "T0": {
+        "clear10": 0.37,
+        "survival3": 0.67,
+        "time3Avg": 299.58059701492544,
+        "runs": 100
+      },
+      "T1": {
+        "clear10": 0.75,
+        "survival3": 0.98,
+        "time3Avg": 260.9537755102041,
+        "runs": 100
+      },
+      "T2": {
+        "clear10": 0.85,
+        "survival3": 1,
+        "time3Avg": 235.11770000000018,
+        "runs": 100
+      },
+      "T3": {
+        "clear10": 0.9,
+        "survival3": 1,
+        "time3Avg": 235.11770000000018,
+        "runs": 100
+      }
+    },
+    "frost": {
+      "T0": {
+        "clear10": 0.52,
+        "survival3": 0.8,
+        "time3Avg": 336.437625,
+        "runs": 100
+      },
+      "T1": {
+        "clear10": 0.85,
+        "survival3": 1,
+        "time3Avg": 296.74630000000013,
+        "runs": 100
+      },
+      "T2": {
+        "clear10": 0.92,
+        "survival3": 1,
+        "time3Avg": 265.2389000000001,
+        "runs": 100
+      },
+      "T3": {
+        "clear10": 0.97,
+        "survival3": 1,
+        "time3Avg": 265.2389000000001,
+        "runs": 100
+      }
+    },
+    "frostA": {
+      "T0": {
+        "clear10": 0.49,
+        "survival3": 0.78,
+        "time3Avg": 333.26794871794874,
+        "runs": 100
+      },
+      "T1": {
+        "clear10": 0.83,
+        "survival3": 1,
+        "time3Avg": 295.37280000000015,
+        "runs": 100
+      },
+      "T2": {
+        "clear10": 0.9,
+        "survival3": 1,
+        "time3Avg": 264.02350000000007,
+        "runs": 100
+      },
+      "T3": {
+        "clear10": 0.97,
+        "survival3": 1,
+        "time3Avg": 264.02350000000007,
+        "runs": 100
+      }
+    },
+    "frostB": {
+      "T0": {
+        "clear10": 0.43,
+        "survival3": 0.67,
+        "time3Avg": 329.844776119403,
+        "runs": 100
+      },
+      "T1": {
+        "clear10": 0.76,
+        "survival3": 1,
+        "time3Avg": 296.74630000000013,
+        "runs": 100
+      },
+      "T2": {
+        "clear10": 0.84,
+        "survival3": 1,
+        "time3Avg": 265.2389000000001,
+        "runs": 100
+      },
+      "T3": {
+        "clear10": 0.94,
+        "survival3": 1,
+        "time3Avg": 265.2389000000001,
+        "runs": 100
+      }
+    },
+    "volt": {
+      "T0": {
+        "clear10": 0.45,
+        "survival3": 0.75,
+        "time3Avg": 304.72426666666655,
+        "runs": 100
+      },
+      "T1": {
+        "clear10": 0.82,
+        "survival3": 1,
+        "time3Avg": 261.4202,
+        "runs": 100
+      },
+      "T2": {
+        "clear10": 0.89,
+        "survival3": 1,
+        "time3Avg": 233.98739999999998,
+        "runs": 100
+      },
+      "T3": {
+        "clear10": 0.97,
+        "survival3": 1,
+        "time3Avg": 233.98739999999998,
+        "runs": 100
+      }
+    },
+    "voltA": {
+      "T0": {
+        "clear10": 0.49,
+        "survival3": 0.77,
+        "time3Avg": 307.76870129870133,
+        "runs": 100
+      },
+      "T1": {
+        "clear10": 0.84,
+        "survival3": 1,
+        "time3Avg": 262.06970000000007,
+        "runs": 100
+      },
+      "T2": {
+        "clear10": 0.9,
+        "survival3": 1,
+        "time3Avg": 234.562,
+        "runs": 100
+      },
+      "T3": {
+        "clear10": 0.98,
+        "survival3": 1,
+        "time3Avg": 234.562,
+        "runs": 100
+      }
+    },
+    "voltB": {
+      "T0": {
+        "clear10": 0.44,
+        "survival3": 0.7,
+        "time3Avg": 303.8659999999999,
+        "runs": 100
+      },
+      "T1": {
+        "clear10": 0.81,
+        "survival3": 1,
+        "time3Avg": 261.4202,
+        "runs": 100
+      },
+      "T2": {
+        "clear10": 0.87,
+        "survival3": 1,
+        "time3Avg": 233.98739999999998,
+        "runs": 100
+      },
+      "T3": {
+        "clear10": 0.96,
+        "survival3": 1,
+        "time3Avg": 233.98739999999998,
+        "runs": 100
+      }
+    }
+  }
+}

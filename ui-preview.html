@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>烬 · UI 补丁包 · 四块实测预览</title>
+
+<!-- ============================================================
+     改前基线（只属于预览页，不进游戏）
+     ------------------------------------------------------------
+     这里复刻 ui-kit 对照图里的旧值：卡高 148 / 圆角 11 / 3px 色条、
+     血条 11 / 状态胶囊 22、结算 720 / 重开 40 静态、设置行高 30 /
+     开关 38×20。取消 body.jj-ui 时看到的就是这一套。
+     ============================================================ -->
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #05070c;
+    color: #c3d7ef;
+    font-family: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+    min-width: 1180px;
+  }
+  .pv-head {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid rgba(140, 178, 228, .16);
+  }
+  .pv-head h1 {
+    margin: 0;
+    font-size: 19px;
+    letter-spacing: .08em;
+    color: #eaf5ff;
+    font-weight: 700;
+  }
+  .pv-head h1 em {
+    font-style: normal;
+    margin-left: 8px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: .18em;
+    color: #5ce6ff;
+  }
+  .pv-head .pv-meta {
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 11px;
+    color: #93a6c4;
+    line-height: 1.7;
+  }
+  .pv-head .pv-meta b { color: #eaf5ff; font-weight: 400; }
+  /* 改前 / 改后 滑块 */
+  .pv-toggle {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid rgba(140, 178, 228, .28);
+    border-radius: 10px;
+    background: rgba(10, 18, 32, .7);
+  }
+  .pv-toggle span {
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: .06em;
+    color: #93a6c4;
+  }
+  .pv-toggle span.is-on { color: #5ce6ff; }
+  .pv-toggle input[type="range"] {
+    width: 140px;
+    height: 4px;
+    appearance: none;
+    -webkit-appearance: none;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #4a566a, #5ce6ff);
+    outline: none;
+    cursor: pointer;
+  }
+  .pv-toggle input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #e9feff;
+    border: 1px solid #5ce6ff;
+    box-shadow: 0 0 12px rgba(92, 230, 255, .5);
+  }
+  .pv-toggle b {
+    min-width: 34px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 12px;
+    color: #ffc247;
+  }
+
+  /* 主区 + 右侧实测栏 */
+  .pv-wrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 336px;
+    gap: 24px;
+    max-width: 1720px;
+    margin: 0 auto;
+    padding: 22px 24px 64px;
+    align-items: start;
+  }
+  .pv-main { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+  .pv-block {
+    position: relative;
+    padding: 44px 18px 18px;
+    border: 1px solid rgba(140, 178, 228, .18);
+    border-radius: 16px;
+    background: #080d16;
+    overflow: hidden;
+  }
+  .pv-block > h3 {
+    position: absolute;
+    left: 18px;
+    top: 13px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: .12em;
+    color: #c3d7ef;
+  }
+  .pv-block > h3 em {
+    font-style: normal;
+    margin-left: 8px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 10px;
+    letter-spacing: .05em;
+    color: #93a6c4;
+  }
+  .pv-badge {
+    position: absolute;
+    right: 16px;
+    top: 12px;
+    padding: 3px 8px;
+    border: 1px solid rgba(92, 230, 255, .28);
+    border-radius: 5px;
+    background: rgba(92, 230, 255, .06);
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 10.5px;
+    letter-spacing: .04em;
+    color: #8ff6ff;
+  }
+  .pv-stage {
+    position: relative;
+    overflow: hidden;
+    border-radius: 12px;
+    border: 1px solid rgba(140, 178, 228, .12);
+    background:
+      radial-gradient(700px 260px at 50% 10%, rgba(30, 47, 77, .5), transparent 70%),
+      linear-gradient(180deg, #0b1220, #070a12 70%);
+  }
+  .pv-stage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      repeating-linear-gradient(90deg, transparent 0 79px, rgba(140, 178, 228, .045) 79px 80px),
+      repeating-linear-gradient(0deg, transparent 0 79px, rgba(140, 178, 228, .045) 79px 80px);
+    pointer-events: none;
+  }
+  .pv-stage-strip { height: 420px; }
+  .pv-stage-hud { height: 340px; }
+  .pv-stage-result { height: 780px; }
+  .pv-stage-settings { height: 500px; }
+
+  /* ---------- 改前：卡条 ---------- */
+  .modal-layer {
+    position: absolute;
+    inset: 0;
+    z-index: 60;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 0 0 14px;
+    background: transparent;
+  }
+  .modal {
+    width: 880px;
+    max-height: 46vh;
+    overflow: auto;
+    padding: 24px;
+    border: 1px solid rgba(84, 140, 180, .45);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(10, 18, 28, .92), rgba(5, 10, 16, .96));
+    box-shadow: 0 -8px 32px rgba(0, 0, 0, .55);
+    text-align: left;
+  }
+  .modal-kicker {
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 11px;
+    letter-spacing: .2em;
+    color: #5ce6ff;
+  }
+  .modal h2 { margin: 2px 0 4px; font-size: 16px; color: #eaf5ff; }
+  .modal-sub { margin: 0 0 8px; font-size: 11px; color: #93a6c4; line-height: 1.4; }
+  .reward-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin: 10px 0 6px; }
+  .reward-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 148px;
+    padding: 10px;
+    border: 1px solid rgba(84, 140, 180, .45);
+    border-radius: 11px;
+    background: linear-gradient(180deg, #16233a, #0b1220);
+    color: #b085ff;
+    text-align: left;
+    overflow: hidden;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .reward-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: currentColor;
+    opacity: .6;
+  }
+  .reward-card .r-top { display: flex; align-items: center; gap: 6px; }
+  .reward-card .r-tag,
+  .reward-card .r-rarity {
+    display: inline-flex;
+    align-items: center;
+    height: 18px;
+    padding: 0 7px;
+    border: 1px solid currentColor;
+    border-radius: 999px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 10px;
+    color: #a8bfdc;
+  }
+  .reward-card .r-rarity { margin-left: auto; }
+  .reward-card .r-key {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    border: 1px solid rgba(140, 178, 228, .2);
+    border-radius: 4px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 10px;
+    color: #93a6c4;
+  }
+  .reward-card .r-glyph {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-top: 2px;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    color: #b085ff;
+    background: rgba(255, 255, 255, .035);
+  }
+  .reward-card .r-glyph svg { width: 24px; height: 24px; display: block; }
+  .reward-card .r-name { font-size: 14px; font-weight: 700; color: #eaf5ff; line-height: 1.3; }
+  .reward-card .r-sub { display: none; }
+  .reward-card .r-desc { font-size: 11.5px; line-height: 1.45; color: #a8bfdc; }
+  .reward-card .r-result { margin-top: auto; font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; color: #8ddfc1; }
+  .reward-card .r-result em { display: none; font-style: normal; }
+  .reward-card.rarity-rare { color: #4aa8ff; }
+  .reward-card.rarity-epic { color: #b47cff; }
+
+  /* ---------- 改前：HUD ---------- */
+  .hud-top {
+    position: absolute;
+    z-index: 20;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 56px;
+    padding: 0 18px;
+    background: linear-gradient(180deg, rgba(7, 10, 18, .96), rgba(7, 10, 18, .5) 72%, transparent);
+  }
+  .brand { width: 196px; min-width: 196px; }
+  .logo { font-family: "Cascadia Mono", Consolas, monospace; font-size: 21px; font-weight: 800; letter-spacing: .18em; color: #eaf7ff; }
+  .brand .sub { margin-top: 3px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; letter-spacing: .14em; color: #93a6c4; }
+  .hud-readouts { display: flex; align-items: center; gap: 16px; flex: 1; min-width: 0; }
+  .bar-group { display: flex; flex-direction: column; gap: 5px; width: 196px; padding: 4px 0; }
+  .bar-label { display: flex; align-items: center; gap: 6px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; letter-spacing: .1em; color: #a8bfdc; }
+  .bar-label b { margin-left: auto; font-family: "Cascadia Mono", Consolas, monospace; font-size: 12px; font-weight: 600; color: #e6f2ff; }
+  .bar {
+    position: relative;
+    height: 11px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: rgba(90, 130, 180, .14);
+    border: 1px solid rgba(120, 170, 230, .20);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5);
+  }
+  .bar > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: inherit; background: linear-gradient(90deg, #ff8a6b, #ffc247); }
+  .bar-aether > i { background: linear-gradient(90deg, #5ce6ff, #b085ff); }
+  .skill-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    height: 22px;
+    padding: 0 7px;
+    border: 1px solid rgba(120, 170, 230, .3);
+    border-radius: 6px;
+    font-size: 10.5px;
+    color: #77aaff;
+    background: rgba(119, 170, 255, .06);
+    white-space: nowrap;
+  }
+  .skill-chip b { font-family: "Cascadia Mono", Consolas, monospace; font-size: 10.5px; color: #c3d7ef; font-weight: 700; }
+  .hud-actions { display: flex; gap: 6px; }
+  .hud-actions .btn {
+    display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 9px;
+    border: 1px solid rgba(120, 190, 255, .30); border-radius: 7px;
+    background: rgba(16, 28, 46, .8); color: #cfe6ff; font-size: 11px; cursor: pointer;
+  }
+  .hud-actions .btn-primary { border-color: rgba(92, 230, 255, .5); box-shadow: 0 0 14px rgba(92, 230, 255, .16); }
+  .hud-deck {
+    position: absolute;
+    z-index: 20;
+    left: 18px;
+    right: 18px;
+    bottom: 14px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 1px solid rgba(140, 178, 228, .2);
+    border-radius: 10px;
+    background: linear-gradient(180deg, #1e2f4d, #101a2c);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08), 0 18px 50px rgba(0, 0, 0, .45);
+  }
+  .deck-block { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .deck-title { display: flex; align-items: baseline; gap: 8px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; letter-spacing: .12em; color: #a9c2e0; }
+  .deck-title i { font-style: normal; font-size: 11px; color: #93a6c4; }
+  .card-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+  .mini-card {
+    position: relative;
+    min-height: 68px;
+    padding: 8px 9px;
+    border: 1px solid rgba(120, 160, 220, .22);
+    border-radius: 8px;
+    background: linear-gradient(180deg, #16233a, #0b1220);
+    color: #b085ff;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .mini-card .m-glyph {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 21px; height: 21px; margin-right: 5px;
+    border: 1px solid currentColor; border-radius: 4px;
+    font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px;
+    vertical-align: middle; color: currentColor;
+  }
+  .mini-card .m-glyph svg { width: 22px; height: 22px; }
+  .mini-card .m-name { font-size: 12.5px; font-weight: 600; color: #eaf5ff; vertical-align: middle; }
+  .mini-card .m-sub { display: block; margin-top: 4px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10.5px; color: #a8bfdc; }
+
+  /* ---------- 改前：结算 ---------- */
+  .pv-stage-result .modal-layer { align-items: center; padding: 16px; }
+  .result-modal {
+    width: 720px;
+    max-height: 720px;
+    overflow: auto;
+    padding: 22px;
+    border: 1px solid rgba(120, 190, 255, .46);
+    border-radius: 16px;
+    background: radial-gradient(600px 220px at 50% 0%, rgba(176, 133, 255, .12), transparent 70%),
+      linear-gradient(180deg, #16233a, #0b1220);
+    box-shadow: 0 28px 80px rgba(0, 0, 0, .66), inset 0 1px 0 rgba(255, 255, 255, .08);
+    text-align: center;
+  }
+  .result-icon {
+    width: 40px; height: 40px; margin: 0 auto 4px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255, 107, 127, .45); border-radius: 50%;
+    background: rgba(52, 14, 22, .6); color: #ff6b7f;
+    font-family: "Cascadia Mono", Consolas, monospace; font-size: 16px;
+  }
+  .result-modal > h2 { margin: 4px 0 4px; font-size: 16px; color: #ffe4e8; }
+  .result-modal > .modal-sub { margin: 0 0 8px; font-size: 11px; line-height: 1.6; color: #93a6c4; }
+  .tower-voice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0;
+    padding: 8px 10px;
+    border: 1px solid rgba(255, 107, 127, .28);
+    border-left: 3px solid #ff6b7f;
+    border-radius: 8px;
+    background: rgba(38, 12, 18, .4);
+    font-size: 12px;
+    font-weight: 400;
+    color: #ffdbe0;
+    text-align: left;
+  }
+  .tower-body { display: flex; align-items: center; gap: 10px; }
+  .tower-meta { margin-left: auto; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10.5px; color: #a8bfdc; }
+  .result-summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0 8px; }
+  .result-summary > div { font-size: 11px; color: #93a6c4; }
+  .result-summary > div b { display: block; margin-top: 2px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 17px; color: #eaf5ff; }
+  .result-summary > div:first-child b { font-size: 26px; color: #ffc247; }
+  .result-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 0; }
+  .result-stat {
+    padding: 8px;
+    border: 1px solid rgba(140, 178, 228, .20);
+    border-radius: 8px;
+    background: #0d1424;
+    text-align: left;
+  }
+  .result-stat span { display: block; font-size: 11px; color: #93a6c4; }
+  .result-stat b { display: block; margin-top: 2px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 15px; color: #eaf5ff; }
+  .result-stat.is-gold b { color: #ffc247; }
+  .p1-verdict {
+    margin: 8px 0;
+    padding: 10px 12px;
+    border: 1px solid rgba(255, 107, 127, .30);
+    border-radius: 8px;
+    background: rgba(38, 12, 18, .4);
+    text-align: left;
+  }
+  .p1-verdict-tag { font-size: 13px; font-weight: 700; color: #ffd7dc; }
+  .p1-verdict-rule { margin-top: 4px; font-size: 11.5px; line-height: 1.6; color: #a8bfdc; }
+  .result-bottom { margin-top: 10px; }
+  .result-bottom .btn {
+    width: 100%;
+    height: 40px;
+    border: 1px solid rgba(92, 230, 255, .5);
+    border-radius: 8px;
+    background: rgba(20, 52, 68, .9);
+    color: #d6f8ff;
+    font-size: 13px;
+    cursor: pointer;
+    position: static;
+  }
+  .result-hint { margin-top: 10px; font-size: 11px; color: #93a6c4; }
+
+  /* ---------- 改前：设置 ---------- */
+  .pv-stage-settings { padding: 14px; }
+  .rules-card {
+    width: 880px;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 18px;
+    border: 1px solid rgba(120, 190, 255, .36);
+    border-radius: 16px;
+    background: linear-gradient(180deg, #131e33, #0d1424);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+  }
+  .rules-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .rules-head .kicker { font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; letter-spacing: .18em; color: #5ce6ff; }
+  .rules-head h2 { margin: 2px 0 0; font-size: 16px; color: #eaf5ff; }
+  .settings-panel { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .settings-box {
+    padding: 14px;
+    border: 1px solid rgba(62, 230, 255, .28);
+    border-radius: 8px;
+    background: linear-gradient(180deg, #16233a, #080e18);
+  }
+  .talent-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .talent-head h3 { margin: 0; font-size: 12.5px; color: #c8f6ff; letter-spacing: .06em; font-weight: 600; }
+  .setting-state { font-family: "Cascadia Mono", Consolas, monospace; font-size: 10.5px; color: #93a6c4; white-space: nowrap; }
+  .setting-row { display: flex; align-items: center; gap: 10px; min-height: 30px; padding: 4px 0; border-top: 1px dashed rgba(62, 230, 255, .14); }
+  .setting-row:first-of-type { border-top: 0; }
+  .setting-row > label { flex: none; width: 96px; font-size: 12px; color: #c3d7ef; }
+  .setting-row > b { flex: none; width: 44px; text-align: right; font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; color: #d9f6ff; }
+  .setting-row input[type="range"] {
+    flex: 1; min-width: 100px; height: 4px; appearance: none; -webkit-appearance: none;
+    border-radius: 2px; background: linear-gradient(90deg, #5ce6ff, rgba(120, 160, 200, .2)); outline: none;
+  }
+  .setting-row input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%;
+    background: #0b1624; border: 2px solid #5ce6ff;
+  }
+  .switch {
+    position: relative; flex: none; width: 38px; height: 20px;
+    border: 1px solid rgba(120, 190, 255, .46); border-radius: 999px;
+    background: rgba(90, 120, 160, .25); cursor: pointer;
+  }
+  .switch::after {
+    content: ""; position: absolute; left: 2px; top: 2px; width: 16px; height: 16px;
+    border-radius: 50%; background: #8ea8c8; transition: transform .2s;
+  }
+  .switch[aria-checked="true"] { background: rgba(92, 230, 255, .3); border-color: #5ce6ff; }
+  .switch[aria-checked="true"]::after { transform: translateX(16px); background: #e9feff; }
+  .aim-modes { display: inline-flex; overflow: hidden; border: 1px solid rgba(140, 178, 228, .2); border-radius: 6px; }
+  .aim-mode { height: 26px; padding: 0 10px; border: 0; border-left: 1px solid rgba(140, 178, 228, .2); background: transparent; color: #a8bfdc; font-size: 11px; cursor: pointer; font-family: inherit; }
+  .aim-mode:first-child { border-left: 0; }
+  .aim-mode.is-active { background: rgba(92, 230, 255, .12); color: #eaf5ff; font-weight: 600; }
+  .setting-note { margin-top: 6px; font-size: 11px; line-height: 1.6; color: #a8bfdc; }
+  .settings-box.is-danger { grid-column: 1 / -1; border-color: rgba(255, 107, 127, .34); background: rgba(38, 12, 18, .4); }
+  .jj-danger { grid-column: 1 / -1; }
+  .jj-danger .btn { border-color: rgba(255, 107, 127, .5); color: #ffd7dc; }
+  .jj-danger .btn { height: 30px; padding: 0 12px; border-radius: 7px; border: 1px solid rgba(255, 107, 127, .5); background: rgba(38, 12, 18, .6); font-size: 11.5px; cursor: pointer; font-family: inherit; }
+
+  /* ---------- 右侧实测栏 ---------- */
+  .pv-rail {
+    position: sticky;
+    top: 18px;
+    align-self: start;
+    max-height: calc(100vh - 36px);
+    overflow: auto;
+    border: 1px solid rgba(140, 178, 228, .20);
+    border-radius: 14px;
+    background: #080d16;
+    box-shadow: 0 18px 46px rgba(0, 0, 0, .45);
+  }
+  .pv-rail-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid rgba(140, 178, 228, .16);
+    background: #080d16;
+  }
+  .pv-rail-head b { display: block; font-size: 12px; color: #eaf5ff; letter-spacing: .08em; }
+  .pv-rail-head span { display: block; margin-top: 4px; font-family: "Cascadia Mono", Consolas, monospace; font-size: 10.5px; color: #93a6c4; }
+  .pv-rail-head span em { font-style: normal; color: #ffc247; }
+  .pv-group { padding: 10px 14px 12px; border-bottom: 1px solid rgba(140, 178, 228, .12); }
+  .pv-group:last-child { border-bottom: 0; }
+  .pv-group-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+  .pv-group-head b { font-size: 11.5px; color: #5ce6ff; letter-spacing: .08em; font-weight: 600; }
+  .pv-group-head span { font-family: "Cascadia Mono", Consolas, monospace; font-size: 10px; color: #93a6c4; }
+  .pv-metric {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: baseline;
+    gap: 6px;
+    padding: 3px 0;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 10.5px;
+  }
+  .pv-metric .pv-name { color: #a8bfdc; }
+  .pv-metric .pv-vals { color: #93a6c4; }
+  .pv-metric .pv-vals i { font-style: normal; color: #ff9aa6; }
+  .pv-metric .pv-vals b { color: #47e8a7; font-weight: 700; }
+  .pv-metric .pv-target { color: #8ff6ff; }
+  .pv-metric .pv-ok { color: #47e8a7; }
+  .pv-metric .pv-ng { color: #ff6b7f; }
+  .pv-note {
+    padding: 10px 14px 14px;
+    font-size: 10.5px;
+    line-height: 1.7;
+    color: #93a6c4;
+  }
+  .pv-note b { color: #c3d7ef; font-weight: 600; }
+  .pv-note .ok { color: #47e8a7; }
+  .pv-note .ng { color: #ff6b7f; }
+</style>
+
+<link rel="stylesheet" href="./ui-patch.css">
+</head>
+<body>
+
+<header class="pv-head">
+  <h1>烬 · UI 补丁包<em>UI-PATCH v1.0</em></h1>
+  <div class="pv-meta">
+    依据 ui-kit.md v1.6 · 零外部请求 · 图标全内联<br>
+    <b>body.jj-ui</b> 作用域：不调用 JJUI.apply() 时零影响
+  </div>
+  <div class="pv-toggle">
+    <span id="pvLabelBefore">改前</span>
+    <input id="pvRange" type="range" min="0" max="1" step="1" value="1" aria-label="切换改前 / 改后">
+    <span id="pvLabelAfter" class="is-on">改后</span>
+    <b id="pvState">改后</b>
+  </div>
+</header>
+
+<div class="pv-wrap">
+  <main class="pv-main">
+
+    <!-- ============ 01 三选一卡条 ============ -->
+    <section class="pv-block" id="blockStrip">
+      <h3>01 · 三选一卡条 <em>REWARD STRIP</em></h3>
+      <span class="pv-badge" id="badgeStrip">—</span>
+      <div class="pv-stage pv-stage-strip">
+        <div class="jj-vignette" aria-hidden="true"></div>
+        <div class="modal-layer is-reward">
+          <div class="modal" id="pvStrip">
+            <div class="modal-kicker">CHOOSE ONE</div>
+            <h2>楼层清空 · 技能三选一</h2>
+            <p class="modal-sub">按 <b>1 / 2 / 3</b> 或点击</p>
+            <div class="reward-grid" id="pvRewardGrid">
+              <button type="button" class="reward-card rarity-common" id="pvCard0">
+                <div class="r-top">
+                  <span class="r-tag">魔法</span>
+                  <span class="r-rarity">普通</span>
+                  <span class="r-key">1</span>
+                </div>
+                <span class="r-glyph" data-icon="flame" data-size="24"></span>
+                <span class="r-name">火球</span>
+                <span class="r-sub">魔法 · 投射</span>
+                <span class="r-desc">向准心发射一枚火球，命中后爆炸造成范围伤害，并留下短暂燃烧。</span>
+                <span class="r-result">伤害 38 <em>燃烧 3s</em></span>
+              </button>
+              <button type="button" class="reward-card rarity-rare" id="pvCard1">
+                <div class="r-top">
+                  <span class="r-tag">科技</span>
+                  <span class="r-rarity">稀有</span>
+                  <span class="r-key">2</span>
+                </div>
+                <span class="r-glyph" data-icon="frost" data-size="24"></span>
+                <span class="r-name">冰环</span>
+                <span class="r-sub">科技 · 范围</span>
+                <span class="r-desc">以自身为圆心释放冰环，命中者被冻结 1.2 秒，落地碎裂造成小额伤害。</span>
+                <span class="r-result">冻结 1.2s <em>半径 140</em></span>
+              </button>
+              <button type="button" class="reward-card rarity-epic" id="pvCard2">
+                <div class="r-top">
+                  <span class="r-tag">融合</span>
+                  <span class="r-rarity">史诗</span>
+                  <span class="r-key">3</span>
+                </div>
+                <span class="r-glyph" data-icon="void" data-size="24"></span>
+                <span class="r-name">坍缩黑洞</span>
+                <span class="r-sub">融合 · 控场</span>
+                <span class="r-desc">在瞄准点撕开黑洞，把周围敌人拉向中心，1.2 秒后统一坍缩结算。</span>
+                <span class="r-result">伤害 96 <em>牵引 170</em></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 02 HUD ============ -->
+    <section class="pv-block" id="blockHud">
+      <h3>02 · HUD <em>顶部条 + 状态胶囊 + 卡组</em></h3>
+      <span class="pv-badge" id="badgeHud">—</span>
+      <div class="pv-stage pv-stage-hud">
+        <div class="jj-vignette" aria-hidden="true"></div>
+
+        <header class="hud-top" id="pvHudTop">
+          <div class="brand">
+            <div class="logo"><b>烬</b></div>
+            <div class="sub">Emberfall · 魔法 × 科技</div>
+          </div>
+          <div class="hud-readouts">
+            <div class="bar-group">
+              <div class="bar-label"><span>生命 HP</span><b>82 / 100</b></div>
+              <div class="bar bar-hp" id="pvHpBar"><i style="width:82%"></i></div>
+            </div>
+            <div class="bar-group">
+              <div class="bar-label"><span>奥能 AETHER</span><b>74 / 100</b></div>
+              <div class="bar bar-aether"><i style="width:74%"></i></div>
+            </div>
+            <div class="skill-chip is-magic" id="pvChip0" data-chip-icon="flame" style="--jj-chip:#ff8a3d">
+              <span>燃烧</span><b>3s</b>
+            </div>
+            <div class="skill-chip" id="pvChip1" data-chip-icon="shield" style="--jj-chip:#77aaff">
+              <span>护盾</span><b>42</b>
+            </div>
+            <div class="skill-chip is-tech" id="pvChip2" data-chip-icon="charge" style="--jj-chip:#ffc247">
+              <span>蓄能</span><b>×2</b>
+            </div>
+          </div>
+          <div class="hud-actions">
+            <button type="button" class="btn btn-primary">技能树</button>
+            <button type="button" class="btn">设置</button>
+          </div>
+        </header>
+
+        <aside class="hud-deck" id="pvDeck">
+          <div class="deck-block">
+            <div class="deck-title">魔法卡 <i>数字键 1–6 切换</i></div>
+            <div class="card-row is-dense" id="pvDeckRow">
+              <button type="button" class="mini-card magic" id="pvDeckCard0"><span class="m-glyph" data-icon="flame" data-size="22"></span><span class="m-name">火球</span><span class="m-sub">F1 · 普通</span></button>
+              <button type="button" class="mini-card tech"><span class="m-glyph" data-icon="frost" data-size="22"></span><span class="m-name">冰环</span><span class="m-sub">F1 · 稀有</span></button>
+              <button type="button" class="mini-card tech"><span class="m-glyph" data-icon="bolt" data-size="22"></span><span class="m-name">雷击</span><span class="m-sub">F2 · 稀有</span></button>
+              <button type="button" class="mini-card magic"><span class="m-glyph" data-icon="pool" data-size="22"></span><span class="m-name">奥术池</span><span class="m-sub">F3 · 普通</span></button>
+              <button type="button" class="mini-card magic"><span class="m-glyph" data-icon="blade" data-size="22"></span><span class="m-name">回旋刃</span><span class="m-sub">F4 · 普通</span></button>
+              <button type="button" class="mini-card magic is-selected"><span class="m-glyph" data-icon="void" data-size="22"></span><span class="m-name">坍缩黑洞</span><span class="m-sub">F5 · 史诗</span></button>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ============ 03 结算 ============ -->
+    <section class="pv-block" id="blockResult">
+      <h3>03 · 结算 <em>RESULT</em></h3>
+      <span class="pv-badge" id="badgeResult">—</span>
+      <div class="pv-stage pv-stage-result">
+        <div class="modal-layer">
+          <div class="modal result-modal" id="pvResult">
+            <div class="result-icon">×</div>
+            <div class="modal-kicker">RUN ENDED · FLOOR 12</div>
+            <h2>机体失效</h2>
+            <p class="modal-sub">你在第 <b>12</b> 层倒下。本局获得的奥术结晶与天赋升级会永久保留。</p>
+
+            <div class="tower-voice" id="pvDeathBar" data-death-cause="hazard">
+              <span class="tower-body">
+                <span class="tower-tag">死因 · 熔岩喷发</span>
+                <span class="tower-meta">致命一击 96 · 种子 7F2A</span>
+              </span>
+            </div>
+
+            <div class="result-summary">
+              <div>到达楼层 <b id="pvHero">12</b></div>
+              <div>击杀 <b>284</b></div>
+              <div>核心组合 <b>火球 + 静电</b></div>
+            </div>
+
+            <div class="p1-verdict">
+              <div class="p1-verdict-tag">结论：被范围伤害夹击</div>
+              <div class="p1-verdict-rule">证据：本层 3 次熔岩喷发都发生在换弹窗口；细节见下方的伤害账目。</div>
+            </div>
+
+            <div class="result-stats" id="pvStats">
+              <div class="result-stat"><span>到达楼层</span><b>12</b></div>
+              <div class="result-stat"><span>击杀</span><b>284</b></div>
+              <div class="result-stat"><span>清空层数</span><b>11</b></div>
+              <div class="result-stat"><span>存活时间</span><b>18:42</b></div>
+              <div class="result-stat"><span>最高连杀</span><b>47</b></div>
+              <div class="result-stat"><span>融合次数</span><b>6</b></div>
+              <div class="result-stat is-gold"><span>本局结晶</span><b>+38</b></div>
+              <div class="result-stat is-gold"><span>累计结晶</span><b>412</b></div>
+              <div class="result-stat is-gold"><span>最佳里程碑</span><b>F12</b></div>
+            </div>
+
+            <div class="result-bottom">
+              <button type="button" class="btn btn-primary btn-big" id="pvRestart" data-action="restart">重新开始 · 第 1 层 R</button>
+              <div class="result-hint">按 R 或点上方按钮重开；H 帮助 · T 技能树 · O 设置。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ 04 设置 ============ -->
+    <section class="pv-block" id="blockSettings">
+      <h3>04 · 设置 <em>SETTINGS</em></h3>
+      <span class="pv-badge" id="badgeSettings">—</span>
+      <div class="pv-stage pv-stage-settings">
+        <div class="rules-card">
+          <div class="rules-head">
+            <div>
+              <div class="kicker">PAUSED · SETTINGS</div>
+              <h2>设置</h2>
+            </div>
+          </div>
+          <div class="settings-panel" id="pvSettings">
+            <section class="settings-box">
+              <div class="talent-head"><h3>音频 · AUDIO</h3><span class="setting-state">BGM 关</span></div>
+              <div class="setting-row" id="pvRow0">
+                <label>氛围 BGM</label>
+                <div class="switch" id="pvSwitch0" role="switch" aria-checked="false"></div>
+                <span class="setting-state">默认关闭</span>
+              </div>
+              <div class="setting-row">
+                <label>BGM 音量</label>
+                <input type="range" id="pvRange0" min="0" max="100" step="5" value="25" aria-label="BGM 音量">
+                <b>25%</b>
+              </div>
+            </section>
+
+            <section class="settings-box">
+              <div class="talent-head"><h3>操作 · CONTROL</h3><span class="setting-state">弱辅助</span></div>
+              <div class="setting-row">
+                <label>辅助瞄准</label>
+                <div class="aim-modes" role="group">
+                  <button type="button" class="aim-mode">强辅助</button>
+                  <button type="button" class="aim-mode is-active">弱辅助</button>
+                  <button type="button" class="aim-mode">关闭</button>
+                </div>
+              </div>
+              <div class="setting-row">
+                <label>近战武器</label>
+                <div class="switch" id="pvSwitch1" role="switch" aria-checked="true"></div>
+                <span class="setting-state">默认开</span>
+              </div>
+            </section>
+
+            <section class="settings-box">
+              <div class="talent-head"><h3>画面 · DISPLAY</h3><span class="setting-state">后处理开</span></div>
+              <div class="setting-row">
+                <label>后处理特效</label>
+                <div class="switch" id="pvSwitch2" role="switch" aria-checked="true"></div>
+                <span class="setting-state">像素溶解 / 故障</span>
+              </div>
+              <div class="setting-row">
+                <label>性能模式</label>
+                <div class="switch" role="switch" aria-checked="false"></div>
+                <span class="setting-state">关 · 全画质</span>
+              </div>
+            </section>
+
+            <section class="settings-box">
+              <div class="talent-head"><h3>可访问性 · A11Y</h3><span class="setting-state">全效果开</span></div>
+              <div class="setting-row">
+                <label>减少屏震</label>
+                <div class="switch" role="switch" aria-checked="false"></div>
+                <span class="setting-state">默认关</span>
+              </div>
+              <div class="setting-row">
+                <label>关闭闪白</label>
+                <div class="switch" role="switch" aria-checked="false"></div>
+                <span class="setting-state">默认关</span>
+              </div>
+            </section>
+
+            <section class="settings-box is-danger jj-danger">
+              <div class="talent-head"><h3>危险区 · DANGER</h3><span class="setting-state">不可撤销</span></div>
+              <div class="setting-row">
+                <label>清除存档</label>
+                <button type="button" class="btn">清除永久天赋与结晶</button>
+                <span class="setting-state">需二次确认</span>
+              </div>
+            </section>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <aside class="pv-rail">
+    <div class="pv-rail-head">
+      <b>实测尺寸</b>
+      <span id="pvLive">状态：改后 · 组件命中 — · 外部请求 —</span>
+    </div>
+    <div id="pvRailBody"></div>
+    <div class="pv-note" id="pvNote">
+      判定基准：ui-kit.md v1.6。左侧红字为改前，绿字为改后。<br>
+      断网检查：<b class="ok" id="pvNet">待测</b>
+    </div>
+  </aside>
+</div>
+
+<!-- 隐藏自检块：供无头浏览器 / 人工排查读取布局宽度，不参与页面展示 -->
+<pre id="pvDebug" hidden></pre>
+
+<script src="./ui-patch.js"></script>
+<script>
+/* ============================================================
+   预览页脚本
+   ------------------------------------------------------------
+   1) 用 JJUI.icon() 把 13 个内联图标填进卡面 / 胶囊 / 卡组；
+   2) 先量"改前"，再 JJUI.apply()，再量"改后"；
+   3) 滑块只切 body.jj-ui，右侧读数展示 before → after；
+   4) 用 performance resource 列表核验零外部请求。
+   ============================================================ */
+(function () {
+  'use strict';
+
+  /** 把 data-icon 占位符替换成内联 SVG（不引外部资源） */
+  function fillIcons() {
+    var nodes = document.querySelectorAll('[data-icon]');
+    for (var i = 0; i < nodes.length; i += 1) {
+      var el = nodes[i];
+      var size = Number(el.getAttribute('data-size')) || 24;
+      el.innerHTML = JJUI.icon(el.getAttribute('data-icon'), size);
+    }
+    var chips = document.querySelectorAll('[data-chip-icon]');
+    for (var j = 0; j < chips.length; j += 1) {
+      var chip = chips[j];
+      chip.insertAdjacentHTML('afterbegin', JJUI.icon(chip.getAttribute('data-chip-icon'), 14));
+    }
+  }
+
+  /** 读计算值并四舍五入到 0.1 */
+  function num(value) {
+    var n = parseFloat(value);
+    return isNaN(n) ? 0 : Math.round(n * 10) / 10;
+  }
+
+  /** 取宽高 */
+  function box(sel) {
+    var el = document.querySelector(sel);
+    if (!el) return { w: 0, h: 0 };
+    var r = el.getBoundingClientRect();
+    return { w: num(r.width), h: num(r.height) };
+  }
+
+  /** 取伪元素属性 */
+  function pseudo(sel, prop) {
+    var el = document.querySelector(sel);
+    return el ? num(getComputedStyle(el, '::before')[prop] || getComputedStyle(el, '::after')[prop]) : 0;
+  }
+
+  /** 取网格列数 */
+  function cols(sel) {
+    var el = document.querySelector(sel);
+    if (!el) return 0;
+    var tpl = getComputedStyle(el).gridTemplateColumns;
+    return tpl ? tpl.split(' ').length : 0;
+  }
+
+  /** 一次性采集全部实测值 */
+  function measure() {
+    var strip = box('#pvStrip');
+    var card = box('#pvCard0');
+    var cardEl = document.querySelector('#pvCard0');
+    var brick = box('#pvCard0 .r-glyph');
+    var hud = box('#pvHudTop');
+    var hp = box('#pvHpBar');
+    var chip = box('#pvChip0');
+    var deckCard = box('#pvDeckCard0');
+    var result = box('#pvResult');
+    var death = box('#pvDeathBar');
+    var hero = document.querySelector('#pvHero');
+    var restart = box('#pvRestart');
+    var row = box('#pvRow0');
+    var sw = box('#pvSwitch0');
+    var knob = document.querySelector('#pvSwitch0')
+      ? num(getComputedStyle(document.querySelector('#pvSwitch0'), '::after').width)
+      : 0;
+    var range = document.querySelector('#pvRange0');
+
+    return {
+      stripW: strip.w,
+      cardH: card.h,
+      cardR: cardEl ? num(getComputedStyle(cardEl).borderRadius) : 0,
+      rarBar: cardEl ? num(getComputedStyle(cardEl, '::before').width) : 0,
+      brickW: brick.w,
+      brickH: brick.h,
+      hudH: hud.h,
+      hpBarH: hp.h,
+      chipH: chip.h,
+      deckCardH: deckCard.h,
+      deckCols: cols('#pvDeckRow'),
+      resultW: result.w,
+      deathH: death.h,
+      heroSize: hero ? num(getComputedStyle(hero).fontSize) : 0,
+      statCols: cols('#pvStats'),
+      restartH: restart.h,
+      restartPos: document.querySelector('#pvRestart')
+        ? getComputedStyle(document.querySelector('#pvRestart')).position : '',
+      settingsCols: cols('#pvSettings'),
+      rowH: row.h,
+      switchW: sw.w,
+      switchH: sw.h,
+      knob: knob,
+      trackH: range ? num(getComputedStyle(range).height) : 0
+    };
+  }
+
+  /* 指标表：target 为 ui-kit 目标值，read 从采集结果取值 */
+  var METRICS = [
+    { block: '01 卡条', name: '卡条宽', target: 960, unit: 'px', key: 'stripW' },
+    { block: '01 卡条', name: '卡高', target: 176, unit: 'px', key: 'cardH' },
+    { block: '01 卡条', name: '卡圆角', target: 12, unit: 'px', key: 'cardR' },
+    { block: '01 卡条', name: '稀有条', target: 4, unit: 'px', key: 'rarBar' },
+    { block: '01 卡条', name: '图标砖', target: 44, unit: 'px', key: 'brickW' },
+    { block: '02 HUD', name: '顶栏高', target: 64, unit: 'px', key: 'hudH' },
+    { block: '02 HUD', name: '血条高', target: 10, unit: 'px', key: 'hpBarH' },
+    { block: '02 HUD', name: '状态胶囊', target: 26, unit: 'px', key: 'chipH' },
+    { block: '02 HUD', name: '卡格高', target: 68, unit: 'px', key: 'deckCardH' },
+    { block: '02 HUD', name: '卡组列数', target: 6, unit: '列', key: 'deckCols' },
+    { block: '03 结算', name: '面板宽', target: 760, unit: 'px', key: 'resultW' },
+    { block: '03 结算', name: '死因条高', target: 38, unit: 'px', key: 'deathH' },
+    { block: '03 结算', name: '主数值字号', target: 38, unit: 'px', key: 'heroSize' },
+    { block: '03 结算', name: '数据格列数', target: 3, unit: '列', key: 'statCols' },
+    { block: '03 结算', name: '重开按钮高', target: 44, unit: 'px', key: 'restartH' },
+    { block: '04 设置', name: '网格列数', target: 2, unit: '列', key: 'settingsCols' },
+    { block: '04 设置', name: '行高', target: 40, unit: 'px', key: 'rowH' },
+    { block: '04 设置', name: '开关宽', target: 40, unit: 'px', key: 'switchW' },
+    { block: '04 设置', name: '开关高', target: 22, unit: 'px', key: 'switchH' },
+    { block: '04 设置', name: '滑钮直径', target: 14, unit: 'px', key: 'knob' },
+    { block: '04 设置', name: '滑杆轨道', target: 4, unit: 'px', key: 'trackH' }
+  ];
+
+  /** 生成右侧实测栏（改前 → 改后 + 达标标记） */
+  function renderRail(before, after) {
+    var body = document.getElementById('pvRailBody');
+    var groups = {};
+    METRICS.forEach(function (m) {
+      if (!groups[m.block]) groups[m.block] = [];
+      groups[m.block].push(m);
+    });
+
+    var html = '';
+    Object.keys(groups).forEach(function (key) {
+      html += '<div class="pv-group"><div class="pv-group-head"><b>' + key + '</b>'
+        + '<span>' + badgeFor(key, after) + '</span></div>';
+      groups[key].forEach(function (m) {
+        var b = before[m.key];
+        var a = after[m.key];
+        var ok = Math.abs(Number(a) - m.target) <= 0.5;
+        html += '<div class="pv-metric">'
+          + '<span class="pv-name">' + m.name + '</span>'
+          + '<span class="pv-vals"><i>' + b + '</i> → <b>' + a + '</b></span>'
+          + '<span class="pv-target">' + (ok ? 'OK' : 'NG') + '</span>'
+          + '</div>';
+      });
+      html += '</div>';
+    });
+    body.innerHTML = html;
+  }
+
+  /** 每块右上角的摘要尺寸 */
+  function badgeFor(block, d) {
+    if (block.indexOf('01') === 0) return d.stripW + ' × ' + d.cardH;
+    if (block.indexOf('02') === 0) return d.hudH + ' / ' + d.hpBarH + ' / ' + d.chipH + ' / ' + d.deckCols + '×' + d.deckCardH;
+    if (block.indexOf('03') === 0) return d.resultW + ' / ' + d.deathH + ' / ' + d.statCols + '×3';
+    return d.settingsCols + '×2 / ' + d.rowH + ' / ' + d.switchW + '×' + d.switchH;
+  }
+
+  /** 更新四块右上角徽标 */
+  function updateBadges(d) {
+    document.getElementById('badgeStrip').textContent = badgeFor('01', d);
+    document.getElementById('badgeHud').textContent = badgeFor('02', d);
+    document.getElementById('badgeResult').textContent = badgeFor('03', d);
+    document.getElementById('badgeSettings').textContent = badgeFor('04', d);
+  }
+
+  /** 断网核验：统计 http(s) 外部资源条数 */
+  function checkNetwork() {
+    var entries = performance.getEntriesByType('resource') || [];
+    var external = entries.filter(function (e) {
+      return /^https?:/i.test(e.name);
+    });
+    var local = entries.length - external.length;
+    var el = document.getElementById('pvNet');
+    el.textContent = external.length === 0
+      ? '0 外部请求（file:// 本地资源 ' + local + ' 条）'
+      : external.length + ' 条外部请求（不合格）';
+    el.className = external.length === 0 ? 'ok' : 'ng';
+    return external.length;
+  }
+
+  /* ---------------- 主流程 ---------------- */
+  fillIcons();
+
+  /* 先量改前（body 还没有 jj-ui） */
+  var before = measure();
+
+  /* 调用补丁：挂 class + 注入 sprite */
+  var applied = JJUI.apply();
+
+  /* 再量改后（class 已挂上） */
+  var after = measure();
+
+  /* 隐藏自检：记录视口 / 容器 / 卡条宽度，排查 min(960px,94vw) 的实际约束 */
+  var dbg = document.getElementById('pvDebug');
+  if (dbg) {
+    var wbox = function (sel) { return box(sel); };
+    dbg.textContent = JSON.stringify({
+      vw: window.innerWidth,
+      dpr: window.devicePixelRatio,
+      wrap: wbox('.pv-wrap').w,
+      main: wbox('.pv-main').w,
+      block: wbox('#blockStrip').w,
+      stage: wbox('.pv-stage-strip').w,
+      layer: wbox('.modal-layer.is-reward').w,
+      strip: wbox('#pvStrip').w,
+      restartPos: after.restartPos,
+      trackH: after.trackH
+    });
+  }
+
+  renderRail(before, after);
+  updateBadges(after);
+
+  var live = document.getElementById('pvLive');
+  var hitCount = Object.keys(applied.counts || {}).reduce(function (n, k) {
+    return n + (applied.counts[k] || 0);
+  }, 0);
+  live.innerHTML = '状态：改后 · 组件命中 <em>' + hitCount + '</em> 项 · 图标 '
+    + applied.icons + ' 个 · 外部请求 —';
+
+  /* 滑块：切 body.jj-ui，读数保持 before → after 对照 */
+  var range = document.getElementById('pvRange');
+  var labelBefore = document.getElementById('pvLabelBefore');
+  var labelAfter = document.getElementById('pvLabelAfter');
+  var state = document.getElementById('pvState');
+
+  function setPatched(on) {
+    document.body.classList.toggle('jj-ui', !!on);
+    labelBefore.classList.toggle('is-on', !on);
+    labelAfter.classList.toggle('is-on', !!on);
+    state.textContent = on ? '改后' : '改前';
+    updateBadges(on ? after : before);
+    live.innerHTML = '状态：' + (on ? '改后' : '改前')
+      + ' · 组件命中 <em>' + hitCount + '</em> 项 · 图标 ' + applied.icons + ' 个 · 外部请求 —';
+  }
+
+  range.addEventListener('input', function () {
+    setPatched(range.value === '1');
+  });
+
+  /* 支持 file://...#before 直接打开改前状态，方便截图与对比 */
+  if (location.hash === '#before') {
+    range.value = '0';
+    setPatched(false);
+  }
+
+  /* 资源统计放到 load 之后，确保 CSS / JS 都进 performance 列表 */
+  window.addEventListener('load', function () {
+    setTimeout(checkNetwork, 0);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>烬 · 角色细节实验室</title>
+<style>
+/* ============================================================
+   烬 · 角色细节实验室 (hero-detail-lab)
+   第二轮：材质分层 / 动作关键帧 / 小尺寸可读性 / 差异清单
+   设计令牌沿用主文件与 hero-lab：深蓝面板 / 科技青 / 魔法紫 / 岩金
+   零外部资源、零网络请求，双击即开。
+   ============================================================ */
+:root{
+  --bg:#05080f; --s1:#0d1424; --s2:#131e33;
+  --line:rgba(126,164,214,.24); --line2:rgba(120,190,255,.46);
+  --t1:#eaf5ff; --t2:#c3d6ec; --t3:#a8bfdc;
+  --tech:#3ee6ff; --magic:#b085ff; --gold:#ffc247;
+  --good:#47e8a7; --bad:#ff6b7f;
+  --ease:cubic-bezier(.2,.9,.25,1);
+  --mono:"Cascadia Mono","Consolas","Courier New",monospace;
+  --sans:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(900px 520px at 50% -12%, rgba(62,230,255,.10), transparent 64%),
+    radial-gradient(760px 460px at 88% 20%, rgba(176,133,255,.10), transparent 66%),
+    linear-gradient(180deg,#050810,#070d18 42%,#05080f);
+  color:var(--t1); font-family:var(--sans); -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; align-items:center; gap:12px;
+  padding:16px 14px 28px;
+}
+/* ---------- 顶栏 ---------- */
+.bar{width:min(1340px,97vw); display:flex; align-items:flex-end; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.brand h1{margin:0; font-size:19px; letter-spacing:.15em; color:#ffe6ae; text-shadow:0 0 18px rgba(255,194,71,.22);}
+.brand h1 span{font-family:var(--mono); font-size:10px; letter-spacing:.24em; color:var(--t3); margin-left:8px; vertical-align:2px;}
+.brand p{margin:4px 0 0; font-family:var(--mono); font-size:10px; letter-spacing:.18em; color:var(--t3); opacity:.85;}
+.controls{display:flex; align-items:center; gap:6px; flex-wrap:wrap;}
+.seg{display:flex; border:1px solid var(--line); border-radius:7px; overflow:hidden; background:rgba(7,11,20,.7);}
+.seg button{padding:6px 10px; font-family:var(--sans); font-size:11.5px; letter-spacing:.05em; color:var(--t3); background:transparent; border:0; cursor:pointer; transition:color .12s var(--ease), background .12s var(--ease);}
+.seg button:hover{color:var(--t1);}
+.seg button.on{color:#06121d; background:linear-gradient(180deg,#7ff2ff,#3ee6ff);}
+.pill{display:inline-flex; align-items:center; gap:6px; padding:5px 9px; font-family:var(--mono); font-size:10px; letter-spacing:.05em; color:var(--t3); border:1px solid var(--line); border-radius:4px; background:rgba(13,20,36,.7);}
+.pill b{color:var(--t1); font-weight:400;}
+/* ---------- 舞台 ---------- */
+.stage{position:relative; width:min(1340px,97vw); border-radius:16px; border:1px solid var(--line); overflow:hidden;
+  background:radial-gradient(680px 420px at 50% 8%, rgba(62,230,255,.09), transparent 66%),
+             radial-gradient(520px 380px at 84% 76%, rgba(176,133,255,.09), transparent 68%),
+             linear-gradient(180deg,#0a1120,#070c16 58%,#05080f);
+  box-shadow:0 26px 78px rgba(0,0,0,.62), inset 0 0 0 1px rgba(255,255,255,.02);}
+#bg{position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none;}
+.views{position:relative; padding:14px 18px 16px; min-height:690px; display:flex; flex-direction:column;}
+.view{display:none; flex:1; flex-direction:column; gap:10px; animation:viewIn .26s var(--ease) both;}
+.view.on{display:flex;}
+@keyframes viewIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+.view-head{display:flex; align-items:baseline; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.view-head h2{margin:0; font-size:15px; letter-spacing:.09em; color:#ffe6ae;}
+.view-head .sub{margin:0; font-size:11.5px; color:var(--t3); letter-spacing:.03em;}
+.view-head .sub b{color:var(--tech); font-weight:400;}
+/* ---------- 通用 ---------- */
+.cap{font-family:var(--mono); font-size:10px; letter-spacing:.10em; color:var(--t3); padding:3px 0 5px;}
+.cap.on{color:var(--good);}
+.cv-box{position:relative; border:1px solid rgba(120,190,255,.16); border-radius:9px; overflow:hidden;
+  background:linear-gradient(180deg,#0b1322,#070c16);}
+.cv-box canvas{display:block; width:100%; height:100%;}
+.card{background:rgba(13,20,36,.62); border:1px solid rgba(126,164,214,.18); border-radius:10px;}
+/* ---------- A 近景 ---------- */
+.near-wrap{display:grid; grid-template-columns:1fr 426px; gap:14px; align-items:stretch;}
+.near-pair{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+.near-col{display:flex; flex-direction:column;}
+.near-col .cv-box{height:452px;}
+.near-legend{padding:10px 12px 8px; display:flex; flex-direction:column; gap:6px;}
+.lg-head{font-size:12px; letter-spacing:.06em; color:#ffe6ae; display:flex; justify-content:space-between; align-items:baseline;}
+.lg-head span{font-family:var(--mono); font-size:10px; color:var(--t3);}
+.lg-list{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:3px;}
+.lg-list li{display:flex; gap:7px; align-items:flex-start; font-size:11px; line-height:1.42; color:var(--t2);}
+.lg-list li b{flex:0 0 17px; font-family:var(--mono); font-size:9.5px; color:var(--tech); border:1px solid rgba(62,230,255,.35); border-radius:3px; text-align:center; line-height:15px; height:16px; margin-top:1px;}
+.lg-list li .nm{color:var(--t1); font-size:11.5px;}
+.lg-list li .dg{display:block; font-size:10px; color:var(--t3); font-family:var(--mono); letter-spacing:.01em;}
+.lg-note{font-size:10px; line-height:1.5; color:var(--t3); border-top:1px dashed rgba(126,164,214,.22); padding-top:6px; margin-top:2px;}
+.lg-note b{color:var(--tech); font-weight:400;}
+.sw-head{font-family:var(--mono); font-size:10px; letter-spacing:.10em; color:var(--t3); margin-top:2px;}
+.sw-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:6px;}
+.sw-cell{display:flex; flex-direction:column; gap:3px; align-items:center;}
+.sw-cell canvas{width:64px; height:64px; display:block; border-radius:6px; border:1px solid rgba(126,164,214,.20);}
+.sw-cell span{font-size:9px; color:var(--t3); text-align:center; line-height:1.3;}
+.mini-row{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.mini-hero{display:flex; gap:6px; align-items:center; padding:6px 8px;}
+.mini-hero .nm{font-size:11px; color:#ffe6ae; flex:0 0 42px;}
+.mini-hero canvas{width:96px; height:104px; display:block; background:rgba(7,11,20,.5); border-radius:4px;}
+/* ---------- B 动作 ---------- */
+.mo-wrap{display:grid; grid-template-columns:360px 1fr; gap:14px; align-items:start;}
+.mo-stage{padding:8px 10px 10px; display:flex; flex-direction:column; gap:6px;}
+.mo-cap{display:flex; align-items:baseline; gap:8px; font-family:var(--mono); font-size:10px; color:var(--t3);}
+.mo-cap b{font-family:var(--sans); font-size:13px; color:#ffe6ae; font-weight:400; letter-spacing:.06em;}
+.mo-cap .ac{color:var(--tech);}
+.mo-cap .tm{margin-left:auto; color:var(--t1);}
+#moCanvas{width:100%; height:372px; display:block; background:linear-gradient(180deg,#0b1322,#070c16); border:1px solid rgba(120,190,255,.16); border-radius:8px;}
+.mo-scrub{display:flex; align-items:center; gap:7px;}
+.mo-scrub input{flex:1; accent-color:#3ee6ff;}
+.mo-phases{display:flex; height:20px; border-radius:4px; overflow:hidden; border:1px solid rgba(126,164,214,.18);}
+.mo-phases div{font-size:9px; font-family:var(--mono); color:#cfe6ff; display:flex; align-items:center; justify-content:center; border-right:1px solid rgba(5,8,15,.5); overflow:hidden; white-space:nowrap;}
+.mo-strips{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+.mo-hero{padding:7px 8px 8px; display:flex; flex-direction:column; gap:5px;}
+.mo-hero-head{display:flex; align-items:baseline; gap:6px;}
+.mo-hero-head b{font-size:12px; color:#ffe6ae; font-weight:400; letter-spacing:.05em;}
+.mo-hero-head span{font-size:10px; color:var(--t3);}
+.mo-strip{display:flex; align-items:flex-start; gap:5px;}
+.mo-fl{flex:0 0 34px; display:flex; flex-direction:column; gap:1px; padding-top:16px;}
+.mo-fl b{font-family:var(--mono); font-size:9px; color:var(--tech); font-weight:400;}
+.mo-fl span{font-family:var(--mono); font-size:8.5px; color:var(--t3);}
+.mo-frames{display:flex; gap:3px;}
+.mo-frame{display:flex; flex-direction:column; gap:1px; align-items:center;}
+.mo-frame canvas{width:46px; height:58px; display:block; background:rgba(7,11,20,.55); border:1px solid rgba(126,164,214,.16); border-radius:3px;}
+.mo-frame span{font-family:var(--mono); font-size:8px; color:var(--t3);}
+.mo-table{margin-top:2px;}
+.mo-table table{width:100%; border-collapse:collapse; font-size:10.5px;}
+.mo-table th,.mo-table td{border-bottom:1px solid rgba(126,164,214,.14); padding:3px 6px; text-align:left; color:var(--t2);}
+.mo-table th{font-family:var(--mono); font-size:9px; letter-spacing:.08em; color:var(--t3); font-weight:400;}
+.mo-table td.t{font-family:var(--mono); color:var(--tech); white-space:nowrap;}
+.mo-table td.n{color:var(--t1);}
+/* ---------- C 小尺寸 ---------- */
+.sz-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px;}
+.sz-col{padding:10px 12px 12px; display:flex; flex-direction:column; gap:4px;}
+.sz-col h3{margin:0; font-size:13px; letter-spacing:.05em; color:#ffe6ae; font-weight:400; display:flex; align-items:baseline; gap:6px;}
+.sz-col h3 span{font-family:var(--mono); font-size:9.5px; color:var(--t3);}
+.sz-size{font-family:var(--mono); font-size:9.5px; letter-spacing:.10em; color:var(--tech); margin-top:4px;}
+.sz-tiles{display:flex; gap:7px; align-items:flex-start;}
+.sz-tile{display:flex; flex-direction:column; gap:2px; align-items:center;}
+.sz-tile canvas{display:block; image-rendering:pixelated; background:rgba(7,11,20,.55); border:1px solid rgba(126,164,214,.18); border-radius:3px;}
+.sz-tile span{font-family:var(--mono); font-size:8.5px; color:var(--t3);}
+.sz-zoom{display:flex; gap:7px; align-items:flex-start; margin-top:2px;}
+.sz-zoom canvas{display:block; image-rendering:pixelated; background:rgba(7,11,20,.55); border:1px solid rgba(126,164,214,.18); border-radius:3px;}
+.sz-stat{font-family:var(--mono); font-size:9px; color:var(--t3); line-height:1.5;}
+.sz-stat b{color:var(--t1); font-weight:400;}
+.sz-stat .hi{color:var(--bad);}
+.sz-stat .ok{color:var(--good);}
+.sz-sum{margin-top:2px; padding:7px 10px; font-size:11px; line-height:1.55; color:var(--t2);}
+.sz-sum b{color:var(--tech); font-weight:400;}
+/* ---------- D 差异 ---------- */
+.df-grid{display:grid; grid-template-columns:1.35fr .9fr; gap:12px; align-items:start;}
+.df-panel{padding:10px 12px 12px;}
+.df-panel h3{margin:0 0 6px; font-size:12.5px; color:#ffe6ae; font-weight:400; letter-spacing:.05em;}
+.df-panel table{width:100%; border-collapse:collapse; font-size:10.5px;}
+.df-panel th,.df-panel td{border-bottom:1px solid rgba(126,164,214,.14); padding:3px 5px; text-align:left; color:var(--t2); vertical-align:top;}
+.df-panel th{font-family:var(--mono); font-size:9px; letter-spacing:.06em; color:var(--t3); font-weight:400;}
+.df-panel td.dim{color:var(--t1);}
+.yes{color:var(--good); font-family:var(--mono);}
+.no{color:var(--bad); font-family:var(--mono);}
+.gap{font-family:var(--mono); font-size:9px; color:var(--bad);}
+.df-note{font-size:10px; color:var(--t3); line-height:1.55; margin:6px 0 0;}
+.df-note b{color:var(--tech); font-weight:400;}
+.sp-bar{height:5px; border-radius:3px; background:linear-gradient(90deg,#3ee6ff,#7ff2ff); margin-top:2px;}
+#probe{display:none;}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="brand">
+    <h1>烬 · 角色细节实验室<span>DETAIL LAYER LAB</span></h1>
+    <p>第二轮 · 材质分层 / 动作关键帧 / 48px·24px 可读性 / 差异清单 · 陈光辉制作</p>
+  </div>
+  <div class="controls">
+    <div class="seg" id="heroSeg">
+      <button data-hero="warden" class="on">1 守拙</button>
+      <button data-hero="ember">2 疾火</button>
+      <button data-hero="gazer">3 观星</button>
+    </div>
+    <div class="seg" id="viewSeg">
+      <button data-view="near" class="on">近景材质</button>
+      <button data-view="motion">动作</button>
+      <button data-view="size">小尺寸</button>
+      <button data-view="diff">差异清单</button>
+    </div>
+    <div class="seg" id="dSeg">
+      <button data-d="1" class="on">细节 ON</button>
+      <button data-d="0">细节 OFF</button>
+    </div>
+    <div class="seg" id="silSeg">
+      <button data-sil="0" class="on">彩显</button>
+      <button data-sil="1">剪影</button>
+    </div>
+    <div class="seg" id="cbSeg">
+      <button data-cb="none" class="on">正常</button>
+      <button data-cb="deut">红绿</button>
+      <button data-cb="trit">蓝黄</button>
+    </div>
+  </div>
+</div>
+
+<div class="stage">
+  <canvas id="bg"></canvas>
+  <div class="views">
+    <!-- A · 近景材质 -->
+    <section class="view on" id="view-near">
+      <div class="view-head">
+        <h2>① 身上看得见的东西 · 同机位 OFF / ON</h2>
+        <p class="sub">角色高 <b>300 px</b>（1440×900 画面约 1/3）· 左为现状 · 右为细节层 · 编号对应右侧清单</p>
+      </div>
+      <div class="near-wrap">
+        <div class="near-pair">
+          <div class="near-col">
+            <div class="cap">DETAIL OFF · 现状</div>
+            <div class="cv-box"><canvas id="nearOff"></canvas></div>
+          </div>
+          <div class="near-col">
+            <div class="cap on">DETAIL ON · 细节层</div>
+            <div class="cv-box"><canvas id="nearOn"></canvas></div>
+          </div>
+        </div>
+        <div class="near-legend card">
+          <div class="lg-head">细节清单 · <span id="lgHero">守拙</span></div>
+          <ol class="lg-list" id="lgList"></ol>
+          <div class="sw-head">材质特写 · 同机位 4 格</div>
+          <div class="sw-grid" id="swGrid"></div>
+          <div class="lg-note" id="lgNote"></div>
+        </div>
+      </div>
+      <div class="mini-row" id="miniRow"></div>
+    </section>
+
+    <!-- B · 动作 -->
+    <section class="view" id="view-motion">
+      <div class="view-head">
+        <h2>② 动作 · 待机呼吸 / 施法起收 / 受击</h2>
+        <p class="sub">关键帧 + 时长；<b>&larr; &rarr;</b> 拖相位，<b>X</b> 切动作；右侧是三人同尺度节奏对照</p>
+      </div>
+      <div class="mo-wrap">
+        <div class="mo-stage card">
+          <div class="mo-cap"><b id="moHero">守拙</b><span class="ac" id="moAct">IDLE</span><span id="moDur"></span><span class="tm" id="moTime">0 ms</span></div>
+          <canvas id="moCanvas"></canvas>
+          <div class="mo-scrub"><input id="moRange" type="range" min="0" max="1000" value="0"><span class="mo-cap" id="moPct" style="font-size:9px">0%</span></div>
+          <div class="mo-phases" id="moPhases"></div>
+        </div>
+        <div class="mo-strips" id="moStrips"></div>
+      </div>
+      <div class="mo-table card">
+        <div style="padding:6px 10px 2px" class="cap">当前角色 · 关键帧表（时间点为实测时长）</div>
+        <table id="moTable"></table>
+      </div>
+    </section>
+
+    <!-- C · 小尺寸 -->
+    <section class="view" id="view-size">
+      <div class="view-head">
+        <h2>③ 小尺寸可读性 · 48 px（HUD 头像）/ 24 px（手机估算）</h2>
+        <p class="sub">同一机位三档：<b>细节 ON 直出</b> / <b>FAR 降级（按存活线删细节）</b> / <b>纯剪影</b>；数字为内部硬跳变率</p>
+      </div>
+      <div class="sz-grid" id="szGrid"></div>
+      <div class="sz-sum card" id="szSummary"></div>
+    </section>
+
+    <!-- D · 差异清单 -->
+    <section class="view" id="view-diff">
+      <div class="view-head">
+        <h2>④ 除了外形还差在哪 · 可感知差异清单</h2>
+        <p class="sub">左：现在就有 / 还缺；右：移速差<b>只给方案与数值影响</b>，主文件数值未动</p>
+      </div>
+      <div class="df-grid">
+        <div class="df-panel card">
+          <h3>可感知差异清单（13 项）</h3>
+          <table id="dfTable"></table>
+          <p class="df-note" id="dfNote"></p>
+        </div>
+        <div class="df-panel card">
+          <h3>移速差方案（0.90× / 1.06× / 1.00×）</h3>
+          <table id="spTable"></table>
+          <p class="df-note" id="spNote"></p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<pre id="probe"></pre>
+<script>
+/* ============================================================
+   0) 数据 / 常量
+   ============================================================ */
+/* 三角色数值口径：抄自主文件 CHARACTER_CONFIG（只读，未改） */
+const HEROES = {
+  warden:{ id:'warden', name:'守拙', role:'岩盾 · 守势', glyph:'石', hp:104, speedLabel:'0.90×',
+    palette:{ main:'#C6A868', aux1:'#3E5A6E', aux2:'#5C3B25', accent:'#3EE6FF' },
+    rhythm:'慢而重', mat:'岩板 / 粗麻 / 皮革 / 冷金属 / 青芯' },
+  ember:{ id:'ember', name:'疾火', role:'余烬 · 游猎', glyph:'焰', hp:95, speedLabel:'1.06×',
+    palette:{ main:'#E8402A', aux1:'#FFC24D', aux2:'#6E2E8F', accent:'#FFF3D0' },
+    rhythm:'急而碎', mat:'皮衬 / 焰布 / 金属 / 焰珠' },
+  gazer:{ id:'gazer', name:'观星', role:'星轨 · 悬浮', glyph:'星', hp:100, speedLabel:'1.00×',
+    palette:{ main:'#7A5CFF', aux1:'#3EE6FF', aux2:'#1B2547', accent:'#EAF5FF' },
+    rhythm:'飘而缓', mat:'绸 / 金属环轨 / 星璃 / 星尘' }
+};
+const HERO_IDS = ['warden','ember','gazer'];
+
+/* 待机周期（本轮收小幅度后的目标值，单位 ms） */
+const CYCLE = { warden:4600, ember:1900, gazer:3600 };
+/* 施法总时长（ms） */
+const CAST_DUR = { warden:1150, ember:720, gazer:1400 };
+/* 受击总时长（ms） */
+const HIT_DUR = { warden:850, ember:520, gazer:760 };
+
+const LAB = { hero:'warden', view:'near', detail:true, silhouette:false, cb:'none',
+  t:0, moAct:'idle', moPhase:0, moAuto:true, moFixed:false };
+
+/* ============================================================
+   1) 基础工具（与 hero-lab 同源）
+   ============================================================ */
+function hexToRgb(hex){ const h=hex.replace('#',''); return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
+function rgbToHex(r,g,b){ const c=(v)=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0'); return '#'+c(r)+c(g)+c(b); }
+function srgbToLin(v){ const x=v/255; return x<=0.04045?x/12.92:Math.pow((x+0.055)/1.055,2.4); }
+function linToSrgb(v){ const x=v<=0.0031308?v*12.92:1.055*Math.pow(v,1/2.4)-0.055; return x*255; }
+const CB_MATRICES = {
+  none:null,
+  deut:[[0.367322,0.860646,-0.227968],[0.280085,0.672501,0.047413],[-0.011820,0.042940,0.968881]],
+  prot:[[0.152286,1.052583,-0.204868],[0.114503,0.786281,0.099216],[-0.003882,-0.048116,1.051998]],
+  trit:[[1.255528,-0.076749,-0.178779],[-0.078411,0.930809,0.147602],[0.004733,0.691367,0.303900]]
+};
+/* 单色 → 色盲模拟后的颜色 */
+function simulateHex(hex, mode){
+  const m=CB_MATRICES[mode]; if(!m) return hex;
+  const [r,g,b]=hexToRgb(hex).map(srgbToLin);
+  const out=[0,1,2].map(i=> m[i][0]*r+m[i][1]*g+m[i][2]*b);
+  return rgbToHex(linToSrgb(out[0]),linToSrgb(out[1]),linToSrgb(out[2]));
+}
+function rgba(hex,a){ const [r,g,b]=hexToRgb(hex); return `rgba(${r},${g},${b},${a})`; }
+function luminance(hex){ const [r,g,b]=hexToRgb(hex).map(srgbToLin); return 0.2126*r+0.7152*g+0.0722*b; }
+function rr(ctx,x,y,w,h,r){
+  const rad=Math.min(r,Math.abs(w)/2,Math.abs(h)/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rad,y); ctx.lineTo(x+w-rad,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+rad); ctx.lineTo(x+w,y+h-rad);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h); ctx.lineTo(x+rad,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-rad); ctx.lineTo(x,y+rad);
+  ctx.quadraticCurveTo(x,y,x+rad,y); ctx.closePath();
+}
+function poly(ctx,pts){ ctx.beginPath(); pts.forEach((p,i)=>{ i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]); }); ctx.closePath(); }
+function mixHex(a,b,k){ const A=hexToRgb(a),B=hexToRgb(b); return rgbToHex(A[0]+(B[0]-A[0])*k,A[1]+(B[1]-A[1])*k,A[2]+(B[2]-A[2])*k); }
+function shade(hex,k){ return k>=0?mixHex(hex,'#ffffff',k):mixHex(hex,'#05070c',-k); }
+function easeOut(u){ return 1-Math.pow(1-u,3); }
+function easeIn(u){ return u*u*u; }
+function easeInOut(u){ return u<0.5?4*u*u*u:1-Math.pow(-2*u+2,3)/2; }
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+function seg(k,a,b){ return clamp((k-a)/(b-a),0,1); }
+/* 确定性伪随机：同 seed 每次截图材质位置不变 */
+function rnd(seed){ let s=seed||1; return function(){ s=(s*16807)%2147483647; return s/2147483647; }; }
+
+/* 身体填充：上亮下暗 + 强调描边；剪影模式纯黑 */
+function bodyFill(ctx, buildPath, pal, opts){
+  const o=opts||{};
+  if(o.silhouette){ buildPath(); ctx.fillStyle='#05070C'; ctx.fill(); return; }
+  const g=ctx.createLinearGradient(0,-50,0,50);
+  g.addColorStop(0,rgba(shade(pal.main,0.24),0.98));
+  g.addColorStop(0.45,rgba(pal.main,0.98));
+  g.addColorStop(1,rgba(pal.aux2,0.99));
+  buildPath(); ctx.fillStyle=g;
+  if(o.glow){ ctx.shadowColor=rgba(pal.accent,0.45); ctx.shadowBlur=10; }
+  ctx.fill(); ctx.shadowBlur=0;
+  if(o.stroke!==false){
+    buildPath();
+    ctx.strokeStyle=rgba(o.strokeColor||pal.accent,o.strokeAlpha==null?0.55:o.strokeAlpha);
+    ctx.lineWidth=1.15; ctx.stroke();
+  }
+}
+function accentFill(ctx, buildPath, color, alpha, glow){
+  buildPath(); ctx.fillStyle=rgba(color,alpha);
+  if(glow){ ctx.shadowColor=rgba(color,0.75); ctx.shadowBlur=glow; }
+  ctx.fill(); ctx.shadowBlur=0;
+}
+function capsule(ctx,x1,y1,x2,y2,w,style){
+  ctx.beginPath(); ctx.lineCap='round'; ctx.lineWidth=w; ctx.strokeStyle=style;
+  ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.stroke();
+}
+function taper(ctx,x1,y1,x2,y2,w1,w2,bend){
+  const dx=x2-x1,dy=y2-y1,len=Math.hypot(dx,dy)||1;
+  const nx=-dy/len,ny=dx/len;
+  const mx=(x1+x2)/2+nx*bend,my=(y1+y2)/2+ny*bend;
+  const ax=x1+nx*w1,ay=y1+ny*w1,bx=x1-nx*w1,by=y1-ny*w1;
+  const ex=x2+nx*w2,ey=y2+ny*w2,fx=x2-nx*w2,fy=y2-ny*w2;
+  ctx.beginPath(); ctx.moveTo(ax,ay);
+  ctx.quadraticCurveTo(mx+nx*w1*0.5,my+ny*w1*0.5,ex,ey);
+  ctx.lineTo(fx,fy);
+  ctx.quadraticCurveTo(mx-nx*w1*0.5,my-ny*w1*0.5,bx,by);
+  ctx.closePath();
+}
+
+/* ============================================================
+   2) 材质层（近景读材质差异，48px 一律按存活线裁掉）
+   ============================================================ */
+/* 岩石：竖向明暗 + 碎屑 + 裂缝（硬边、颗粒、无折痕） */
+function stoneFill(ctx, build, pal, o){
+  o=o||{};
+  const y0=o.y0==null?-50:o.y0, y1=o.y1==null?50:o.y1;
+  const g=ctx.createLinearGradient(0,y0,0,y1);
+  g.addColorStop(0,rgba(shade(pal.main,0.22),0.99));
+  g.addColorStop(0.55,rgba(pal.main,0.99));
+  g.addColorStop(1,rgba(pal.aux2,0.99));
+  build(); ctx.fillStyle=g; ctx.fill();
+  ctx.save(); build(); ctx.clip();
+  const r=rnd(o.seed||11), n=o.chips==null?8:o.chips;
+  const x0=o.x0==null?-40:o.x0, x1=o.x1==null?40:o.x1;
+  for(let i=0;i<n;i++){
+    const x=x0+r()*(x1-x0), yy=y0+r()*(y1-y0), s=1.6+r()*3.0;
+    poly(ctx,[[x,yy],[x+s,yy-s*0.55],[x+s*1.3,yy+s*0.2],[x+s*0.4,yy+s*0.9],[x-s*0.7,yy+s*0.35]]);
+    ctx.fillStyle=rgba(r()>0.45?shade(pal.main,0.30):shade(pal.aux2,-0.10),0.50);
+    ctx.fill();
+  }
+  ctx.lineCap='round'; ctx.lineWidth=1.3; ctx.strokeStyle=rgba(shade(pal.aux2,-0.35),0.50);
+  (o.cracks||[[[-16,-8],[-9,4],[-12,14]],[[6,-14],[11,-2],[7,8]]]).forEach(c=>{
+    ctx.beginPath(); c.forEach((p,i)=> i?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1])); ctx.stroke();
+  });
+  ctx.restore();
+}
+/* 织物：柔和渐变 + 宽折痕（暗/亮成对）+ 纤维细纹（软边、无裂缝） */
+function clothFill(ctx, build, pal, o){
+  o=o||{};
+  const y0=o.y0==null?-40:o.y0, y1=o.y1==null?44:o.y1;
+  const g=ctx.createLinearGradient(0,y0,0,y1);
+  g.addColorStop(0,rgba(shade(pal.main,0.14),0.98));
+  g.addColorStop(0.5,rgba(o.mid||pal.main,0.97));
+  g.addColorStop(1,rgba(o.bot||shade(pal.aux2,0.02),0.99));
+  build(); ctx.fillStyle=g; ctx.fill();
+  ctx.save(); build(); ctx.clip();
+  const folds=o.folds||[[-9,-30,-11,36],[1,-26,2,40],[10,-28,8,32]];
+  ctx.lineCap='round';
+  folds.forEach(f=>{
+    ctx.beginPath(); ctx.moveTo(f[0],f[1]);
+    ctx.quadraticCurveTo((f[0]+f[2])/2+3,(f[1]+f[3])/2,f[2],f[3]);
+    ctx.lineWidth=2.8; ctx.strokeStyle=rgba(shade(o.bot||pal.aux2,-0.25),0.24); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(f[0]+1.2,f[1]+1);
+    ctx.quadraticCurveTo((f[0]+f[2])/2+4.2,(f[1]+f[3])/2,f[2]+1.2,f[3]);
+    ctx.lineWidth=1.4; ctx.strokeStyle=rgba('#ffffff',0.10); ctx.stroke();
+  });
+  if(o.weave!==false){
+    ctx.fillStyle=rgba('#ffffff',0.030);
+    for(let y=-44;y<46;y+=2.4) ctx.fillRect(-44,y,88,0.7);
+  }
+  if(o.sheen!==false){
+    ctx.fillStyle=rgba('#ffffff',0.085);
+    ctx.fillRect(-44,y0+2,88,o.sheenH==null?9:o.sheenH);
+  }
+  ctx.restore();
+}
+/* 皮革：暗底 + 缝线一排 + 压边（比布更硬、比岩更均匀） */
+function leatherFill(ctx, build, base, o){
+  o=o||{};
+  const y0=o.y0==null?-20:o.y0, y1=o.y1==null?20:o.y1;
+  const g=ctx.createLinearGradient(0,y0,0,y1);
+  g.addColorStop(0,rgba(shade(base,0.16),0.99));
+  g.addColorStop(0.55,rgba(base,0.99));
+  g.addColorStop(1,rgba(shade(base,-0.22),0.99));
+  build(); ctx.fillStyle=g; ctx.fill();
+  ctx.save(); build(); ctx.clip();
+  if(o.stitch!==false){
+    ctx.fillStyle=rgba(shade(base,-0.55),0.55);
+    for(let x=-30;x<30;x+=3.4) ctx.fillRect(x,o.sy==null?-2:o.sy,1.8,0.7);
+  }
+  ctx.restore();
+  build(); ctx.strokeStyle=rgba('#000000',0.28); ctx.lineWidth=0.9; ctx.stroke();
+}
+/* 金属：斜向镜面渐变 + 一条高光（锐利、冷） */
+function metalFill(ctx, build, base, o){
+  o=o||{};
+  const g=ctx.createLinearGradient(-12,-12,12,12);
+  g.addColorStop(0,rgba(shade(base,0.45),1));
+  g.addColorStop(0.35,rgba(shade(base,0.18),1));
+  g.addColorStop(0.62,rgba(base,1));
+  g.addColorStop(1,rgba(shade(base,-0.45),1));
+  build(); ctx.fillStyle=g; ctx.fill();
+  ctx.save(); build(); ctx.clip();
+  ctx.strokeStyle=rgba('#ffffff',0.55); ctx.lineWidth=1.0;
+  ctx.beginPath();
+  ctx.moveTo(o.lx0==null?-4:o.lx0,o.ly0==null?-6:o.ly0);
+  ctx.lineTo(o.lx1==null?1:o.lx1,o.ly1==null?7:o.ly1);
+  ctx.stroke();
+  ctx.restore();
+}
+/* 绸：宽高光带 + 极淡长折（比布更平、更连续） */
+function silkFill(ctx, build, pal, o){
+  o=o||{};
+  const y0=o.y0==null?-40:o.y0, y1=o.y1==null?44:o.y1;
+  const g=ctx.createLinearGradient(0,y0,0,y1);
+  g.addColorStop(0,rgba(shade(pal.main,0.22),0.97));
+  g.addColorStop(0.42,rgba(pal.main,0.95));
+  g.addColorStop(1,rgba(pal.aux2,0.99));
+  build(); ctx.fillStyle=g; ctx.fill();
+  ctx.save(); build(); ctx.clip();
+  ctx.fillStyle=rgba('#ffffff',0.14);
+  ctx.fillRect(o.hx==null?-7:o.hx,y0+4,6,Math.abs(y1-y0)*0.8);
+  ctx.restore();
+}
+/* 星璃：径向发光 + 冷白核心 */
+function glassFill(ctx, build, pal, cx, cy, r){
+  const g=ctx.createRadialGradient(cx-1,cy-1,0.5,cx,cy,r);
+  g.addColorStop(0,'rgba(255,255,255,0.95)');
+  g.addColorStop(0.28,rgba(pal.aux1,0.95));
+  g.addColorStop(0.62,rgba(pal.main,0.75));
+  g.addColorStop(1,rgba(pal.main,0.15));
+  build(); ctx.fillStyle=g; ctx.fill();
+}
+/* ============================================================
+   3) 守拙：厚重 / 岩板
+   细节层：石纹外披 + 粗麻内衬 + 皮革束带(铜扣/垂穗) + 冷金属铆钉/腕甲 + 盾握拳
+   dt = { on: 细节层开关, far: 小尺寸降级, cycleMs: 待机周期 }
+   ============================================================ */
+function drawWarden(ctx, t, mode, k, pal, sil, dt){
+  dt = dt || {};
+  const D = !sil && !!dt.on;        // 彩显 + 细节层
+  const FAR = D && !!dt.far;        // 小尺寸降级：只留块级特征
+  const cycle = (dt.cycleMs || 4600) / 1000;
+  const p = (t / cycle) % 1;
+  const br = Math.sin(p * Math.PI * 2);   // 呼吸 ±1（本轮幅度收小到 1.2 u）
+  let bob = br * 1.2, shift = br * 1.4;
+  let crouch = 0, push = 0, tilt = -0.10, ring = 0, brace = 0.45;
+  let sink = 0, recoil = 0, headLag = 0, hitDust = 0;
+
+  if (mode === 'cast'){
+    if (k < 0.22){
+      const u = seg(k,0,0.22);
+      crouch = 3.2*easeIn(u); push = -6*easeIn(u); tilt = -0.10 + 0.32*easeIn(u); brace = u;
+    } else if (k < 0.46){
+      const u = seg(k,0.22,0.46);
+      crouch = 3.2*(1-u); push = -6 + 20*easeOut(u); tilt = 0.22 - 0.52*easeOut(u); ring = u; brace = 1-u;
+    } else if (k < 0.70){
+      const u = seg(k,0.46,0.70);
+      crouch = 0; push = 14 - 1.6*u; tilt = -0.30; ring = 1;
+    } else {
+      const u = seg(k,0.70,1);
+      crouch = 0; push = 12.4*(1-u); tilt = -0.30*(1-u) - 0.10*u; ring = 1-u;
+    }
+  } else if (mode === 'hit'){
+    /* 受击：不后仰，重心下沉 + 一次慢回摆（慢而重） */
+    const u = k, decay = Math.exp(-4.6*u);
+    sink = 3.2*decay;
+    recoil = -2.6*decay;
+    headLag = -2.2*decay;
+    tilt = -0.10 + 0.20*decay*Math.cos(u*7.2);
+    brace = 1 - decay;
+    hitDust = decay;
+  } else {
+    tilt = -0.10 + Math.sin(p*Math.PI*2 + 0.8)*0.04;
+    brace = 0.45 + br*0.10;
+  }
+
+  ctx.save();
+  ctx.translate((mode==='idle'?shift:0) + recoil, bob + crouch + sink);
+
+  /* 影子 */
+  if (!sil){
+    ctx.beginPath(); ctx.ellipse(0, 52 - crouch*0.6, 36, 6.5, 0, 0, Math.PI*2);
+    ctx.fillStyle='rgba(2,6,14,0.5)'; ctx.fill();
+  }
+
+  /* ---- 外披（细节层，画在身体后）---- */
+  if (D){
+    const capL = ()=>poly(ctx,[[-30,-30],[-25,-33],[-13,-31],[-14,-10],[-19,12],[-23,26],[-26,30],[-31,24],[-36,6],[-34,-12]]);
+    const capR = ()=>poly(ctx,[[26,-31],[33,-26],[37,-6],[34,8],[29,12],[24,-6],[23,-20],[24,-28]]);
+    if (FAR){
+      ctx.fillStyle = rgba(shade(pal.main,-0.16),0.97); capL(); ctx.fill(); capR(); ctx.fill();
+    } else {
+      stoneFill(ctx, capL, pal, {seed:23,y0:-33,y1:30,chips:6,x0:-38,x1:-12,
+        cracks:[[[-33,-20],[-28,-6],[-31,10]],[[-20,-24],[-16,-12],[-18,2]]]});
+      stoneFill(ctx, capR, pal, {seed:31,y0:-31,y1:12,chips:3,x0:22,x1:38,
+        cracks:[[[26,-18],[31,-8],[28,2]]]});
+      ctx.strokeStyle = rgba(shade(pal.main,0.5),0.38); ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(-30,-30); ctx.lineTo(-25,-33); ctx.lineTo(-13,-31); ctx.stroke();
+    }
+  }
+
+  /* 腿：两段宽靴，低重心 */
+  bodyFill(ctx, ()=>{ rr(ctx,-25,32,18,19,5); rr(ctx,6,32,18,19,5); }, pal, {silhouette:sil, stroke:false});
+  if (!sil){
+    ctx.fillStyle = rgba(pal.aux2, 0.9);
+    rr(ctx,-25,44,18,7,3); ctx.fill();
+    rr(ctx,6,44,18,7,3); ctx.fill();
+  }
+
+  /* 基座裙甲 */
+  bodyFill(ctx, ()=>{ poly(ctx, [[-29,12],[24,12],[19,36],[-23,36]]); }, pal, {silhouette:sil});
+  if (!sil){
+    ctx.strokeStyle = rgba(pal.accent, 0.32); ctx.lineWidth = 1;
+    for (let i=0;i<3;i++){
+      ctx.beginPath(); ctx.moveTo(-20+i*13,18); ctx.lineTo(-18+i*13,32); ctx.stroke();
+    }
+  }
+
+  /* ---- 内衬（粗麻下摆 + 腋下衬）---- */
+  if (D){
+    const hem = ()=>poly(ctx,[[-19,25],[19,25],[18,36],[20,37.5],[12,36],[6,37.5],[0,35.5],[-7,37.5],[-14,36],[-18,37.5]]);
+    if (FAR){
+      ctx.fillStyle = rgba(shade(pal.aux2,0.02),0.97); hem(); ctx.fill();
+    } else {
+      clothFill(ctx, hem, pal, {y0:24,y1:38,bot:shade(pal.aux2,-0.05),sheenH:5,
+        folds:[[-12,26,-13,36],[0,26,1,36],[10,26,9,35]]});
+    }
+    clothFill(ctx, ()=>poly(ctx,[[-20,-17],[-12,-15],[-10,-3],[-16,-5]]), pal,
+      {y0:-18,y1:-3,bot:shade(pal.aux2,0.04),sheenH:4,folds:[[-18,-14,-13,-6]]});
+    clothFill(ctx, ()=>poly(ctx,[[14,-17],[20,-15],[22,-4],[17,-6]]), pal,
+      {y0:-18,y1:-4,bot:shade(pal.aux2,0.08),sheenH:4,folds:[[16,-15,21,-7]]});
+  }
+
+  /* 躯干：一整块方桶 */
+  bodyFill(ctx, ()=>{ rr(ctx,-21,-26,42,42,9); }, pal, {silhouette:sil, glow:!sil});
+  if (!sil){
+    ctx.strokeStyle = rgba(pal.aux1, 0.8); ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-12,-20); ctx.lineTo(-4,-10); ctx.lineTo(-9,-2); ctx.lineTo(-3,6);
+    ctx.moveTo(4,-18); ctx.lineTo(10,-8); ctx.lineTo(5,0);
+    ctx.stroke();
+    ctx.strokeStyle = rgba(pal.accent, 0.45); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-18,10); ctx.lineTo(17,10); ctx.stroke();
+  }
+
+  /* ---- 束带：皮革 + 冷金属扣 + 两条垂穗 ---- */
+  if (D){
+    const belt = ()=>rr(ctx,-20,8,39,5.2,2.4);
+    if (FAR){ ctx.fillStyle = rgba(shade(pal.aux2,-0.12),0.96); belt(); ctx.fill(); }
+    else leatherFill(ctx, belt, shade(pal.aux2,0.06), {y0:8,y1:13.4,sy:10.4});
+    const buck = ()=>rr(ctx,0.5,7.6,7.2,6.4,2.2);
+    if (FAR){ ctx.fillStyle = rgba(pal.aux1,0.95); buck(); ctx.fill(); }
+    else {
+      metalFill(ctx, buck, pal.aux1, {lx0:2,ly0:8,lx1:6,ly1:13});
+      ctx.fillStyle = rgba(pal.accent,0.55); rr(ctx,3,9.6,2.2,2.4,1); ctx.fill();
+    }
+    if (!FAR){
+      taper(ctx,16,12,18.4,30,2.4,1.1,-2); ctx.fillStyle = rgba(pal.aux2,0.95); ctx.fill();
+      taper(ctx,17.4,12.4,21,26,1.9,0.9,2); ctx.fillStyle = rgba(shade(pal.aux2,0.16),0.92); ctx.fill();
+    }
+  }
+
+  /* ---- 饰物：胸心护符 + 挂绳岩珠 ---- */
+  if (D){
+    const hexPlate = ()=>{
+      ctx.beginPath();
+      for (let i=0;i<6;i++){
+        const a = -Math.PI/2 + i*Math.PI/3;
+        const x = -1 + Math.cos(a)*3.6, y = -15 + Math.sin(a)*3.6;
+        i ? ctx.lineTo(x,y) : ctx.moveTo(x,y);
+      }
+      ctx.closePath();
+    };
+    if (FAR){
+      ctx.beginPath(); ctx.arc(-1,-15,2.2,0,Math.PI*2);
+      ctx.fillStyle = rgba(pal.accent,0.80); ctx.fill();
+    } else {
+      metalFill(ctx, hexPlate, pal.aux1, {lx0:-3,ly0:-18,lx1:1,ly1:-11});
+      accentFill(ctx, ()=>ctx.arc(-1,-15,1.9,0,Math.PI*2), pal.accent, 0.88, 6);
+      ctx.strokeStyle = rgba(shade(pal.aux2,-0.3),0.75); ctx.lineWidth = 0.9;
+      ctx.beginPath();
+      ctx.moveTo(-16,-26); ctx.lineTo(-3,-18);
+      ctx.moveTo(11,-25); ctx.lineTo(2,-18);
+      ctx.stroke();
+      [[-9,-21],[-6,-18],[7,-12]].forEach((b)=>{
+        ctx.beginPath(); ctx.arc(b[0],b[1],1.35,0,Math.PI*2);
+        ctx.fillStyle = rgba(shade(pal.main,-0.22),0.95); ctx.fill();
+        ctx.fillStyle = rgba('#ffffff',0.35);
+        ctx.beginPath(); ctx.arc(b[0]-0.4,b[1]-0.4,0.5,0,Math.PI*2); ctx.fill();
+      });
+    }
+  }
+
+  /* 肩甲：两块横向大方肩 */
+  bodyFill(ctx, ()=>{ rr(ctx,-30,-32,16,17,5); }, pal, {silhouette:sil, stroke:false});
+  bodyFill(ctx, ()=>{ rr(ctx,15,-32,17,17,5); }, pal, {silhouette:sil, stroke:false});
+  /* ---- 铆钉（肩甲）---- */
+  if (D && !FAR){
+    [[-27,-28.6],[-22.6,-28.6],[-18.2,-28.6],[18.2,-28.6],[22.6,-28.6],[27,-28.6]].forEach((rv)=>{
+      ctx.beginPath(); ctx.arc(rv[0],rv[1],1.25,0,Math.PI*2);
+      ctx.fillStyle = rgba(shade(pal.aux1,0.28),1); ctx.fill();
+      ctx.fillStyle = rgba('#ffffff',0.60);
+      ctx.beginPath(); ctx.arc(rv[0]-0.4,rv[1]-0.4,0.45,0,Math.PI*2); ctx.fill();
+    });
+  }
+
+  /* 头：平顶盔（受击时头滞后） */
+  ctx.save();
+  ctx.translate(0, headLag);
+  bodyFill(ctx, ()=>{ rr(ctx,-13,-47,26,21,5); }, pal, {silhouette:sil});
+  if (!sil){
+    ctx.fillStyle = rgba(pal.aux2, 0.95);
+    rr(ctx,-15,-49,30,6,2); ctx.fill();
+    if (D && !FAR){
+      /* 岩冠：三级垛口（48px 仍保留，因为它是剪影锚点） */
+      stoneFill(ctx, ()=>poly(ctx,[[-14,-49],[-14,-53],[-8,-53],[-8,-50],[-2,-50],[-2,-54],[4,-54],[4,-50],[9,-50],[9,-52],[13,-52],[13,-49]]),
+        pal, {seed:7,y0:-54,y1:-49,chips:3,x0:-14,x1:13});
+      /* 额带 + 青石 */
+      leatherFill(ctx, ()=>rr(ctx,-13,-42,26,2.6,1.3), shade(pal.aux2,0.02), {y0:-42,y1:-39.4,sy:-41});
+      ctx.beginPath(); ctx.moveTo(6.6,-42.4); ctx.lineTo(8.2,-41); ctx.lineTo(6.6,-39.6); ctx.lineTo(5,-41); ctx.closePath();
+      ctx.fillStyle = rgba(pal.accent,0.9); ctx.fill();
+    }
+    ctx.fillStyle = rgba(pal.accent, 0.85);
+    rr(ctx,-2,-39,12,2.6,1.3); ctx.fill();
+  } else {
+    rr(ctx,-15,-49,30,6,2); ctx.fillStyle = '#05070C'; ctx.fill();
+  }
+  ctx.restore();
+
+  /* ---- 前臂 + 岩板：盾柄 / 握拳 / 双皮带 / 腕甲 ---- */
+  ctx.save();
+  ctx.translate(24 + push, 0);
+  ctx.rotate(tilt);
+  const shieldPath = ()=>poly(ctx,[[-15,-28],[2,-23],[16,-9],[14,14],[-1,25],[-16,14],[-16,-11]]);
+  if (D && !FAR){
+    /* 盾内侧伸出的握柄（露在盾缘左侧） */
+    leatherFill(ctx, ()=>rr(ctx,-22,6.5,11,3.4,1.6), shade(pal.aux2,0.04), {y0:6,y1:10,sy:8});
+  }
+  bodyFill(ctx, shieldPath, pal, {silhouette:sil, glow:!sil});
+  if (!sil){
+    shieldPath(); ctx.strokeStyle = rgba(pal.accent, 0.70); ctx.lineWidth = 1.6; ctx.stroke();
+    if (D){
+      stoneFill(ctx, shieldPath, pal, {seed:41,y0:-28,y1:25,chips:6,x0:-16,x1:16,
+        cracks:[[[-10,-16],[-4,-6],[-7,4]],[[6,-18],[10,-8],[6,2]]]});
+      shieldPath(); ctx.strokeStyle = rgba(pal.accent, 0.70); ctx.lineWidth = 1.5; ctx.stroke();
+    }
+    ctx.strokeStyle = rgba(pal.aux1, 0.9); ctx.lineWidth = 1.2;
+    for (let i=0;i<3;i++){
+      ctx.beginPath(); ctx.moveTo(-7, -18+i*2.2); ctx.lineTo(5, -16+i*2.2); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(0,-2,4.2,0,Math.PI*2);
+    ctx.fillStyle = rgba(pal.accent, 0.9); ctx.fill();
+    ctx.strokeStyle = rgba('#ffffff', 0.7); ctx.lineWidth = 1; ctx.stroke();
+    if (D && !FAR){
+      /* 握拳扣在柄上（跨在盾缘） */
+      leatherFill(ctx, ()=>rr(ctx,-21,1.4,7.6,7.4,3.2), shade(pal.aux2,0.10), {y0:1,y1:9,sy:4,stitch:false});
+      ctx.strokeStyle = rgba(shade(pal.aux2,-0.4),0.55); ctx.lineWidth = 0.9;
+      for (let i=0;i<3;i++){
+        ctx.beginPath(); ctx.moveTo(-19.6, 3+i*1.9); ctx.lineTo(-14.4, 3+i*1.9); ctx.stroke();
+      }
+    }
+  } else {
+    accentFill(ctx, ()=>ctx.arc(0,-2,4.2,0,Math.PI*2), '#05070C', 1, 0);
+  }
+  ctx.restore();
+
+  /* 持盾前臂 */
+  bodyFill(ctx, ()=>{ rr(ctx,14,-12,16,4,2); }, pal, {silhouette:sil, stroke:false});
+  if (D && !sil){
+    /* 两条前臂皮带 + 腕甲 */
+    leatherFill(ctx, ()=>rr(ctx,15.4,-13.4,3.6,7,1.6), shade(pal.aux2,0.02), {y0:-13,y1:-6,sy:-9.2});
+    leatherFill(ctx, ()=>rr(ctx,20.6,-13.4,3.6,7,1.6), shade(pal.aux2,0.08), {y0:-13,y1:-6,sy:-9.2});
+    metalFill(ctx, ()=>rr(ctx,26,-14.4,6.6,9,2.6), pal.aux1, {lx0:27,ly0:-12,lx1:30,ly1:-4});
+    ctx.fillStyle = rgba('#ffffff',0.6);
+    ctx.beginPath(); ctx.arc(17.2,-9.9,0.7,0,Math.PI*2); ctx.arc(22.4,-9.9,0.7,0,Math.PI*2); ctx.fill();
+  }
+
+  /* 冲击环（只彩显） */
+  if (!sil && mode === 'cast' && ring > 0.05){
+    ctx.strokeStyle = rgba(pal.accent, 0.55*ring); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(16, 6, 20 + 22*ring, -1.05, 0.6); ctx.stroke();
+    ctx.strokeStyle = rgba(pal.accent, 0.24*ring); ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(16, 6, 24 + 30*ring, -1.2, 0.9); ctx.stroke();
+  }
+  if (!sil && brace > 0 && mode === 'cast'){
+    for (let i=0;i<5;i++){
+      const a = t*1.4 + i*1.257;
+      ctx.fillStyle = rgba(pal.accent, 0.30*brace);
+      ctx.fillRect(Math.cos(a)*22, 44 + Math.sin(a)*4, 2, 2);
+    }
+  }
+  /* 受击尘土 */
+  if (!sil && mode === 'hit' && hitDust > 0.15){
+    for (let i=0;i<6;i++){
+      const a = t*2.4 + i*1.05;
+      ctx.fillStyle = rgba(shade(pal.main,0.3), 0.35*hitDust);
+      ctx.fillRect(-8 + Math.cos(a)*24, 46 + Math.sin(a)*5, 2.2, 2.2);
+    }
+  }
+  ctx.restore();
+}
+/*__PART_VIEWS__*/
+/*__PART_INIT__*/
+</script>
+</body>
+</html>

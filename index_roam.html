@@ -1,0 +1,3289 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>量子采集计划 · 自由采集合成</title>
+<style>
+  /* ============================================================
+     样式区：科技感深色 HUD + Canvas 全屏探索界面
+     ============================================================ */
+  :root {
+    --bg: #04070f;
+    --panel: rgba(8, 16, 30, 0.82);
+    --panel-2: rgba(12, 24, 42, 0.92);
+    --line: rgba(92, 170, 255, 0.22);
+    --line-strong: rgba(92, 210, 255, 0.5);
+    --text: #dcecff;
+    --muted: #7f95b8;
+    --cyan: #3ee6ff;
+    --green: #47e8a7;
+    --gold: #ffc247;
+    --violet: #b085ff;
+    --pink: #ff6bc1;
+    --red: #ff6b7f;
+    --mono: "Consolas", "Cascadia Mono", "Courier New", monospace;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  button { font-family: inherit; }
+
+  /* 游戏画布铺满窗口，HUD 以悬浮层叠在上面 */
+  #game {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+    z-index: 0;
+  }
+
+  .vignette {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 48%, transparent 42%, rgba(2, 6, 12, 0.78) 100%);
+  }
+
+  .hud {
+    position: fixed;
+    top: 14px;
+    left: 16px;
+    right: 16px;
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 12px 16px;
+    pointer-events: none;
+  }
+
+  .brand-block {
+    min-width: 218px;
+    padding: 10px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(14, 28, 48, 0.92), rgba(6, 12, 23, 0.86));
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .logo {
+    font-family: var(--mono);
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing: 0.14em;
+    color: #ecfaff;
+    text-shadow: 0 0 18px rgba(62, 230, 255, 0.45);
+  }
+  .logo span { color: var(--cyan); }
+  .brand-sub {
+    margin-top: 4px;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+  }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    pointer-events: none;
+  }
+  .stat {
+    min-width: 92px;
+    padding: 8px 11px 7px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--panel);
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  }
+  .stat > span {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .stat b {
+    font-family: var(--mono);
+    font-size: 19px;
+    line-height: 1.15;
+    color: #dff6ff;
+    font-weight: 700;
+  }
+  .stat b small {
+    font-size: 10px;
+    color: var(--muted);
+    font-family: inherit;
+    margin-left: 2px;
+    font-weight: 400;
+  }
+  .stat-time b { color: #c7ecff; }
+  .stat-time.is-low { border-color: rgba(255, 107, 127, 0.5); background: rgba(42, 10, 20, 0.8); }
+  .stat-time.is-low b { color: #ff9aa7; animation: lowPulse 1s ease-in-out infinite; }
+  @keyframes lowPulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+  .pips { display: flex; gap: 4px; margin-top: 2px; }
+  .pips i {
+    width: 7px;
+    height: 7px;
+    border-radius: 2px;
+    background: rgba(120, 170, 220, 0.16);
+    border: 1px solid rgba(120, 170, 220, 0.2);
+    transition: background 0.2s, box-shadow 0.2s;
+  }
+  .pips.tech i.is-on { background: var(--green); border-color: var(--green); box-shadow: 0 0 8px rgba(71, 232, 167, 0.7); }
+  .pips.progress i { width: 15px; }
+  .pips.progress i.is-on { background: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px rgba(62, 230, 255, 0.65); }
+  .pips.progress i span {
+    display: none;
+  }
+
+  .hud-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    pointer-events: auto;
+  }
+  .minimap-box {
+    position: relative;
+    width: 158px;
+    padding: 5px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  }
+  #minimap {
+    display: block;
+    width: 148px;
+    height: 107px;
+    border-radius: 8px;
+    background: #050b16;
+  }
+  .minimap-box::after {
+    content: "区域地图";
+    position: absolute;
+    left: 10px;
+    top: 8px;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    color: rgba(150, 190, 230, 0.55);
+    pointer-events: none;
+  }
+
+  .btns { display: flex; flex-direction: column; gap: 6px; }
+
+  .btn {
+    position: relative;
+    padding: 8px 13px;
+    border-radius: 9px;
+    border: 1px solid var(--line-strong);
+    background: rgba(18, 34, 58, 0.78);
+    color: #d9ecff;
+    font-size: 12.5px;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    pointer-events: auto;
+  }
+  .btn:hover { transform: translateY(-1px); border-color: rgba(120, 235, 255, 0.85); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { cursor: not-allowed; opacity: 0.42; transform: none; box-shadow: none; }
+  .btn-primary {
+    border-color: rgba(71, 232, 167, 0.45);
+    background: linear-gradient(180deg, rgba(20, 80, 69, 0.75), rgba(9, 35, 31, 0.8));
+    color: #baffdf;
+  }
+  .btn-primary.is-ready { animation: readyPulse 1.7s ease-in-out infinite; }
+  @keyframes readyPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(71, 232, 167, 0.24); }
+    50% { box-shadow: 0 0 0 6px rgba(71, 232, 167, 0.06), 0 0 20px rgba(71, 232, 167, 0.28); }
+  }
+  .btn-danger {
+    border-color: rgba(255, 107, 127, 0.35);
+    background: rgba(52, 14, 25, 0.7);
+    color: #ffc4cc;
+  }
+  .btn small { opacity: 0.6; font-size: 10px; margin-left: 3px; }
+
+  /* 目标条 */
+  .goalbar {
+    position: fixed;
+    left: 50%;
+    bottom: 154px;
+    transform: translateX(-50%);
+    z-index: 9;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: min(820px, 94vw);
+    padding: 7px 14px;
+    border: 1px solid rgba(92, 170, 255, 0.16);
+    border-radius: 999px;
+    background: rgba(6, 13, 24, 0.76);
+    font-size: 11.5px;
+    color: #94aac9;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .goalbar b { color: #dff7ff; font-weight: 600; }
+  .goalbar .dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--cyan);
+    box-shadow: 0 0 9px var(--cyan);
+    animation: dotBlink 1.6s ease-in-out infinite;
+    flex: none;
+  }
+  @keyframes dotBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  /* 背包 */
+  .backpack-wrap {
+    position: fixed;
+    left: 50%;
+    bottom: 14px;
+    transform: translateX(-50%);
+    width: min(860px, calc(100vw - 22px));
+    padding: 9px 12px 8px;
+    border: 1px solid var(--line);
+    border-radius: 15px;
+    background: linear-gradient(180deg, rgba(12, 23, 40, 0.95), rgba(6, 11, 21, 0.92));
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    z-index: 20;
+  }
+  .backpack-wrap.is-full { border-color: rgba(255, 107, 127, 0.5); box-shadow: 0 0 26px rgba(255, 107, 127, 0.14), 0 18px 44px rgba(0, 0, 0, 0.55); }
+  .backpack-wrap.is-denied { animation: bagDeny 0.38s ease; }
+  @keyframes bagDeny {
+    0%, 100% { transform: translateX(-50%); }
+    20% { transform: translateX(calc(-50% - 7px)); }
+    45% { transform: translateX(calc(-50% + 6px)); }
+    70% { transform: translateX(calc(-50% - 3px)); }
+  }
+  .backpack-wrap.is-flash { animation: bagFlash 0.5s ease; }
+  @keyframes bagFlash {
+    0% { box-shadow: 0 0 0 0 rgba(62, 230, 255, 0.5), 0 18px 44px rgba(0, 0, 0, 0.55); }
+    100% { box-shadow: 0 0 0 14px rgba(62, 230, 255, 0), 0 18px 44px rgba(0, 0, 0, 0.55); }
+  }
+
+  .bag-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 6px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .bag-title { color: #d7ecff; font-weight: 700; letter-spacing: 0.06em; font-size: 12px; }
+  .bag-title b { font-family: var(--mono); color: #a9d8ff; }
+  #bagHint { color: #8ea7c7; }
+  #bagHint.is-craftable { color: #9dffd1; text-shadow: 0 0 12px rgba(71, 232, 167, 0.25); }
+  .bag-actions { margin-left: auto; display: flex; gap: 6px; }
+  .mini-btn {
+    padding: 5px 10px;
+    border: 1px solid rgba(92, 190, 255, 0.32);
+    border-radius: 7px;
+    background: rgba(18, 36, 58, 0.75);
+    color: #cdeaff;
+    font-size: 11px;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+  }
+  .mini-btn:hover { border-color: rgba(110, 235, 255, 0.8); background: rgba(24, 48, 76, 0.85); }
+  .mini-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .mini-btn.craft { border-color: rgba(71, 232, 167, 0.42); color: #b9ffe0; background: rgba(16, 52, 44, 0.7); }
+
+  .backpack {
+    display: grid;
+    gap: 7px;
+  }
+  .bag-slot {
+    position: relative;
+    height: 70px;
+    border-radius: 9px;
+    border: 1px solid var(--cc, rgba(100, 150, 200, 0.2));
+    background: var(--cb, rgba(20, 34, 54, 0.5));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    overflow: hidden;
+    transition: box-shadow 0.2s, transform 0.12s;
+  }
+  .bag-slot .tier-tag {
+    position: absolute;
+    top: 4px;
+    left: 5px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--cc);
+    opacity: 0.9;
+  }
+  .bag-slot .glyph {
+    font-family: var(--mono);
+    font-size: 21px;
+    font-weight: 700;
+    color: var(--cc);
+    text-shadow: 0 0 12px var(--cb);
+    line-height: 1;
+  }
+  .bag-slot .bag-name { font-size: 10.5px; color: #d2e7ff; }
+  .bag-slot .q-mark {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: var(--gold);
+    border: 1px solid rgba(255, 194, 71, 0.5);
+    border-radius: 3px;
+    padding: 0 3px;
+    background: rgba(40, 28, 6, 0.7);
+  }
+  .bag-slot.is-empty {
+    border-style: dashed;
+    border-color: rgba(100, 150, 200, 0.16);
+    background: rgba(12, 22, 38, 0.45);
+    color: rgba(120, 160, 200, 0.2);
+    font-size: 14px;
+  }
+  .bag-slot.is-empty::before { content: "＋"; }
+  .bag-slot.is-craftable {
+    box-shadow: 0 0 0 1px var(--cc), 0 0 18px var(--cb);
+    animation: craftGlow 1.6s ease-in-out infinite;
+  }
+  @keyframes craftGlow {
+    0%, 100% { box-shadow: 0 0 0 1px var(--cc), 0 0 10px var(--cb); }
+    50% { box-shadow: 0 0 0 1px var(--cc), 0 0 22px var(--cc); }
+  }
+  .bag-slot.is-last { box-shadow: inset 0 0 0 1px rgba(255, 194, 71, 0.4); }
+  .bag-slot.is-craftable.is-last { box-shadow: 0 0 0 1px var(--cc), 0 0 20px var(--cb), inset 0 0 0 1px rgba(255, 194, 71, 0.55); }
+  .bag-slot[data-index] { cursor: pointer; }
+  .bag-slot[data-index]:hover { transform: translateY(-2px); }
+
+  .tier-1 { --cc: #5cc8ff; --cb: rgba(45, 130, 210, 0.18); }
+  .tier-2 { --cc: #47e8a7; --cb: rgba(30, 150, 105, 0.18); }
+  .tier-3 { --cc: #ffc247; --cb: rgba(190, 130, 20, 0.18); }
+  .tier-4 { --cc: #b085ff; --cb: rgba(120, 70, 210, 0.2); }
+  .tier-5 { --cc: #ff6bc1; --cb: rgba(190, 40, 120, 0.22); }
+
+  .key-hints {
+    margin-top: 6px;
+    text-align: center;
+    font-size: 10px;
+    letter-spacing: 0.04em;
+    color: rgba(130, 160, 195, 0.72);
+  }
+  .key-hints b { color: #cfe7ff; font-weight: 600; }
+
+  /* 浮动提示 */
+  .toast {
+    position: fixed;
+    top: 112px;
+    left: 50%;
+    z-index: 30;
+    transform: translate(-50%, -8px);
+    max-width: min(560px, 90vw);
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(92, 190, 255, 0.3);
+    background: rgba(8, 18, 33, 0.94);
+    color: #dceeff;
+    font-size: 12.5px;
+    text-align: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s, transform 0.2s;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
+  .toast.is-show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.is-success { border-color: rgba(71, 232, 167, 0.5); color: #c5ffe4; }
+  .toast.is-warn { border-color: rgba(255, 194, 71, 0.5); color: #ffe7b2; }
+  .toast.is-error { border-color: rgba(255, 107, 127, 0.55); color: #ffc9d0; }
+
+  /* 全屏闪光 */
+  .screen-flash {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    pointer-events: none;
+    opacity: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(62, 230, 255, 0.28), transparent 68%);
+  }
+  .screen-flash.is-on { animation: flashAnim 0.45s ease-out; }
+  @keyframes flashAnim { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+  /* 规则面板 */
+  .rules-panel {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 5vh 16px 16px;
+    background: rgba(3, 7, 14, 0.72);
+    backdrop-filter: blur(6px);
+  }
+  .rules-panel.is-open { display: flex; }
+  .rules-card {
+    width: min(880px, 94vw);
+    max-height: 88vh;
+    overflow-y: auto;
+    padding: 20px 24px 24px;
+    border: 1px solid var(--line-strong);
+    border-radius: 16px;
+    background: linear-gradient(180deg, rgba(13, 26, 46, 0.98), rgba(6, 12, 23, 0.98));
+    box-shadow: 0 26px 70px rgba(0, 0, 0, 0.6);
+  }
+  .rules-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+    position: sticky;
+    top: -20px;
+    padding: 8px 0 6px;
+    background: linear-gradient(180deg, rgba(12, 25, 44, 0.98) 70%, rgba(12, 25, 44, 0));
+    z-index: 2;
+  }
+  .rules-head h2 { margin: 0; font-size: 19px; letter-spacing: 0.04em; }
+  .rules-head p { margin: 3px 0 0; font-size: 11px; color: var(--muted); }
+  .close-x {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: rgba(20, 36, 58, 0.8);
+    color: #cfe8ff;
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    flex: none;
+  }
+  .close-x:hover { border-color: rgba(120, 235, 255, 0.8); }
+
+  .rule-block { margin-top: 16px; }
+  .rule-block h3 {
+    margin: 0 0 7px;
+    font-size: 13px;
+    color: #b7d8f7;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+  .rule-block h3 em { color: var(--cyan); font-style: normal; font-family: var(--mono); margin-right: 6px; }
+  .rule-block p, .rule-block li { font-size: 12px; line-height: 1.85; color: #9fb5d3; margin: 0; }
+  .rule-block ul { margin: 0; padding-left: 18px; }
+  .rule-block li b { color: #dcefff; font-weight: 600; }
+  .rule-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+
+  .recipe-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 14px; margin-top: 4px; }
+  .recipe-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 6px 9px;
+    border: 1px solid rgba(92, 150, 220, 0.14);
+    border-radius: 8px;
+    background: rgba(8, 17, 31, 0.6);
+    font-size: 11px;
+    color: #9fb5d3;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 7px;
+    border-radius: 5px;
+    border: 1px solid var(--cc);
+    background: var(--cb);
+    color: var(--cc);
+    font-size: 10.5px;
+    white-space: nowrap;
+  }
+  .chip i { font-family: var(--mono); font-style: normal; font-weight: 700; }
+  .recipe-arrow { color: rgba(150, 190, 230, 0.55); font-family: var(--mono); }
+  .recipe-result { border-width: 1px; box-shadow: 0 0 10px var(--cb); }
+  .upgrade-list { display: flex; flex-wrap: wrap; gap: 6px; }
+  .upgrade-tag-chip {
+    padding: 3px 8px;
+    border: 1px solid rgba(92, 170, 255, 0.24);
+    border-radius: 999px;
+    font-size: 10.5px;
+    color: #a9c4e2;
+    background: rgba(10, 22, 38, 0.7);
+  }
+  .upgrade-tag-chip b { color: #cfe9ff; font-weight: 600; }
+
+  /* 通用弹窗（升级 / 结算） */
+  .modal-layer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(3, 7, 14, 0.74);
+    backdrop-filter: blur(7px);
+  }
+  .modal-layer.hidden { display: none; }
+  .modal {
+    width: min(900px, 94vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 24px 26px;
+    border: 1px solid var(--line-strong);
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(14, 28, 50, 0.98), rgba(6, 12, 24, 0.98));
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    animation: modalIn 0.24s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: none; } }
+  .modal-kicker {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: var(--cyan);
+  }
+  .modal h2 { margin: 4px 0 6px; font-size: 22px; letter-spacing: 0.04em; color: #ecfaff; }
+  .modal-sub { margin: 0 0 16px; font-size: 12px; line-height: 1.8; color: #93aac9; }
+  .modal-sub b { color: #cfe9ff; }
+  .modal-note {
+    margin-top: 14px;
+    font-size: 11px;
+    line-height: 1.7;
+    color: #7f95b8;
+    border-top: 1px solid rgba(92, 150, 220, 0.12);
+    padding-top: 11px;
+  }
+  .modal-note b { color: #ffdf9a; }
+
+  .upgrade-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .upgrade-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    min-height: 176px;
+    padding: 14px 15px;
+    border: 1px solid rgba(92, 170, 255, 0.26);
+    border-radius: 13px;
+    background: linear-gradient(160deg, rgba(20, 40, 70, 0.8), rgba(8, 17, 31, 0.85));
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: transform 0.16s, border-color 0.16s, box-shadow 0.16s;
+  }
+  .upgrade-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(110, 240, 255, 0.75);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.45), 0 0 22px rgba(62, 230, 255, 0.1);
+  }
+  .upgrade-icon {
+    font-size: 24px;
+    line-height: 1;
+    color: var(--cyan);
+    text-shadow: 0 0 16px rgba(62, 230, 255, 0.55);
+  }
+  .upgrade-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: var(--mono);
+    font-size: 9px;
+    color: #80a4cc;
+    border: 1px solid rgba(92, 170, 255, 0.25);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .upgrade-title { font-size: 16px; font-weight: 700; color: #eaf9ff; letter-spacing: 0.02em; }
+  .upgrade-desc { flex: 1; font-size: 11.5px; line-height: 1.75; color: #96adcb; }
+  .upgrade-stack { font-family: var(--mono); font-size: 10px; color: #667f9f; }
+  .upgrade-key {
+    position: absolute;
+    right: 12px;
+    bottom: 10px;
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+    border: 1px solid rgba(92, 170, 255, 0.3);
+    color: #9fc4e8;
+    font-family: var(--mono);
+    font-size: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .result-modal { width: min(560px, 94vw); text-align: center; }
+  .result-modal .modal-kicker { color: var(--green); }
+  .result-modal.is-lose .modal-kicker { color: var(--red); }
+  .result-icon {
+    font-size: 46px;
+    line-height: 1;
+    margin-bottom: 8px;
+    color: var(--cyan);
+    text-shadow: 0 0 26px rgba(62, 230, 255, 0.6);
+  }
+  .result-modal.is-win .result-icon { color: #b6ffe0; text-shadow: 0 0 34px rgba(71, 232, 167, 0.7); }
+  .result-modal.is-lose .result-icon { color: #ff8d9b; text-shadow: 0 0 30px rgba(255, 107, 127, 0.6); }
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin: 16px 0 10px;
+    text-align: left;
+  }
+  .result-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1px solid rgba(92, 150, 220, 0.16);
+    border-radius: 8px;
+    background: rgba(8, 17, 31, 0.65);
+    font-size: 11px;
+    color: var(--muted);
+  }
+  .result-stat b { font-family: var(--mono); font-size: 14px; color: #d8eeff; }
+  .result-stat.is-highlight { border-color: rgba(71, 232, 167, 0.32); }
+  .result-stat.is-highlight b { color: #a8ffd6; }
+  .btn-big { width: 100%; padding: 11px 16px; font-size: 13.5px; }
+
+  .footer-tip {
+    position: fixed;
+    right: 16px;
+    bottom: 10px;
+    z-index: 5;
+    font-size: 10px;
+    color: rgba(110, 145, 185, 0.45);
+    pointer-events: none;
+  }
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width: 1100px) {
+    .hud-actions { margin-left: 0; }
+    .brand-block { min-width: 190px; }
+    .minimap-box { display: none; }
+    .goalbar { bottom: 176px; }
+  }
+  @media (max-width: 760px) {
+    .hud { top: 9px; left: 9px; right: 9px; gap: 8px; }
+    .brand-block { padding: 8px 11px; min-width: 0; width: calc(100% - 150px); }
+    .logo { font-size: 15px; }
+    .brand-sub { font-size: 10px; }
+    .stats { order: 3; width: 100%; display: grid; grid-template-columns: repeat(2, 1fr); }
+    .stat { min-width: 0; padding: 6px 9px; }
+    .stat b { font-size: 16px; }
+    .hud-actions { position: absolute; right: 0; top: 0; }
+    .btns { flex-direction: row; }
+    .btns .btn { padding: 6px 8px; font-size: 10.5px; }
+    .backpack-wrap { bottom: 9px; padding: 7px 8px 6px; width: calc(100vw - 14px); }
+    .bag-slot { height: 56px; }
+    .bag-slot .glyph { font-size: 17px; }
+    .bag-slot .bag-name { font-size: 9px; }
+    .bag-head { font-size: 10px; }
+    .bag-actions { width: 100%; margin-left: 0; }
+    .bag-actions .mini-btn { flex: 1; }
+    .key-hints { display: none; }
+    .goalbar { bottom: 146px; font-size: 10px; padding: 6px 10px; }
+    .toast { top: 150px; font-size: 11px; }
+    .upgrade-grid { grid-template-columns: 1fr; }
+    .upgrade-card { min-height: 0; }
+    .recipe-grid, .rule-cols { grid-template-columns: 1fr; }
+    .modal { padding: 18px; }
+    .result-stats { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <!-- Canvas 游戏画面 -->
+  <canvas id="game" width="1280" height="720"></canvas>
+  <div class="vignette"></div>
+
+  <!-- 顶部 HUD -->
+  <header class="hud">
+    <div class="brand-block">
+      <div class="logo">量子<span>采集</span>计划</div>
+      <div class="brand-sub">WASD 自由探索 · 采集合成 · 点亮量子芯片</div>
+      <div class="brand-sub" id="goalText">终极目标：量子芯片 · 下一步：合成金属（T2）</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat stat-time" id="timerStat">
+        <span>剩余时间</span>
+        <b id="hudTimer">03:00</b>
+      </div>
+      <div class="stat">
+        <span>科技点</span>
+        <b id="hudTech">0<small>/3</small></b>
+        <div class="pips tech" id="techPips"><i></i><i></i><i></i></div>
+      </div>
+      <div class="stat">
+        <span>背包占用</span>
+        <b id="hudBag">0 / 8</b>
+      </div>
+      <div class="stat">
+        <span>合成进度</span>
+        <b id="hudProgress">0 / 4</b>
+        <div class="pips progress" id="progressPips"><i></i><i></i><i></i><i></i></div>
+      </div>
+    </div>
+
+    <div class="hud-actions">
+      <div class="minimap-box">
+        <canvas id="minimap" width="300" height="216"></canvas>
+      </div>
+      <div class="btns">
+        <button type="button" id="btnUpgrade" class="btn btn-primary" disabled>升级<small id="upgradeHint">需 3 点</small></button>
+        <button type="button" id="btnRules" class="btn">规则<small>H</small></button>
+        <button type="button" id="btnRestart" class="btn btn-danger">重开<small>R</small></button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 目标提示条 -->
+  <div class="goalbar">
+    <span class="dot"></span>
+    <span>终极目标：<b>量子芯片</b> · 当前建议：<b id="nextGoalText">先采集矿石与硅砂</b></span>
+  </div>
+
+  <!-- 背包栏（始终可见） -->
+  <section class="backpack-wrap" id="backpackWrap">
+    <div class="bag-head">
+      <span class="bag-title">背包 <b id="bagCount">0 / 8</b></span>
+      <span id="bagHint">暂无可合成组合，继续采集</span>
+      <span class="bag-actions">
+        <button type="button" class="mini-btn craft" id="btnCraft" disabled>合成 E</button>
+        <button type="button" class="mini-btn" id="btnDiscard" disabled>丢弃 Q</button>
+      </span>
+    </div>
+    <div class="backpack" id="backpack"></div>
+    <div class="key-hints">
+      <b>WASD / 方向键</b> 移动 · <b>E</b> 自动合成 · <b>Q</b> 丢弃高亮卡 · <b>H</b> 规则 · 靠近发光资源点自动采集
+    </div>
+  </section>
+
+  <div class="footer-tip">单文件 Canvas 2D · 每局地图随机生成</div>
+
+  <!-- 浮动提示 / 闪光 -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="screenFlash" class="screen-flash"></div>
+
+  <!-- 规则说明 -->
+  <div class="rules-panel" id="rulesPanel" aria-hidden="true">
+    <div class="rules-card">
+      <div class="rules-head">
+        <div>
+          <h2>规则说明</h2>
+          <p>30 秒看懂 · 配方与升级由数据自动生成 · 打开期间暂停计时</p>
+        </div>
+        <button type="button" class="close-x" id="rulesClose" aria-label="关闭规则">×</button>
+      </div>
+      <div id="rulesBody"></div>
+    </div>
+  </div>
+
+  <!-- 升级 / 结算弹窗 -->
+  <div class="modal-layer hidden" id="modalLayer" aria-hidden="true">
+    <div class="modal" id="modal"></div>
+  </div>
+
+<script>
+/* ============================================================
+   一、配置区（卡牌、配方、节点、升级）
+   ------------------------------------------------------------
+   以后加卡 / 改配方 / 调数值，优先只改这一块。
+   ============================================================ */
+
+/** 全局玩法参数：地图、速度、采集、倒计时等 */
+const GAME_CONFIG = {
+  worldWidth: 1800,          // 地图宽（世界坐标）
+  worldHeight: 1300,         // 地图高
+  duration: 180,             // 每局倒计时（秒）
+  backpackBase: 8,           // 基础背包格数
+  backpackMax: 12,           // 升级后最多格数
+  pickupRadius: 58,          // 基础自动采集半径
+  pickInterval: 0.32,        // 采集一次的时间间隔（秒）
+  playerSpeed: 235,          // 角色最高速度（像素 / 秒）
+  playerAccel: 1500,         // 加速度，越大起步越跟手
+  playerFriction: 9,         // 松手后的减速强度
+  upgradeCost: 3,            // 一次三选一升级消耗的科技点
+  droneDelay: 45,            // 开局多少秒后无人机上线
+  droneSpeed: 82,            // 无人机追击速度（明显慢于角色）
+  dronePenalty: 5,           // 被撞后扣除的秒数
+  targetCardId: 'quantum'    // 终极目标卡
+};
+
+/** 卡牌配置：id / 名称 / 等级 / 卡面符号 / 合成时给的科技点 */
+const CARD_CONFIG = [
+  { id: 'ore',     name: '矿石',     tier: 1, glyph: 'Fe',  techPoints: 0, desc: '基础矿物，两块可熔炼成金属。' },
+  { id: 'silicon', name: '硅砂',     tier: 1, glyph: 'Si',  techPoints: 0, desc: '两块可提纯拉制成晶圆。' },
+  { id: 'water',   name: '水',       tier: 1, glyph: 'H₂O', techPoints: 0, desc: '两块聚合成塑料，也可与塑料组成电池。' },
+  { id: 'metal',   name: '金属',     tier: 2, glyph: 'Me',  techPoints: 0, desc: '导电结构材料，与晶圆组成电路板。' },
+  { id: 'wafer',   name: '晶圆',     tier: 2, glyph: 'Wa',  techPoints: 0, desc: '精密基底，与金属组成电路板。' },
+  { id: 'plastic', name: '塑料',     tier: 2, glyph: 'PL',  techPoints: 0, desc: '绝缘材料，与一块水合成电池。' },
+  { id: 'circuit', name: '电路板',   tier: 3, glyph: 'PCB', techPoints: 2, desc: '两块堆叠成算力芯片。' },
+  { id: 'battery', name: '电池',     tier: 3, glyph: 'BAT', techPoints: 2, desc: '能源单元，与芯片封装成量子芯片。' },
+  { id: 'chip',    name: '芯片',     tier: 4, glyph: 'IC',  techPoints: 4, desc: '算力核心，需要电池供电。' },
+  { id: 'quantum', name: '量子芯片', tier: 5, glyph: 'Q∞',  techPoints: 6, desc: '终极目标，合成即通关。' }
+];
+
+/** 通过 id 快速查卡牌配置 */
+const CARD_BY_ID = {};
+CARD_CONFIG.forEach((card) => { CARD_BY_ID[card.id] = card; });
+
+/** 配方配置：两张材料 -> 一张更高等级的卡（顺序无关） */
+const RECIPE_CONFIG = [
+  { a: 'ore',     b: 'ore',     out: 'metal' },
+  { a: 'silicon', b: 'silicon', out: 'wafer' },
+  { a: 'water',   b: 'water',   out: 'plastic' },
+  { a: 'metal',   b: 'wafer',   out: 'circuit' },
+  { a: 'plastic', b: 'water',   out: 'battery' },
+  { a: 'circuit', b: 'circuit', out: 'chip' },
+  { a: 'chip',    b: 'battery', out: 'quantum' }
+];
+
+/** 地图资源节点配置：颜色、储量范围、外形 */
+const NODE_CONFIG = {
+  ore:     { label: '矿石', cardId: 'ore',     color: '#ff9d4d', dark: '#7a3f14', radius: 19, amountMin: 3, amountMax: 5, shape: 'rock' },
+  silicon: { label: '硅砂', cardId: 'silicon', color: '#5ce1ff', dark: '#155a72', radius: 18, amountMin: 3, amountMax: 5, shape: 'crystal' },
+  water:   { label: '水',   cardId: 'water',   color: '#4d8dff', dark: '#173a78', radius: 17, amountMin: 3, amountMax: 5, shape: 'pool' }
+};
+
+/** 三选一升级配置：apply 里写“选中后立刻生效”的效果 */
+const UPGRADE_CONFIG = [
+  {
+    id: 'speed', tag: '移动', icon: '⚡', title: '超频推进',
+    desc: '角色移动速度永久 +15%，跑图更省时间。', maxStacks: 4,
+    apply() { state.speedMul *= 1.15; }
+  },
+  {
+    id: 'bag', tag: '背包', icon: '▣', title: '扩容背舱',
+    desc: '背包容量 +2 格（最多 12 格），材料更好囤。', maxStacks: 2,
+    apply() { state.capacity = Math.min(GAME_CONFIG.backpackMax, state.capacity + 2); }
+  },
+  {
+    id: 'range', tag: '采集', icon: '◎', title: '引力采集',
+    desc: '自动采集范围 +20%，路过资源点就能吸到。', maxStacks: 3,
+    apply() { state.pickupMul *= 1.2; }
+  },
+  {
+    id: 'refund', tag: '合成', icon: '↺', title: '余料回收',
+    desc: '每次合成成功后，返还 1 张随机 T1 材料。', maxStacks: 1,
+    apply() { state.refundEnabled = true; }
+  },
+  {
+    id: 'time', tag: '时间', icon: '⏱', title: '时间借贷',
+    desc: '倒计时立刻 +20 秒，给自己一次喘息。', maxStacks: 4,
+    apply() { state.timeLeft += 20; }
+  },
+  {
+    id: 'gather', tag: '采集', icon: '✦', title: '快速采样',
+    desc: '采集间隔 -20%，站在资源点旁吸得更快。', maxStacks: 2,
+    apply() { state.pickIntervalMul *= 0.8; }
+  }
+];
+
+/** 通过 id 快速查升级配置 */
+const UPGRADE_BY_ID = {};
+UPGRADE_CONFIG.forEach((upgrade) => { UPGRADE_BY_ID[upgrade.id] = upgrade; });
+
+/** 等级颜色，供 Canvas 与界面统一使用 */
+const TIER_COLOR = {
+  1: '#5cc8ff',
+  2: '#47e8a7',
+  3: '#ffc247',
+  4: '#b085ff',
+  5: '#ff6bc1'
+};
+
+/* ============================================================
+   二、状态区
+   ------------------------------------------------------------
+   所有玩法数据都集中在一个 state 对象里，重开时整体换新。
+   ============================================================ */
+
+/**
+ * 把数值限制在 [min, max] 之间
+ * @param {number} value 原值
+ * @param {number} min 最小值
+ * @param {number} max 最大值
+ * @returns {number} 限制后的值
+ */
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
+/**
+ * 从数组里随机取一个元素
+ * @param {Array} list 候选数组
+ * @returns {*} 随机元素
+ */
+function pickRandom(list) {
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+/**
+ * 原地打乱数组（Fisher-Yates）
+ * @param {Array} list 要打乱的数组
+ * @returns {Array} 同一个数组
+ */
+function shuffleArray(list) {
+  for (let i = list.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const temp = list[i];
+    list[i] = list[j];
+    list[j] = temp;
+  }
+  return list;
+}
+
+/**
+ * 把秒数格式化成 mm:ss（倒计时用 ceil，避免显示 00:00 时其实还有零点几秒）
+ * @param {number} seconds 剩余秒数
+ * @returns {string} 形如 03:00 的文本
+ */
+function formatTime(seconds) {
+  const total = Math.max(0, Math.ceil(seconds));
+  const minutes = Math.floor(total / 60);
+  const rest = total % 60;
+  return String(minutes).padStart(2, '0') + ':' + String(rest).padStart(2, '0');
+}
+
+/**
+ * 判断两张卡是否符合任意配方（配方的两个材料顺序无关）
+ * @param {string} cardA 第一张卡 id
+ * @param {string} cardB 第二张卡 id
+ * @returns {Object|null} 命中的配方对象
+ */
+function findRecipe(cardA, cardB) {
+  if (!cardA || !cardB) return null;
+  return RECIPE_CONFIG.find((recipe) => {
+    return (recipe.a === cardA && recipe.b === cardB)
+      || (recipe.a === cardB && recipe.b === cardA);
+  }) || null;
+}
+
+/**
+ * 创建一局全新的游戏状态（随机地图、随机开局三张 T1）
+ * @returns {Object} 初始 state
+ */
+function createInitialState() {
+  const t1Ids = CARD_CONFIG.filter((card) => card.tier === 1).map((card) => card.id);
+
+  // 开局三张 T1，保证至少有一对相同材料，方便新手立刻按 E 体验合成
+  const pairId = pickRandom(t1Ids);
+  const starter = [pairId, pairId, pickRandom(t1Ids.filter((id) => id !== pairId)) || pairId];
+  shuffleArray(starter);
+
+  const player = {
+    x: GAME_CONFIG.worldWidth / 2 + (Math.random() * 80 - 40),
+    y: GAME_CONFIG.worldHeight / 2 + (Math.random() * 80 - 40),
+    vx: 0,
+    vy: 0,
+    angle: 0,
+    radius: 18
+  };
+
+  const freshState = {
+    // 角色与相机
+    player: player,
+    cam: { x: player.x, y: player.y },
+    view: { w: 0, h: 0 },
+    dpr: 1,
+    keys: {},                              // 当前按下的移动键
+
+    // 背包
+    backpack: starter.slice(),             // 卡牌 id 数组（从左到右）
+    capacity: GAME_CONFIG.backpackBase,
+    highlightIndex: starter.length - 1,    // Q 丢弃 / 高亮的那一张
+
+    // 进度与经济
+    techPoints: 0,
+    totalTechEarned: 0,
+    upgrades: {},
+    upgradesTaken: 0,
+    upgradeOptions: [],
+    craftedEver: { 2: false, 3: false, 4: false, 5: false },
+    craftCount: 0,
+    gatherCount: 0,
+
+    // 计时与状态
+    timeLeft: GAME_CONFIG.duration,
+    elapsed: 0,
+    lastTime: 0,
+    status: 'playing',                     // playing / won / lost
+    mode: 'playing',                       // playing / upgrade / rules / result
+    runId: Date.now() + Math.random(),
+
+    // 局内成长数值
+    speedMul: 1,
+    pickupMul: 1,
+    pickIntervalMul: 1,
+    refundEnabled: false,
+
+    // 世界内容
+    nodes: [],
+    decor: [],
+    zones: [],
+    items: [],                             // 无人机撞落的卡牌
+    drone: { active: false, x: 0, y: 0, cooldown: 0, warned: false },
+
+    // 视觉反馈池
+    particles: [],
+    floats: [],
+    rings: [],
+    cardFx: [],
+    shake: { time: 0, power: 0 },
+
+    // 各种节流 / 缓存
+    pickAccum: 0,
+    trailAccum: 0,
+    minimapAccum: 0,
+    lastBagFullToast: 0,
+    hudCache: {}
+  };
+
+  generateMap(freshState);
+  return freshState;
+}
+
+/** 当前这一局的状态；重开时整体替换成新对象 */
+let state = createInitialState();
+
+/* ============================================================
+   三、地图生成区
+   ------------------------------------------------------------
+   每局重新随机散布矿石 / 硅砂 / 水节点，并保证起点附近有资源。
+   ============================================================ */
+
+/**
+ * 生成一局随机地图：资源节点、装饰光斑、区域文字
+ * @param {Object} gameState 要填充地图数据的状态对象
+ */
+function generateMap(gameState) {
+  const W = GAME_CONFIG.worldWidth;
+  const H = GAME_CONFIG.worldHeight;
+  const margin = 100;
+  const nodes = [];
+  const decor = [];
+  const zones = [];
+  let serial = 0;
+
+  /**
+   * 检查某个坐标是否离已有节点和出生点足够远
+   * @param {number} x 世界 x
+   * @param {number} y 世界 y
+   * @param {number} minGap 与已有节点的最小距离
+   * @param {number} startGap 与出生点的最小距离
+   * @returns {boolean} 可以放置返回 true
+   */
+  function canPlace(x, y, minGap, startGap) {
+    if (x < margin || x > W - margin || y < margin || y > H - margin) return false;
+    if (Math.hypot(x - gameState.player.x, y - gameState.player.y) < startGap) return false;
+    return nodes.every((node) => Math.hypot(node.x - x, node.y - y) >= minGap);
+  }
+
+  /**
+   * 把一个新资源节点写入地图
+   * @param {string} type 节点类型 ore / silicon / water
+   * @param {number} x 世界 x
+   * @param {number} y 世界 y
+   */
+  function addNode(type, x, y) {
+    const conf = NODE_CONFIG[type];
+    const amount = Math.floor(conf.amountMin + Math.random() * (conf.amountMax - conf.amountMin + 1));
+    serial += 1;
+    nodes.push({
+      id: 'node-' + serial,
+      type: type,
+      x: x,
+      y: y,
+      amount: amount,
+      maxAmount: amount,
+      radius: conf.radius,
+      rot: Math.random() * Math.PI * 2,
+      seed: Math.random() * 100
+    });
+  }
+
+  // 1）保证出生点附近每种资源都有两个节点，避免开局找不到材料
+  ['ore', 'silicon', 'water'].forEach((type) => {
+    for (let k = 0; k < 2; k += 1) {
+      for (let attempt = 0; attempt < 40; attempt += 1) {
+        const angle = Math.random() * Math.PI * 2;
+        const distance = 185 + Math.random() * 145;
+        const x = gameState.player.x + Math.cos(angle) * distance;
+        const y = gameState.player.y + Math.sin(angle) * distance;
+        if (canPlace(x, y, 72, 150)) {
+          addNode(type, x, y);
+          break;
+        }
+      }
+    }
+  });
+
+  // 2）全图再随机撒更多资源，形成矿区 / 晶砂带 / 水脉
+  const extraCounts = { ore: 16, silicon: 14, water: 12 };
+  Object.keys(extraCounts).forEach((type) => {
+    let placed = 0;
+    let guard = 0;
+    while (placed < extraCounts[type] && guard < 800) {
+      guard += 1;
+      const x = margin + Math.random() * (W - margin * 2);
+      const y = margin + Math.random() * (H - margin * 2);
+      if (canPlace(x, y, 78, 170)) {
+        addNode(type, x, y);
+        placed += 1;
+      }
+    }
+  });
+
+  // 3）装饰光斑：只影响观感，不参与碰撞与采集
+  const decorHues = ['58,180,220', '78,118,230', '140,90,220', '45,210,160'];
+  for (let i = 0; i < 18; i += 1) {
+    decor.push({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: 80 + Math.random() * 180,
+      hue: pickRandom(decorHues),
+      alpha: 0.05 + Math.random() * 0.07
+    });
+  }
+
+  // 4）区域文字：给地图一点“废墟科考站”的空间感
+  const zoneNames = ['废弃矿区', '硅晶平原', '冷却水脉', '旧实验站', '断裂走廊', '信号盲区'];
+  for (let i = 0; i < zoneNames.length; i += 1) {
+    zones.push({
+      name: zoneNames[i],
+      x: 160 + Math.random() * (W - 320),
+      y: 140 + Math.random() * (H - 280)
+    });
+  }
+
+  gameState.nodes = nodes;
+  gameState.decor = decor;
+  gameState.zones = zones;
+}
+/* ============================================================
+   四、渲染区（HUD、背包、小地图、规则内容、Canvas 画面）
+   ------------------------------------------------------------
+   渲染函数只读 state，不直接改玩法数据。
+   ============================================================ */
+
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const minimap = document.getElementById('minimap');
+const mctx = minimap.getContext('2d');
+
+/** 缓存常用 DOM 节点，避免每帧重复查询 */
+const ui = {
+  timerStat: document.getElementById('timerStat'),
+  hudTimer: document.getElementById('hudTimer'),
+  hudTech: document.getElementById('hudTech'),
+  techPips: document.getElementById('techPips'),
+  hudBag: document.getElementById('hudBag'),
+  hudProgress: document.getElementById('hudProgress'),
+  progressPips: document.getElementById('progressPips'),
+  goalText: document.getElementById('goalText'),
+  nextGoalText: document.getElementById('nextGoalText'),
+  btnUpgrade: document.getElementById('btnUpgrade'),
+  upgradeHint: document.getElementById('upgradeHint'),
+  btnRules: document.getElementById('btnRules'),
+  btnRestart: document.getElementById('btnRestart'),
+  btnCraft: document.getElementById('btnCraft'),
+  btnDiscard: document.getElementById('btnDiscard'),
+  backpackWrap: document.getElementById('backpackWrap'),
+  backpack: document.getElementById('backpack'),
+  bagCount: document.getElementById('bagCount'),
+  bagHint: document.getElementById('bagHint'),
+  toast: document.getElementById('toast'),
+  screenFlash: document.getElementById('screenFlash'),
+  rulesPanel: document.getElementById('rulesPanel'),
+  rulesBody: document.getElementById('rulesBody'),
+  rulesClose: document.getElementById('rulesClose'),
+  modalLayer: document.getElementById('modalLayer'),
+  modal: document.getElementById('modal')
+};
+
+/**
+ * 根据窗口大小调整画布分辨率（限制 DPR，避免高分屏太吃性能）
+ */
+function resizeCanvas() {
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  state.view.w = width;
+  state.view.h = height;
+  state.dpr = dpr;
+
+  canvas.width = Math.max(1, Math.floor(width * dpr));
+  canvas.height = Math.max(1, Math.floor(height * dpr));
+  canvas.style.width = width + 'px';
+  canvas.style.height = height + 'px';
+
+  snapCamera();
+  if (state.nodes.length) renderBackpack();
+}
+
+/**
+ * 计算相机应该停留的位置（让角色尽量居中，并限制在地图内）
+ * @returns {{x:number, y:number}} 目标相机坐标
+ */
+function getCameraTarget() {
+  const vw = state.view.w || window.innerWidth;
+  const vh = state.view.h || window.innerHeight;
+  const worldW = GAME_CONFIG.worldWidth;
+  const worldH = GAME_CONFIG.worldHeight;
+
+  let tx = state.player.x - vw / 2;
+  let ty = state.player.y - vh / 2;
+
+  tx = vw >= worldW ? (worldW - vw) / 2 : clamp(tx, 0, worldW - vw);
+  ty = vh >= worldH ? (worldH - vh) / 2 : clamp(ty, 0, worldH - vh);
+  return { x: tx, y: ty };
+}
+
+/**
+ * 立刻把相机放到目标位置（重开 / 改变窗口大小时用，不产生滑动）
+ */
+function snapCamera() {
+  const target = getCameraTarget();
+  state.cam.x = target.x;
+  state.cam.y = target.y;
+}
+
+/**
+ * 让相机平滑跟随角色
+ * @param {number} dt 本帧时间步长（秒）
+ */
+function updateCamera(dt) {
+  const target = getCameraTarget();
+  const smooth = 1 - Math.exp(-dt * 9);
+  state.cam.x += (target.x - state.cam.x) * smooth;
+  state.cam.y += (target.y - state.cam.y) * smooth;
+}
+
+/**
+ * 统计已经达成几个合成里程碑（T2 / T3 / T4 / T5）
+ * @returns {{achieved:number, total:number}} 已达成数量与总数量
+ */
+function getGoalProgress() {
+  const tiers = [2, 3, 4, 5];
+  const achieved = tiers.filter((tier) => state.craftedEver[tier]).length;
+  return { achieved: achieved, total: tiers.length };
+}
+
+/**
+ * 根据当前进度给出下一步建议
+ * @returns {string} 简短中文提示
+ */
+function getNextGoalText() {
+  if (!state.craftedEver[2]) return '先合成金属 / 晶圆 / 塑料（T2）';
+  if (!state.craftedEver[3]) return '合成电路板或电池（T3）';
+  if (!state.craftedEver[4]) return '合成芯片（T4）';
+  return '芯片 + 电池 → 量子芯片';
+}
+
+/**
+ * 刷新顶部的倒计时、科技点、背包占用与进度显示
+ * 只改文字和 class，不重建 DOM，避免打断动画。
+ */
+function updateHUD() {
+  const timerText = formatTime(state.timeLeft);
+  if (ui.hudTimer.textContent !== timerText) ui.hudTimer.textContent = timerText;
+  ui.timerStat.classList.toggle('is-low', state.timeLeft <= 30 && state.timeLeft > 0);
+
+  const techText = String(state.techPoints);
+  if (ui.hudTech.firstChild.nodeValue !== techText) ui.hudTech.firstChild.nodeValue = techText;
+  Array.from(ui.techPips.children).forEach((pip, index) => {
+    pip.classList.toggle('is-on', index < Math.min(3, state.techPoints));
+  });
+
+  const bagText = state.backpack.length + ' / ' + state.capacity;
+  if (ui.hudBag.textContent !== bagText) ui.hudBag.textContent = bagText;
+  if (ui.bagCount.textContent !== bagText) ui.bagCount.textContent = bagText;
+
+  const progress = getGoalProgress();
+  const progressText = progress.achieved + ' / ' + progress.total;
+  if (ui.hudProgress.textContent !== progressText) ui.hudProgress.textContent = progressText;
+  Array.from(ui.progressPips.children).forEach((pip, index) => {
+    pip.classList.toggle('is-on', index < progress.achieved);
+  });
+
+  const nextGoal = getNextGoalText();
+  if (ui.nextGoalText.textContent !== nextGoal) ui.nextGoalText.textContent = nextGoal;
+  const goalLine = '终极目标：量子芯片 · 下一步：' + nextGoal;
+  if (ui.goalText.textContent !== goalLine) ui.goalText.textContent = goalLine;
+
+  const canUpgrade = state.techPoints >= GAME_CONFIG.upgradeCost
+    && state.status === 'playing'
+    && state.mode === 'playing';
+  ui.btnUpgrade.disabled = !canUpgrade;
+  ui.btnUpgrade.classList.toggle('is-ready', canUpgrade);
+  ui.upgradeHint.textContent = state.techPoints >= GAME_CONFIG.upgradeCost ? '可用' : '需 3 点';
+
+  ui.backpackWrap.classList.toggle('is-full', state.backpack.length >= state.capacity);
+}
+
+/**
+ * 在背包里找第一组能合成的材料（按背包顺序，i 在前 j 在后）
+ * @returns {Object|null} { i, j, recipe }；没有返回 null
+ */
+function findFirstCraftPair() {
+  for (let i = 0; i < state.backpack.length; i += 1) {
+    for (let j = i + 1; j < state.backpack.length; j += 1) {
+      const recipe = findRecipe(state.backpack[i], state.backpack[j]);
+      if (recipe) return { i: i, j: j, recipe: recipe };
+    }
+  }
+  return null;
+}
+
+/**
+ * 收集所有参与“可合成组合”的背包下标，用来做高亮
+ * @returns {Set<number>} 需要高亮的背包下标集合
+ */
+function getCraftableIndices() {
+  const result = new Set();
+  for (let i = 0; i < state.backpack.length; i += 1) {
+    for (let j = i + 1; j < state.backpack.length; j += 1) {
+      if (findRecipe(state.backpack[i], state.backpack[j])) {
+        result.add(i);
+        result.add(j);
+      }
+    }
+  }
+  return result;
+}
+
+/**
+ * 重建底部背包：卡牌、可合成高亮、最后拾取标记与操作按钮状态
+ */
+function renderBackpack() {
+  const craftable = getCraftableIndices();
+  const columns = Math.min(state.capacity, window.innerWidth < 760 ? 6 : 8);
+  ui.backpack.style.gridTemplateColumns = 'repeat(' + columns + ', minmax(0, 1fr))';
+
+  let html = '';
+  for (let index = 0; index < state.capacity; index += 1) {
+    if (index >= state.backpack.length) {
+      html += '<div class="bag-slot is-empty"></div>';
+      continue;
+    }
+
+    const card = CARD_BY_ID[state.backpack[index]];
+    const classes = ['bag-slot', 'tier-' + card.tier];
+    if (craftable.has(index)) classes.push('is-craftable');
+    if (index === state.highlightIndex) classes.push('is-last');
+    const isLast = index === state.highlightIndex
+      ? '<span class="q-mark">Q</span>'
+      : '';
+
+    html += '<div class="' + classes.join(' ') + '" data-index="' + index + '" title="' + card.desc + '">'
+      + '<span class="tier-tag">T' + card.tier + '</span>'
+      + '<span class="glyph">' + card.glyph + '</span>'
+      + '<span class="bag-name">' + card.name + '</span>'
+      + isLast
+      + '</div>';
+  }
+  ui.backpack.innerHTML = html;
+
+  const pair = findFirstCraftPair();
+  if (pair) {
+    const cardA = CARD_BY_ID[state.backpack[pair.i]];
+    const cardB = CARD_BY_ID[state.backpack[pair.j]];
+    const out = CARD_BY_ID[pair.recipe.out];
+    const formula = cardA.id === cardB.id
+      ? cardA.name + ' ×2'
+      : cardA.name + ' + ' + cardB.name;
+    ui.bagHint.textContent = '可合成：' + formula + ' → ' + out.name + '（按 E）';
+    ui.bagHint.classList.add('is-craftable');
+  } else {
+    ui.bagHint.textContent = state.backpack.length >= state.capacity
+      ? '背包已满：按 E 合成腾出空间，或按 Q 丢弃高亮卡'
+      : '暂无可合成组合，继续采集';
+    ui.bagHint.classList.remove('is-craftable');
+  }
+
+  ui.btnCraft.disabled = !pair || state.status !== 'playing' || state.mode !== 'playing';
+  ui.btnDiscard.disabled = state.backpack.length === 0 || state.status !== 'playing' || state.mode !== 'playing';
+  updateHUD();
+}
+
+/**
+ * 生成一张卡牌的小 HTML 标签（规则面板与配方展示用）
+ * @param {Object} card 卡牌配置
+ * @returns {string} 带等级配色的 chip HTML
+ */
+function cardChipHtml(card) {
+  return '<span class="chip tier-' + card.tier + '"><i>' + card.glyph + '</i>' + card.name + '</span>';
+}
+
+/**
+ * 根据配置生成规则说明内容（配方与升级列表都来自数据，不写死文案）
+ */
+function buildRulesContent() {
+  const recipeRows = RECIPE_CONFIG
+    .slice()
+    .sort((a, b) => CARD_BY_ID[a.out].tier - CARD_BY_ID[b.out].tier)
+    .map((recipe) => {
+      const a = CARD_BY_ID[recipe.a];
+      const b = CARD_BY_ID[recipe.b];
+      const out = CARD_BY_ID[recipe.out];
+      const left = a.id === b.id
+        ? cardChipHtml(a) + '<span class="recipe-arrow">×2</span>'
+        : cardChipHtml(a) + '<span class="recipe-arrow">＋</span>' + cardChipHtml(b);
+      return '<div class="recipe-row">' + left
+        + '<span class="recipe-arrow">→</span>'
+        + '<span class="recipe-result">' + cardChipHtml(out) + '</span>'
+        + '<span style="color:#667f9f">T' + out.tier + '</span>'
+        + '</div>';
+    })
+    .join('');
+
+  const upgradeChips = UPGRADE_CONFIG.map((upgrade) => {
+    return '<span class="upgrade-tag-chip"><b>' + upgrade.title + '</b> · ' + upgrade.desc + '</span>';
+  }).join('');
+
+  ui.rulesBody.innerHTML = ''
+    + '<section class="rule-block"><h3><em>01</em>目标</h3>'
+    + '<p>在 <b>3 分钟</b>内沿着配方链合成出 <b>量子芯片（T5）</b>即通关；倒计时归零仍未合出则失败。</p></section>'
+
+    + '<section class="rule-block"><h3><em>02</em>操作</h3>'
+    + '<div class="rule-cols"><ul>'
+    + '<li><b>WASD / 方向键</b>：平滑自由移动，撞到地图边界会被挡住。</li>'
+    + '<li><b>E</b>：自动匹配背包中第一组合法配方并合成。</li>'
+    + '<li><b>Q</b>：丢弃当前高亮 / 最后拾取的一张卡，避免背包死锁。</li>'
+    + '<li><b>H</b>：打开 / 收起本规则面板，打开期间计时与移动暂停。</li>'
+    + '</ul><ul>'
+    + '<li><b>点击背包格</b>：把该卡设为高亮，再用 Q 丢弃。</li>'
+    + '<li><b>靠近资源点</b>：自动采集，不需要额外按键。</li>'
+    + '<li><b>R</b>：结算弹窗内可直接重开；顶部也有重开按钮。</li>'
+    + '<li><b>1 / 2 / 3</b>：升级弹窗里也可以键盘选择。</li>'
+    + '</ul></div></section>'
+
+    + '<section class="rule-block"><h3><em>03</em>采集与背包</h3>'
+    + '<p>每局地图随机生成，矿石 / 硅砂 / 水节点都有储量，采空后会变暗。背包默认 <b>8 格</b>，满了之后无法继续拾取，屏幕会提示；合成会腾出空间。</p></section>'
+
+    + '<section class="rule-block"><h3><em>04</em>合成与成长</h3>'
+    + '<p>合成 <b>T3 及以上</b>卡牌会获得科技点；攒够 <b>3 点</b>立刻触发三选一升级，选中后立即生效。每次升级消耗 3 点。</p>'
+    + '<div class="upgrade-list" style="margin-top:8px">' + upgradeChips + '</div></section>'
+
+    + '<section class="rule-block"><h3><em>05</em>计时与干扰</h3>'
+    + '<p>开局倒计时 <b>03:00</b>。约 45 秒后会出现一架缓慢追击的<b>干扰无人机</b>：被撞到会掉落背包里一张卡，并扣除 <b>5 秒</b>。它比角色慢很多，持续移动就能甩开。</p></section>'
+
+    + '<section class="rule-block"><h3><em>06</em>配方链（点击 E 自动匹配）</h3>'
+    + '<div class="recipe-grid">' + recipeRows + '</div></section>';
+}
+
+/**
+ * 绘制右上角小地图：资源点、掉落卡、玩家、无人机与视野框
+ */
+function drawMinimap() {
+  const mw = minimap.width;
+  const mh = minimap.height;
+  const pad = 8;
+  const sx = (mw - pad * 2) / GAME_CONFIG.worldWidth;
+  const sy = (mh - pad * 2) / GAME_CONFIG.worldHeight;
+
+  mctx.clearRect(0, 0, mw, mh);
+  mctx.fillStyle = '#050b16';
+  mctx.fillRect(0, 0, mw, mh);
+
+  mctx.strokeStyle = 'rgba(92,170,255,0.22)';
+  mctx.lineWidth = 2;
+  mctx.strokeRect(pad, pad, mw - pad * 2, mh - pad * 2);
+
+  // 地图网格
+  mctx.strokeStyle = 'rgba(80,150,220,0.08)';
+  mctx.lineWidth = 1;
+  for (let x = 1; x < 6; x += 1) {
+    const px = pad + (mw - pad * 2) * (x / 6);
+    mctx.beginPath();
+    mctx.moveTo(px, pad);
+    mctx.lineTo(px, mh - pad);
+    mctx.stroke();
+  }
+  for (let y = 1; y < 6; y += 1) {
+    const py = pad + (mh - pad * 2) * (y / 6);
+    mctx.beginPath();
+    mctx.moveTo(pad, py);
+    mctx.lineTo(mw - pad, py);
+    mctx.stroke();
+  }
+
+  // 资源点
+  state.nodes.forEach((node) => {
+    const conf = NODE_CONFIG[node.type];
+    const px = pad + node.x * sx;
+    const py = pad + node.y * sy;
+    mctx.globalAlpha = node.amount > 0 ? 0.95 : 0.22;
+    mctx.fillStyle = conf.color;
+    mctx.beginPath();
+    mctx.arc(px, py, node.amount > 0 ? 2.6 : 1.6, 0, Math.PI * 2);
+    mctx.fill();
+  });
+  mctx.globalAlpha = 1;
+
+  // 无人机掉落的卡牌
+  state.items.forEach((item) => {
+    const px = pad + item.x * sx;
+    const py = pad + item.y * sy;
+    mctx.fillStyle = '#ffc247';
+    mctx.fillRect(px - 2, py - 2, 4, 4);
+  });
+
+  // 视野框
+  const vw = state.view.w || window.innerWidth;
+  const vh = state.view.h || window.innerHeight;
+  mctx.strokeStyle = 'rgba(62,230,255,0.35)';
+  mctx.lineWidth = 1;
+  mctx.strokeRect(
+    pad + state.cam.x * sx,
+    pad + state.cam.y * sy,
+    Math.min(vw, GAME_CONFIG.worldWidth) * sx,
+    Math.min(vh, GAME_CONFIG.worldHeight) * sy
+  );
+
+  // 角色光点
+  const px = pad + state.player.x * sx;
+  const py = pad + state.player.y * sy;
+  mctx.fillStyle = '#ffffff';
+  mctx.shadowColor = '#3ee6ff';
+  mctx.shadowBlur = 8;
+  mctx.beginPath();
+  mctx.arc(px, py, 3.2, 0, Math.PI * 2);
+  mctx.fill();
+  mctx.shadowBlur = 0;
+
+  // 无人机
+  if (state.drone.active) {
+    const dx = pad + state.drone.x * sx;
+    const dy = pad + state.drone.y * sy;
+    mctx.fillStyle = '#ff6b7f';
+    mctx.beginPath();
+    mctx.arc(dx, dy, 3, 0, Math.PI * 2);
+    mctx.fill();
+  }
+}
+/**
+ * 把 #rrggbb 颜色转换成带透明度的 rgba 字符串（Canvas 渐变用）
+ * @param {string} hex 十六进制颜色
+ * @param {number} alpha 透明度 0~1
+ * @returns {string} rgba 颜色
+ */
+function hexToRgba(hex, alpha) {
+  const raw = hex.replace('#', '');
+  const r = parseInt(raw.slice(0, 2), 16);
+  const g = parseInt(raw.slice(2, 4), 16);
+  const b = parseInt(raw.slice(4, 6), 16);
+  return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+/**
+ * 在 Canvas 上画一个圆角矩形路径（不直接填充，方便复用）
+ * @param {number} x 左上角 x
+ * @param {number} y 左上角 y
+ * @param {number} w 宽
+ * @param {number} h 高
+ * @param {number} r 圆角半径
+ */
+function roundRectPath(x, y, w, h, r) {
+  const radius = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + w - radius, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
+  ctx.lineTo(x + w, y + h - radius);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - radius, y + h);
+  ctx.lineTo(x + radius, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+/**
+ * 主渲染：清屏 -> 相机变换 -> 画世界 -> 还原 -> 画小地图
+ */
+function render() {
+  const vw = state.view.w || window.innerWidth;
+  const vh = state.view.h || window.innerHeight;
+  ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+  ctx.clearRect(0, 0, vw, vh);
+  ctx.fillStyle = '#04070e';
+  ctx.fillRect(0, 0, vw, vh);
+
+  let shakeX = 0;
+  let shakeY = 0;
+  if (state.shake.time > 0) {
+    shakeX = (Math.random() * 2 - 1) * state.shake.power;
+    shakeY = (Math.random() * 2 - 1) * state.shake.power;
+  }
+
+  ctx.save();
+  ctx.translate(-state.cam.x + shakeX, -state.cam.y + shakeY);
+
+  drawWorldBackground();
+  drawDecor();
+  drawWorldBorder();
+  drawZoneLabels();
+  drawNodes();
+  drawItems();
+  drawDrone();
+  drawPlayer();
+  drawEffects();
+
+  ctx.restore();
+
+  drawMinimap();
+}
+
+/**
+ * 画世界底色与科技网格
+ */
+function drawWorldBackground() {
+  const W = GAME_CONFIG.worldWidth;
+  const H = GAME_CONFIG.worldHeight;
+
+  ctx.fillStyle = '#071120';
+  ctx.fillRect(0, 0, W, H);
+
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, 'rgba(20, 55, 90, 0.35)');
+  grad.addColorStop(0.5, 'rgba(9, 22, 40, 0.1)');
+  grad.addColorStop(1, 'rgba(45, 25, 80, 0.3)');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // 基础网格
+  ctx.strokeStyle = 'rgba(80, 160, 240, 0.075)';
+  ctx.lineWidth = 1;
+  for (let x = 0; x <= W; x += 90) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= H; y += 90) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+
+  // 每 450 像素一条更亮的“主网格”
+  ctx.strokeStyle = 'rgba(90, 190, 255, 0.13)';
+  for (let x = 0; x <= W; x += 450) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, H);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= H; y += 450) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(W, y);
+    ctx.stroke();
+  }
+}
+
+/**
+ * 画地图装饰光斑，让荒原看起来有层次
+ */
+function drawDecor() {
+  state.decor.forEach((blob) => {
+    const grad = ctx.createRadialGradient(blob.x, blob.y, 0, blob.x, blob.y, blob.r);
+    grad.addColorStop(0, 'rgba(' + blob.hue + ',' + blob.alpha + ')');
+    grad.addColorStop(1, 'rgba(' + blob.hue + ',0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(blob.x, blob.y, blob.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+/**
+ * 画地图边界：发光边框 + 四角卡扣 + 内侧警戒线
+ */
+function drawWorldBorder() {
+  const W = GAME_CONFIG.worldWidth;
+  const H = GAME_CONFIG.worldHeight;
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(62, 230, 255, 0.34)';
+  ctx.lineWidth = 2;
+  ctx.shadowColor = 'rgba(62, 230, 255, 0.6)';
+  ctx.shadowBlur = 16;
+  ctx.strokeRect(7, 7, W - 14, H - 14);
+  ctx.restore();
+
+  ctx.strokeStyle = 'rgba(255, 194, 71, 0.18)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([14, 12]);
+  ctx.strokeRect(22, 22, W - 44, H - 44);
+  ctx.setLineDash([]);
+
+  // 四角卡扣
+  const corners = [
+    [7, 7, 1, 1],
+    [W - 7, 7, -1, 1],
+    [7, H - 7, 1, -1],
+    [W - 7, H - 7, -1, -1]
+  ];
+  ctx.strokeStyle = 'rgba(62, 230, 255, 0.8)';
+  ctx.lineWidth = 3;
+  corners.forEach((corner) => {
+    const cx = corner[0];
+    const cy = corner[1];
+    const dx = corner[2];
+    const dy = corner[3];
+    ctx.beginPath();
+    ctx.moveTo(cx, cy + dy * 34);
+    ctx.lineTo(cx, cy);
+    ctx.lineTo(cx + dx * 34, cy);
+    ctx.stroke();
+  });
+}
+
+/**
+ * 画区域名称，作为地图的空间锚点
+ */
+function drawZoneLabels() {
+  ctx.save();
+  ctx.fillStyle = 'rgba(130, 175, 225, 0.1)';
+  ctx.font = '600 14px "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'left';
+  state.zones.forEach((zone) => {
+    ctx.fillText(zone.name, zone.x, zone.y);
+    ctx.strokeStyle = 'rgba(130, 175, 225, 0.07)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(zone.x, zone.y + 7);
+    ctx.lineTo(zone.x + 86, zone.y + 7);
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/**
+ * 画所有资源节点（含储量标签与采空状态）
+ */
+function drawNodes() {
+  const player = state.player;
+
+  state.nodes.forEach((node) => {
+    const conf = NODE_CONFIG[node.type];
+    const depleted = node.amount <= 0;
+    const pulse = 0.5 + 0.5 * Math.sin(state.elapsed * 2 + node.seed);
+
+    if (depleted) {
+      // 采空后变成暗色坑洞，但保留位置，避免玩家困惑
+      ctx.fillStyle = 'rgba(6, 12, 20, 0.85)';
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, conf.radius * 1.05, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = hexToRgba(conf.dark, 0.55);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, conf.radius * 0.8, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(120, 145, 175, 0.18)';
+      for (let i = 0; i < 3; i += 1) {
+        ctx.beginPath();
+        ctx.arc(node.x + Math.cos(i * 2.1 + node.seed) * 12, node.y + Math.sin(i * 2.1 + node.seed) * 9, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      const glowRadius = conf.radius * (2.5 + pulse * 0.4);
+      const glow = ctx.createRadialGradient(node.x, node.y, 2, node.x, node.y, glowRadius);
+      glow.addColorStop(0, hexToRgba(conf.color, 0.22 + pulse * 0.1));
+      glow.addColorStop(1, hexToRgba(conf.color, 0));
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(node.x, node.y, glowRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.save();
+      ctx.translate(node.x, node.y);
+      ctx.rotate(node.rot);
+      ctx.shadowColor = conf.color;
+      ctx.shadowBlur = 12 + pulse * 7;
+
+      if (conf.shape === 'rock') {
+        // 矿石：不规则五边形岩块
+        ctx.beginPath();
+        const points = 5;
+        for (let i = 0; i < points; i += 1) {
+          const angle = (Math.PI * 2 / points) * i - Math.PI / 2;
+          const radius = conf.radius * (0.78 + (i % 2) * 0.18);
+          const px = Math.cos(angle) * radius;
+          const py = Math.sin(angle) * radius;
+          if (i === 0) ctx.moveTo(px, py);
+          else ctx.lineTo(px, py);
+        }
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(16, 25, 36, 0.95)';
+        ctx.fill();
+        ctx.strokeStyle = conf.color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.strokeStyle = hexToRgba(conf.color, 0.45);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(-6, -2);
+        ctx.lineTo(2, 7);
+        ctx.lineTo(9, -4);
+        ctx.stroke();
+      } else if (conf.shape === 'crystal') {
+        // 硅砂：三簇发光晶体
+        const shards = [[-9, 4, 8], [2, -2, 12], [10, 6, 7]];
+        shards.forEach((shard) => {
+          const bx = shard[0];
+          const by = shard[1];
+          const size = shard[2];
+          ctx.beginPath();
+          ctx.moveTo(bx, by - size);
+          ctx.lineTo(bx - size * 0.5, by + size * 0.35);
+          ctx.lineTo(bx + size * 0.5, by + size * 0.35);
+          ctx.closePath();
+          ctx.fillStyle = hexToRgba(conf.color, 0.28);
+          ctx.fill();
+          ctx.strokeStyle = conf.color;
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+        });
+      } else {
+        // 水：半透明水池 + 两圈涟漪
+        ctx.fillStyle = 'rgba(22, 52, 110, 0.55)';
+        ctx.beginPath();
+        ctx.ellipse(0, 2, conf.radius * 1.15, conf.radius * 0.72, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = hexToRgba(conf.color, 0.75);
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.ellipse(0, 2, conf.radius * 1.15, conf.radius * 0.72, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = hexToRgba(conf.color, 0.35);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.ellipse(0, 2, conf.radius * 0.66, conf.radius * 0.38, 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // 靠近时显示资源名称与剩余储量
+    const dist = Math.hypot(player.x - node.x, player.y - node.y);
+    if (dist < 175) {
+      ctx.save();
+      ctx.textAlign = 'center';
+      ctx.font = '600 11px "Microsoft YaHei", sans-serif';
+      ctx.fillStyle = depleted ? 'rgba(120, 145, 175, 0.42)' : hexToRgba(conf.color, 0.95);
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 6;
+      ctx.fillText(depleted ? conf.label + ' · 已采空' : conf.label + ' ×' + node.amount, node.x, node.y - conf.radius - 13);
+      ctx.restore();
+    }
+  });
+}
+
+/**
+ * 画无人机掉在地上的卡牌（可以重新拾取）
+ */
+function drawItems() {
+  state.items.forEach((item) => {
+    const card = CARD_BY_ID[item.cardId];
+    const bob = Math.sin(state.elapsed * 3 + item.bob) * 3.5;
+    const x = item.x;
+    const y = item.y + bob;
+
+    const glow = ctx.createRadialGradient(x, y, 2, x, y, 34);
+    glow.addColorStop(0, hexToRgba(TIER_COLOR[card.tier], 0.3));
+    glow.addColorStop(1, hexToRgba(TIER_COLOR[card.tier], 0));
+    ctx.fillStyle = glow;
+    ctx.beginPath();
+    ctx.arc(x, y, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.shadowColor = TIER_COLOR[card.tier];
+    ctx.shadowBlur = 14;
+    roundRectPath(-14, -22, 28, 38, 6);
+    ctx.fillStyle = 'rgba(8, 16, 28, 0.94)';
+    ctx.fill();
+    ctx.strokeStyle = TIER_COLOR[card.tier];
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = TIER_COLOR[card.tier];
+    ctx.font = '700 14px "Consolas", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(card.glyph, 0, 0);
+    ctx.restore();
+
+    ctx.fillStyle = 'rgba(255, 194, 71, 0.75)';
+    ctx.font = '10px "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('回收 +1', x, y - 32);
+  });
+}
+
+/**
+ * 画干扰无人机：红色全息六边形 + 指向角色的警戒线
+ */
+function drawDrone() {
+  if (!state.drone.active) return;
+  const drone = state.drone;
+  const pulse = 0.5 + 0.5 * Math.sin(state.elapsed * 5);
+
+  // 指向角色的警戒虚线
+  ctx.strokeStyle = 'rgba(255, 107, 127, 0.18)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 9]);
+  ctx.beginPath();
+  ctx.moveTo(drone.x, drone.y);
+  ctx.lineTo(state.player.x, state.player.y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  const glow = ctx.createRadialGradient(drone.x, drone.y, 2, drone.x, drone.y, 48);
+  glow.addColorStop(0, 'rgba(255, 107, 127, ' + (0.2 + pulse * 0.12) + ')');
+  glow.addColorStop(1, 'rgba(255, 107, 127, 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(drone.x, drone.y, 48, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.save();
+  ctx.translate(drone.x, drone.y);
+  ctx.rotate(state.elapsed * 1.1);
+  ctx.shadowColor = '#ff6b7f';
+  ctx.shadowBlur = 16;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI * 2 / 6) * i;
+    const px = Math.cos(angle) * 17;
+    const py = Math.sin(angle) * 17;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(46, 12, 22, 0.9)';
+  ctx.fill();
+  ctx.strokeStyle = '#ff6b7f';
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = 'rgba(255, 107, 127, 0.9)';
+  ctx.beginPath();
+  ctx.arc(0, 0, 5 + pulse * 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.fillStyle = 'rgba(255, 130, 148, 0.8)';
+  ctx.font = '10px "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('干扰无人机', drone.x, drone.y - 28);
+}
+
+/**
+ * 画玩家角色：全息六边形机体 + 采集范围 + 推进尾焰
+ */
+function drawPlayer() {
+  const player = state.player;
+  const pickupRadius = GAME_CONFIG.pickupRadius * state.pickupMul;
+  const speed = Math.hypot(player.vx, player.vy);
+  const pulse = 0.5 + 0.5 * Math.sin(state.elapsed * 3);
+
+  // 采集范围圈
+  ctx.save();
+  ctx.strokeStyle = 'rgba(62, 230, 255, 0.16)';
+  ctx.lineWidth = 1;
+  ctx.setLineDash([6, 10]);
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, pickupRadius, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // 地面投影与光晕
+  const glow = ctx.createRadialGradient(player.x, player.y, 2, player.x, player.y, 60);
+  glow.addColorStop(0, 'rgba(62, 230, 255, 0.18)');
+  glow.addColorStop(1, 'rgba(62, 230, 255, 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(player.x, player.y, 60, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.34)';
+  ctx.beginPath();
+  ctx.ellipse(player.x, player.y + 17, 22, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(player.x, player.y);
+  ctx.rotate(player.angle);
+
+  // 推进尾焰
+  if (speed > 30) {
+    ctx.fillStyle = 'rgba(62, 230, 255, ' + (0.18 + Math.min(0.35, speed / 700)) + ')';
+    ctx.beginPath();
+    ctx.moveTo(-13, -6);
+    ctx.lineTo(-27 - Math.random() * 9, 0);
+    ctx.lineTo(-13, 6);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // 机体六边形
+  ctx.shadowColor = '#3ee6ff';
+  ctx.shadowBlur = 15;
+  ctx.beginPath();
+  for (let i = 0; i < 6; i += 1) {
+    const angle = (Math.PI * 2 / 6) * i + Math.PI / 6;
+    const px = Math.cos(angle) * 16;
+    const py = Math.sin(angle) * 16;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(16, 40, 62, 0.95)';
+  ctx.fill();
+  ctx.strokeStyle = '#3ee6ff';
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // 核心与朝向标记
+  ctx.fillStyle = 'rgba(62, 230, 255, ' + (0.65 + pulse * 0.3) + ')';
+  ctx.beginPath();
+  ctx.arc(0, 0, 5.5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = 'rgba(220, 252, 255, 0.9)';
+  ctx.beginPath();
+  ctx.moveTo(20, 0);
+  ctx.lineTo(10, -4);
+  ctx.lineTo(10, 4);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/**
+ * 画所有临时视觉反馈：粒子、浮动文字、扩散光环、合成后的飞卡
+ */
+function drawEffects() {
+  // 粒子
+  state.particles.forEach((particle) => {
+    const alpha = Math.max(0, particle.life / particle.maxLife);
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = particle.color;
+    ctx.beginPath();
+    ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.globalAlpha = 1;
+
+  // 扩散光环
+  state.rings.forEach((ring) => {
+    const alpha = Math.max(0, ring.life / ring.maxLife);
+    ctx.globalAlpha = alpha;
+    ctx.strokeStyle = ring.color;
+    ctx.lineWidth = ring.width;
+    ctx.beginPath();
+    ctx.arc(ring.x, ring.y, ring.radius, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+  ctx.globalAlpha = 1;
+
+  // 合成产物飞入：一张小卡从角色头顶升起
+  state.cardFx.forEach((fx) => {
+    const card = CARD_BY_ID[fx.cardId];
+    const t = 1 - fx.life / fx.maxLife;
+    const alpha = Math.min(1, fx.life * 2.2);
+    const y = fx.y - 44 - t * 58;
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(fx.x, y);
+    ctx.shadowColor = TIER_COLOR[card.tier];
+    ctx.shadowBlur = 20;
+    roundRectPath(-16, -23, 32, 44, 7);
+    ctx.fillStyle = 'rgba(8, 16, 30, 0.94)';
+    ctx.fill();
+    ctx.strokeStyle = TIER_COLOR[card.tier];
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = TIER_COLOR[card.tier];
+    ctx.font = '700 15px "Consolas", monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(card.glyph, 0, -2);
+    ctx.font = '9px "Microsoft YaHei", sans-serif';
+    ctx.fillText(card.name, 0, 14);
+    ctx.restore();
+  });
+  ctx.globalAlpha = 1;
+
+  // 浮动文字
+  state.floats.forEach((floatText) => {
+    const alpha = Math.max(0, floatText.life / floatText.maxLife);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.font = '700 ' + floatText.size + 'px "Microsoft YaHei", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = floatText.color;
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.85)';
+    ctx.shadowBlur = 8;
+    ctx.fillText(floatText.text, floatText.x, floatText.y);
+    ctx.restore();
+  });
+}
+/* ============================================================
+   五、输入与交互区
+   ------------------------------------------------------------
+   这里放“玩家做了什么”的结果：拾取、合成、丢弃、升级、暂停、结算。
+   ============================================================ */
+
+let toastTimer = null;
+
+/**
+ * 显示顶部浮动提示
+ * @param {string} message 提示文字
+ * @param {string} type info / success / warn / error
+ * @param {number} duration 显示时长（毫秒）
+ */
+function showToast(message, type, duration) {
+  const kind = type || 'info';
+  const time = duration || 2200;
+  ui.toast.textContent = message;
+  ui.toast.className = 'toast is-show is-' + kind;
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    ui.toast.classList.remove('is-show');
+  }, time);
+}
+
+/**
+ * 全屏短促闪光，作为合成 / 受击的强反馈
+ * @param {string} color 闪光颜色（带透明度的 rgba）
+ */
+function flashScreen(color) {
+  ui.screenFlash.style.background = 'radial-gradient(circle at 50% 50%, ' + color + ', transparent 70%)';
+  ui.screenFlash.classList.remove('is-on');
+  void ui.screenFlash.offsetWidth;
+  ui.screenFlash.classList.add('is-on');
+}
+
+/**
+ * 让背包栏播放一次动画
+ * @param {'flash'|'deny'} kind flash 表示合成成功，deny 表示操作失败
+ */
+function pulseBag(kind) {
+  const cls = kind === 'flash' ? 'is-flash' : 'is-denied';
+  ui.backpackWrap.classList.remove(cls);
+  void ui.backpackWrap.offsetWidth;
+  ui.backpackWrap.classList.add(cls);
+  setTimeout(() => ui.backpackWrap.classList.remove(cls), 600);
+}
+
+/**
+ * 在角色附近生成一圈粒子
+ * @param {number} x 世界 x
+ * @param {number} y 世界 y
+ * @param {string} color 粒子颜色
+ * @param {number} count 数量
+ * @param {number} speed 初速度
+ */
+function addBurst(x, y, color, count, speed) {
+  const total = count || 10;
+  const force = speed || 120;
+  for (let i = 0; i < total; i += 1) {
+    const angle = Math.random() * Math.PI * 2;
+    const velocity = force * (0.35 + Math.random() * 0.9);
+    state.particles.push({
+      x: x,
+      y: y,
+      vx: Math.cos(angle) * velocity,
+      vy: Math.sin(angle) * velocity,
+      life: 0.4 + Math.random() * 0.5,
+      maxLife: 0.9,
+      size: 1.5 + Math.random() * 2.5,
+      color: color
+    });
+  }
+  if (state.particles.length > 160) state.particles.splice(0, state.particles.length - 160);
+}
+
+/**
+ * 添加一条从世界坐标向上飘的浮动文字
+ * @param {string} text 文字
+ * @param {number} x 世界 x
+ * @param {number} y 世界 y
+ * @param {string} color 颜色
+ * @param {number} size 字号
+ */
+function addFloat(text, x, y, color, size) {
+  state.floats.push({
+    text: text,
+    x: x,
+    y: y,
+    color: color || '#dff7ff',
+    size: size || 13,
+    life: 1.1,
+    maxLife: 1.1
+  });
+  if (state.floats.length > 14) state.floats.shift();
+}
+
+/**
+ * 添加一个向外扩散的光环
+ * @param {number} x 世界 x
+ * @param {number} y 世界 y
+ * @param {string} color 颜色
+ * @param {number} maxRadius 最大半径
+ */
+function addRing(x, y, color, maxRadius) {
+  state.rings.push({
+    x: x,
+    y: y,
+    radius: 10,
+    maxRadius: maxRadius || 90,
+    life: 0.55,
+    maxLife: 0.55,
+    color: color,
+    width: 2.5
+  });
+}
+
+/**
+ * 添加“合成产物飞入”的小卡动画
+ * @param {number} x 世界 x
+ * @param {number} y 世界 y
+ * @param {string} cardId 产出的卡牌 id
+ */
+function addCardFx(x, y, cardId) {
+  state.cardFx.push({ x: x, y: y, cardId: cardId, life: 1.1, maxLife: 1.1 });
+}
+
+/**
+ * 触发屏幕震动
+ * @param {number} power 震动幅度（像素）
+ * @param {number} time 持续时间（秒）
+ */
+function triggerShake(power, time) {
+  state.shake.power = Math.max(state.shake.power, power);
+  state.shake.time = Math.max(state.shake.time, time);
+}
+
+/**
+ * 背包满时给出限频提示，避免每帧刷屏
+ */
+function showBagFullHint() {
+  const now = performance.now();
+  if (now - state.lastBagFullToast < 1800) return;
+  state.lastBagFullToast = now;
+  showToast('背包已满：按 E 合成腾出空间，或按 Q 丢弃高亮卡', 'warn', 2400);
+  addFloat('背包已满', state.player.x, state.player.y - 42, '#ff9aa7', 13);
+  pulseBag('deny');
+}
+
+/**
+ * 拾取一个资源点里的 1 份材料
+ * @param {Object} node 资源节点
+ */
+function collectNode(node) {
+  const conf = NODE_CONFIG[node.type];
+  node.amount -= 1;
+  state.backpack.push(conf.cardId);
+  state.highlightIndex = state.backpack.length - 1;
+  state.gatherCount += 1;
+
+  addBurst(node.x, node.y, conf.color, 9, 110);
+  addFloat('+' + conf.label, node.x, node.y - conf.radius - 10, conf.color, 13);
+  if (node.amount <= 0) {
+    addRing(node.x, node.y, hexToRgba(conf.color, 0.4), 50);
+    addFloat('已采空', node.x, node.y - conf.radius - 26, 'rgba(180,200,220,0.7)', 11);
+  }
+  pulseBag('flash');
+  renderBackpack();
+}
+
+/**
+ * 按 E 自动匹配第一组合法配方并合成
+ */
+function tryCraft() {
+  if (state.status !== 'playing' || state.mode !== 'playing') return;
+
+  const pair = findFirstCraftPair();
+  if (!pair) {
+    showToast('没有可合成的配方：继续采集，或按 Q 丢弃高亮卡', 'warn', 2200);
+    addFloat('无可用配方', state.player.x, state.player.y - 44, '#ff9aa7', 13);
+    triggerShake(2.5, 0.18);
+    pulseBag('deny');
+    return;
+  }
+
+  const cardA = state.backpack[pair.i];
+  const cardB = state.backpack[pair.j];
+  const resultCard = CARD_BY_ID[pair.recipe.out];
+
+  // 先删后面的下标，再删前面的，避免下标错位
+  [pair.i, pair.j].sort((a, b) => b - a).forEach((index) => {
+    state.backpack.splice(index, 1);
+  });
+  state.backpack.push(resultCard.id);
+  state.highlightIndex = state.backpack.length - 1;
+
+  state.craftCount += 1;
+  state.craftedEver[resultCard.tier] = true;
+  const gained = resultCard.techPoints;
+  state.techPoints += gained;
+  state.totalTechEarned += gained;
+
+  // “余料回收”升级：合成后退回一张随机 T1
+  let refundName = '';
+  if (state.refundEnabled && state.backpack.length < state.capacity) {
+    const refundCard = CARD_BY_ID[pickRandom(CARD_CONFIG.filter((card) => card.tier === 1).map((card) => card.id))];
+    state.backpack.push(refundCard.id);
+    refundName = refundCard.name;
+  }
+
+  // 明显反馈：粒子、光环、飞卡、闪光、震屏、文字
+  addBurst(state.player.x, state.player.y, TIER_COLOR[resultCard.tier], 24, 185);
+  addRing(state.player.x, state.player.y, TIER_COLOR[resultCard.tier], 96);
+  addRing(state.player.x, state.player.y, 'rgba(71,232,167,0.5)', 62);
+  addCardFx(state.player.x, state.player.y, resultCard.id);
+  addFloat('+' + resultCard.name + ' T' + resultCard.tier, state.player.x, state.player.y - 36, TIER_COLOR[resultCard.tier], 15);
+  if (gained > 0) {
+    addFloat('+' + gained + ' 科技点', state.player.x, state.player.y - 58, '#9dffd1', 13);
+  }
+  triggerShake(7, 0.3);
+  flashScreen(hexToRgba(TIER_COLOR[resultCard.tier], 0.35));
+  pulseBag('flash');
+
+  showToast(
+    '合成成功：' + resultCard.name + (gained > 0 ? ' · +' + gained + ' 科技点' : '')
+      + (refundName ? ' · 回收返还「' + refundName + '」' : ''),
+    'success',
+    2400
+  );
+
+  renderBackpack();
+  updateHUD();
+
+  // 合成量子芯片 = 立即胜利
+  if (resultCard.id === GAME_CONFIG.targetCardId) {
+    winGame();
+    return;
+  }
+
+  // 科技点达到 3 点：稍等飞卡动画后自动弹出三选一
+  const runId = state.runId;
+  if (state.techPoints >= GAME_CONFIG.upgradeCost) {
+    setTimeout(() => {
+      if (state.runId !== runId) return;
+      if (state.status === 'playing' && state.mode === 'playing') {
+        openUpgrade('craft');
+      }
+    }, 450);
+  }
+}
+
+/**
+ * 按 Q 丢弃当前高亮 / 最后拾取的一张卡
+ */
+function discardHighlight() {
+  if (state.status !== 'playing' || state.mode !== 'playing') return;
+  if (state.backpack.length === 0) {
+    showToast('背包是空的，没有可以丢弃的卡', 'info', 1600);
+    return;
+  }
+
+  const index = clamp(state.highlightIndex, 0, state.backpack.length - 1);
+  const card = CARD_BY_ID[state.backpack[index]];
+  state.backpack.splice(index, 1);
+  state.highlightIndex = state.backpack.length > 0 ? Math.min(index, state.backpack.length - 1) : -1;
+
+  addBurst(state.player.x, state.player.y, '#ff9aa7', 10, 100);
+  addFloat('丢弃 ' + card.name, state.player.x, state.player.y - 36, '#ffb3bd', 13);
+  showToast('已丢弃「' + card.name + '」，腾出 1 格背包', 'info', 1700);
+  renderBackpack();
+  updateHUD();
+}
+
+/**
+ * 生成升级弹窗的 HTML（三个候选）
+ * @param {Array} options 候选升级配置数组
+ * @returns {string} 弹窗 HTML
+ */
+function buildUpgradeModalHtml(options) {
+  const cards = options.map((upgrade, index) => {
+    const stacks = state.upgrades[upgrade.id] || 0;
+    const stackText = upgrade.maxStacks === 1 ? '一次性升级' : '已选 ' + stacks + ' / ' + upgrade.maxStacks;
+    return '<button type="button" class="upgrade-card" data-upgrade-id="' + upgrade.id + '">'
+      + '<span class="upgrade-icon">' + upgrade.icon + '</span>'
+      + '<span class="upgrade-tag">' + upgrade.tag + '</span>'
+      + '<span class="upgrade-title">' + upgrade.title + '</span>'
+      + '<span class="upgrade-desc">' + upgrade.desc + '</span>'
+      + '<span class="upgrade-stack">' + stackText + '</span>'
+      + '<span class="upgrade-key">' + (index + 1) + '</span>'
+      + '</button>';
+  }).join('');
+
+  return '<div class="modal-kicker">科技升级 · 消耗 ' + GAME_CONFIG.upgradeCost + ' 点</div>'
+    + '<h2>三选一 · 选中即刻生效</h2>'
+    + '<p class="modal-sub">当前科技点 <b>' + state.techPoints + '</b>，本次消耗 <b>'
+    + GAME_CONFIG.upgradeCost + '</b> 点。升级会影响移动、采集、背包或时间。</p>'
+    + '<div class="upgrade-grid">' + cards + '</div>'
+    + '<div class="modal-note">按 <b>1 / 2 / 3</b> 也可以选择；弹窗打开期间倒计时与无人机暂停。</div>';
+}
+
+/**
+ * 打开三选一升级弹窗
+ * @param {string} reason craft / manual / debug，仅用于文案区分
+ */
+function openUpgrade(reason) {
+  if (state.status !== 'playing') return;
+  if (state.mode !== 'playing') return;
+  if (state.techPoints < GAME_CONFIG.upgradeCost) {
+    showToast('科技点不足：还差 ' + (GAME_CONFIG.upgradeCost - state.techPoints) + ' 点', 'warn', 1800);
+    return;
+  }
+
+  // 过滤掉已经满级的升级；背包升级还会检查容量上限
+  const available = UPGRADE_CONFIG.filter((upgrade) => {
+    if (upgrade.id === 'bag' && state.capacity >= GAME_CONFIG.backpackMax) return false;
+    const stacks = state.upgrades[upgrade.id] || 0;
+    return stacks < upgrade.maxStacks;
+  });
+  if (available.length === 0) {
+    showToast('所有升级都已满级，继续冲刺量子芯片吧', 'info', 2000);
+    return;
+  }
+
+  const options = shuffleArray(available.slice()).slice(0, Math.min(3, available.length));
+  state.upgradeOptions = options.map((upgrade) => upgrade.id);
+  state.mode = 'upgrade';
+  state.keys = {};
+  state.player.vx = 0;
+  state.player.vy = 0;
+
+  ui.modal.className = 'modal';
+  ui.modal.innerHTML = buildUpgradeModalHtml(options);
+  ui.modalLayer.classList.remove('hidden');
+  ui.modalLayer.setAttribute('aria-hidden', 'false');
+
+  renderBackpack();
+  updateHUD();
+
+  setTimeout(() => {
+    const first = ui.modal.querySelector('.upgrade-card');
+    if (first) first.focus();
+  }, 60);
+
+  if (reason === 'craft') {
+    showToast('科技点达到 3 点，选择一项升级', 'success', 1700);
+  }
+}
+
+/**
+ * 选择一个升级并立即应用
+ * @param {string} upgradeId 升级 id
+ */
+function chooseUpgrade(upgradeId) {
+  if (state.mode !== 'upgrade') return;
+  if (!state.upgradeOptions.includes(upgradeId)) return;
+
+  const upgrade = UPGRADE_BY_ID[upgradeId];
+  if (!upgrade) return;
+
+  state.techPoints -= GAME_CONFIG.upgradeCost;
+  const stacks = state.upgrades[upgradeId] || 0;
+  state.upgrades[upgradeId] = stacks + 1;
+  state.upgradesTaken += 1;
+  upgrade.apply();
+
+  state.mode = 'playing';
+  state.upgradeOptions = [];
+  hideModal();
+
+  addRing(state.player.x, state.player.y, 'rgba(71,232,167,0.55)', 80);
+  addBurst(state.player.x, state.player.y, '#47e8a7', 16, 130);
+  addFloat(upgrade.title + ' 已生效', state.player.x, state.player.y - 44, '#9dffd1', 14);
+  triggerShake(4, 0.25);
+  flashScreen('rgba(71,232,167,0.28)');
+  showToast('升级生效：' + upgrade.title + ' · ' + upgrade.desc, 'success', 2600);
+
+  renderBackpack();
+  updateHUD();
+
+  // 如果还有剩余科技点（一次拿到 6 点以上），稍后继续给三选一
+  const runId = state.runId;
+  if (state.techPoints >= GAME_CONFIG.upgradeCost) {
+    setTimeout(() => {
+      if (state.runId === runId && state.status === 'playing' && state.mode === 'playing') {
+        openUpgrade('craft');
+      }
+    }, 500);
+  }
+}
+
+/**
+ * 隐藏通用弹窗
+ */
+function hideModal() {
+  ui.modalLayer.classList.add('hidden');
+  ui.modalLayer.setAttribute('aria-hidden', 'true');
+  ui.modal.className = 'modal';
+  ui.modal.innerHTML = '';
+}
+
+/**
+ * 打开 / 收起规则说明；打开时暂停计时与移动
+ */
+function toggleRules() {
+  if (state.status !== 'playing') return;
+  if (state.mode === 'upgrade' || state.mode === 'result') return;
+
+  const opening = state.mode !== 'rules';
+  if (opening) {
+    state.mode = 'rules';
+    state.keys = {};
+    state.player.vx = 0;
+    state.player.vy = 0;
+    buildRulesContent();
+    ui.rulesPanel.classList.add('is-open');
+    ui.rulesPanel.setAttribute('aria-hidden', 'false');
+    const card = ui.rulesPanel.querySelector('.rules-card');
+    if (card) card.scrollTop = 0;
+  } else {
+    state.mode = 'playing';
+    ui.rulesPanel.classList.remove('is-open');
+    ui.rulesPanel.setAttribute('aria-hidden', 'true');
+    state.lastTime = performance.now();
+  }
+
+  renderBackpack();
+  updateHUD();
+}
+
+/**
+ * 触发无人机上线：放在远离玩家的地图边缘
+ */
+function activateDrone() {
+  if (state.drone.active || state.status !== 'playing') return;
+  const angle = Math.random() * Math.PI * 2;
+  const distance = 520;
+  const x = clamp(state.player.x + Math.cos(angle) * distance, 110, GAME_CONFIG.worldWidth - 110);
+  const y = clamp(state.player.y + Math.sin(angle) * distance, 110, GAME_CONFIG.worldHeight - 110);
+
+  state.drone.active = true;
+  state.drone.x = x;
+  state.drone.y = y;
+  state.drone.cooldown = 0;
+
+  showToast('警告：干扰无人机上线！被撞会掉卡并扣除 5 秒', 'warn', 3000);
+  addFloat('无人机上线', state.player.x, state.player.y - 50, '#ff9aa7', 13);
+  flashScreen('rgba(255,107,127,0.22)');
+}
+
+/**
+ * 无人机撞到玩家：掉一张背包卡、扣 5 秒、击退玩家
+ */
+function droneHit() {
+  const drone = state.drone;
+  if (state.status !== 'playing' || state.mode !== 'playing' || !drone.active) return;
+  if (drone.cooldown > 0) return;
+
+  drone.cooldown = 4.5;
+  state.timeLeft -= GAME_CONFIG.dronePenalty;
+
+  let lostName = '';
+  if (state.backpack.length > 0) {
+    const index = clamp(state.highlightIndex, 0, state.backpack.length - 1);
+    const card = CARD_BY_ID[state.backpack[index]];
+    state.backpack.splice(index, 1);
+    state.highlightIndex = state.backpack.length > 0 ? Math.min(index, state.backpack.length - 1) : -1;
+    lostName = card.name;
+
+    // 掉在角色附近的地上，2 秒后才能重新拾取，给玩家“抢回材料”的机会
+    const angle = Math.random() * Math.PI * 2;
+    state.items.push({
+      cardId: card.id,
+      x: clamp(state.player.x + Math.cos(angle) * 68, 60, GAME_CONFIG.worldWidth - 60),
+      y: clamp(state.player.y + Math.sin(angle) * 68, 60, GAME_CONFIG.worldHeight - 60),
+      life: 18,
+      pickupDelay: 1.8,
+      bob: Math.random() * 10
+    });
+  }
+
+  // 从无人机指向角色的方向击退
+  const dx = state.player.x - drone.x;
+  const dy = state.player.y - drone.y;
+  const length = Math.hypot(dx, dy) || 1;
+  state.player.vx += (dx / length) * 230;
+  state.player.vy += (dy / length) * 230;
+
+  addBurst(state.player.x, state.player.y, '#ff6b7f', 18, 160);
+  addFloat('-' + GAME_CONFIG.dronePenalty + ' 秒', state.player.x, state.player.y - 42, '#ff9aa7', 15);
+  if (lostName) addFloat('丢失 ' + lostName, state.player.x, state.player.y - 64, '#ffb3bd', 12);
+  triggerShake(11, 0.5);
+  flashScreen('rgba(255,107,127,0.34)');
+  pulseBag('deny');
+
+  showToast(
+    lostName
+      ? '无人机撞击：丢失「' + lostName + '」，倒计时 -5 秒'
+      : '无人机撞击：倒计时 -5 秒（背包为空）',
+    'error',
+    2600
+  );
+
+  renderBackpack();
+  updateHUD();
+
+  if (state.timeLeft <= 0) {
+    state.timeLeft = 0;
+    loseGame();
+  }
+}
+
+/**
+ * 倒计时归零：失败结算
+ */
+function loseGame() {
+  if (state.status !== 'playing') return;
+  state.status = 'lost';
+  state.timeLeft = 0;
+  state.keys = {};
+  state.player.vx = 0;
+  state.player.vy = 0;
+
+  addFloat('倒计时归零', state.player.x, state.player.y - 46, '#ff9aa7', 16);
+  triggerShake(8, 0.45);
+  flashScreen('rgba(255,107,127,0.3)');
+  showToast('倒计时结束，量子芯片未能点亮', 'error', 2800);
+  updateHUD();
+  renderBackpack();
+
+  const runId = state.runId;
+  setTimeout(() => {
+    if (state.runId === runId && state.status === 'lost') showResult(false);
+  }, 700);
+}
+
+/**
+ * 合出量子芯片：立即胜利并稍后弹出结算
+ */
+function winGame() {
+  if (state.status !== 'playing') return;
+  state.status = 'won';
+  state.keys = {};
+  state.player.vx = 0;
+  state.player.vy = 0;
+
+  addBurst(state.player.x, state.player.y, '#ff6bc1', 34, 240);
+  addRing(state.player.x, state.player.y, 'rgba(255,107,193,0.7)', 150);
+  addFloat('量子芯片已点亮', state.player.x, state.player.y - 54, '#ffd0ec', 17);
+  triggerShake(12, 0.6);
+  flashScreen('rgba(255,107,193,0.4)');
+  showToast('量子芯片合成成功！终极目标达成', 'success', 3200);
+  updateHUD();
+  renderBackpack();
+
+  const runId = state.runId;
+  setTimeout(() => {
+    if (state.runId === runId && state.status === 'won') showResult(true);
+  }, 950);
+}
+
+/**
+ * 显示结算弹窗
+ * @param {boolean} isWin true 为胜利，false 为失败
+ */
+function showResult(isWin) {
+  state.mode = 'result';
+  state.keys = {};
+  state.player.vx = 0;
+  state.player.vy = 0;
+
+  const title = isWin ? '量子芯片已点亮' : '产线停摆';
+  const kicker = isWin ? '任务完成' : '信号中断';
+  const desc = isWin
+    ? '芯片与电池完成封装，量子芯片启动成功。你在倒计时结束前跑通了整条配方链。'
+    : '倒计时归零，量子芯片还未完成。下一局可以优先清理背包、沿配方链推进。';
+  const tip = isWin
+    ? '试试更少升级次数，或不开无人机硬闯一局。'
+    : '优先采集矿石与硅砂，尽早做出电路板，再补电池。';
+
+  ui.modal.className = 'modal result-modal ' + (isWin ? 'is-win' : 'is-lose');
+  ui.modal.innerHTML = ''
+    + '<div class="result-icon">' + (isWin ? '◈' : '⚠') + '</div>'
+    + '<div class="modal-kicker">' + kicker + '</div>'
+    + '<h2>' + title + '</h2>'
+    + '<p class="modal-sub">' + desc + '</p>'
+    + '<div class="result-stats">'
+    + '<div class="result-stat"><span>本局用时</span><b>' + formatTime(state.elapsed) + '</b></div>'
+    + '<div class="result-stat"><span>采集次数</span><b>' + state.gatherCount + '</b></div>'
+    + '<div class="result-stat"><span>合成次数</span><b>' + state.craftCount + '</b></div>'
+    + '<div class="result-stat"><span>科技升级</span><b>' + state.upgradesTaken + '</b></div>'
+    + '<div class="result-stat is-highlight"><span>累计科技点</span><b>' + state.totalTechEarned + '</b></div>'
+    + '<div class="result-stat"><span>背包占用</span><b>' + state.backpack.length + ' / ' + state.capacity + '</b></div>'
+    + '</div>'
+    + '<p class="modal-sub">' + tip + '</p>'
+    + '<button type="button" class="btn btn-primary btn-big" data-action="restart">再来一局（R）</button>';
+
+  ui.modalLayer.classList.remove('hidden');
+  ui.modalLayer.setAttribute('aria-hidden', 'false');
+  renderBackpack();
+  updateHUD();
+
+  setTimeout(() => {
+    const button = ui.modal.querySelector('[data-action="restart"]');
+    if (button) button.focus();
+  }, 80);
+}
+
+/**
+ * 一键重开：重建状态、随机新地图、重置计时与升级
+ */
+function restartGame() {
+  hideModal();
+  ui.rulesPanel.classList.remove('is-open');
+  ui.rulesPanel.setAttribute('aria-hidden', 'true');
+  ui.screenFlash.classList.remove('is-on');
+
+  state = createInitialState();
+  state.lastTime = performance.now();
+  resizeCanvas();
+  renderBackpack();
+  updateHUD();
+  drawMinimap();
+
+  showToast('新一局开始：WASD 移动，靠近发光节点自动采集；按 E 合成', 'info', 2600);
+}
+
+/**
+ * 键盘按下：移动、合成、丢弃、规则、升级选择、结算重开
+ * @param {KeyboardEvent} event 键盘事件
+ */
+function handleKeyDown(event) {
+  const code = event.code;
+  const moveCodes = ['KeyW', 'KeyA', 'KeyS', 'KeyD', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+  if (moveCodes.includes(code) || code === 'Space') event.preventDefault();
+
+  // 升级弹窗：数字键快速选择
+  if (state.mode === 'upgrade') {
+    const numberKeys = { Digit1: 0, Digit2: 1, Digit3: 2, Numpad1: 0, Numpad2: 1, Numpad3: 2 };
+    if (code in numberKeys) {
+      const optionId = state.upgradeOptions[numberKeys[code]];
+      if (optionId) chooseUpgrade(optionId);
+    }
+    return;
+  }
+
+  // 结算弹窗：R 直接重开
+  if (state.mode === 'result') {
+    if (code === 'KeyR' && !event.repeat) restartGame();
+    return;
+  }
+
+  // 规则面板随时可以用 H 关闭
+  if (code === 'KeyH') {
+    if (!event.repeat) toggleRules();
+    return;
+  }
+
+  if (state.mode !== 'playing' || state.status !== 'playing') return;
+
+  if (code === 'KeyE') {
+    if (!event.repeat) tryCraft();
+    return;
+  }
+  if (code === 'KeyQ') {
+    if (!event.repeat) discardHighlight();
+    return;
+  }
+
+  if (moveCodes.includes(code)) state.keys[code] = true;
+}
+
+/**
+ * 键盘松开：取消对应移动方向
+ * @param {KeyboardEvent} event 键盘事件
+ */
+function handleKeyUp(event) {
+  delete state.keys[event.code];
+}
+
+/**
+ * 绑定所有事件监听（初始化时只执行一次）
+ */
+function bindEvents() {
+  window.addEventListener('keydown', handleKeyDown);
+  window.addEventListener('keyup', handleKeyUp);
+  window.addEventListener('blur', () => { state.keys = {}; });
+  window.addEventListener('resize', resizeCanvas);
+  document.addEventListener('visibilitychange', () => { state.lastTime = performance.now(); });
+
+  ui.btnCraft.addEventListener('click', tryCraft);
+  ui.btnDiscard.addEventListener('click', discardHighlight);
+  ui.btnUpgrade.addEventListener('click', () => openUpgrade('manual'));
+  ui.btnRules.addEventListener('click', toggleRules);
+  ui.btnRestart.addEventListener('click', restartGame);
+  ui.rulesClose.addEventListener('click', toggleRules);
+
+  // 点击规则遮罩空白处也能关闭
+  ui.rulesPanel.addEventListener('click', (event) => {
+    if (event.target === ui.rulesPanel) toggleRules();
+  });
+
+  // 点击背包格：设为高亮，随后可按 Q 丢弃
+  ui.backpack.addEventListener('click', (event) => {
+    const slot = event.target.closest('[data-index]');
+    if (!slot) return;
+    const index = Number(slot.dataset.index);
+    if (index < 0 || index >= state.backpack.length) return;
+    state.highlightIndex = index;
+    const card = CARD_BY_ID[state.backpack[index]];
+    renderBackpack();
+    showToast('已高亮「' + card.name + '」，按 Q 丢弃', 'info', 1200);
+  });
+
+  // 弹窗按钮：升级选项与结算重开
+  ui.modal.addEventListener('click', (event) => {
+    const upgradeBtn = event.target.closest('[data-upgrade-id]');
+    if (upgradeBtn) {
+      chooseUpgrade(upgradeBtn.dataset.upgradeId);
+      return;
+    }
+    const restartBtn = event.target.closest('[data-action="restart"]');
+    if (restartBtn) restartGame();
+  });
+}
+/* ============================================================
+   六、主循环与初始化
+   ------------------------------------------------------------
+   requestAnimationFrame + 时间步长；切后台或弹窗打开时自动暂停结算。
+   ============================================================ */
+
+/**
+ * 更新角色移动：平滑加速、摩擦减速、边界阻挡
+ * @param {number} dt 时间步长（秒）
+ */
+function updatePlayer(dt) {
+  const player = state.player;
+  const keys = state.keys;
+  const left = keys.KeyA || keys.ArrowLeft;
+  const right = keys.KeyD || keys.ArrowRight;
+  const up = keys.KeyW || keys.ArrowUp;
+  const down = keys.KeyS || keys.ArrowDown;
+
+  let dirX = (right ? 1 : 0) - (left ? 1 : 0);
+  let dirY = (down ? 1 : 0) - (up ? 1 : 0);
+
+  if (dirX !== 0 || dirY !== 0) {
+    const length = Math.hypot(dirX, dirY);
+    dirX /= length;
+    dirY /= length;
+
+    // 加速度累积，松开后靠摩擦自然减速，避免“一格一格”的僵硬移动
+    player.vx += dirX * GAME_CONFIG.playerAccel * dt;
+    player.vy += dirY * GAME_CONFIG.playerAccel * dt;
+  } else {
+    const damping = Math.exp(-GAME_CONFIG.playerFriction * dt);
+    player.vx *= damping;
+    player.vy *= damping;
+  }
+
+  const maxSpeed = GAME_CONFIG.playerSpeed * state.speedMul;
+  const speed = Math.hypot(player.vx, player.vy);
+  if (speed > maxSpeed) {
+    player.vx = (player.vx / speed) * maxSpeed;
+    player.vy = (player.vy / speed) * maxSpeed;
+  }
+
+  player.x += player.vx * dt;
+  player.y += player.vy * dt;
+
+  // 地图边界阻挡：撞墙时把速度清零，避免贴边抖动
+  const margin = 30;
+  if (player.x < margin) {
+    player.x = margin;
+    player.vx = 0;
+  } else if (player.x > GAME_CONFIG.worldWidth - margin) {
+    player.x = GAME_CONFIG.worldWidth - margin;
+    player.vx = 0;
+  }
+  if (player.y < margin) {
+    player.y = margin;
+    player.vy = 0;
+  } else if (player.y > GAME_CONFIG.worldHeight - margin) {
+    player.y = GAME_CONFIG.worldHeight - margin;
+    player.vy = 0;
+  }
+
+  const nowSpeed = Math.hypot(player.vx, player.vy);
+  if (nowSpeed > 8) player.angle = Math.atan2(player.vy, player.vx);
+
+  // 移动时在身后留下少量全息尾迹
+  state.trailAccum += dt;
+  if (nowSpeed > 110 && state.trailAccum > 0.055) {
+    state.trailAccum = 0;
+    state.particles.push({
+      x: player.x - Math.cos(player.angle) * 15,
+      y: player.y - Math.sin(player.angle) * 15,
+      vx: -player.vx * 0.12 + (Math.random() * 12 - 6),
+      vy: -player.vy * 0.12 + (Math.random() * 12 - 6),
+      life: 0.35,
+      maxLife: 0.35,
+      size: 1.5 + Math.random() * 1.4,
+      color: 'rgba(62,230,255,0.55)'
+    });
+  }
+}
+
+/**
+ * 自动采集：按固定间隔寻找采集范围内最近的未采空节点
+ * @param {number} dt 时间步长（秒）
+ */
+function updatePickup(dt) {
+  state.pickAccum += dt;
+  const interval = GAME_CONFIG.pickInterval * state.pickIntervalMul;
+  if (state.pickAccum < interval) return;
+  state.pickAccum = 0;
+
+  const reach = GAME_CONFIG.pickupRadius * state.pickupMul;
+  let nearest = null;
+  let nearestDist = Infinity;
+
+  state.nodes.forEach((node) => {
+    if (node.amount <= 0) return;
+    const distance = Math.hypot(state.player.x - node.x, state.player.y - node.y) - node.radius * 0.4;
+    if (distance <= reach && distance < nearestDist) {
+      nearest = node;
+      nearestDist = distance;
+    }
+  });
+
+  if (!nearest) return;
+
+  if (state.backpack.length >= state.capacity) {
+    showBagFullHint();
+    return;
+  }
+
+  collectNode(nearest);
+}
+
+/**
+ * 更新地上的掉落卡：倒计时消散，或进入采集范围后被重新拾取
+ * @param {number} dt 时间步长（秒）
+ */
+function updateItems(dt) {
+  const reach = GAME_CONFIG.pickupRadius * state.pickupMul;
+
+  for (let i = state.items.length - 1; i >= 0; i -= 1) {
+    const item = state.items[i];
+    item.life -= dt;
+    item.pickupDelay -= dt;
+
+    if (item.life <= 0) {
+      addFloat('掉落卡消散', item.x, item.y - 24, 'rgba(160,180,205,0.6)', 11);
+      state.items.splice(i, 1);
+      continue;
+    }
+
+    const distance = Math.hypot(state.player.x - item.x, state.player.y - item.y);
+    if (distance <= reach && item.pickupDelay <= 0) {
+      if (state.backpack.length >= state.capacity) {
+        showBagFullHint();
+        continue;
+      }
+
+      const card = CARD_BY_ID[item.cardId];
+      state.backpack.push(card.id);
+      state.highlightIndex = state.backpack.length - 1;
+      state.gatherCount += 1;
+      addBurst(item.x, item.y, TIER_COLOR[card.tier], 10, 110);
+      addFloat('回收 ' + card.name, item.x, item.y - 24, TIER_COLOR[card.tier], 12);
+      showToast('已回收掉落的「' + card.name + '」', 'success', 1500);
+      state.items.splice(i, 1);
+      renderBackpack();
+    }
+  }
+}
+
+/**
+ * 更新无人机：延迟上线，缓慢追击，碰到角色触发惩罚
+ * @param {number} dt 时间步长（秒）
+ */
+function updateDrone(dt) {
+  const drone = state.drone;
+
+  if (!drone.active) {
+    if (state.elapsed >= GAME_CONFIG.droneDelay) activateDrone();
+    return;
+  }
+
+  drone.cooldown = Math.max(0, drone.cooldown - dt);
+
+  const dx = state.player.x - drone.x;
+  const dy = state.player.y - drone.y;
+  const distance = Math.hypot(dx, dy) || 1;
+
+  // 速度明显低于角色，保持“慢慢逼近”的压力感
+  drone.x += (dx / distance) * GAME_CONFIG.droneSpeed * dt;
+  drone.y += (dy / distance) * GAME_CONFIG.droneSpeed * dt;
+  drone.x = clamp(drone.x, 40, GAME_CONFIG.worldWidth - 40);
+  drone.y = clamp(drone.y, 40, GAME_CONFIG.worldHeight - 40);
+
+  if (distance < 30 && drone.cooldown <= 0) {
+    droneHit();
+  }
+}
+
+/**
+ * 更新粒子、光环、浮动文字、飞卡与震屏
+ * @param {number} dt 时间步长（秒）
+ */
+function updateEffects(dt) {
+  for (let i = state.particles.length - 1; i >= 0; i -= 1) {
+    const particle = state.particles[i];
+    particle.life -= dt;
+    if (particle.life <= 0) {
+      state.particles.splice(i, 1);
+      continue;
+    }
+    particle.x += particle.vx * dt;
+    particle.y += particle.vy * dt;
+    particle.vx *= 0.94;
+    particle.vy *= 0.94;
+  }
+
+  for (let i = state.rings.length - 1; i >= 0; i -= 1) {
+    const ring = state.rings[i];
+    ring.life -= dt;
+    if (ring.life <= 0) {
+      state.rings.splice(i, 1);
+      continue;
+    }
+    const progress = 1 - ring.life / ring.maxLife;
+    ring.radius = 10 + (ring.maxRadius - 10) * progress;
+  }
+
+  for (let i = state.floats.length - 1; i >= 0; i -= 1) {
+    const floatText = state.floats[i];
+    floatText.life -= dt;
+    if (floatText.life <= 0) {
+      state.floats.splice(i, 1);
+      continue;
+    }
+    floatText.y -= 30 * dt;
+  }
+
+  for (let i = state.cardFx.length - 1; i >= 0; i -= 1) {
+    const fx = state.cardFx[i];
+    fx.life -= dt;
+    if (fx.life <= 0) state.cardFx.splice(i, 1);
+  }
+
+  if (state.shake.time > 0) {
+    state.shake.time -= dt;
+    if (state.shake.time <= 0) state.shake.power = 0;
+  }
+}
+
+/**
+ * 每帧更新入口：只在 playing 时推进世界；弹窗/规则/结算会暂停
+ * @param {number} dt 时间步长（秒）
+ */
+function update(dt) {
+  if (state.mode !== 'playing' || state.status !== 'playing') {
+    updateHUD();
+    return;
+  }
+
+  state.elapsed += dt;
+  state.timeLeft -= dt;
+
+  if (state.timeLeft <= 0) {
+    state.timeLeft = 0;
+    loseGame();
+    updateHUD();
+    return;
+  }
+
+  updatePlayer(dt);
+  updateCamera(dt);
+  updatePickup(dt);
+  updateItems(dt);
+  updateDrone(dt);
+  updateEffects(dt);
+  updateHUD();
+}
+
+/**
+ * requestAnimationFrame 主循环：限制单帧 dt，避免切后台后瞬移
+ * @param {number} now 当前时间戳
+ */
+function loop(now) {
+  const rawDelta = Math.max(0, now - state.lastTime);
+  const dt = Math.min(rawDelta / 1000, 0.05);
+  state.lastTime = now;
+
+  update(dt);
+  render();
+  requestAnimationFrame(loop);
+}
+
+/**
+ * 初始化：绑定事件、调整画布、首帧渲染、开始主循环
+ */
+function init() {
+  window.__errors = [];
+  window.addEventListener('error', (event) => {
+    window.__errors.push(String(event.message || event.error || 'unknown error'));
+  });
+
+  bindEvents();
+  resizeCanvas();
+  state.lastTime = performance.now();
+  renderBackpack();
+  updateHUD();
+  drawMinimap();
+  requestAnimationFrame(loop);
+
+  // 开局引导，不阻塞操作
+  setTimeout(() => {
+    if (state.status === 'playing') {
+      showToast('开局赠送 3 张 T1：WASD 移动，靠近发光资源点自动采集，按 E 合成', 'info', 3000);
+    }
+  }, 800);
+}
+
+init();
+
+/* ============================================================
+   自动化测试接口（正常游玩不需要）
+   ------------------------------------------------------------
+   方便快速布置背包、传送、改时间，验证核心路径。
+   ============================================================ */
+window.__roamDebug = {
+  /** 读取当前完整状态 */
+  getState: () => state,
+
+  /**
+   * 把角色传送到指定世界坐标（用于测试采集与边界）
+   * @param {number} x 世界 x
+   * @param {number} y 世界 y
+   */
+  teleport(x, y) {
+    state.player.x = clamp(x, 30, GAME_CONFIG.worldWidth - 30);
+    state.player.y = clamp(y, 30, GAME_CONFIG.worldHeight - 30);
+    state.player.vx = 0;
+    state.player.vy = 0;
+    snapCamera();
+  },
+
+  /**
+   * 直接设置背包内容（用于测试合成与满包）
+   * @param {Array<string>} ids 卡牌 id 数组
+   */
+  setBackpack(ids) {
+    state.backpack = ids.slice(0, state.capacity);
+    state.highlightIndex = state.backpack.length - 1;
+    renderBackpack();
+    updateHUD();
+  },
+
+  /**
+   * 设置剩余时间（用于测试失败路径）
+   * @param {number} seconds 剩余秒数
+   */
+  setTime(seconds) {
+    state.timeLeft = seconds;
+    updateHUD();
+  },
+
+  /**
+   * 增加科技点（用于测试升级）
+   * @param {number} amount 点数
+   */
+  addTech(amount) {
+    state.techPoints += amount;
+    state.totalTechEarned += amount;
+    updateHUD();
+    renderBackpack();
+  },
+
+  /** 找到指定类型的第一个未采空节点，方便测试自动采集 */
+  nearestNode(type) {
+    const list = state.nodes.filter((node) => node.type === type && node.amount > 0);
+    if (!list.length) return null;
+    return list.slice().sort((a, b) => {
+      return Math.hypot(a.x - state.player.x, a.y - state.player.y)
+        - Math.hypot(b.x - state.player.x, b.y - state.player.y);
+    })[0];
+  },
+
+  /** 立即执行一次合成 */
+  craft() { tryCraft(); },
+
+  /** 立即丢弃高亮卡 */
+  discard() { discardHighlight(); },
+
+  /** 打开升级弹窗 */
+  openUpgrade() { openUpgrade('debug'); },
+
+  /** 强制无人机上线 */
+  forceDrone() { activateDrone(); },
+
+  /** 强制模拟一次无人机撞击 */
+  forceDroneHit() { droneHit(); },
+
+  /** 打开 / 关闭规则 */
+  toggleRules() { toggleRules(); },
+
+  /** 读取运行时 JS 错误列表 */
+  errors: () => window.__errors
+};
+</script>
+</body>
+</html>

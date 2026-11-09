@@ -1,0 +1,65 @@
+{
+  "patch": "烬 · 标题页背景（方向一：符阵）",
+  "sourceLab": "D:/其他/TRAE宝/奥术工程师/ui-lab/bg-lab.html",
+  "target": "D:/其他/TRAE宝/奥术工程师/index_arcane_v2.html",
+  "method": "按「函数签名 + 括号配平」整函数替换；行号只作参考，禁止按行号剪贴",
+  "payload": "tbg-sigil.payload.js",
+  "payloadBytes": 19079,
+  "baseline": {
+    "bytes": 2833963,
+    "md5": "22D28003E947503101476C789FDBB0AC",
+    "capturedAt": "2026-11-08T23:05:00+08:00",
+    "note": "本机构建时回读的只读主文件快照；主文件仍在被并行写入，贴前必须重新回读"
+  },
+  "expected": {
+    "bytes": 2852390,
+    "md5": "55A9AB991243CA88AD2C3E4FE05D255E",
+    "deltaBytes": 18427
+  },
+  "anchors": [
+    {
+      "id": "A1",
+      "kind": "exact-text",
+      "desc": "titleBgRuntime：加 TITLE_BG_OFF 常量与 dpr 字段",
+      "expectedHits": 1,
+      "anchorHead": "/** 标题背景运行时：running / frames 供验收读取，stars+diff 只在初始化时生成一次 */",
+      "extraCheck": "stopTitleBackground 函数签名命中 1 次（不改，仅用于确认运行时结构未被 B 方案改掉）"
+    },
+    {
+      "id": "A2",
+      "kind": "function-signature",
+      "desc": "resizeTitleBg：dpr 上限 1.5 + 徽记尺寸同帧同步",
+      "signature": "function resizeTitleBg() {",
+      "expectedHits": 1
+    },
+    {
+      "id": "A3",
+      "kind": "function-signature",
+      "desc": "drawTitleBackground：先整体插入 payload，再用新函数替换（payload 与函数必须成对出现）",
+      "signature": "function drawTitleBackground(ts) {",
+      "expectedHits": 1,
+      "mustPairWith": "tbg-sigil.payload.js"
+    },
+    {
+      "id": "A4",
+      "kind": "function-signature",
+      "desc": "startTitleBackground：?bg=off 不排队 rAF、画布 display:none",
+      "signature": "function startTitleBackground() {",
+      "expectedHits": 1
+    }
+  ],
+  "constraints": {
+    "doNotTouch": [
+      "#titleLayer 的 background / z-index / mix-blend-mode",
+      "#titleBg 与 #titleEmblem 的 DOM 位置与 CSS（canvas 必须留在 #titleLayer 内）",
+      "h1.title-wordmark / .title-kicker / .title-tagline / 任何 button / .difficulty-* / .title-stat",
+      "buildTitleSceneB / drawTitleSceneB / titleSceneB / stars / dust 等旧背景代码"
+    ],
+    "acceptance": [
+      "贴后字节 / MD5 回读命中 expected",
+      "页面 1280x800 截图：标题/按钮/难度卡位置与合并前一致",
+      "?bg=off：titleBg display=none、frames=0、running=false",
+      "开始探索 → 选角色 → 以此角色开始：running=false 且 frames 不再增长"
+    ]
+  }
+}

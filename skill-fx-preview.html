@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>烬 · 技能特效补丁预览</title>
+<link rel="stylesheet" href="skill-fx.css">
+<style>
+  /* ============================================================
+     预览页自带的基础样式：只复刻主文件卡面的必要部分，
+     让“改前 / 改后”两张图都能在同一套底图上比较。
+     不联网、不引字体、无 emoji。
+     ============================================================ */
+  :root {
+    --bg: #070b12;
+    --panel: #0c131f;
+    --surface-1: #101a2a;
+    --surface-3: #182338;
+    --line: rgba(120, 160, 220, 0.22);
+    --line-strong: rgba(150, 200, 255, 0.45);
+    --text-1: #e8f0fb;
+    --text-2: #a8bdd6;
+    --text-3: #6f89a8;
+    --gold: #ffc247;
+    --magic: #b085ff;
+    --tech: #3ee6ff;
+    --r-sm: 8px;
+    --r-xs: 4px;
+    --fs-xs: 10px;
+    --mono: Consolas, "Courier New", monospace;
+    --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+    --mat-inner: inset 0 1px 0 rgba(255, 255, 255, 0.06), inset 0 -12px 24px rgba(0, 0, 0, 0.35);
+    --mat-sheen: linear-gradient(180deg, rgba(255, 255, 255, 0.06), transparent 42%);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text-1); }
+  body {
+    font-family: "Segoe UI", "Microsoft YaHei", system-ui, sans-serif;
+    min-height: 100vh;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, rgba(80, 60, 160, 0.22), transparent 60%),
+      radial-gradient(900px 500px at 100% 10%, rgba(20, 90, 140, 0.16), transparent 55%),
+      var(--bg);
+  }
+  .wrap { max-width: 1280px; margin: 0 auto; padding: 18px 18px 30px; }
+  .top { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: 0.06em; font-weight: 700; }
+  .sub { margin-top: 6px; font-size: 12px; color: var(--text-3); letter-spacing: 0.04em; }
+  .toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+  .seg button {
+    background: rgba(12, 19, 31, 0.8); color: var(--text-2); border: 0;
+    padding: 7px 14px; font-size: 12px; cursor: pointer; letter-spacing: 0.06em;
+    font-family: inherit;
+  }
+  .seg button.on { background: rgba(255, 194, 71, 0.16); color: var(--gold); font-weight: 700; }
+  .btn {
+    background: rgba(12, 19, 31, 0.8); color: var(--text-2); border: 1px solid var(--line);
+    border-radius: 8px; padding: 7px 12px; font-size: 12px; cursor: pointer;
+    font-family: inherit; letter-spacing: 0.04em;
+  }
+  .btn:hover { border-color: var(--line-strong); color: var(--text-1); }
+  .btn.gold { border-color: rgba(255, 194, 71, 0.55); color: var(--gold); }
+  .btn.danger { border-color: rgba(255, 120, 110, 0.45); color: #ff9a90; }
+
+  /* ---------- 预览舞台 ---------- */
+  .stage-box {
+    position: relative; margin-top: 14px; border: 1px solid var(--line);
+    border-radius: 12px; overflow: hidden; background: #060910;
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  }
+  #stage { display: block; width: 100%; height: auto; }
+  .stage-tag {
+    position: absolute; left: 12px; top: 10px; font-family: var(--mono);
+    font-size: 10px; letter-spacing: 0.12em; color: rgba(168, 191, 220, 0.6);
+    pointer-events: none;
+  }
+  .stage-legend {
+    position: absolute; right: 12px; top: 10px; display: flex; gap: 10px;
+    font-size: 10px; color: var(--text-3); letter-spacing: 0.05em; pointer-events: none;
+  }
+  .stage-legend i { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 4px; }
+  .perf {
+    position: absolute; right: 12px; bottom: 10px; font-family: var(--mono);
+    font-size: 10px; color: rgba(160, 200, 235, 0.72); letter-spacing: 0.03em;
+    background: rgba(4, 8, 14, 0.72); border: 1px solid rgba(120, 160, 220, 0.18);
+    border-radius: 6px; padding: 5px 8px; pointer-events: none;
+  }
+
+  /* ---------- 技能触发区 ---------- */
+  .skills {
+    margin-top: 14px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px;
+  }
+  .skill {
+    position: relative; display: flex; align-items: center; gap: 9px;
+    text-align: left; padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(24, 35, 56, 0.9), rgba(12, 19, 31, 0.9));
+    color: var(--text-1); font-family: inherit;
+    transition: transform 0.1s var(--ease), border-color 0.12s, box-shadow 0.12s;
+  }
+  .skill:hover { border-color: var(--line-strong); transform: translateY(-2px); }
+  .skill:active { transform: scale(0.98); }
+  .skill .g {
+    width: 28px; height: 28px; flex: none; display: grid; place-items: center;
+    border-radius: 5px; border: 1px solid currentColor; font-family: var(--mono);
+    font-size: 15px; color: var(--c, var(--magic));
+  }
+  .skill .n { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+  .skill .d { display: block; margin-top: 2px; font-family: var(--mono); font-size: 9px; color: var(--text-3); }
+  .skill .el {
+    position: absolute; right: 7px; top: 7px; font-family: var(--mono);
+    font-size: 9px; letter-spacing: 0.08em; color: rgba(168, 191, 220, 0.5);
+  }
+  .skill .cd {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 0;
+    background: rgba(80, 150, 220, 0.14); pointer-events: none;
+    border-top: 1px solid rgba(120, 200, 255, 0.35);
+  }
+
+  /* ---------- 复刻卡面（与主文件同一套类名） ---------- */
+  .card-row {
+    margin-top: 16px; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px;
+  }
+  .mini-card {
+    position: relative; min-height: 68px; padding: 8px 9px 7px;
+    border-radius: var(--r-sm); border: 1px solid var(--line);
+    background: var(--mat-sheen), linear-gradient(180deg, var(--surface-3), var(--surface-1));
+    box-shadow: var(--mat-inner); text-align: left; cursor: pointer; overflow: hidden;
+    font-family: inherit; color: var(--magic);
+    transition: border-color 0.12s var(--ease), transform 0.12s var(--ease), box-shadow 0.12s var(--ease);
+  }
+  .mini-card::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), transparent 45%);
+    opacity: 0; transition: opacity 0.12s var(--ease); pointer-events: none;
+  }
+  .mini-card:hover { transform: translateY(-3px); border-color: var(--line-strong); }
+  .mini-card:hover::after { opacity: 1; }
+  .mini-card .m-key {
+    position: absolute; right: 3px; top: 2px; font-family: var(--mono); font-size: 8.5px;
+    color: var(--text-3); border: 1px solid rgba(120, 170, 230, 0.24); border-radius: 3px;
+    padding: 0 2px; line-height: 1.4;
+  }
+  .mini-card .m-glyph {
+    display: inline-flex; align-items: center; justify-content: center; width: 21px; height: 21px;
+    border-radius: var(--r-xs); border: 1px solid currentColor;
+    font-family: var(--mono); font-size: 12px; line-height: 1; margin-right: 5px;
+    vertical-align: middle;
+  }
+  .mini-card .m-name { font-size: 12.5px; font-weight: 600; letter-spacing: 0.02em; color: var(--text-1); vertical-align: middle; }
+  .mini-card .m-sub {
+    display: none; margin-top: 5px; font-family: var(--mono); font-size: 11px;
+    color: var(--text-3); letter-spacing: 0.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .mini-card .m-meta {
+    position: absolute; left: 6px; top: 4px; display: flex; align-items: center; gap: 4px;
+    font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.04em; pointer-events: none;
+  }
+  .mini-card .m-rarity { color: var(--rc, var(--text-3)); }
+  .mini-card .m-floor { color: rgba(168, 191, 220, 0.55); }
+  .mini-card .m-ring {
+    position: absolute; right: 4px; bottom: 4px; width: 18px; height: 18px; border-radius: 50%;
+    background: conic-gradient(currentColor calc(var(--cd, 0) * 1turn), rgba(120, 160, 200, 0.14) 0);
+    opacity: 0; transition: opacity 0.12s var(--ease); pointer-events: none;
+  }
+  .mini-card .m-ring i {
+    position: absolute; inset: 2.5px; border-radius: 50%; background: var(--panel);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono); font-size: 9px; font-style: normal; color: #ffd6d6;
+  }
+  .mini-card.is-cooling .m-ring { opacity: 1; }
+  .mini-card .m-cd {
+    position: absolute; left: 0; right: 0; bottom: 0; height: 0%;
+    background: rgba(3, 8, 16, 0.66); pointer-events: none; transition: height 0.1s linear;
+  }
+  .mini-card .m-cd-text { display: none; }
+  .mini-card.is-cooling .m-cd-text { display: block; position: absolute; left: 6px; bottom: 3px; font-family: var(--mono); font-size: 9px; color: var(--text-3); }
+  .mini-card.r-common { border-color: rgba(120, 150, 190, 0.35); }
+  .mini-card.r-rare { border-color: rgba(90, 170, 255, 0.45); box-shadow: var(--mat-inner), inset 0 0 0 1px rgba(90, 170, 255, 0.18); }
+  .mini-card.r-epic { border-color: rgba(180, 120, 255, 0.5); box-shadow: var(--mat-inner), inset 0 0 18px rgba(180, 120, 255, 0.14); }
+  .mini-card.r-rare .m-glyph { color: #6fb6ff; text-shadow: 0 0 8px rgba(90, 170, 255, 0.35); }
+  .mini-card.r-epic .m-glyph { color: #c08bff; text-shadow: 0 0 10px rgba(180, 120, 255, 0.35); }
+  .mini-card.is-active {
+    border-color: currentColor;
+    box-shadow: 0 0 0 1px currentColor, 0 0 22px rgba(176, 133, 255, 0.22);
+    background: var(--mat-sheen), linear-gradient(180deg, rgba(40, 31, 66, 0.94), var(--surface-1));
+  }
+  .mini-card.is-cooling .m-glyph { opacity: 0.78; }
+  /* 改前模拟：只有最朴素的一下下压，没有任何状态色 */
+  .mini-card.sfx-press-legacy {
+    transform: translateY(1px) scale(0.985);
+    border-color: var(--line-strong);
+  }
+  .row-label {
+    margin: 20px 0 8px; font-family: var(--mono); font-size: 10px;
+    letter-spacing: 0.14em; color: var(--text-3);
+  }
+
+  /* ---------- 说明区 ---------- */
+  .notes { margin-top: 18px; display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px; }
+  .note {
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px;
+    background: rgba(10, 16, 26, 0.72); font-size: 12px; line-height: 1.9; color: var(--text-2);
+  }
+  .note b { color: var(--text-1); }
+  .note code { font-family: var(--mono); color: var(--gold); }
+  .chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .chip { font-family: var(--mono); font-size: 10px; padding: 2px 6px; border-radius: 4px; border: 1px solid var(--line); color: var(--text-3); }
+
+  @media (max-width: 980px) {
+    .skills, .card-row { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .notes { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>烬 · 技能特效补丁预览</h1>
+      <div class="sub">12 张技能卡 · 施法前摇 / 命中签名 / 残留收束 · 卡面三态反馈</div>
+    </div>
+    <div class="toolbar">
+      <div class="seg">
+        <button id="btnBefore" type="button">改前</button>
+        <button id="btnAfter" type="button" class="on">改后</button>
+      </div>
+      <button class="btn gold" id="btnVolley" type="button">四技能齐射</button>
+      <button class="btn" id="btnAether" type="button">奥能不足</button>
+      <button class="btn" id="btnReset" type="button">重置</button>
+    </div>
+  </div>
+
+  <div class="stage-box">
+    <canvas id="stage" width="1200" height="560"></canvas>
+    <div class="stage-tag">固定机位 · 同场景对照</div>
+    <div class="stage-legend">
+      <span><i style="background:#ff8a5a"></i>火</span>
+      <span><i style="background:#7fd8ff"></i>冰</span>
+      <span><i style="background:#a8e6ff"></i>雷</span>
+      <span><i style="background:#b6ff6b"></i>蚀</span>
+      <span><i style="background:#9b6bff"></i>虚空</span>
+      <span><i style="background:#47e8a7"></i>治疗</span>
+    </div>
+    <div class="perf" id="perf">渲染 -- ms · p95 -- ms · 粒子峰值 --</div>
+  </div>
+
+  <div class="skills" id="skillGrid"></div>
+
+  <div class="row-label">卡面状态 · 按下 / 冷却开始 / 充能完毕 / 缺能</div>
+  <div class="card-row" id="cardRow"></div>
+
+  <div class="notes">
+    <div class="note">
+      <b>怎么看这张图</b><br>
+      1. 点任意技能：舞台立即播放“前摇 + 释放 + 残留”，同时卡面进入冷却。<br>
+      2. 点“四技能齐射”：火（楔形）、冰（六角）、雷（折线）、虚空（内旋）同一帧命中，靠形状和方向区分，不只靠颜色。<br>
+      3. 点“奥能不足”：卡面进入琥珀色“缺能”态，与冷却中的蓝色环形进度完全分开。<br>
+      4. 切“改前”：同一场景只播放主文件现有特效，卡面没有三态区分。
+    </div>
+    <div class="note">
+      <b>补丁信息</b><br>
+      脚本：<code>skill-fx.js</code> · 样式：<code>skill-fx.css</code><br>
+      关闭参数：<code>?skillfx=off</code><br>
+      挂载点：<code>castSlot()</code> / <code>damageEnemy()</code> / <code>updateDeckCooldowns()</code><br>
+      <div class="chips">
+        <span class="chip">同帧合并</span><span class="chip">粒子上限 300</span>
+        <span class="chip">无二次合成</span><span class="chip">零外部请求</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 预览页的“沙盒世界”与假状态：必须在 skill-fx.js 之前定义 -->
+<script>
+(function () {
+  'use strict';
+
+  /* ==========================================================
+     1. 12 张卡的最小配置（只用于预览，数值与主文件一致）
+     ========================================================== */
+  var MAGIC = [
+    { id: 'fireball', name: '火球', glyph: '△', cost: 15, cooldown: 0.55, rarity: 'common', el: 'fire', vfx: { core: '#ff9a5a', glow: '#ff6b3d', accent: '#ffd27a' } },
+    { id: 'frost', name: '冰环', glyph: '◎', cost: 25, cooldown: 1.8, rarity: 'common', el: 'ice', vfx: { core: '#7fd8ff', glow: '#4aa8ff', accent: '#d8f6ff' } },
+    { id: 'bolt', name: '雷击', glyph: '⌁', cost: 30, cooldown: 2.2, rarity: 'rare', el: 'thunder', vfx: { core: '#a8e6ff', glow: '#5ec8ff', accent: '#eaffff' } },
+    { id: 'heal', name: '治疗符', glyph: '✚', cost: 28, cooldown: 3.2, rarity: 'common', el: 'heal', vfx: { core: '#47e8a7', glow: '#2fbf87', accent: '#c8ffe2' } },
+    { id: 'blade', name: '回旋刃', glyph: '⟲', cost: 20, cooldown: 1.4, rarity: 'rare', el: 'poison', vfx: { core: '#e8d4ff', glow: '#b085ff', accent: '#ffffff' } },
+    { id: 'mine', name: '符文雷', glyph: '✳', cost: 22, cooldown: 2.6, rarity: 'epic', el: 'fire', vfx: { core: '#d8c2ff', glow: '#a06bff', accent: '#f0e6ff' } },
+    { id: 'lavaFissure', name: '熔岩地裂', glyph: '⌇', cost: 24, cooldown: 2.4, rarity: 'rare', el: 'fire', vfx: { core: '#ffb066', glow: '#ff6b2d', accent: '#ffe0a8' } },
+    { id: 'arcanePool', name: '奥术雷池', glyph: '≋', cost: 30, cooldown: 3.0, rarity: 'epic', el: 'thunder', vfx: { core: '#9fe0ff', glow: '#5ec8ff', accent: '#eaffff' } },
+    { id: 'runeOrbit', name: '符文轨道', glyph: '◌', cost: 26, cooldown: 2.8, rarity: 'rare', el: 'poison', vfx: { core: '#d8b8ff', glow: '#a06bff', accent: '#f4e6ff' } },
+    { id: 'collapseHole', name: '坍缩黑洞', glyph: '◍', cost: 32, cooldown: 3.2, rarity: 'epic', el: 'void', vfx: { core: '#c7a8ff', glow: '#7b4dff', accent: '#ffffff' } },
+    { id: 'flameCone', name: '喷火锥', glyph: '◮', cost: 22, cooldown: 2.2, rarity: 'common', el: 'fire', vfx: { core: '#ffb066', glow: '#ff6b3d', accent: '#ffd27a' } },
+    { id: 'frostRing', name: '冰霜环', glyph: '❄', cost: 25, cooldown: 2.6, rarity: 'common', el: 'ice', vfx: { core: '#7fd8ff', glow: '#4aa8ff', accent: '#d8f6ff' } }
+  ];
+  var BY_ID = {};
+  MAGIC.forEach(function (m) { BY_ID[m.id] = m; });
+  window.MAGIC_BY_ID = BY_ID;
+  window.talentEff = function () { return 0; };
+  /* 与正式游戏保持一致：并联回路开启，副槽耗能 0.9 倍 */
+  window.DUAL_CONFIG = { enabled: true, secondaryCost: 0.9 };
+
+  /* 假状态：卡面逻辑会读这些字段，和主文件同名字段保持同义 */
+  window.state = {
+    mode: 'playing',
+    status: 'playing',
+    elapsed: 0,
+    cooldowns: {},
+    ownedMagic: MAGIC.map(function (m) { return m.id; }),
+    mods: { cooldownMul: 1.6 },
+    player: { x: 300, y: 330, aether: 26, aetherMax: 100 },
+    dual: null
+  };
+
+  /* ==========================================================
+     2. 沙盒世界：只做预览渲染，不参与正式游戏
+     ========================================================== */
+  var W = {
+    time: 0,
+    aim: 0,
+    player: { x: 300, y: 330 },
+    particles: [],
+    rings: [],
+    beams: [],
+    enemies: [
+      { x: 640, y: 250, r: 18, hp: 1 },
+      { x: 760, y: 330, r: 20, hp: 1 },
+      { x: 700, y: 430, r: 18, hp: 1 },
+      { x: 880, y: 240, r: 22, hp: 1 },
+      { x: 900, y: 420, r: 18, hp: 1 }
+    ],
+    frozen: false
+  };
+
+  function rnd(a, b) { return a + Math.random() * (b - a); }
+
+  function spawnRing(x, y, r, color, grow, life, shape, spin) {
+    W.rings.push({ x: x, y: y, r: r, color: color, grow: grow, life: life, maxLife: life, shape: shape || 'ring', spin: spin || 0 });
+  }
+
+  function spawnBurst(x, y, color, count, speed, dir, spread) {
+    var n = Math.max(3, Math.round(count || 8));
+    var half = spread == null ? 0.5 : spread;
+    for (var i = 0; i < n; i += 1) {
+      var a = (dir == null) ? rnd(0, Math.PI * 2) : (dir + rnd(-half, half));
+      var s = (speed || 120) * rnd(0.5, 1);
+      spawnMote(x, y, Math.cos(a) * s, Math.sin(a) * s, rnd(1.2, 2.8), color, rnd(0.18, 0.42));
+    }
+  }
+
+  function spawnSparks(x, y, color, count) {
+    for (var i = 0; i < count; i += 1) {
+      var a = rnd(0, Math.PI * 2);
+      var s = rnd(40, 140);
+      spawnMote(x, y, Math.cos(a) * s, Math.sin(a) * s, rnd(1, 2.2), color, rnd(0.16, 0.34));
+    }
+  }
+
+  function spawnMote(x, y, vx, vy, size, color, life) {
+    if (W.particles.length >= 300) return;
+    W.particles.push({ x: x, y: y, vx: vx, vy: vy, size: size, color: color, life: life, maxLife: life });
+  }
+
+  function spawnBeam(points, color, life, width, branch) {
+    W.beams.push({ points: points, color: color, life: life, maxLife: life, width: width || 1.5, branch: !!branch });
+  }
+
+  var SANDBOX = {
+    ring: spawnRing,
+    burst: spawnBurst,
+    sparks: spawnSparks,
+    beam: spawnBeam,
+    mote: spawnMote,
+    counts: function () {
+      return { particles: W.particles.length, rings: W.rings.length, beams: W.beams.length };
+    },
+    now: function () { return W.time; },
+    player: function () { return W.player; },
+    aim: function () { return W.aim; },
+    scale: function () { return 1; }
+  };
+
+  /* ==========================================================
+     3. 改前（旧版）特效：照主文件现有 cast 函数的参数复刻
+     ========================================================== */
+  function legacyCast(id) {
+    var m = BY_ID[id];
+    var p = W.player;
+    var a = W.aim;
+    var v = m.vfx;
+    if (id === 'fireball') {
+      var sx = p.x + Math.cos(a) * 12;
+      var sy = p.y + Math.sin(a) * 12;
+      spawnRing(sx, sy, 5, hex(v.accent, 0.85), 18, 0.2, 'shockwave');
+      spawnBurst(sx, sy, v.accent, 8, 120, a, Math.PI / 5);
+    } else if (id === 'frost') {
+      spawnRing(p.x, p.y, 10, hex(v.accent, 0.9), 96, 0.46, 'hex', 1.4);
+      spawnRing(p.x, p.y, 16, hex(v.glow, 0.5), 69, 0.4, 'rune', 2.6);
+      spawnBurst(p.x, p.y, v.accent, 18, 170);
+    } else if (id === 'bolt') {
+      var t = W.enemies[0];
+      spawnBeam(zig(p.x, p.y, t.x, t.y, 4, 13), v.core, 0.28, 2.2, false);
+      spawnRing(t.x, t.y, t.r, hex(v.core, 0.85), 22, 0.24, 'shockwave');
+      spawnSparks(t.x, t.y, v.accent, 7);
+    } else if (id === 'heal') {
+      spawnRing(p.x, p.y, 12, hex(v.core, 0.85), 58, 0.52, 'rune', 2.2);
+      spawnRing(p.x, p.y, 8, hex(v.accent, 0.6), 34, 0.4, 'ring');
+      for (var h = 0; h < 16; h += 1) {
+        spawnMote(p.x + rnd(-28, 28), p.y + rnd(-6, 22), rnd(-12, 12), rnd(-96, -44), rnd(1.5, 3.2), h % 3 === 0 ? v.accent : v.core, rnd(0.4, 0.85));
+      }
+    } else if (id === 'blade') {
+      var bx = p.x + Math.cos(a) * 14;
+      var by = p.y + Math.sin(a) * 14;
+      spawnRing(bx, by, 5, hex(v.accent, 0.9), 22, 0.2, 'shockwave');
+      spawnBurst(bx, by, v.accent, 8, 130, a, Math.PI / 5);
+    } else if (id === 'mine') {
+      var mp = targetOf(id);
+      spawnRing(mp.x, mp.y, 8, hex(v.accent, 0.85), 38, 0.3, 'rune', 2.0);
+      spawnBurst(mp.x, mp.y, v.accent, 10, 90);
+    } else if (id === 'lavaFissure') {
+      var ex = p.x + Math.cos(a) * 260;
+      var ey = p.y + Math.sin(a) * 260;
+      spawnBeam([{ x: p.x, y: p.y }, { x: ex, y: ey }], hex(v.glow, 0.85), 0.55, 14, false);
+      spawnRing(ex, ey, 10, hex(v.accent, 0.85), 46, 0.32, 'shockwave');
+      for (var s = 1; s <= 4; s += 1) {
+        spawnSparks(p.x + (ex - p.x) * (s / 5), p.y + (ey - p.y) * (s / 5), v.accent, 5);
+      }
+    } else if (id === 'arcanePool') {
+      var ap = targetOf(id);
+      spawnRing(ap.x, ap.y, 8, hex(v.accent, 0.9), 110, 0.5, 'shockwave');
+      spawnRing(ap.x, ap.y, 44, hex(v.glow, 0.7), 115, 0.42, 'rune', 1.8);
+      spawnBurst(ap.x, ap.y, v.accent, 16, 190);
+    } else if (id === 'runeOrbit') {
+      spawnRing(p.x, p.y, 40, hex(v.glow, 0.85), 200, 0.52, 'rune', 3.2);
+      spawnRing(p.x, p.y, 48, hex(v.accent, 0.6), 180, 0.44, 'ring', -2.4);
+      spawnRing(p.x, p.y, 32, hex(v.glow, 0.5), 160, 0.6, 'hex', 1.6);
+      spawnSparks(p.x, p.y, v.accent, 14);
+    } else if (id === 'collapseHole') {
+      var cp = targetOf(id);
+      spawnRing(cp.x, cp.y, 34, hex(v.glow, 0.9), 93, 0.5, 'rune', -3.4);
+      spawnBurst(cp.x, cp.y, v.accent, 18, 60, null, Math.PI * 2);
+    } else if (id === 'flameCone') {
+      var half = (72 * Math.PI / 180) * 0.5;
+      spawnBurst(p.x, p.y, v.accent, 26, 266, a, half * 2);
+      spawnBeam([{ x: p.x, y: p.y }, { x: p.x + Math.cos(a - half) * 190, y: p.y + Math.sin(a - half) * 190 }], hex(v.glow, 0.45), 0.3, 1.6, false);
+      spawnBeam([{ x: p.x, y: p.y }, { x: p.x + Math.cos(a + half) * 190, y: p.y + Math.sin(a + half) * 190 }], hex(v.glow, 0.45), 0.3, 1.6, false);
+    } else if (id === 'frostRing') {
+      spawnRing(p.x, p.y, 12, hex(v.accent, 0.9), 140, 0.46, 'hex', 1.6);
+      spawnRing(p.x, p.y, 20, hex(v.glow, 0.6), 109, 0.4, 'ring', -2.2);
+      spawnBurst(p.x, p.y, v.accent, 20, 180);
+    }
+  }
+
+  function hex(h, a) {
+    var s = String(h).replace('#', '');
+    if (s.length === 3) s = s[0] + s[0] + s[1] + s[1] + s[2] + s[2];
+    var n = parseInt(s, 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+
+  function zig(x1, y1, x2, y2, seg, jitter) {
+    var pts = [{ x: x1, y: y1 }];
+    var ang = Math.atan2(y2 - y1, x2 - x1);
+    for (var i = 1; i < seg; i += 1) {
+      var f = i / seg;
+      var off = rnd(-jitter, jitter);
+      pts.push({ x: x1 + (x2 - x1) * f + Math.cos(ang + Math.PI / 2) * off, y: y1 + (y2 - y1) * f + Math.sin(ang + Math.PI / 2) * off });
+    }
+    pts.push({ x: x2, y: y2 });
+    return pts;
+  }
+
+  /**
+   * 每张技能在固定机位下的落点（预览用）
+   */
+  function targetOf(id) {
+    if (id === 'mine') return { x: 700, y: 430 };
+    if (id === 'arcanePool') return { x: 760, y: 330 };
+    if (id === 'collapseHole') return { x: 780, y: 350 };
+    if (id === 'bolt') return W.enemies[0];
+    return { x: W.player.x + Math.cos(W.aim) * 220, y: W.player.y + Math.sin(W.aim) * 220 };
+  }
+
+  /**
+   * 计算每张技能的瞄准角，让 12 张卡在固定场景里各自指向合适的目标
+   */
+  function aimFor(id) {
+    var t = targetOf(id);
+    return Math.atan2(t.y - W.player.y, t.x - W.player.x);
+  }
+
+  /* ==========================================================
+     4. 改后：SKILLFX 演出
+     ========================================================== */
+  var mode = 'after';
+  var skillfxReady = false;
+
+  function trigger(id) {
+    var m = BY_ID[id];
+    if (!m) return;
+    if (state.cooldowns[id] > 0.05) return;
+    if (state.player.aether < m.cost * 0.9) { flashDenied(id); return; }
+
+    state.player.aether = Math.max(0, state.player.aether - m.cost);
+    state.cooldowns[id] = m.cooldown * state.mods.cooldownMul;
+    W.aim = aimFor(id);
+
+    if (mode === 'after' && skillfxReady) {
+      var t = targetOf(id);
+      window.SKILLFX.emitCast(id, { x: W.player.x, y: W.player.y, angle: W.aim, tx: t.x, ty: t.y });
+      window.SKILLFX.castCard(id);
+      // 命中签名：真实游戏由 damageEnemy 的 abilityId 触发，预览用 260ms 后的模拟命中补上
+      setTimeout(function () {
+        if (!skillfxReady) return;
+        window.SKILLFX.emitHit(id, t.x, t.y, W.aim);
+      }, 260);
+    } else {
+      legacyCast(id);
+      // 改前只有基础卡面：给一个最朴素的下压与冷却开始
+      var card = document.querySelector('.mini-card[data-magic-id="' + id + '"]');
+      if (card) {
+        card.classList.add('sfx-press-legacy');
+        setTimeout(function () { card.classList.remove('sfx-press-legacy'); }, 140);
+      }
+    }
+    updateCardsBase();
+  }
+
+  function flashDenied(id) {
+    var card = document.querySelector('.mini-card[data-magic-id="' + id + '"]');
+    if (!card) return;
+    card.style.transition = 'transform 0.08s';
+    card.style.transform = 'translateX(-2px)';
+    setTimeout(function () { card.style.transform = 'translateX(2px)'; }, 80);
+    setTimeout(function () { card.style.transform = ''; card.style.transition = ''; }, 160);
+  }
+
+  /* ==========================================================
+     5. 卡面：基础层（与主文件 updateDeckCooldowns 等价）
+     ========================================================== */
+  var cardRow = document.getElementById('cardRow');
+  var skillGrid = document.getElementById('skillGrid');
+  var cards = {};
+
+  function buildCards() {
+    var html = '';
+    MAGIC.forEach(function (m, i) {
+      html += '<button type="button" class="mini-card r-' + m.rarity + '" data-magic-id="' + m.id + '">'
+        + '<span class="m-key">' + (i + 1) + '</span>'
+        + '<span class="m-meta"><span class="m-rarity">' + (m.rarity === 'epic' ? 'Ⅲ' : (m.rarity === 'rare' ? 'Ⅱ' : 'Ⅰ')) + '</span><span class="m-floor">F1</span></span>'
+        + '<span class="m-glyph">' + m.glyph + '</span>'
+        + '<span class="m-name">' + m.name + '</span>'
+        + '<span class="m-sub">' + m.cost + ' 奥能 · ' + m.cooldown.toFixed(1) + 's</span>'
+        + '<span class="m-cd"></span>'
+        + '<span class="m-ring"><i></i></span>'
+        + '<span class="m-cd-text"></span>'
+        + '</button>';
+    });
+    cardRow.innerHTML = html;
+    MAGIC.forEach(function (m) {
+      cards[m.id] = cardRow.querySelector('[data-magic-id="' + m.id + '"]');
+    });
+    // 单击卡面 = 触发该技能（预览里最直观的“逐个触发”）
+    MAGIC.forEach(function (m) {
+      cards[m.id].addEventListener('click', function () { trigger(m.id); });
+    });
+  }
+
+  function buildSkillButtons() {
+    var html = '';
+    MAGIC.forEach(function (m) {
+      var c = m.vfx.glow;
+      html += '<button type="button" class="skill" data-skill="' + m.id + '" style="--c:' + c + '">'
+        + '<span class="g">' + m.glyph + '</span>'
+        + '<span><span class="n">' + m.name + '</span><span class="d">' + m.cost + ' 奥能 · ' + m.cooldown.toFixed(1) + 's</span></span>'
+        + '<span class="el">' + m.el.toUpperCase() + '</span>'
+        + '<span class="cd"></span>'
+        + '</button>';
+    });
+    skillGrid.innerHTML = html;
+    skillGrid.querySelectorAll('[data-skill]').forEach(function (btn) {
+      btn.addEventListener('click', function () { trigger(btn.getAttribute('data-skill')); });
+    });
+  }
+
+  /**
+   * 基础卡面刷新：环形进度 / 底部遮罩 / 倒计时（改前改后都跑）
+   */
+  function updateCardsBase() {
+    var aether = state.player.aether;
+    MAGIC.forEach(function (m) {
+      var card = cards[m.id];
+      if (!card) return;
+      var remain = Math.max(0, state.cooldowns[m.id] || 0);
+      var total = Math.max(0.001, m.cooldown * state.mods.cooldownMul);
+      var frac = remain > 0.05 ? Math.min(1, remain / total) : 0;
+      var ring = card.querySelector('.m-ring');
+      var overlay = card.querySelector('.m-cd');
+      var ringText = card.querySelector('.m-ring i');
+      var cdText = card.querySelector('.m-cd-text');
+      if (overlay) overlay.style.height = (frac * 100).toFixed(1) + '%';
+      if (ring) ring.style.setProperty('--cd', frac.toFixed(3));
+      if (ringText) ringText.textContent = remain > 0.05 ? (remain >= 10 ? String(Math.round(remain)) : remain.toFixed(1)) : '';
+      if (cdText) cdText.textContent = remain >= 3 ? remain.toFixed(0) + 's' : '';
+      card.classList.toggle('is-cooling', remain > 0.05);
+    });
+  }
+
+  /* ==========================================================
+     6. 世界更新与绘制
+     ========================================================== */
+  function updateWorld(dt) {
+    W.time += dt;
+    state.elapsed = W.time;
+    for (var i = W.particles.length - 1; i >= 0; i -= 1) {
+      var p = W.particles[i];
+      p.life -= dt;
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.vx *= 0.96;
+      p.vy *= 0.96;
+      if (p.life <= 0) W.particles.splice(i, 1);
+    }
+    for (var r = W.rings.length - 1; r >= 0; r -= 1) {
+      W.rings[r].life -= dt;
+      if (W.rings[r].life <= 0) W.rings.splice(r, 1);
+    }
+    for (var b = W.beams.length - 1; b >= 0; b -= 1) {
+      W.beams[b].life -= dt;
+      if (W.beams[b].life <= 0) W.beams.splice(b, 1);
+    }
+    // 奥能缓慢回复，保证连续演示不会卡死
+    state.player.aether = Math.min(100, state.player.aether + dt * 9);
+  }
+
+  var canvas = document.getElementById('stage');
+  var ctx = canvas.getContext('2d');
+  var perfEl = document.getElementById('perf');
+  var frameMs = [];
+  var peak = 0;
+
+  /**
+   * 画地面：网格 + 暗角，保证“改前/改后”同一底图
+   */
+  function drawGround() {
+    var w = canvas.width;
+    var h = canvas.height;
+    var g = ctx.createLinearGradient(0, 0, 0, h);
+    g.addColorStop(0, '#0a1220');
+    g.addColorStop(0.55, '#081019');
+    g.addColorStop(1, '#05080d');
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, w, h);
+
+    ctx.save();
+    ctx.strokeStyle = 'rgba(90, 140, 200, 0.12)';
+    ctx.lineWidth = 1;
+    for (var x = 0; x <= w; x += 60) {
+      ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+    }
+    for (var y = 0; y <= h; y += 60) {
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
+    }
+    ctx.restore();
+
+    var rg = ctx.createRadialGradient(w * 0.48, h * 0.55, 80, w * 0.48, h * 0.55, w * 0.62);
+    rg.addColorStop(0, 'rgba(80, 120, 200, 0.05)');
+    rg.addColorStop(1, 'rgba(0, 0, 0, 0.62)');
+    ctx.fillStyle = rg;
+    ctx.fillRect(0, 0, w, h);
+  }
+
+  function polyPath(cx, cy, radius, sides, rotation) {
+    ctx.beginPath();
+    for (var i = 0; i <= sides; i += 1) {
+      var a = rotation + (Math.PI * 2 * i) / sides;
+      var x = cx + Math.cos(a) * radius;
+      var y = cy + Math.sin(a) * radius;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+  }
+
+  /**
+   * 画环：支持 ring / shockwave / hex / rune 四种形状
+   */
+  function drawRings() {
+    for (var i = 0; i < W.rings.length; i += 1) {
+      var r = W.rings[i];
+      var prog = 1 - Math.max(0, r.life) / Math.max(0.001, r.maxLife);
+      var rad = Math.max(1, r.r + r.grow * prog);
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, r.life / r.maxLife);
+      ctx.strokeStyle = r.color;
+      ctx.lineWidth = r.shape === 'shockwave' ? 3.4 : 2;
+      var rot = r.spin * prog;
+      if (r.shape === 'hex') {
+        polyPath(r.x, r.y, rad, 6, rot);
+        ctx.stroke();
+        ctx.globalAlpha *= 0.35;
+        polyPath(r.x, r.y, rad * 0.72, 6, rot + Math.PI / 6);
+        ctx.stroke();
+      } else if (r.shape === 'rune') {
+        polyPath(r.x, r.y, rad, 12, rot);
+        ctx.stroke();
+        ctx.globalAlpha *= 0.45;
+        polyPath(r.x, r.y, rad * 0.66, 6, -rot);
+        ctx.stroke();
+      } else if (r.shape === 'shockwave') {
+        ctx.lineWidth = 3.4;
+        // 必须重置路径：否则会重描上一帧残留路径（比如底图最后一条网格线）
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, rad, 0, Math.PI * 2);
+        ctx.stroke();
+        // 外圈再补一圈细线，读作“冲击波”
+        ctx.globalAlpha *= 0.5;
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, Math.max(1, rad * 1.12), 0, Math.PI * 2);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(r.x, r.y, rad, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+  }
+
+  function drawBeams() {
+    for (var i = 0; i < W.beams.length; i += 1) {
+      var b = W.beams[i];
+      var alpha = Math.max(0, b.life / b.maxLife);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.strokeStyle = b.color;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      // 宽而淡的底 + 细而亮的芯，替代 shadowBlur（预览也要守住性能）
+      ctx.lineWidth = b.width * 3.2;
+      ctx.globalAlpha = alpha * 0.32;
+      trace(b.points);
+      ctx.stroke();
+      ctx.globalAlpha = alpha;
+      ctx.lineWidth = b.width;
+      trace(b.points);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function trace(points) {
+    ctx.beginPath();
+    for (var i = 0; i < points.length; i += 1) {
+      if (i === 0) ctx.moveTo(points[i].x, points[i].y); else ctx.lineTo(points[i].x, points[i].y);
+    }
+  }
+
+  function drawParticles() {
+    for (var i = 0; i < W.particles.length; i += 1) {
+      var p = W.particles[i];
+      var a = Math.max(0, p.life / p.maxLife);
+      ctx.globalAlpha = a;
+      ctx.fillStyle = p.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /**
+   * 画角色与敌人：只提供位置感，不参与判定
+   */
+  function drawActors() {
+    var p = W.player;
+    ctx.save();
+    ctx.fillStyle = 'rgba(120, 210, 255, 0.16)';
+    ctx.beginPath(); ctx.arc(p.x, p.y, 34, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(159, 243, 255, 0.55)';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, Math.PI * 2); ctx.stroke();
+    ctx.fillStyle = '#dff6ff';
+    ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, Math.PI * 2); ctx.fill();
+    // 法杖指向当前瞄准角
+    ctx.strokeStyle = 'rgba(200, 235, 255, 0.75)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x + Math.cos(W.aim) * 26, p.y + Math.sin(W.aim) * 26);
+    ctx.stroke();
+    ctx.restore();
+
+    for (var i = 0; i < W.enemies.length; i += 1) {
+      var e = W.enemies[i];
+      ctx.save();
+      ctx.fillStyle = 'rgba(255, 110, 120, 0.12)';
+      polyPath(e.x, e.y, e.r + 6, 6, 0.2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255, 140, 150, 0.55)';
+      ctx.lineWidth = 1.6;
+      polyPath(e.x, e.y, e.r, 6, 0.2);
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawGround();
+    drawRings();
+    drawBeams();
+    drawActors();
+    drawParticles();
+  }
+
+  /* ==========================================================
+     7. 主循环 + 性能统计
+     ========================================================== */
+  var last = 0;
+  var uiTimer = 0;
+
+  function loop(ts) {
+    if (!last) last = ts;
+    var dt = Math.min(0.05, (ts - last) / 1000);
+    last = ts;
+    var t0 = performance.now();
+
+    if (!W.frozen) updateWorld(dt);
+    // 奥能回复放在 updateWorld 里，这里不要再加一遍
+    draw();
+
+    var t1 = performance.now();
+    frameMs.push(t1 - t0);
+    if (frameMs.length > 600) frameMs.shift();
+
+    uiTimer += dt;
+    if (uiTimer >= 0.05) {
+      uiTimer = 0;
+      updateCardsBase();
+      if (mode === 'after' && skillfxReady) window.SKILLFX.refreshCards();
+      var sorted = frameMs.slice().sort(function (a, b) { return a - b; });
+      var p95 = sorted.length ? sorted[Math.floor(sorted.length * 0.95)] : 0;
+      var localPeak = Math.max(peak, W.particles.length);
+      peak = localPeak;
+      perfEl.textContent = '渲染 ' + (t1 - t0).toFixed(2) + ' ms · p95 ' + p95.toFixed(2) + ' ms · 粒子峰值 ' + Math.max(localPeak, W.particles.length);
+    }
+    requestAnimationFrame(loop);
+  }
+
+  /* ==========================================================
+     8. 模式切换 / 按钮 / 自动截图场景
+     ========================================================== */
+  function setMode(next) {
+    mode = next;
+    document.getElementById('btnBefore').classList.toggle('on', next === 'before');
+    document.getElementById('btnAfter').classList.toggle('on', next === 'after');
+    if (next === 'after') {
+      window.SKILLFX.bindSandbox(SANDBOX);
+      skillfxReady = window.SKILLFX.apply();
+    } else {
+      skillfxReady = false;
+      window.SKILLFX.revert();
+    }
+    updateCardsBase();
+  }
+
+  function volley() {
+    var ids = ['fireball', 'frost', 'bolt', 'collapseHole'];
+    ids.forEach(function (id) {
+      state.cooldowns[id] = 0;
+      state.player.aether = 100;
+      W.aim = aimFor(id);
+      if (mode === 'after') {
+        var t = targetOf(id);
+        window.SKILLFX.emitCast(id, { x: W.player.x, y: W.player.y, angle: W.aim, tx: t.x, ty: t.y });
+        window.SKILLFX.castCard(id);
+        // 70ms 后补一次命中签名：截帧时能看到“四种技能同时命中也能分清”
+        (function (hid, hx, hy, ha) {
+          setTimeout(function () {
+            if (mode === 'after' && window.SKILLFX && window.SKILLFX.isEnabled()) {
+              window.SKILLFX.emitHit(hid, hx, hy, ha);
+            }
+          }, 70);
+        })(id, t.x, t.y, W.aim);
+      } else {
+        legacyCast(id);
+      }
+      state.cooldowns[id] = BY_ID[id].cooldown * state.mods.cooldownMul;
+    });
+    state.player.aether = 26;
+    updateCardsBase();
+  }
+
+  function reset() {
+    W.particles.length = 0;
+    W.rings.length = 0;
+    W.beams.length = 0;
+    W.time = 0;
+    W.frozen = false;
+    frameMs.length = 0;
+    peak = 0;
+    MAGIC.forEach(function (m) { state.cooldowns[m.id] = 0; });
+    state.player.aether = 26;
+    updateCardsBase();
+    if (mode === 'after') window.SKILLFX.refreshCards();
+  }
+
+  /* ---------- 自动截图：?autoshot=before|after&freeze=1 ---------- */
+  function autoshot() {
+    var q = String(location.search || '');
+    var m = /autoshot=(before|after)/.exec(q);
+    if (!m) return;
+    var which = m[1];
+    setMode(which);
+    reset();
+    // 先让一张卡的冷却读到“快结束”，这样改后会捕捉到“充能完毕”的金色回弹
+    state.cooldowns.blade = 0.09;
+    if (which === 'after') {
+      window.SKILLFX.refreshCards();
+    }
+    setTimeout(function () {
+      volley();
+      // 保留一个“按下”态：让一张仍可用的卡在截图瞬间处于按下反馈
+      if (which === 'after') {
+        window.SKILLFX.press('heal');
+      }
+      state.player.aether = 26;
+      updateCardsBase();
+      if (which === 'after') window.SKILLFX.refreshCards();
+      if (/freeze=1/.test(q)) {
+        setTimeout(function () {
+          W.frozen = true;
+          draw();
+          window.__shotReady = true;
+        }, 110);
+      }
+    }, 240);
+  }
+
+  /* ---------- 启动 ---------- */
+  window.addEventListener('load', function () {
+    buildSkillButtons();
+    buildCards();
+    setMode('after');
+    reset();
+    requestAnimationFrame(loop);
+    setTimeout(autoshot, 40);
+  });
+
+  document.getElementById('btnBefore').addEventListener('click', function () { setMode('before'); reset(); });
+  document.getElementById('btnAfter').addEventListener('click', function () { setMode('after'); reset(); });
+  document.getElementById('btnVolley').addEventListener('click', volley);
+  document.getElementById('btnReset').addEventListener('click', reset);
+  document.getElementById('btnAether').addEventListener('click', function () {
+    state.player.aether = 0;
+    updateCardsBase();
+    if (mode === 'after') window.SKILLFX.refreshCards();
+  });
+})();
+</script>
+
+<!-- 补丁脚本：必须放在假状态之后；预览页会手动 bindSandbox + apply -->
+<script src="skill-fx.js"></script>
+</body>
+</html>

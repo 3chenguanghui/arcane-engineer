@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>烬 · 技能卡三方案（UI Lab）</title>
+<style>
+/* ============================================================
+   0. 设计令牌：逐条照抄主文件 :root，不新增色相
+   ------------------------------------------------------------
+   目的：新方案"长在现有体系上"。所有颜色、圆角、间距、字体
+   均来自主文件 烬_v1.6.0.html 第 19–145 行的令牌区。
+   ============================================================ */
+:root{
+  --bg:#070b14; --bg-deep:#03060c;
+  --surface-1:#0d1424; --surface-2:#131e33; --surface-3:#1b2942;
+  --panel:#121d31; --panel-2:#16233a;
+  --line:rgba(126,164,214,.24); --line-strong:rgba(120,190,255,.46);
+  --line-soft:rgba(140,178,228,.14);
+  --text-1:#eaf5ff; --text-2:#c3d7ef; --text-3:#a8bfdc; --muted:#a8bfdc;
+  --tech:#3ee6ff; --magic:#b085ff; --gold:#ffc247; --good:#47e8a7; --bad:#ff6b7f;
+  --rar-common:#9fb0c8; --rar-rare:#4aa8ff; --rar-epic:#b47cff; --rar-relic:#ffc247;
+  --rar-common-line:rgba(159,176,200,.34);
+  --rar-rare-line:rgba(74,168,255,.46);
+  --rar-epic-line:rgba(180,124,255,.55);
+  --rar-relic-line:rgba(255,194,71,.55);
+  --rar-epic-text:#c9a6ff;
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  --sp-1:4px; --sp-2:6px; --sp-3:8px; --sp-4:12px; --sp-5:16px; --sp-6:22px;
+  --sans:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;
+  --mono:"Cascadia Mono","Consolas","Courier New",monospace;
+  --sheen:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,0) 42%);
+  --inner:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -18px 32px rgba(0,0,0,.35);
+  --shadow-panel:0 18px 46px rgba(0,0,0,.55);
+  --shadow-pop:0 28px 80px rgba(0,0,0,.66);
+  --ease:cubic-bezier(.2,.9,.25,1);
+  --dur:.22s; --dur-fast:.14s;
+  --page:1320px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100%;
+  background:
+    radial-gradient(900px 460px at 50% -8%,rgba(62,230,255,.075),transparent 70%),
+    radial-gradient(760px 420px at 92% 4%,rgba(176,133,255,.065),transparent 70%),
+    linear-gradient(rgba(120,190,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,190,255,.04) 1px,transparent 1px),
+    var(--bg);
+  background-size:auto,auto,48px 48px,48px 48px,auto;
+  color:var(--text-2);
+  font-family:var(--sans);
+  font-size:14px;
+  -webkit-font-smoothing:antialiased;
+  padding:44px 24px 72px;
+}
+.wrap{max-width:var(--page);margin:0 auto}
+
+/* ============================================================
+   1. 页头：实验室编号 / 标题 / 约束条
+   ============================================================ */
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--tech);text-transform:uppercase}
+h1{margin:8px 0 10px;font-size:34px;line-height:1.15;letter-spacing:.03em;color:var(--text-1);font-weight:700}
+.lede{margin:0;max-width:760px;font-size:13px;line-height:1.8;color:var(--text-3)}
+.lede b{color:var(--text-1);font-weight:600}
+.head-rule{height:1px;margin:24px 0 0;background:linear-gradient(90deg,var(--line-strong),rgba(120,190,255,0) 62%)}
+
+/* 约束三连 */
+.constraints{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 0;padding:0;list-style:none}
+.constraints li{
+  display:flex;align-items:center;gap:8px;padding:7px 12px;
+  border:1px solid var(--line);border-radius:var(--r-sm);
+  background:rgba(10,18,30,.62);font-size:12px;color:var(--text-3);
+}
+.constraints em{font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--tech)}
+
+/* ============================================================
+   2. 令牌条：证明"没有另起一套"
+   ============================================================ */
+.tokenbar{display:flex;flex-wrap:wrap;align-items:center;gap:18px;margin-top:26px;padding:12px 16px;
+  border:1px solid var(--line);border-radius:var(--r-md);background:linear-gradient(180deg,rgba(19,30,51,.7),rgba(13,20,36,.7))}
+.tokenbar .t{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em}
+.sw{width:12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,.22)}
+.tokenbar .tail{margin-left:auto;font-size:11px;color:var(--muted)}
+.tokenbar .tail b{color:var(--text-2);font-weight:600}
+
+/* ============================================================
+   3. 三列方案区
+   ============================================================ */
+.schemes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:26px}
+.col{
+  position:relative;padding:16px 16px 18px;border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--sheen),linear-gradient(180deg,rgba(19,30,51,.92),rgba(9,15,26,.96));
+  box-shadow:var(--inner);
+}
+/* 左上角 L 形刻线：沿用主文件楼层板的角标语言 */
+.col::before{
+  content:"";position:absolute;left:12px;top:12px;width:14px;height:14px;
+  border-left:1px solid rgba(92,230,255,.4);border-top:1px solid rgba(92,230,255,.4);
+  pointer-events:none;
+}
+.col-head{display:flex;align-items:flex-start;gap:10px;padding:0 0 12px;border-bottom:1px dashed var(--line-soft)}
+.badge{
+  flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:var(--r-sm);
+  border:1px solid rgba(92,230,255,.45);background:rgba(20,60,84,.42);
+  font-family:var(--mono);font-size:13px;font-weight:700;color:#d6f8ff;
+}
+.col-head h2{margin:0;font-size:17px;line-height:1.25;color:var(--text-1);letter-spacing:.02em}
+.scene{margin:3px 0 0;font-size:11.5px;line-height:1.55;color:var(--muted)}
+.spec{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0 14px;padding:0;list-style:none}
+.spec li{font-family:var(--mono);font-size:10px;letter-spacing:.03em;padding:3px 7px;border-radius:var(--r-xs);
+  border:1px solid var(--line);color:var(--text-3);background:rgba(255,255,255,.028)}
+.spec li b{color:var(--text-1);font-weight:700}
+.cards{display:flex;flex-direction:column;gap:12px}
+
+/* ============================================================
+   4. 卡面公共骨架（三方案共用：圆角 12 / 描边 1px / 左上光源）
+   ============================================================ */
+.card{
+  position:relative;display:flex;flex-direction:column;
+  border-radius:var(--r-md);
+  background:var(--sheen),linear-gradient(180deg,var(--surface-2),var(--surface-1));
+  box-shadow:var(--inner);
+  text-align:left;
+  overflow:hidden;
+}
+.card::after{ /* 顶部柔光，与主文件 .reward-card::after 同参数 */
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(240px 110px at 50% 0%,rgba(255,255,255,.06),transparent 70%);
+}
+/* 稀有度四档：颜色只是"加速"，另有形状/数量/描边三路冗余 */
+.r-common{--rc:var(--rar-common);--rc-line:var(--rar-common-line);--lvl:1}
+.r-rare  {--rc:var(--rar-rare);  --rc-line:var(--rar-rare-line);  --lvl:2}
+.r-epic  {--rc:var(--rar-epic);  --rc-line:var(--rar-epic-line);  --lvl:3}
+.r-relic {--rc:var(--rar-relic); --rc-line:var(--rar-relic-line); --lvl:4}
+.card{border:1px solid var(--rc-line);color:var(--rc)}
+/* 史诗小字改用亮紫（主文件 --rar-epic-text，11px 在深底才够 6.6:1） */
+.r-epic .rar-txt,.r-epic .tag{color:var(--rar-epic-text)}
+
+.tag{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;padding:2px 7px;border-radius:var(--r-pill);
+  border:1px solid currentColor;background:rgba(255,255,255,.03);white-space:nowrap;
+}
+.key{
+  flex:none;width:18px;height:18px;display:grid;place-items:center;border-radius:var(--r-xs);
+  border:1px solid var(--line);background:rgba(6,12,22,.7);
+  font-family:var(--mono);font-size:10px;color:var(--text-3);
+}
+.glyph{
+  flex:none;display:grid;place-items:center;border:1px solid currentColor;border-radius:var(--r-sm);
+  background:rgba(255,255,255,.035);box-shadow:inset 0 0 14px rgba(255,255,255,.04);
+}
+.glyph svg{width:22px;height:22px;color:inherit}
+.name{color:var(--text-1);font-weight:700;letter-spacing:.02em;margin:0}
+.desc{color:var(--text-3);display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;margin:0}
+
+/* 稀有度刻度：4 枚菱形，点亮数量 = 品质等级（灰度/色弱也能量） */
+.pips{display:inline-flex;gap:3px;align-items:center}
+.pips i{width:6px;height:6px;transform:rotate(45deg);border:1px solid rgba(160,180,210,.30);background:transparent}
+.pips i.on{background:var(--rc);border-color:var(--rc);box-shadow:0 0 7px -1px var(--rc)}
+
+/* ============================================================
+   5. 方案 A「刻度」：保持原卡结构，只加刻度 + 数值轨
+   ============================================================ */
+.card-a{padding:12px 14px 12px 17px;gap:7px;min-height:224px;
+  border-width:1px}
+.r-epic.card-a{border-width:1.5px}
+.r-relic.card-a{border-width:2px}
+.card-a::before{ /* 左侧色条：3px（史诗/传说 4px），与主文件 .reward-card::before 同义 */
+  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:var(--rc);opacity:.85;box-shadow:0 0 14px -2px var(--rc);
+}
+.r-epic.card-a::before,.r-relic.card-a::before{width:4px;opacity:1}
+.card-a .top{position:relative;z-index:1;display:flex;align-items:center;gap:8px}
+.card-a .rar{margin-left:auto;display:inline-flex;align-items:center;gap:7px}
+.card-a .rar-txt{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em}
+.card-a .glyph{width:44px;height:44px;margin-top:2px;position:relative;z-index:1}
+.card-a .name{font-size:16.5px;line-height:1.3;position:relative;z-index:1}
+.card-a .desc{font-size:12.5px;line-height:1.6;position:relative;z-index:1}
+/* 数值轨：一条独立横带，三个数字固定列位，不与描述混排 */
+.card-a .stats{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  margin-top:auto;padding-top:8px;border-top:1px solid var(--line-soft);position:relative;z-index:1;
+}
+.card-a .stats>div{padding:0 9px;border-left:1px dashed var(--line-soft);min-width:0}
+.card-a .stats>div:first-child{padding-left:0;border-left:0}
+.card-a .stats span{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted);line-height:1.2}
+.card-a .stats b{display:block;margin-top:3px;font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text-1);line-height:1.1;white-space:nowrap}
+.card-a .stats b em{font-style:normal;font-size:10px;font-weight:400;color:var(--text-3);margin-left:1px}
+.card-a .stats .v-aether{color:var(--tech)}
+
+/* ============================================================
+   6. 方案 B「铭牌」：横向紧凑，为贴底奖励条设计
+   ============================================================ */
+.card-b{min-height:178px;padding:0;gap:0}
+.card-b .plate{
+  display:flex;align-items:center;gap:10px;padding:12px 14px 0;
+  border-top:3px solid var(--rc);
+}
+.card-b .glyph{width:38px;height:38px}
+.card-b .glyph svg{width:19px;height:19px}
+.card-b .ttl{display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.card-b .name{font-size:16px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-b .sub{font-family:var(--mono);font-size:10px;letter-spacing:.07em;color:var(--text-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 菱形番号章：尺寸随品质增大，罗马数字正写（色弱读数字） */
+.card-b .seal{
+  position:relative;z-index:1;flex:none;width:18px;height:18px;transform:rotate(45deg);
+  border:1px solid var(--rc);background:rgba(255,255,255,.04);
+  display:grid;place-items:center;margin-left:2px;
+}
+.card-b .seal>span{transform:rotate(-45deg);font-family:var(--mono);font-size:8px;font-weight:700;color:var(--rc)}
+.r-rare.card-b .seal{width:21px;height:21px}
+.r-epic.card-b .seal{width:23px;height:23px}
+.r-relic.card-b .seal{width:25px;height:25px}
+.card-b .pills{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:10px 14px 0}
+.card-b .pill{
+  display:flex;align-items:baseline;gap:5px;height:24px;padding:0 8px;border-radius:var(--r-pill);
+  border:1px solid var(--line);background:rgba(255,255,255,.035);
+}
+.card-b .pill em{font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;color:var(--muted);white-space:nowrap}
+.card-b .pill b{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--text-1);white-space:nowrap}
+.card-b .pill .v-aether{color:var(--tech)}
+.card-b .desc{padding:9px 14px 0;font-size:12px;line-height:1.55}
+.card-b .foot{
+  display:flex;align-items:center;gap:6px;margin-top:auto;padding:8px 14px 11px;
+  font-family:var(--mono);font-size:10px;color:var(--text-3);
+}
+.card-b .foot i{width:5px;height:5px;transform:rotate(45deg);background:var(--gold);flex:none}
+
+/* ============================================================
+   7. 方案 C「主数」：伤害做主角，冷却/耗蓝降为副信息
+   ============================================================ */
+.card-c{min-height:180px;padding:12px 14px 12px 22px;gap:8px}
+.card-c .meter{position:absolute;left:7px;top:12px;display:flex;flex-direction:column;gap:3px;z-index:1}
+.card-c .meter i{width:4px;height:9px;border-radius:1px;background:rgba(160,180,210,.16)}
+.card-c .meter i.on{background:var(--rc);box-shadow:0 0 8px -2px var(--rc)}
+.card-c .head{display:flex;align-items:center;gap:9px;position:relative;z-index:1}
+.card-c .glyph{width:42px;height:42px}
+.card-c .ttl{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.card-c .name{font-size:16.5px;line-height:1.25}
+.card-c .sub{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--text-3)}
+.card-c .hero{
+  display:flex;align-items:baseline;gap:8px;margin-top:4px;padding-top:9px;
+  border-top:1px solid var(--line-soft);position:relative;z-index:1;
+}
+.card-c .hero b{font-family:var(--mono);font-size:25px;font-weight:700;line-height:1;color:var(--text-1)}
+.card-c .hero>span{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted)}
+.card-c .chips{margin-left:auto;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.card-c .chips i{font-style:normal;font-family:var(--mono);font-size:10.5px;font-weight:700;padding:3px 6px;
+  border-radius:var(--r-xs);border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text-3)}
+.card-c .chips i.aether{color:var(--tech);border-color:rgba(62,230,255,.30)}
+.card-c .desc{font-size:12px;line-height:1.55;position:relative;z-index:1}
+
+/* ============================================================
+   8. 容器查询：卡面按"自己的宽度"重排，而不是按窗口
+   ------------------------------------------------------------
+   模拟两个真实场景：
+   · 360px 手机单卡（容器 334）
+   · 228px 四选一实战卡宽（960 条 / 4 列）
+   ============================================================ */
+.slot{container-type:inline-size}
+@container (max-width:360px){
+  .card-a{min-height:0;padding:11px 12px 11px 15px;gap:6px}
+  .card-a .glyph{width:38px;height:38px}
+  .card-a .glyph svg{width:20px;height:20px}
+  .card-a .name{font-size:15.5px}
+  .card-a .desc{font-size:12px;line-height:1.55}
+  .card-a .stats b{font-size:14px}
+  .card-b .plate{padding:11px 12px 0}
+  .card-b .pills{padding:9px 12px 0}
+  .card-b .pill{height:26px}
+  .card-b .desc{padding:8px 12px 0;font-size:11.5px}
+  .card-b .foot{padding:7px 12px 10px}
+  .card-c{padding:11px 12px 11px 20px}
+  .card-c .hero b{font-size:23px}
+}
+@container (max-width:250px){
+  .card-a .desc,.card-b .desc,.card-c .desc{display:none}
+  .card-a{min-height:0;padding:10px 10px 10px 14px;gap:6px}
+  .card-a .glyph{width:34px;height:34px}
+  .card-a .glyph svg{width:18px;height:18px}
+  .card-a .name{font-size:14.5px}
+  .card-a .stats>div{padding:0 6px}
+  .card-a .stats span{font-size:9px;letter-spacing:.06em}
+  .card-a .stats b{font-size:13px}
+  .card-b .pills{gap:4px;padding:8px 10px 0}
+  .card-b .pill{padding:0 6px;height:23px}
+  .card-b .pill em{font-size:9px}
+  .card-b .pill b{font-size:12px}
+  .card-b .plate{padding:10px 10px 0}
+  .card-c{padding:10px 10px 10px 18px}
+  .card-c .hero b{font-size:21px}
+  .card-c .chips{gap:4px}
+  .card-c .chips i{font-size:9.5px;padding:2px 5px}
+  .card-c .meter{left:5px;top:10px}
+  .card-c .meter i{height:8px}
+}
+
+/* ============================================================
+   9. 窄宽复检区
+   ============================================================ */
+.recheck{margin-top:38px}
+.recheck h2{margin:0 0 6px;font-size:20px;color:var(--text-1);letter-spacing:.02em}
+.recheck .note{margin:0 0 18px;font-size:12px;color:var(--muted);line-height:1.7}
+.frames{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap;margin-top:32px}
+.frame{
+  border:1px solid var(--line-strong);border-radius:var(--r-lg);
+  background:#05080f;box-shadow:var(--shadow-panel);
+  padding:12px;position:relative;
+}
+.frame::before{
+  content:attr(data-label);position:absolute;left:0;top:-23px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;color:var(--tech);white-space:nowrap;
+}
+.frame.w360{width:360px}
+.frame.w228{width:228px;padding:10px}
+.frame .stack{display:flex;flex-direction:column;gap:10px}
+
+/* ============================================================
+   10. 结论块
+   ============================================================ */
+.verdict{
+  margin-top:38px;padding:20px 22px;border:1px solid var(--line-strong);border-radius:var(--r-lg);
+  background:radial-gradient(600px 200px at 50% 0%,rgba(176,133,255,.10),transparent 70%),
+    var(--sheen),linear-gradient(180deg,var(--surface-2),var(--surface-1));
+  box-shadow:var(--shadow-pop),var(--inner);
+}
+.verdict .kicker{color:var(--gold)}
+.verdict h2{margin:7px 0 10px;font-size:22px;color:var(--text-1)}
+.verdict p{margin:0;font-size:13px;line-height:1.85;color:var(--text-3)}
+.verdict p b{color:var(--text-1)}
+.verdict .nums{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.verdict .nums span{
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;padding:4px 9px;
+  border:1px solid var(--line);border-radius:var(--r-xs);color:var(--text-3);
+}
+.verdict .nums b{color:var(--gold);font-weight:700}
+
+/* ============================================================
+   11. 参考来源：只借"分区与顺序"，不复制代码或美术资源
+   ============================================================ */
+.refs{margin-top:26px;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-md);
+  background:rgba(10,18,30,.55)}
+.refs .kicker{color:var(--muted)}
+.refs ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.refs li{font-size:11.5px;line-height:1.65;color:var(--text-3)}
+.refs li b{color:var(--text-2);font-weight:600}
+.refs li code{font-family:var(--mono);font-size:10.5px;color:var(--tech);background:rgba(62,230,255,.06);
+  padding:1px 4px;border-radius:3px}
+.refs .lic{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--good);margin-left:6px}
+
+/* ============================================================
+   12. 页面级断点：窗口窄时三列改一列，避免把"窄卡样式"误当桌面态
+   ============================================================ */
+@media (max-width:1100px){
+  body{padding:32px 16px 56px}
+  h1{font-size:27px}
+  .schemes{grid-template-columns:1fr;gap:16px}
+  .frames{gap:16px}
+  .frame.w360{width:100%;max-width:360px}
+  .verdict h2{font-size:19px}
+}
+
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 页头 -->
+  <header>
+    <div class="kicker">UI LAB · 08 · SKILL CARD</div>
+    <h1>技能卡 · 三方案</h1>
+    <p class="lede">
+      目标只有三条：<b>品质不靠颜色也能读</b>、<b>伤害 / 冷却 / 耗蓝能一眼扫到</b>、<b>360px 宽仍读得清</b>。
+      三列方案全部沿用主文件已经存在的令牌（底色、稀有度色、圆角 12、等宽数字、左上光源），
+      不引入新色相，也不改任何玩法数值。
+    </p>
+    <ul class="constraints">
+      <li><em>01</em>品质：颜色 + 形状 + 数量 三路编码</li>
+      <li><em>02</em>数值：独立横带，固定列位</li>
+      <li><em>03</em>窄屏：按卡宽重排，不按窗口</li>
+    </ul>
+    <div class="head-rule"></div>
+  </header>
+
+  <!-- 令牌条 -->
+  <div class="tokenbar">
+    <div class="t"><span class="sw" style="background:#9fb0c8"></span>普通 #9FB0C8</div>
+    <div class="t"><span class="sw" style="background:#4aa8ff"></span>稀有 #4AA8FF</div>
+    <div class="t"><span class="sw" style="background:#b47cff"></span>史诗 #B47CFF</div>
+    <div class="t"><span class="sw" style="background:#ffc247"></span>传说 #FFC247</div>
+    <div class="t"><span class="sw" style="background:#3ee6ff"></span>科技 #3EE6FF</div>
+    <div class="t"><span class="sw" style="background:#b085ff"></span>魔法 #B085FF</div>
+    <div class="tail">圆角 <b>12px</b> · 描边 <b>1px</b> · 数字 <b>Cascadia Mono</b> · 面板底 <b>#131E33→#0D1424</b></div>
+  </div>
+
+  <!-- 三方案 -->
+  <main class="schemes" id="schemes">
+
+    <!-- ===================== 方案 A ===================== -->
+    <section class="col">
+      <div class="col-head">
+        <div class="badge">A</div>
+        <div>
+          <h2>刻度</h2>
+          <p class="scene">默认四选一。结构不动，只补"品质刻度 + 数值轨"，改动量最小。</p>
+        </div>
+      </div>
+      <ul class="spec">
+        <li>卡高 <b>224px</b></li>
+        <li>数值 <b>15px / 700</b></li>
+        <li>标签 <b>9.5px</b></li>
+        <li>品质通道 <b>刻度+描边+文字</b></li>
+      </ul>
+      <div class="cards">
+
+        <!-- 稀有 -->
+        <div class="slot">
+          <article class="card card-a r-rare">
+            <div class="top">
+              <span class="tag">范围</span>
+              <span class="rar">
+                <span class="pips"><i class="on"></i><i class="on"></i><i></i><i></i></span>
+                <span class="rar-txt">稀有</span>
+              </span>
+              <span class="key">1</span>
+            </div>
+            <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crack"/></svg></span>
+            <h3 class="name">熔岩地裂</h3>
+            <p class="desc">沿瞄准方向撕开一道裂缝，线段上的敌人全部被熔岩灼伤。</p>
+            <div class="stats">
+              <div><span>伤害</span><b>46</b></div>
+              <div><span>冷却</span><b>2.4<em>s</em></b></div>
+              <div><span>耗蓝</span><b class="v-aether">24</b></div>
+            </div>
+          </article>
+        </div>
+
+        <!-- 史诗 -->
+        <div class="slot">
+          <article class="card card-a r-epic">
+            <div class="top">
+              <span class="tag">范围</span>
+              <span class="rar">
+                <span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span>
+                <span class="rar-txt">史诗</span>
+              </span>
+              <span class="key">2</span>
+            </div>
+            <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-void"/></svg></span>
+            <h3 class="name">坍缩黑洞</h3>
+            <p class="desc">在瞄准点撕开黑洞，把周围敌人拉向中心，1.2 秒后统一坍缩结算。</p>
+            <div class="stats">
+              <div><span>伤害</span><b>52</b></div>
+              <div><span>冷却</span><b>3.2<em>s</em></b></div>
+              <div><span>耗蓝</span><b class="v-aether">32</b></div>
+            </div>
+          </article>
+        </div>
+
+        <!-- 传说 -->
+        <div class="slot">
+          <article class="card card-a r-relic">
+            <div class="top">
+              <span class="tag">范围</span>
+              <span class="rar">
+                <span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+                <span class="rar-txt">传说</span>
+              </span>
+              <span class="key">3</span>
+            </div>
+            <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg></span>
+            <h3 class="name">虚空之握</h3>
+            <p class="desc">在身前凝出一只巨手，把直线上所有敌人捏到一起并结算一次重击。</p>
+            <div class="stats">
+              <div><span>伤害</span><b>96</b></div>
+              <div><span>冷却</span><b>4.5<em>s</em></b></div>
+              <div><span>耗蓝</span><b class="v-aether">40</b></div>
+            </div>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================== 方案 B ===================== -->
+    <section class="col">
+      <div class="col-head">
+        <div class="badge">B</div>
+        <div>
+          <h2>铭牌</h2>
+          <p class="scene">贴底奖励条 / 手机竖屏。卡高压到 178px，三个数字变成并排铭牌。</p>
+        </div>
+      </div>
+      <ul class="spec">
+        <li>卡高 <b>178px</b></li>
+        <li>数值 <b>13px / 700</b></li>
+        <li>铭牌高 <b>24px</b></li>
+        <li>品质通道 <b>番号章+顶线</b></li>
+      </ul>
+      <div class="cards">
+
+        <div class="slot">
+          <article class="card card-b r-rare">
+            <div class="plate">
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crack"/></svg></span>
+              <div class="ttl">
+                <h3 class="name">熔岩地裂</h3>
+                <span class="sub">魔法 · 范围 · 稀有</span>
+              </div>
+              <span class="seal"><span>II</span></span>
+              <span class="key">1</span>
+            </div>
+            <div class="pills">
+              <span class="pill"><em>伤害</em><b>46</b></span>
+              <span class="pill"><em>冷却</em><b>2.4s</b></span>
+              <span class="pill"><em>耗蓝</em><b class="v-aether">24</b></span>
+            </div>
+            <p class="desc">沿瞄准方向撕开一道裂缝，线段上的敌人全部被熔岩灼伤。</p>
+            <div class="foot"><i></i>可融合 · 熔岩风暴</div>
+          </article>
+        </div>
+
+        <div class="slot">
+          <article class="card card-b r-epic">
+            <div class="plate">
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-void"/></svg></span>
+              <div class="ttl">
+                <h3 class="name">坍缩黑洞</h3>
+                <span class="sub">魔法 · 范围 · 史诗</span>
+              </div>
+              <span class="seal"><span>III</span></span>
+              <span class="key">2</span>
+            </div>
+            <div class="pills">
+              <span class="pill"><em>伤害</em><b>52</b></span>
+              <span class="pill"><em>冷却</em><b>3.2s</b></span>
+              <span class="pill"><em>耗蓝</em><b class="v-aether">32</b></span>
+            </div>
+            <p class="desc">在瞄准点撕开黑洞，把周围敌人拉向中心，1.2 秒后统一坍缩结算。</p>
+            <div class="foot"><i></i>可融合 · 奇点回廊</div>
+          </article>
+        </div>
+
+        <div class="slot">
+          <article class="card card-b r-relic">
+            <div class="plate">
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg></span>
+              <div class="ttl">
+                <h3 class="name">虚空之握</h3>
+                <span class="sub">魔法 · 范围 · 传说</span>
+              </div>
+              <span class="seal"><span>IV</span></span>
+              <span class="key">3</span>
+            </div>
+            <div class="pills">
+              <span class="pill"><em>伤害</em><b>96</b></span>
+              <span class="pill"><em>冷却</em><b>4.5s</b></span>
+              <span class="pill"><em>耗蓝</em><b class="v-aether">40</b></span>
+            </div>
+            <p class="desc">在身前凝出一只巨手，把直线上所有敌人捏到一起并结算一次重击。</p>
+            <div class="foot"><i></i>本局唯一 · 传说</div>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ===================== 方案 C ===================== -->
+    <section class="col">
+      <div class="col-head">
+        <div class="badge">C</div>
+        <div>
+          <h2>主数</h2>
+          <p class="scene">数值党 / 卡组查看。伤害放大成主角，冷却与耗蓝降级成小铭牌。</p>
+        </div>
+      </div>
+      <ul class="spec">
+        <li>卡高 <b>196px</b></li>
+        <li>主数 <b>25px / 700</b></li>
+        <li>副值 <b>10.5px</b></li>
+        <li>品质通道 <b>电平条+文字</b></li>
+      </ul>
+      <div class="cards">
+
+        <div class="slot">
+          <article class="card card-c r-rare">
+            <span class="meter"><i></i><i></i><i class="on"></i><i class="on"></i></span>
+            <div class="head">
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crack"/></svg></span>
+              <div class="ttl">
+                <h3 class="name">熔岩地裂</h3>
+                <span class="sub">范围 · 稀有</span>
+              </div>
+              <span class="key">1</span>
+            </div>
+            <div class="hero">
+              <b>46</b><span>伤害</span>
+              <span class="chips"><i>2.4s 冷却</i><i class="aether">24 耗蓝</i></span>
+            </div>
+            <p class="desc">沿瞄准方向撕开一道裂缝，线段上的敌人全部被熔岩灼伤。</p>
+          </article>
+        </div>
+
+        <div class="slot">
+          <article class="card card-c r-epic">
+            <span class="meter"><i></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+            <div class="head">
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-void"/></svg></span>
+              <div class="ttl">
+                <h3 class="name">坍缩黑洞</h3>
+                <span class="sub">范围 · 史诗</span>
+              </div>
+              <span class="key">2</span>
+            </div>
+            <div class="hero">
+              <b>52</b><span>伤害</span>
+              <span class="chips"><i>3.2s 冷却</i><i class="aether">32 耗蓝</i></span>
+            </div>
+            <p class="desc">在瞄准点撕开黑洞，把周围敌人拉向中心，1.2 秒后统一坍缩结算。</p>
+          </article>
+        </div>
+
+        <div class="slot">
+          <article class="card card-c r-relic">
+            <span class="meter"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+            <div class="head">
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-bolt"/></svg></span>
+              <div class="ttl">
+                <h3 class="name">虚空之握</h3>
+                <span class="sub">范围 · 传说</span>
+              </div>
+              <span class="key">3</span>
+            </div>
+            <div class="hero">
+              <b>96</b><span>伤害</span>
+              <span class="chips"><i>4.5s 冷却</i><i class="aether">40 耗蓝</i></span>
+            </div>
+            <p class="desc">在身前凝出一只巨手，把直线上所有敌人捏到一起并结算一次重击。</p>
+          </article>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 窄宽复检 -->
+  <section class="recheck">
+    <div class="kicker">WIDTH CHECK</div>
+    <h2>同一张卡，两个真实宽度</h2>
+    <p class="note">
+      左：<b>228px</b>，是主文件 960px 贴底奖励条里四选一的真实卡宽；右：<b>360px</b>，手机竖屏单卡。
+      卡面按自身宽度重排（容器查询），窄到 228px 时自动收起描述、字号仍不低于 9px。
+    </p>
+    <div class="frames">
+
+      <div class="frame w228" data-label="228px · 四选一实战">
+        <div class="stack">
+          <div class="slot">
+            <article class="card card-a r-rare">
+              <div class="top">
+                <span class="tag">范围</span>
+                <span class="rar"><span class="pips"><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="rar-txt">稀有</span></span>
+              </div>
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crack"/></svg></span>
+              <h3 class="name">熔岩地裂</h3>
+              <p class="desc">沿瞄准方向撕开一道裂缝。</p>
+              <div class="stats">
+                <div><span>伤害</span><b>46</b></div>
+                <div><span>冷却</span><b>2.4<em>s</em></b></div>
+                <div><span>耗蓝</span><b class="v-aether">24</b></div>
+              </div>
+            </article>
+          </div>
+          <div class="slot">
+            <article class="card card-b r-rare">
+              <div class="plate">
+                <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crack"/></svg></span>
+                <div class="ttl"><h3 class="name">熔岩地裂</h3><span class="sub">范围 · 稀有</span></div>
+                <span class="seal"><span>II</span></span>
+              </div>
+              <div class="pills">
+                <span class="pill"><em>伤害</em><b>46</b></span>
+                <span class="pill"><em>冷却</em><b>2.4s</b></span>
+                <span class="pill"><em>耗蓝</em><b class="v-aether">24</b></span>
+              </div>
+              <p class="desc">沿瞄准方向撕开一道裂缝。</p>
+              <div class="foot"><i></i>可融合</div>
+            </article>
+          </div>
+          <div class="slot">
+            <article class="card card-c r-rare">
+              <span class="meter"><i></i><i></i><i class="on"></i><i class="on"></i></span>
+              <div class="head">
+                <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-crack"/></svg></span>
+                <div class="ttl"><h3 class="name">熔岩地裂</h3><span class="sub">范围 · 稀有</span></div>
+              </div>
+              <div class="hero">
+                <b>46</b><span>伤害</span>
+                <span class="chips"><i>2.4s</i><i class="aether">24</i></span>
+              </div>
+            </article>
+          </div>
+        </div>
+      </div>
+
+      <div class="frame w360" data-label="360px · 手机单卡">
+        <div class="stack">
+          <div class="slot">
+            <article class="card card-a r-epic">
+              <div class="top">
+                <span class="tag">范围</span>
+                <span class="rar"><span class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="rar-txt">史诗</span></span>
+                <span class="key">1</span>
+              </div>
+              <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-void"/></svg></span>
+              <h3 class="name">坍缩黑洞</h3>
+              <p class="desc">在瞄准点撕开黑洞，把周围敌人拉向中心，1.2 秒后统一坍缩结算。</p>
+              <div class="stats">
+                <div><span>伤害</span><b>52</b></div>
+                <div><span>冷却</span><b>3.2<em>s</em></b></div>
+                <div><span>耗蓝</span><b class="v-aether">32</b></div>
+              </div>
+            </article>
+          </div>
+          <div class="slot">
+            <article class="card card-b r-epic">
+              <div class="plate">
+                <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-void"/></svg></span>
+                <div class="ttl"><h3 class="name">坍缩黑洞</h3><span class="sub">魔法 · 范围 · 史诗</span></div>
+                <span class="seal"><span>III</span></span>
+              </div>
+              <div class="pills">
+                <span class="pill"><em>伤害</em><b>52</b></span>
+                <span class="pill"><em>冷却</em><b>3.2s</b></span>
+                <span class="pill"><em>耗蓝</em><b class="v-aether">32</b></span>
+              </div>
+              <p class="desc">在瞄准点撕开黑洞，把周围敌人拉向中心，1.2 秒后统一坍缩结算。</p>
+              <div class="foot"><i></i>可融合 · 奇点回廊</div>
+            </article>
+          </div>
+          <div class="slot">
+            <article class="card card-c r-epic">
+              <span class="meter"><i></i><i class="on"></i><i class="on"></i><i class="on"></i></span>
+              <div class="head">
+                <span class="glyph"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-void"/></svg></span>
+                <div class="ttl"><h3 class="name">坍缩黑洞</h3><span class="sub">范围 · 史诗</span></div>
+                <span class="key">1</span>
+              </div>
+              <div class="hero">
+                <b>52</b><span>伤害</span>
+                <span class="chips"><i>3.2s 冷却</i><i class="aether">32 耗蓝</i></span>
+              </div>
+              <p class="desc">在瞄准点撕开黑洞，把周围敌人拉向中心，1.2 秒后统一坍缩结算。</p>
+            </article>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 参考来源 -->
+  <section class="refs">
+    <div class="kicker">REFERENCES · 只借分区，不贴皮肤</div>
+    <ul>
+      <li>
+        <b>DesirePathGames / Slay-The-Robot</b><span class="lic">MIT</span> ·
+        取自 <code>scenes/ui/card/Card.tscn</code> 的三层分区：费用徽章独立成节点（<code>EnergySprite + EnergyCost</code>）、名称与类型分行（<code>CardName / CardType</code>）、底部修饰容器（<code>CardDecoratorContainer</code> 是 VBox）。
+        本页把它翻成 CSS：耗蓝独立成格、类型独立成 tag、融合提示独立成一行。未复制任何代码或美术资源。
+      </li>
+      <li>
+        <b>guladam / deck_builder_tutorial</b><span class="lic">MIT</span> ·
+        取自 <code>scenes/ui/card_visuals.tscn</code> 的四槽位（Panel / Cost / Icon / Rarity）——"稀有度必须单独占一个槽，不能塞进标题里"；
+        <code>scenes/ui/battle_over_panel.tscn</code> 的 Label → 继续按钮 → 主菜单按钮的垂直顺序，留给结算页用。
+      </li>
+      <li>
+        <b>已排除：oskarrough / slaytheweb</b><span class="lic" style="color:var(--bad)">AGPL-3.0</span> ·
+        视觉上最接近，但许可证不符合项目"仅 MIT / Apache / BSD / CC0"的硬线，只做对照，不取用。
+      </li>
+    </ul>
+  </section>
+
+  <!-- 结论 -->
+  <section class="verdict" id="verdict">
+    <div class="kicker">RECOMMENDATION</div>
+    <h2>推荐 A「刻度」</h2>
+    <p>
+      它只改两处：品质区加 4 枚菱形刻度（点亮 <b>1/2/3/4</b> 枚），底部加一条 44px 高的三格数值轨。
+      这样品质有三路冗余（颜色 + 刻度数量 + 1 / 1.5 / 2 / 2.5px 描边），灰度打印也能读出稀有度；
+      三个数字固定在同一列位、<b>15px 等宽 700</b>，视线一遍扫过即可，不与 12.5px 描述混排。
+      卡高 224px，比现版 204px 只多 20px，四选一仍然一屏放得下；228px 窄卡下数值仍保持 <b>13px</b>，不降到 11px 以下。
+      B 方案建议只用于贴底奖励条（178px），C 方案留给卡组查看这类"先看伤害"的场景。
+    </p>
+    <div class="nums">
+      <span>品质刻度 <b>4 档</b></span>
+      <span>主数值 <b>15px / 700</b></span>
+      <span>标签 <b>9.5px</b></span>
+      <span>数值行高 <b>44px</b></span>
+      <span>卡高 <b>204 → 224px</b></span>
+      <span>228px 下数值 <b>13px</b></span>
+    </div>
+  </section>
+
+</div>
+
+<!-- 内联图标库：沿用主文件 24×24 / 1.6–1.75px 线宽的线稿语言；i-void 为本页新增 -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-flame" viewBox="0 0 24 24">
+      <path d="M12 2.9c2.7 3.2 4.7 5.4 4.7 8.4a4.7 4.7 0 0 1-9.4 0c0-1.8 1-3.2 2.4-4.6.3 1.1.9 1.8 1.8 2.2.2-1.8.4-3.9.5-6z" stroke="currentColor" stroke-width="1.75" fill="none" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-crack" viewBox="0 0 24 24">
+      <path d="M3 17h18" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M8.4 17 6.9 11.4l2.7-3.6-1.5-4.3M14.6 17l1.9-5.1-2.5-3.4 2.3-4.6" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M6.9 11.4 4.7 10M11.9 11.2l2 1" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-frost" viewBox="0 0 24 24">
+      <path d="M12 3v18M4.2 7.5l15.6 9M19.8 7.5l-15.6 9" stroke="currentColor" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M12 6.4l2.1-2.1M12 6.4L9.9 4.3M12 17.6l2.1 2.1M12 17.6l-2.1 2.1" stroke="currentColor" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-bolt" viewBox="0 0 24 24">
+      <path d="M13.4 2.6 5.6 13.4h5.2L9.8 21.4l7.8-10.8h-5.2z" stroke="currentColor" stroke-width="1.75" fill="none" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-void" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="7.1" stroke="currentColor" stroke-width="1.6" fill="none"/>
+      <circle cx="12" cy="12" r="2.3" fill="currentColor"/>
+      <path d="M15.9 8.7c2 1.5 2.2 4.2.5 5.8" stroke="currentColor" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    </symbol>
+  </defs>
+</svg>
+</body>
+</html>

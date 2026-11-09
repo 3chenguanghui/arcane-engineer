@@ -1,0 +1,1093 @@
+/* ============================================================
+   烬 · UI 补丁包 v1.0 · ui-patch.css
+   ------------------------------------------------------------
+   依据：ui-kit.md v1.6（令牌 / 卡条 / HUD / 结算 / 设置 / 暗角）
+   原则：
+     1) 不改 index_arcane_v2.html 的玩法与 DOM 结构，只覆盖视觉；
+     2) 所有尺寸 / 颜色 / 圆角 / 间距 / 字号只从 --jj-* 令牌取值；
+     3) 所有规则挂在 body.jj-ui 下 —— 不调用 JJUI.apply() 时零影响；
+     4) 零外部请求：无 @import、无 url(http...)、无外部字体。
+   ============================================================ */
+
+/* ============================================================
+   0. 令牌（唯一来源，组件禁止写裸值）
+   ============================================================ */
+:root {
+  /* --- 基底冷色阶 --- */
+  --jj-ink-900: #070a12;
+  --jj-ink-800: #0b1220;
+  --jj-ink-700: #101a2c;
+  --jj-ink-600: #16233a;
+  --jj-ink-500: #1e2f4d;
+  --jj-line-ink: #0a0d16;
+
+  /* --- 文字（最深一级仍 ≥ 4.5:1）--- */
+  --jj-t1: #eaf5ff;
+  --jj-t2: #c3d7ef;
+  --jj-t3: #a8bfdc;
+  --jj-muted: #93a6c4;
+
+  /* --- 语义强调（对比度见 ui-kit 第 7 节）--- */
+  --jj-tech: #5ce6ff;
+  --jj-magic: #b085ff;
+  --jj-void: #78f0d6;
+  --jj-deep: #77aaff;
+  --jj-fire: #ff8a3d;
+  --jj-ice: #8fdcff;
+  --jj-bolt: #ffe066;
+  --jj-poison: #7ee081;
+  --jj-gold: #ffc247;
+  --jj-good: #47e8a7;
+  --jj-bad: #ff6b7f;
+
+  /* --- 稀有度 --- */
+  --jj-rar-common: #9fb0c8;
+  --jj-rar-rare: #4aa8ff;
+  --jj-rar-epic: #b47cff;
+  --jj-rar-relic: #ffc247;
+  --jj-rar-common-line: rgba(159, 176, 200, .34);
+  --jj-rar-rare-line: rgba(74, 168, 255, .46);
+  --jj-rar-epic-line: rgba(180, 124, 255, .55);
+  --jj-rar-relic-line: rgba(255, 194, 71, .55);
+  /* 史诗小字专用：在 ink-500 上 6.62:1（旧 #b47cff 只有 4.63:1） */
+  --jj-rar-epic-text: #c9a6ff;
+
+  /* --- 圆角 --- */
+  --jj-r-xs: 4px;
+  --jj-r-sm: 8px;
+  --jj-r-md: 12px;
+  --jj-r-lg: 16px;
+  --jj-r-pill: 999px;
+  --jj-key-r: 5px;
+  --jj-brick-r: 10px;
+
+  /* --- 间距 --- */
+  --jj-sp-1: 4px;
+  --jj-sp-2: 6px;
+  --jj-sp-3: 8px;
+  --jj-sp-4: 12px;
+  --jj-sp-5: 16px;
+  --jj-sp-6: 22px;
+  --jj-sp-7: 32px;
+
+  /* --- 字号 / 字体 --- */
+  --jj-fs-2xs: 10.5px;
+  --jj-fs-xs: 11px;
+  --jj-fs-mono-sm: 11.5px;
+  --jj-fs-desc: 12px;
+  --jj-fs-sm: 12.5px;
+  --jj-fs-md: 14px;
+  --jj-fs-lg: 16px;
+  --jj-fs-xl: 20px;
+  --jj-fs-2xl: 26px;
+  --jj-fs-3xl: 38px;
+  --jj-fs-num: 17px;
+  --jj-fs-btn: 13px;
+  --jj-fs-floor-num: 32px;
+  --jj-fs-deck: 10px;
+  --jj-fs-deck-name: 10.5px;
+  --jj-sans: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+  --jj-mono: "Cascadia Mono", "Consolas", "Courier New", monospace;
+
+  /* --- 描边 / 材质 / 阴影：单一光源在左上 --- */
+  --jj-line: rgba(140, 178, 228, .20);
+  --jj-line-strip: rgba(140, 178, 228, .34);
+  --jj-line-strong: rgba(120, 190, 255, .46);
+  --jj-sheen: linear-gradient(160deg, rgba(255, 255, 255, .10), rgba(255, 255, 255, 0) 42%);
+  --jj-inner: inset 0 1px 0 rgba(255, 255, 255, .08), inset 0 -18px 32px rgba(0, 0, 0, .35);
+  --jj-shadow-panel: 0 18px 46px rgba(0, 0, 0, .55);
+  --jj-shadow-pop: 0 28px 80px rgba(0, 0, 0, .66);
+  --jj-shadow-bottom: 0 -8px 32px rgba(0, 0, 0, .55);
+
+  /* --- 暗角：只压四角，中心 52% 不压 --- */
+  --jj-vignette: .35;
+
+  /* --- 动效 --- */
+  --jj-ease: cubic-bezier(.2, .9, .25, 1);
+  --jj-dur-fast: .14s;
+  --jj-dur: .22s;
+  --jj-dur-slow: .36s;
+
+  /* --- 组件规格（集中在这里，改尺寸只动这一块）--- */
+  --jj-strip-w: 960px;
+  --jj-strip-pad: 18px 22px 20px;
+  --jj-card-h: 176px;
+  --jj-card-pad: 13px 14px 12px;
+  --jj-rar-bar: 4px;
+  --jj-icon-brick: 44px;
+  --jj-pill-h: 20px;
+  --jj-key-size: 20px;
+  --jj-hud-h: 64px;
+  --jj-hud-btn-h: 30px;
+  --jj-hud-btn-icon: 16px;
+  --jj-brand-w: 176px;
+  --jj-bars-w: 172px;
+  --jj-bar-h: 10px;
+  --jj-chip-h: 26px;
+  --jj-chip-icon: 14px;
+  --jj-floor-top: 76px;
+  --jj-floor-w: 176px;
+  --jj-floor-row-h: 24px;
+  --jj-floor-corner: 16px;
+  --jj-map-w: 204px;
+  --jj-map-canvas-h: 124px;
+  --jj-deck-cols: 6;
+  --jj-deck-card-h: 68px;
+  --jj-mini-glyph: 22px;
+  --jj-floor-pad: 11px 13px 12px;
+  --jj-floor-row-pad: 5px 0;
+  --jj-map-pad: 9px;
+  --jj-deck-pad: 10px 12px;
+  --jj-result-w: 760px;
+  --jj-result-pad: 24px 26px;
+  --jj-result-icon: 40px;
+  --jj-deathbar-h: 38px;
+  --jj-hero-fs: var(--jj-fs-3xl);
+  --jj-restart-h: 44px;
+  --jj-restart-fs: 13px;
+  --jj-stat-gap: 10px;
+  --jj-stat-pad: 9px 10px;
+  --jj-verdict-pad: 10px 12px;
+  --jj-setting-row-h: 40px;
+  --jj-settings-box-pad: 13px 15px 14px;
+  --jj-setting-label-w: 88px;
+  --jj-setting-label-fs: 12px;
+  --jj-switch-w: 40px;
+  --jj-switch-h: 22px;
+  --jj-knob: 14px;
+  --jj-knob-travel: 18px;
+  --jj-range-track: 4px;
+  --jj-range-min: 120px;
+  --jj-knob-inset: 3px;
+  --jj-hint-gap: 9px;
+  --jj-seg-h: 28px;
+}
+
+/* ============================================================
+   1. 全局：字体 / 暗角
+   ============================================================ */
+body.jj-ui {
+  font-family: var(--jj-sans);
+}
+
+/* 四角压暗 0.35，中心 52% 以内完全透明：不压地面纹理 */
+body.jj-ui .jj-vignette,
+body.jj-ui .vignette {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: radial-gradient(ellipse 78% 68% at 50% 46%,
+      transparent 52%, rgba(0, 0, 0, var(--jj-vignette)) 100%);
+  box-shadow: none;
+}
+
+/* ============================================================
+   2. 三选一卡条
+   ============================================================ */
+/* 容器：贴底一条，不压暗、不模糊，战场保持可见 */
+body.jj-ui .modal-layer.is-reward {
+  align-items: flex-end;
+  justify-content: center;
+  padding: 0 0 max(var(--jj-sp-4), env(safe-area-inset-bottom));
+  background: transparent;
+  backdrop-filter: none;
+}
+
+body.jj-ui .modal-layer.is-reward .modal,
+body.jj-ui .jj-strip {
+  flex: 0 0 auto;
+  width: min(var(--jj-strip-w), 100%);
+  max-height: calc(100vh - var(--jj-sp-6));
+  overflow: auto;
+  padding: var(--jj-strip-pad);
+  border-radius: var(--jj-r-lg);
+  border: 1px solid var(--jj-line-strip);
+  background: linear-gradient(180deg, rgba(13, 20, 36, .94), rgba(7, 10, 18, .98));
+  box-shadow: var(--jj-shadow-bottom);
+  text-align: left;
+}
+
+/* 卡头：左 CHOOSE ONE / 中标题 / 右快捷键提示 */
+body.jj-ui .modal-layer.is-reward .modal-kicker {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  letter-spacing: .2em;
+  color: var(--jj-tech);
+}
+
+body.jj-ui .modal-layer.is-reward .modal h2 {
+  margin: var(--jj-sp-1) 0 var(--jj-sp-2);
+  font-size: var(--jj-fs-lg);
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--jj-t1);
+}
+
+body.jj-ui .modal-layer.is-reward .modal-sub {
+  margin: 0 0 var(--jj-sp-2);
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  line-height: 1.5;
+  color: var(--jj-muted);
+}
+
+/* 卡网格：3 列 12 间距 */
+body.jj-ui .reward-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--jj-sp-4);
+  margin: var(--jj-sp-3) 0 var(--jj-sp-2);
+}
+
+/* 卡体：稀有度色走 --jj-rc，不再用类型色
+   176px 是硬高：20(卡头) + 22 + 22(名称/类型) + 1fr(描述 2 行) + 底部数值
+   + 4 个 6px 行距 + 25px 上下内边距 —— 44px 图标砖跨两行，正好塞满 */
+body.jj-ui .reward-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: var(--jj-icon-brick) minmax(0, 1fr);
+  grid-template-rows: 20px 22px 22px minmax(0, 1fr) auto;
+  column-gap: var(--jj-sp-3);
+  row-gap: var(--jj-sp-2);
+  height: var(--jj-card-h);
+  min-height: var(--jj-card-h);
+  padding: var(--jj-card-pad);
+  border: 1px solid var(--jj-rc-line, var(--jj-line));
+  border-radius: var(--jj-r-md);
+  background: var(--jj-sheen), linear-gradient(180deg, var(--jj-ink-600), var(--jj-ink-800));
+  box-shadow: var(--jj-inner);
+  color: var(--jj-rc, var(--jj-t2));
+  text-align: left;
+  overflow: hidden;
+  transition: transform var(--jj-dur-fast) var(--jj-ease),
+    border-color var(--jj-dur-fast) var(--jj-ease),
+    box-shadow var(--jj-dur-fast) var(--jj-ease);
+}
+
+/* 左侧 4px 稀有度条 + 同色 14px 外发光 */
+body.jj-ui .reward-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--jj-rar-bar);
+  background: var(--jj-rc, currentColor);
+  box-shadow: 0 0 14px -2px var(--jj-rc, currentColor);
+  opacity: 1;
+}
+
+/* 顶部柔光：与全局左上光源一致 */
+body.jj-ui .reward-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(240px 110px at 50% 0%, rgba(255, 255, 255, .06), transparent 70%);
+}
+
+/* 稀有度令牌：4px 条与边框同时换色 */
+body.jj-ui .reward-card.rarity-common { --jj-rc: var(--jj-rar-common); --jj-rc-line: var(--jj-rar-common-line); }
+body.jj-ui .reward-card.rarity-rare   { --jj-rc: var(--jj-rar-rare);   --jj-rc-line: var(--jj-rar-rare-line); }
+body.jj-ui .reward-card.rarity-epic   { --jj-rc: var(--jj-rar-epic);   --jj-rc-line: var(--jj-rar-epic-line); }
+body.jj-ui .reward-card.rarity-relic  { --jj-rc: var(--jj-rar-relic);  --jj-rc-line: var(--jj-rar-relic-line); }
+
+/* 卡头行：类型胶囊 / 稀有度胶囊 / 数字键帽 */
+body.jj-ui .reward-card .r-top {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--jj-sp-2);
+  min-height: 0;
+}
+
+body.jj-ui .reward-card .r-tag,
+body.jj-ui .reward-card .r-rarity {
+  display: inline-flex;
+  align-items: center;
+  height: var(--jj-pill-h);
+  padding: 0 var(--jj-sp-3);
+  border-radius: var(--jj-r-pill);
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  letter-spacing: .06em;
+  white-space: nowrap;
+}
+
+body.jj-ui .reward-card .r-tag {
+  border: 1px solid color-mix(in srgb, var(--jj-rc, var(--jj-t3)) 38%, transparent);
+  background: color-mix(in srgb, var(--jj-rc, var(--jj-t3)) 8%, transparent);
+  color: var(--jj-rc, var(--jj-t3));
+}
+
+body.jj-ui .reward-card .r-rarity {
+  margin-left: auto;
+  border: 1px solid var(--jj-rc-line, var(--jj-line));
+  background: color-mix(in srgb, var(--jj-rc, var(--jj-t3)) 10%, transparent);
+  color: var(--jj-rc, var(--jj-t3));
+}
+
+body.jj-ui .reward-card .r-key {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--jj-key-size);
+  height: var(--jj-key-size);
+  border: 1px solid var(--jj-line);
+  border-radius: var(--jj-key-r);
+  background: rgba(6, 12, 22, .7);
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  color: var(--jj-t3);
+}
+
+/* 图标砖：44×44 / 10 圆角 / 8% 同色底 / 1px 38% 同色边 */
+body.jj-ui .reward-card .r-glyph {
+  grid-column: 1;
+  grid-row: 2 / 4;
+  align-self: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--jj-icon-brick);
+  height: var(--jj-icon-brick);
+  border: 1px solid color-mix(in srgb, var(--jj-rc, currentColor) 38%, transparent);
+  border-radius: var(--jj-brick-r);
+  background: color-mix(in srgb, var(--jj-rc, currentColor) 8%, transparent);
+  color: var(--jj-rc, currentColor);
+  box-shadow: inset 0 0 14px rgba(255, 255, 255, .04);
+}
+
+body.jj-ui .reward-card .r-glyph svg,
+body.jj-ui .reward-card .r-glyph .jj-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+  color: currentColor;
+}
+
+/* 名称 / 类型副行 / 描述 / 底部数值 */
+body.jj-ui .reward-card .r-name {
+  grid-column: 2;
+  grid-row: 2;
+  align-self: center;
+  min-width: 0;
+  font-size: var(--jj-fs-lg);
+  font-weight: 700;
+  line-height: 1.3;
+  letter-spacing: .02em;
+  color: var(--jj-t1);
+}
+
+body.jj-ui .reward-card .r-sub {
+  grid-column: 2;
+  grid-row: 3;
+  align-self: center;
+  min-width: 0;
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  line-height: 1.3;
+  color: var(--jj-t3);
+}
+
+body.jj-ui .reward-card .r-desc {
+  grid-column: 1 / -1;
+  grid-row: 4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  font-size: var(--jj-fs-desc);
+  line-height: 1.5;
+  color: var(--jj-t3);
+}
+
+body.jj-ui .reward-card .r-result {
+  grid-column: 1 / -1;
+  grid-row: 5;
+  margin-top: 0;
+  padding-top: var(--jj-sp-2);
+  border-top: 1px solid rgba(140, 178, 228, .14);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--jj-sp-2);
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-desc);
+  font-weight: 700;
+  color: var(--jj-void);
+}
+
+body.jj-ui .reward-card .r-result em {
+  font-style: normal;
+  font-size: var(--jj-fs-xs);
+  font-weight: 400;
+  color: var(--jj-muted);
+}
+
+/* 史诗卡的小字统一 #c9a6ff（AA 6.62:1） */
+body.jj-ui .reward-card.rarity-epic .r-tag,
+body.jj-ui .reward-card.rarity-epic .r-rarity { color: var(--jj-rar-epic-text); }
+body.jj-ui .reward-card.rarity-epic .r-desc { color: #d3c0ee; }
+
+/* 交互四态 */
+body.jj-ui .reward-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--jj-gold);
+  box-shadow: var(--jj-inner), 0 14px 34px rgba(0, 0, 0, .45);
+}
+body.jj-ui .reward-card:active { transform: translateY(-1px) scale(.99); }
+body.jj-ui .reward-card:focus-visible {
+  outline: 2px solid var(--jj-gold);
+  outline-offset: 2px;
+}
+body.jj-ui .reward-card:disabled,
+body.jj-ui .reward-card.is-disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+body.jj-ui .reward-card:disabled:hover,
+body.jj-ui .reward-card.is-disabled:hover {
+  transform: none;
+  border-color: var(--jj-rc-line, var(--jj-line));
+  box-shadow: var(--jj-inner);
+}
+
+/* 响应式：<1024 横向滚动；矮窗口卡片降高 */
+@media (max-width: 1023px) {
+  body.jj-ui .reward-grid {
+    grid-template-columns: repeat(3, 260px);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--jj-sp-1);
+  }
+  body.jj-ui .reward-card { scroll-snap-align: start; }
+}
+@media (max-height: 820px) {
+  body.jj-ui .modal-layer.is-reward .modal,
+  body.jj-ui .jj-strip {
+    max-height: 46vh;
+    overflow: auto;
+  }
+  body.jj-ui .reward-card { height: 148px; min-height: 148px; }
+}
+
+/* ============================================================
+   3. HUD
+   ============================================================ */
+/* 顶栏：固定 64px，底部渐隐到透明 */
+body.jj-ui .hud-top {
+  height: var(--jj-hud-h);
+  min-height: var(--jj-hud-h);
+  padding: 0 var(--jj-sp-5);
+  align-items: center;
+  gap: var(--jj-sp-5);
+  background: linear-gradient(180deg,
+      rgba(7, 10, 18, .96), rgba(7, 10, 18, .52) 72%, transparent);
+}
+
+/* 品牌：176 宽 */
+body.jj-ui .brand { width: var(--jj-brand-w); min-width: var(--jj-brand-w); }
+body.jj-ui .logo {
+  font-size: var(--jj-fs-xl);
+  font-weight: 800;
+  letter-spacing: .14em;
+  color: #eaf7ff;
+  text-shadow: 0 0 20px rgba(92, 230, 255, .35);
+}
+body.jj-ui .brand .sub {
+  margin-top: 2px;
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-2xs);
+  letter-spacing: .14em;
+  color: var(--jj-muted);
+}
+
+/* 生命 / 奥能：172 宽，标签 10.5，数值 11.5 等宽 */
+body.jj-ui .bar-group { width: var(--jj-bars-w); padding: 0; gap: var(--jj-sp-2); }
+body.jj-ui .bar-group .bar-label {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-2xs);
+  letter-spacing: .1em;
+  color: var(--jj-muted);
+}
+body.jj-ui .bar-group .bar-label b {
+  margin-left: auto;
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-mono-sm);
+  font-weight: 700;
+  color: var(--jj-t2);
+}
+
+/* 血条 10px + 20% 刻度（刻度画在填充之上，低血也读得出比例） */
+body.jj-ui .bar {
+  position: relative;
+  height: var(--jj-bar-h);
+  border-radius: var(--jj-r-pill);
+  overflow: hidden;
+  background: rgba(90, 130, 180, .14);
+  border: 1px solid rgba(120, 170, 230, .20);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, .5);
+}
+body.jj-ui .bar > i {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--jj-tech), var(--jj-magic));
+}
+body.jj-ui .bar-hp > i,
+body.jj-ui .bar.bar-hp > i {
+  background: linear-gradient(90deg, var(--jj-bad), var(--jj-gold));
+}
+body.jj-ui .bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  background: repeating-linear-gradient(90deg,
+      rgba(6, 10, 18, 0) 0 calc(20% - 1px),
+      rgba(6, 10, 18, .55) calc(20% - 1px) 20%);
+}
+
+/* 状态胶囊：26px 高，图标 14 */
+body.jj-ui .skill-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: var(--jj-chip-h);
+  padding: 0 var(--jj-sp-3);
+  border-radius: var(--jj-r-sm);
+  border: 1px solid color-mix(in srgb, var(--jj-chip, var(--jj-deep)) 42%, transparent);
+  background: color-mix(in srgb, var(--jj-chip, var(--jj-deep)) 8%, transparent);
+  color: var(--jj-chip, var(--jj-deep));
+  font-size: var(--jj-fs-xs);
+}
+body.jj-ui .skill-chip span,
+body.jj-ui .skill-chip b { line-height: var(--jj-chip-h); }
+body.jj-ui .skill-chip b {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  font-weight: 700;
+  color: var(--jj-t2);
+}
+body.jj-ui .skill-chip.is-magic { --jj-chip: var(--jj-magic); }
+body.jj-ui .skill-chip.is-tech { --jj-chip: var(--jj-tech); }
+body.jj-ui .skill-chip.is-weapon { --jj-chip: var(--jj-fire); }
+body.jj-ui .skill-chip .jj-icon { width: var(--jj-chip-icon); height: var(--jj-chip-icon); flex: none; }
+
+/* 顶部动作按钮：30px 高，主按钮青边 + 18px 外发光 */
+body.jj-ui .hud-actions { gap: var(--jj-sp-2); }
+body.jj-ui .hud-actions .btn {
+  height: var(--jj-hud-btn-h);
+  padding: 0 var(--jj-sp-3);
+  border-radius: var(--jj-r-sm);
+  font-size: var(--jj-fs-mono-sm);
+}
+body.jj-ui .hud-actions .btn svg { width: var(--jj-hud-btn-icon); height: var(--jj-hud-btn-icon); }
+body.jj-ui .hud-actions .btn-primary {
+  border-color: var(--jj-line-strong);
+  box-shadow: 0 0 18px rgba(92, 230, 255, .22);
+}
+
+/* 左侧楼层板：176 宽 / 楼层号 32 等宽 / 行 24 */
+body.jj-ui .floor-panel {
+  left: var(--jj-sp-5);
+  top: var(--jj-floor-top);
+  width: var(--jj-floor-w);
+  padding: var(--jj-floor-pad);
+  border-radius: var(--jj-r-md);
+  border: 1px solid var(--jj-line);
+  background: var(--jj-sheen), linear-gradient(180deg, var(--jj-ink-600), var(--jj-ink-800));
+  box-shadow: var(--jj-inner), 0 16px 40px rgba(0, 0, 0, .42);
+}
+body.jj-ui .floor-panel::before {
+  content: "";
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  width: var(--jj-floor-corner);
+  height: var(--jj-floor-corner);
+  border: 1px solid rgba(92, 230, 255, .4);
+  border-width: 1px 0 0 1px;
+  border-top-left-radius: var(--jj-r-md);
+}
+body.jj-ui .floor-panel .floor-num b {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-floor-num);
+  font-weight: 700;
+  color: #d9fbff;
+  text-shadow: 0 0 18px rgba(92, 230, 255, .3);
+}
+body.jj-ui .floor-panel .floor-row {
+  min-height: var(--jj-floor-row-h);
+  padding: var(--jj-floor-row-pad);
+  border-top: 1px dashed rgba(140, 178, 228, .14);
+  font-size: var(--jj-fs-xs);
+  color: var(--jj-t3);
+}
+body.jj-ui .floor-panel .floor-row b {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-mono-sm);
+  font-weight: 600;
+  color: var(--jj-t2);
+}
+
+/* 小地图：204 宽 / 画布 124 高 / 9 内边距 */
+body.jj-ui .minimap-panel {
+  width: var(--jj-map-w);
+  padding: var(--jj-map-pad);
+  border-radius: var(--jj-r-md);
+  border: 1px solid var(--jj-line);
+  background: var(--jj-sheen), linear-gradient(180deg, var(--jj-ink-500), var(--jj-ink-800));
+  box-shadow: var(--jj-inner);
+}
+body.jj-ui .minimap-panel canvas { width: 100%; height: var(--jj-map-canvas-h); display: block; }
+body.jj-ui .minimap-legend { font-size: var(--jj-fs-deck); gap: var(--jj-sp-2); }
+
+/* 卡组：左右 18 / 底 12 / 内边距 10 12 / 圆角 12 */
+body.jj-ui .hud-deck {
+  left: var(--jj-sp-5);
+  right: var(--jj-sp-5);
+  bottom: var(--jj-sp-4);
+  padding: var(--jj-deck-pad);
+  border-radius: var(--jj-r-md);
+  border: 1px solid var(--jj-line);
+  background: var(--jj-sheen), linear-gradient(180deg, var(--jj-ink-500), var(--jj-ink-700));
+  box-shadow: var(--jj-inner), 0 18px 50px rgba(0, 0, 0, .45);
+  gap: var(--jj-sp-4);
+}
+body.jj-ui .hud-deck::before,
+body.jj-ui .hud-deck::after { border-color: rgba(92, 230, 255, .35); }
+body.jj-ui .deck-title {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-deck);
+  letter-spacing: .12em;
+  color: var(--jj-t3);
+}
+body.jj-ui .deck-title i { font-size: var(--jj-fs-deck); color: var(--jj-muted); }
+
+/* 卡组 6 列 × 68px，图标 22，名称 10.5 */
+body.jj-ui .card-row,
+body.jj-ui .card-row.is-dense {
+  grid-template-columns: repeat(var(--jj-deck-cols), minmax(0, 1fr));
+  gap: var(--jj-sp-2);
+}
+body.jj-ui .mini-card { min-height: var(--jj-deck-card-h); border-radius: var(--jj-r-sm); }
+body.jj-ui .mini-card .m-glyph { width: var(--jj-mini-glyph); height: var(--jj-mini-glyph); font-size: var(--jj-fs-xs); }
+body.jj-ui .mini-card .m-name { font-size: var(--jj-fs-deck-name); }
+body.jj-ui .mini-card.is-selected {
+  border-color: var(--jj-gold);
+  box-shadow: var(--jj-inner), 0 0 0 1px var(--jj-gold), 0 0 18px rgba(255, 194, 71, .22);
+}
+body.jj-ui .mini-card.is-cooling::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(3, 8, 16, .62);
+  pointer-events: none;
+}
+body.jj-ui .mini-card:disabled {
+  border-style: dashed;
+  opacity: .55;
+}
+body.jj-ui .mini-card:disabled .m-glyph { opacity: .26; filter: grayscale(1); }
+
+/* ============================================================
+   4. 结算
+   ============================================================ */
+/* 面板 760 宽；顺序：死因 → 楼层大字 → 数据格 → 复盘 → 重开 */
+body.jj-ui .result-modal {
+  width: min(var(--jj-result-w), 100%);
+  padding: var(--jj-result-pad);
+  border-radius: var(--jj-r-lg);
+  border: 1px solid var(--jj-line-strong);
+  background:
+    radial-gradient(600px 220px at 50% 0%, rgba(176, 133, 255, .12), transparent 70%),
+    var(--jj-sheen),
+    linear-gradient(180deg, var(--jj-ink-600), var(--jj-ink-800));
+  box-shadow: var(--jj-shadow-pop), var(--jj-inner);
+  text-align: center;
+}
+body.jj-ui .result-modal .result-icon {
+  width: var(--jj-result-icon);
+  height: var(--jj-result-icon);
+  margin: 0 auto var(--jj-sp-2);
+  border-radius: 50%;
+  border: 1px solid rgba(255, 107, 127, .45);
+  background: rgba(52, 14, 22, .6);
+  color: var(--jj-bad);
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-lg);
+}
+body.jj-ui .result-modal > .modal-kicker {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  letter-spacing: .2em;
+  color: var(--jj-tech);
+}
+body.jj-ui .result-modal > h2 {
+  margin: var(--jj-sp-1) 0 var(--jj-sp-2);
+  font-size: var(--jj-fs-lg);
+  font-weight: 700;
+  color: #ffe4e8;
+}
+body.jj-ui .result-modal > .modal-sub {
+  font-size: var(--jj-fs-xs);
+  line-height: 1.6;
+  color: var(--jj-muted);
+}
+
+/* 死因条：38 高 / 左 3px bad / 横向红雾 / 右侧种子 10.5 等宽 */
+body.jj-ui .tower-voice,
+body.jj-ui .jj-death-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--jj-sp-3);
+  height: var(--jj-deathbar-h);
+  min-height: var(--jj-deathbar-h);
+  margin: var(--jj-sp-3) 0;
+  padding: 0 var(--jj-sp-4);
+  overflow: hidden;
+  border: 1px solid rgba(255, 107, 127, .28);
+  border-left: 3px solid var(--jj-bad);
+  border-radius: var(--jj-r-sm);
+  background: linear-gradient(90deg, rgba(255, 107, 127, .12), rgba(255, 107, 127, .02));
+  color: #ffdbe0;
+  font-size: var(--jj-fs-btn);
+  font-weight: 600;
+  text-align: left;
+}
+body.jj-ui .tower-voice .tower-orb { display: none; }
+body.jj-ui .tower-voice .tower-body {
+  display: flex;
+  align-items: center;
+  gap: var(--jj-sp-4);
+  min-width: 0;
+}
+body.jj-ui .tower-voice .tower-tag,
+body.jj-ui .jj-death-bar .jj-death-tag {
+  font-size: var(--jj-fs-btn);
+  font-weight: 600;
+  color: #ffdbe0;
+  white-space: nowrap;
+}
+/* 38px 条只放"结论 + 致命值"；长叙事在下方复盘块里已有同源版本 */
+body.jj-ui .tower-voice .tower-quote,
+body.jj-ui .tower-voice .tower-context { display: none; }
+body.jj-ui .tower-voice .tower-meta,
+body.jj-ui .jj-death-bar .jj-death-seed {
+  margin-left: auto;
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-2xs);
+  font-weight: 400;
+  color: var(--jj-t3);
+  white-space: nowrap;
+}
+
+/* 楼层主数值 38px 等宽金色；RUN ENDED 11 等宽青色 */
+body.jj-ui .result-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--jj-sp-3);
+  margin: var(--jj-sp-4) 0 var(--jj-sp-2);
+}
+body.jj-ui .result-summary > div {
+  font-size: var(--jj-fs-xs);
+  color: var(--jj-muted);
+}
+body.jj-ui .result-summary > div b {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-num);
+  font-weight: 700;
+  color: var(--jj-t1);
+}
+body.jj-ui .result-summary > div:first-child b {
+  font-size: var(--jj-hero-fs);
+  line-height: 1.05;
+  color: var(--jj-gold);
+}
+body.jj-ui .jj-run-ended {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  letter-spacing: .2em;
+  color: var(--jj-tech);
+}
+
+/* 3×3 数据格：9 10 内边距 / 8 圆角 / 标签 11 / 数值 17 */
+body.jj-ui .result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--jj-stat-gap);
+  margin: var(--jj-sp-5) 0;
+}
+body.jj-ui .result-stat {
+  padding: var(--jj-stat-pad);
+  border: 1px solid var(--jj-line);
+  border-radius: var(--jj-r-sm);
+  background: linear-gradient(180deg, var(--jj-ink-800), #0a101c);
+  text-align: left;
+  box-shadow: var(--jj-inner);
+}
+body.jj-ui .result-stat span {
+  display: block;
+  font-size: var(--jj-fs-xs);
+  letter-spacing: .06em;
+  color: var(--jj-muted);
+}
+body.jj-ui .result-stat b {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-num);
+  font-weight: 700;
+  color: var(--jj-t1);
+}
+body.jj-ui .result-stat.is-gold b { color: var(--jj-gold); }
+
+/* 复盘块：结论 12 / 证据 11.5 */
+body.jj-ui .p1-verdict {
+  padding: var(--jj-verdict-pad);
+  border: 1px solid rgba(255, 107, 127, .30);
+  border-radius: var(--jj-r-sm);
+  background: linear-gradient(135deg, rgba(38, 12, 18, .40), rgba(16, 10, 16, .72));
+  text-align: left;
+}
+body.jj-ui .p1-verdict-tag {
+  font-size: var(--jj-fs-desc);
+  font-weight: 600;
+  letter-spacing: .04em;
+  line-height: 1.4;
+  color: #ffd7dc;
+  text-shadow: none;
+}
+body.jj-ui .p1-verdict-rule,
+body.jj-ui .p1-verdict-quote {
+  margin-top: var(--jj-sp-1);
+  font-size: var(--jj-fs-mono-sm);
+  line-height: 1.6;
+  color: var(--jj-t3);
+}
+
+/* 重开按钮：44 高 / 8 圆角 / sticky 贴底 / 青边 55% */
+body.jj-ui .result-modal > .btn[data-action="restart"],
+body.jj-ui .result-modal .btn-big[data-action="restart"] {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  width: 100%;
+  height: var(--jj-restart-h);
+  margin-top: var(--jj-sp-4);
+  border-radius: var(--jj-r-sm);
+  border: 1px solid rgba(92, 230, 255, .55);
+  background: linear-gradient(180deg, rgba(20, 52, 68, .95), rgba(8, 26, 38, .95));
+  box-shadow: 0 -12px 22px rgba(3, 7, 14, .92), 0 0 18px rgba(92, 230, 255, .18);
+  font-size: var(--jj-restart-fs);
+}
+body.jj-ui .result-hint {
+  margin-top: var(--jj-hint-gap);
+  font-size: var(--jj-fs-xs);
+  color: var(--jj-muted);
+}
+
+/* ============================================================
+   5. 设置
+   ============================================================ */
+/* 面板：2 列网格 gap 12；危险条整行 */
+body.jj-ui .settings-panel {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--jj-sp-4);
+  align-content: start;
+}
+body.jj-ui .settings-panel .settings-save,
+body.jj-ui .settings-panel .jj-danger,
+body.jj-ui .settings-panel .settings-box.is-danger { grid-column: 1 / -1; }
+
+/* 分块：13 15 14 内边距 / 12 圆角 / 1px 描边 / 深色渐变 */
+body.jj-ui .settings-box {
+  padding: var(--jj-settings-box-pad);
+  border: 1px solid var(--jj-line);
+  border-radius: var(--jj-r-md);
+  background: linear-gradient(180deg, var(--jj-ink-600), #080e18);
+  box-shadow: var(--jj-inner);
+}
+body.jj-ui .settings-box .talent-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--jj-sp-3);
+  margin-bottom: var(--jj-sp-2);
+}
+body.jj-ui .settings-box h3,
+body.jj-ui .settings-box .talent-head h3 {
+  margin: 0;
+  font-size: var(--jj-fs-sm);
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: #c8f6ff;
+}
+body.jj-ui .setting-state {
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-2xs);
+  color: var(--jj-muted);
+  white-space: nowrap;
+}
+
+/* 行：最小 40 高 / 12 间距 / 顶部 1px 虚线 / 标签 88 */
+body.jj-ui .setting-row {
+  display: flex;
+  align-items: center;
+  gap: var(--jj-sp-4);
+  min-height: var(--jj-setting-row-h);
+  padding: 0;
+  border-top: 1px dashed rgba(140, 178, 228, .14);
+}
+body.jj-ui .setting-row:first-of-type { border-top: 0; }
+body.jj-ui .setting-row > label {
+  flex: none;
+  width: var(--jj-setting-label-w);
+  font-size: var(--jj-setting-label-fs);
+  color: var(--jj-t2);
+}
+body.jj-ui .setting-row > b {
+  flex: none;
+  width: 44px;
+  text-align: right;
+  font-family: var(--jj-mono);
+  font-size: var(--jj-fs-xs);
+  color: #d9f6ff;
+}
+
+/* 滑杆：轨道 4 / 已填青 / 滑钮 14 白底青边 */
+body.jj-ui .setting-row input[type="range"] {
+  flex: 1;
+  min-width: var(--jj-range-min);
+  height: var(--jj-range-track);
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: var(--jj-r-pill);
+  background: linear-gradient(90deg, var(--jj-tech), rgba(120, 160, 200, .18));
+  outline: none;
+  cursor: pointer;
+}
+body.jj-ui .setting-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: var(--jj-knob);
+  height: var(--jj-knob);
+  border-radius: 50%;
+  background: #eaf9ff;
+  border: 1px solid var(--jj-tech);
+  box-shadow: 0 0 10px rgba(92, 230, 255, .45);
+  cursor: pointer;
+}
+body.jj-ui .setting-row input[type="range"]::-moz-range-thumb {
+  width: var(--jj-knob);
+  height: var(--jj-knob);
+  border: 1px solid var(--jj-tech);
+  border-radius: 50%;
+  background: #eaf9ff;
+}
+
+/* 开关：40×22 / 圆角 999 / 滑钮 14 / 开态右移 18 */
+body.jj-ui .switch {
+  position: relative;
+  flex: none;
+  box-sizing: border-box;
+  width: var(--jj-switch-w);
+  height: var(--jj-switch-h);
+  border-radius: var(--jj-r-pill);
+  border: 1px solid var(--jj-line-strong);
+  background: rgba(90, 120, 160, .22);
+  cursor: pointer;
+  transition: background var(--jj-dur) var(--jj-ease),
+    border-color var(--jj-dur) var(--jj-ease),
+    box-shadow var(--jj-dur) var(--jj-ease);
+}
+body.jj-ui .switch::after {
+  content: "";
+  position: absolute;
+  left: var(--jj-knob-inset);
+  top: var(--jj-knob-inset);
+  width: var(--jj-knob);
+  height: var(--jj-knob);
+  border-radius: 50%;
+  background: #8ea8c8;
+  transition: transform var(--jj-dur) var(--jj-ease);
+}
+body.jj-ui .switch[aria-checked="true"] {
+  background: rgba(92, 230, 255, .30);
+  border-color: var(--jj-tech);
+  box-shadow: 0 0 14px rgba(92, 230, 255, .28);
+}
+body.jj-ui .switch[aria-checked="true"]::after {
+  transform: translateX(var(--jj-knob-travel));
+  background: #e9feff;
+}
+
+/* 分段控件：1px 边 / 8 圆角 / 段间分隔 / 选中 16% 青底 */
+body.jj-ui .aim-modes {
+  display: inline-flex;
+  overflow: hidden;
+  border: 1px solid var(--jj-line);
+  border-radius: var(--jj-r-sm);
+  background: rgba(8, 16, 28, .6);
+}
+body.jj-ui .aim-modes .aim-mode {
+  height: var(--jj-seg-h);
+  padding: 0 var(--jj-sp-4);
+  border: 0;
+  border-left: 1px solid var(--jj-line);
+  background: transparent;
+  font-size: var(--jj-fs-xs);
+  color: var(--jj-t3);
+  cursor: pointer;
+}
+body.jj-ui .aim-modes .aim-mode:first-child { border-left: 0; }
+body.jj-ui .aim-modes .aim-mode.is-active,
+body.jj-ui .aim-modes .aim-mode[aria-pressed="true"] {
+  background: rgba(92, 230, 255, .16);
+  font-weight: 600;
+  color: var(--jj-t1);
+}
+
+/* 危险条：1px 红边 / 暗红底 / 按钮红边 */
+body.jj-ui .settings-box.is-danger,
+body.jj-ui .jj-danger {
+  grid-column: 1 / -1;
+  border-color: rgba(255, 107, 127, .34);
+  background: rgba(38, 12, 18, .40);
+}
+body.jj-ui .jj-danger .btn,
+body.jj-ui .settings-box.is-danger .btn {
+  border-color: rgba(255, 107, 127, .5);
+  color: #ffd7dc;
+}
+
+body.jj-ui .setting-note {
+  font-size: var(--jj-fs-xs);
+  line-height: 1.6;
+  color: var(--jj-t3);
+}
+
+@media (max-width: 720px) {
+  body.jj-ui .settings-panel { grid-template-columns: 1fr; }
+}
+
+/* ============================================================
+   6. 图标（JJUI.icon 输出的 SVG 统一吃这里）
+   ============================================================ */
+body.jj-ui .jj-icon {
+  display: inline-block;
+  flex: none;
+  color: currentColor;
+  vertical-align: middle;
+}

@@ -1,0 +1,7297 @@
+{
+  "meta": {
+    "at": "2026-11-08T13:51:11.559Z",
+    "runs": 3000,
+    "profile": "bot",
+    "seed": 20261108,
+    "onboard": 0,
+    "mainFile": "B56D9975"
+  },
+  "diffs": {
+    "normal": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 105.6,
+            "sd": 22.9,
+            "p50": 101.66,
+            "p90": 135.76,
+            "p95": 147.15,
+            "max": 200.37,
+            "over90": 2061,
+            "over90Pct": 68.7,
+            "se": 0.52
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 2446,
+          "deaths": 554,
+          "deathRatePct": 18.47,
+          "survivalPct": 81.5,
+          "causes": {
+            "elite": 86,
+            "boss": 468
+          },
+          "bossDeaths": 468,
+          "time": {
+            "n": 2446,
+            "avg": 104.5,
+            "sd": 28.9,
+            "p50": 99.41,
+            "p90": 141.15,
+            "p95": 159.81,
+            "max": 268.86,
+            "over90": 1581,
+            "over90Pct": 64.64,
+            "se": 0.73
+          },
+          "boss": {
+            "n": 2446,
+            "avg": 65,
+            "sd": 5.4,
+            "p50": 64.34,
+            "p90": 71.92,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.14
+          }
+        },
+        "3": {
+          "entries": 2446,
+          "cleared": 1520,
+          "deaths": 926,
+          "deathRatePct": 37.86,
+          "survivalPct": 50.7,
+          "causes": {
+            "elite": 454,
+            "boss": 430,
+            "battle": 42
+          },
+          "bossDeaths": 430,
+          "time": {
+            "n": 1520,
+            "avg": 108.2,
+            "sd": 38,
+            "p50": 99.05,
+            "p90": 161.71,
+            "p95": 180.77,
+            "max": 307.66,
+            "over90": 932,
+            "over90Pct": 61.32,
+            "se": 1.22
+          },
+          "boss": {
+            "n": 1520,
+            "avg": 64.9,
+            "sd": 6.1,
+            "p50": 64.97,
+            "p90": 71.87,
+            "p95": 74.66,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.2
+          }
+        },
+        "4": {
+          "entries": 1520,
+          "cleared": 1138,
+          "deaths": 382,
+          "deathRatePct": 25.13,
+          "survivalPct": 37.9,
+          "causes": {
+            "elite": 168,
+            "boss": 202,
+            "battle": 12
+          },
+          "bossDeaths": 202,
+          "time": {
+            "n": 1138,
+            "avg": 111.7,
+            "sd": 37.6,
+            "p50": 104.24,
+            "p90": 165.49,
+            "p95": 182.92,
+            "max": 282.93,
+            "over90": 751,
+            "over90Pct": 65.99,
+            "se": 1.39
+          },
+          "boss": {
+            "n": 1138,
+            "avg": 66,
+            "sd": 6.5,
+            "p50": 65.77,
+            "p90": 74.29,
+            "p95": 76.1,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.24
+          }
+        },
+        "5": {
+          "entries": 1138,
+          "cleared": 995,
+          "deaths": 143,
+          "deathRatePct": 12.57,
+          "survivalPct": 33.2,
+          "causes": {
+            "elite": 60,
+            "boss": 73,
+            "battle": 10
+          },
+          "bossDeaths": 73,
+          "time": {
+            "n": 995,
+            "avg": 120.2,
+            "sd": 41.1,
+            "p50": 109.52,
+            "p90": 177.66,
+            "p95": 196.81,
+            "max": 295.94,
+            "over90": 743,
+            "over90Pct": 74.67,
+            "se": 1.63
+          },
+          "boss": {
+            "n": 995,
+            "avg": 67.2,
+            "sd": 6.6,
+            "p50": 67.08,
+            "p90": 75.04,
+            "p95": 77.14,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.26
+          }
+        },
+        "6": {
+          "entries": 995,
+          "cleared": 963,
+          "deaths": 32,
+          "deathRatePct": 3.22,
+          "survivalPct": 32.1,
+          "causes": {
+            "battle": 3,
+            "boss": 24,
+            "elite": 5
+          },
+          "bossDeaths": 24,
+          "time": {
+            "n": 963,
+            "avg": 123.1,
+            "sd": 29.8,
+            "p50": 119.32,
+            "p90": 163.28,
+            "p95": 174.69,
+            "max": 230.66,
+            "over90": 840,
+            "over90Pct": 87.23,
+            "se": 1.21
+          },
+          "boss": {
+            "n": 963,
+            "avg": 78.1,
+            "sd": 8.1,
+            "p50": 77.89,
+            "p90": 87.82,
+            "p95": 91.36,
+            "max": 98.43,
+            "over90": 69,
+            "over90Pct": 7.17,
+            "se": 0.33
+          }
+        },
+        "7": {
+          "entries": 963,
+          "cleared": 953,
+          "deaths": 10,
+          "deathRatePct": 1.04,
+          "survivalPct": 31.8,
+          "causes": {
+            "boss": 8,
+            "battle": 1,
+            "elite": 1
+          },
+          "bossDeaths": 8,
+          "time": {
+            "n": 953,
+            "avg": 118.1,
+            "sd": 32.2,
+            "p50": 115.32,
+            "p90": 162.3,
+            "p95": 178.7,
+            "max": 247.52,
+            "over90": 770,
+            "over90Pct": 80.8,
+            "se": 1.31
+          },
+          "boss": {
+            "n": 953,
+            "avg": 68.9,
+            "sd": 7.4,
+            "p50": 69.36,
+            "p90": 78.39,
+            "p95": 82.02,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "8": {
+          "entries": 953,
+          "cleared": 946,
+          "deaths": 7,
+          "deathRatePct": 0.73,
+          "survivalPct": 31.5,
+          "causes": {
+            "elite": 2,
+            "boss": 5
+          },
+          "bossDeaths": 5,
+          "time": {
+            "n": 946,
+            "avg": 120.1,
+            "sd": 34.4,
+            "p50": 116.47,
+            "p90": 168.42,
+            "p95": 183.88,
+            "max": 282.9,
+            "over90": 759,
+            "over90Pct": 80.23,
+            "se": 1.4
+          },
+          "boss": {
+            "n": 946,
+            "avg": 69.9,
+            "sd": 7.7,
+            "p50": 70.03,
+            "p90": 80.07,
+            "p95": 81.65,
+            "max": 91.35,
+            "over90": 3,
+            "over90Pct": 0.32,
+            "se": 0.32
+          }
+        },
+        "9": {
+          "entries": 946,
+          "cleared": 941,
+          "deaths": 5,
+          "deathRatePct": 0.53,
+          "survivalPct": 31.4,
+          "causes": {
+            "boss": 4,
+            "elite": 1
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 941,
+            "avg": 125.4,
+            "sd": 36.3,
+            "p50": 119.4,
+            "p90": 173.74,
+            "p95": 192.33,
+            "max": 269.73,
+            "over90": 792,
+            "over90Pct": 84.17,
+            "se": 1.48
+          },
+          "boss": {
+            "n": 941,
+            "avg": 70.9,
+            "sd": 8.2,
+            "p50": 71.43,
+            "p90": 82.55,
+            "p95": 83.39,
+            "max": 94.18,
+            "over90": 2,
+            "over90Pct": 0.21,
+            "se": 0.33
+          }
+        },
+        "10": {
+          "entries": 941,
+          "cleared": 933,
+          "deaths": 8,
+          "deathRatePct": 0.85,
+          "survivalPct": 31.1,
+          "causes": {
+            "elite": 1,
+            "boss": 7
+          },
+          "bossDeaths": 7,
+          "time": {
+            "n": 933,
+            "avg": 129.2,
+            "sd": 38.7,
+            "p50": 125.17,
+            "p90": 179.58,
+            "p95": 197.56,
+            "max": 289.96,
+            "over90": 790,
+            "over90Pct": 84.67,
+            "se": 1.59
+          },
+          "boss": {
+            "n": 933,
+            "avg": 72.3,
+            "sd": 8.6,
+            "p50": 72.28,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 97.02,
+            "over90": 15,
+            "over90Pct": 1.61,
+            "se": 0.35
+          }
+        },
+        "11": {
+          "entries": 933,
+          "cleared": 926,
+          "deaths": 7,
+          "deathRatePct": 0.75,
+          "survivalPct": 30.9,
+          "causes": {
+            "boss": 5,
+            "elite": 2
+          },
+          "bossDeaths": 5,
+          "time": {
+            "n": 926,
+            "avg": 131.1,
+            "sd": 40.4,
+            "p50": 123.38,
+            "p90": 186.9,
+            "p95": 201.95,
+            "max": 303.41,
+            "over90": 783,
+            "over90Pct": 84.56,
+            "se": 1.66
+          },
+          "boss": {
+            "n": 926,
+            "avg": 73.4,
+            "sd": 9,
+            "p50": 72.93,
+            "p90": 86.37,
+            "p95": 88.4,
+            "max": 99.85,
+            "over90": 20,
+            "over90Pct": 2.16,
+            "se": 0.37
+          }
+        },
+        "12": {
+          "entries": 926,
+          "cleared": 920,
+          "deaths": 6,
+          "deathRatePct": 0.65,
+          "survivalPct": 30.7,
+          "causes": {
+            "boss": 5,
+            "elite": 1
+          },
+          "bossDeaths": 5,
+          "time": {
+            "n": 920,
+            "avg": 118.7,
+            "sd": 41,
+            "p50": 114.65,
+            "p90": 176.49,
+            "p95": 192.77,
+            "max": 271.93,
+            "over90": 664,
+            "over90Pct": 72.17,
+            "se": 1.69
+          },
+          "boss": {
+            "n": 920,
+            "avg": 56,
+            "sd": 7,
+            "p50": 55.89,
+            "p90": 65.34,
+            "p95": 67.44,
+            "max": 76.93,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "13": {
+          "entries": 920,
+          "cleared": 913,
+          "deaths": 7,
+          "deathRatePct": 0.76,
+          "survivalPct": 30.4,
+          "causes": {
+            "elite": 3,
+            "boss": 4
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 913,
+            "avg": 111.7,
+            "sd": 41.6,
+            "p50": 106.34,
+            "p90": 168,
+            "p95": 186.09,
+            "max": 327.52,
+            "over90": 591,
+            "over90Pct": 64.73,
+            "se": 1.72
+          },
+          "boss": {
+            "n": 913,
+            "avg": 49.8,
+            "sd": 6.3,
+            "p50": 49.8,
+            "p90": 58.47,
+            "p95": 60.35,
+            "max": 68.83,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.26
+          }
+        },
+        "14": {
+          "entries": 913,
+          "cleared": 905,
+          "deaths": 8,
+          "deathRatePct": 0.88,
+          "survivalPct": 30.2,
+          "causes": {
+            "elite": 3,
+            "boss": 5
+          },
+          "bossDeaths": 5,
+          "time": {
+            "n": 905,
+            "avg": 117,
+            "sd": 45.5,
+            "p50": 111.19,
+            "p90": 180.07,
+            "p95": 201.71,
+            "max": 308.89,
+            "over90": 628,
+            "over90Pct": 69.39,
+            "se": 1.9
+          },
+          "boss": {
+            "n": 905,
+            "avg": 50.6,
+            "sd": 6.6,
+            "p50": 50.52,
+            "p90": 59.18,
+            "p95": 61.98,
+            "max": 70.69,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.28
+          }
+        },
+        "15": {
+          "entries": 905,
+          "cleared": 902,
+          "deaths": 3,
+          "deathRatePct": 0.33,
+          "survivalPct": 30.1,
+          "causes": {
+            "boss": 2,
+            "elite": 1
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 902,
+            "avg": 121.1,
+            "sd": 49,
+            "p50": 113.93,
+            "p90": 187.83,
+            "p95": 212.52,
+            "max": 311.21,
+            "over90": 633,
+            "over90Pct": 70.18,
+            "se": 2.04
+          },
+          "boss": {
+            "n": 902,
+            "avg": 51.4,
+            "sd": 6.9,
+            "p50": 51.36,
+            "p90": 59.62,
+            "p95": 63.59,
+            "max": 72.53,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "16": {
+          "entries": 902,
+          "cleared": 895,
+          "deaths": 7,
+          "deathRatePct": 0.78,
+          "survivalPct": 29.8,
+          "causes": {
+            "battle": 1,
+            "boss": 6
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 895,
+            "avg": 128.3,
+            "sd": 53.3,
+            "p50": 120.88,
+            "p90": 197.98,
+            "p95": 228.72,
+            "max": 345.21,
+            "over90": 667,
+            "over90Pct": 74.53,
+            "se": 2.23
+          },
+          "boss": {
+            "n": 895,
+            "avg": 52.5,
+            "sd": 7.1,
+            "p50": 52.35,
+            "p90": 61.04,
+            "p95": 65.2,
+            "max": 74.36,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "17": {
+          "entries": 895,
+          "cleared": 888,
+          "deaths": 7,
+          "deathRatePct": 0.78,
+          "survivalPct": 29.6,
+          "causes": {
+            "boss": 6,
+            "elite": 1
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 888,
+            "avg": 136.9,
+            "sd": 54.9,
+            "p50": 129.82,
+            "p90": 209.75,
+            "p95": 241.8,
+            "max": 322.75,
+            "over90": 714,
+            "over90Pct": 80.41,
+            "se": 2.31
+          },
+          "boss": {
+            "n": 888,
+            "avg": 53.5,
+            "sd": 7.4,
+            "p50": 53.41,
+            "p90": 62.26,
+            "p95": 66.8,
+            "max": 76.2,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.31
+          }
+        },
+        "18": {
+          "entries": 888,
+          "cleared": 870,
+          "deaths": 18,
+          "deathRatePct": 2.03,
+          "survivalPct": 29,
+          "causes": {
+            "boss": 15,
+            "elite": 3
+          },
+          "bossDeaths": 15,
+          "time": {
+            "n": 870,
+            "avg": 145.5,
+            "sd": 61.6,
+            "p50": 136.25,
+            "p90": 230.9,
+            "p95": 261.74,
+            "max": 398.67,
+            "over90": 713,
+            "over90Pct": 81.95,
+            "se": 2.62
+          },
+          "boss": {
+            "n": 870,
+            "avg": 57.6,
+            "sd": 8.2,
+            "p50": 58.02,
+            "p90": 67.65,
+            "p95": 72.59,
+            "max": 82.81,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "19": {
+          "entries": 870,
+          "cleared": 866,
+          "deaths": 4,
+          "deathRatePct": 0.46,
+          "survivalPct": 28.9,
+          "causes": {
+            "boss": 3,
+            "elite": 1
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 866,
+            "avg": 172.3,
+            "sd": 74.1,
+            "p50": 161.58,
+            "p90": 274.48,
+            "p95": 309.81,
+            "max": 458.37,
+            "over90": 771,
+            "over90Pct": 89.03,
+            "se": 3.16
+          },
+          "boss": {
+            "n": 866,
+            "avg": 57.8,
+            "sd": 8.4,
+            "p50": 58.4,
+            "p90": 68.12,
+            "p95": 72.48,
+            "max": 83.77,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "20": {
+          "entries": 866,
+          "cleared": 860,
+          "deaths": 6,
+          "deathRatePct": 0.69,
+          "survivalPct": 28.7,
+          "causes": {
+            "boss": 6
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 860,
+            "avg": 178.7,
+            "sd": 90,
+            "p50": 164.07,
+            "p90": 300.22,
+            "p95": 350.08,
+            "max": 597.01,
+            "over90": 743,
+            "over90Pct": 86.4,
+            "se": 3.84
+          },
+          "boss": {
+            "n": 860,
+            "avg": 52.4,
+            "sd": 7.6,
+            "p50": 52.94,
+            "p90": 61.84,
+            "p95": 65.85,
+            "max": 76.11,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.32
+          }
+        }
+      },
+      "pass10Pct": 31.1,
+      "clear20Pct": 28.7,
+      "deathPct": 71.3,
+      "avgDeathFloor": 3.61,
+      "avgRunSec": 984.9,
+      "causes": {
+        "elite": 793,
+        "boss": 1278,
+        "battle": 69
+      },
+      "difficultyId": "normal",
+      "regenBase": 16
+    },
+    "hard": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 110.5,
+            "sd": 26.3,
+            "p50": 105.62,
+            "p90": 145.37,
+            "p95": 157.97,
+            "max": 219.55,
+            "over90": 2104,
+            "over90Pct": 70.13,
+            "se": 0.6
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 1558,
+          "deaths": 1442,
+          "deathRatePct": 48.07,
+          "survivalPct": 51.9,
+          "causes": {
+            "boss": 845,
+            "elite": 582,
+            "battle": 15
+          },
+          "bossDeaths": 845,
+          "time": {
+            "n": 1558,
+            "avg": 104.7,
+            "sd": 35,
+            "p50": 96.76,
+            "p90": 151.51,
+            "p95": 183.08,
+            "max": 299.61,
+            "over90": 927,
+            "over90Pct": 59.5,
+            "se": 1.11
+          },
+          "boss": {
+            "n": 1558,
+            "avg": 66.2,
+            "sd": 5.6,
+            "p50": 65.38,
+            "p90": 74.02,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.18
+          }
+        },
+        "3": {
+          "entries": 1558,
+          "cleared": 862,
+          "deaths": 696,
+          "deathRatePct": 44.67,
+          "survivalPct": 28.7,
+          "causes": {
+            "elite": 310,
+            "boss": 317,
+            "battle": 69
+          },
+          "bossDeaths": 317,
+          "time": {
+            "n": 862,
+            "avg": 121.6,
+            "sd": 47.9,
+            "p50": 110.11,
+            "p90": 186.86,
+            "p95": 215.14,
+            "max": 343.57,
+            "over90": 611,
+            "over90Pct": 70.88,
+            "se": 2.05
+          },
+          "boss": {
+            "n": 862,
+            "avg": 66.8,
+            "sd": 5.8,
+            "p50": 66.8,
+            "p90": 73.41,
+            "p95": 76.84,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.25
+          }
+        },
+        "4": {
+          "entries": 862,
+          "cleared": 714,
+          "deaths": 148,
+          "deathRatePct": 17.17,
+          "survivalPct": 23.8,
+          "causes": {
+            "boss": 66,
+            "elite": 66,
+            "battle": 16
+          },
+          "bossDeaths": 66,
+          "time": {
+            "n": 714,
+            "avg": 123.9,
+            "sd": 43.8,
+            "p50": 114.7,
+            "p90": 182.44,
+            "p95": 205.03,
+            "max": 313.51,
+            "over90": 549,
+            "over90Pct": 76.89,
+            "se": 2.06
+          },
+          "boss": {
+            "n": 714,
+            "avg": 67.5,
+            "sd": 6,
+            "p50": 67.61,
+            "p90": 74.51,
+            "p95": 76.29,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.28
+          }
+        },
+        "5": {
+          "entries": 714,
+          "cleared": 680,
+          "deaths": 34,
+          "deathRatePct": 4.76,
+          "survivalPct": 22.7,
+          "causes": {
+            "elite": 19,
+            "boss": 14,
+            "battle": 1
+          },
+          "bossDeaths": 14,
+          "time": {
+            "n": 680,
+            "avg": 132.9,
+            "sd": 48.5,
+            "p50": 120.31,
+            "p90": 197.95,
+            "p95": 228.64,
+            "max": 329.6,
+            "over90": 556,
+            "over90Pct": 81.76,
+            "se": 2.33
+          },
+          "boss": {
+            "n": 680,
+            "avg": 68.1,
+            "sd": 6.3,
+            "p50": 67.68,
+            "p90": 76.92,
+            "p95": 77.6,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "6": {
+          "entries": 680,
+          "cleared": 670,
+          "deaths": 10,
+          "deathRatePct": 1.47,
+          "survivalPct": 22.3,
+          "causes": {
+            "boss": 9,
+            "elite": 1
+          },
+          "bossDeaths": 9,
+          "time": {
+            "n": 670,
+            "avg": 131.7,
+            "sd": 34.9,
+            "p50": 128.13,
+            "p90": 180.06,
+            "p95": 194.53,
+            "max": 251.73,
+            "over90": 601,
+            "over90Pct": 89.7,
+            "se": 1.69
+          },
+          "boss": {
+            "n": 670,
+            "avg": 78.9,
+            "sd": 7.8,
+            "p50": 78.49,
+            "p90": 88.88,
+            "p95": 91.5,
+            "max": 98.43,
+            "over90": 55,
+            "over90Pct": 8.21,
+            "se": 0.38
+          }
+        },
+        "7": {
+          "entries": 670,
+          "cleared": 664,
+          "deaths": 6,
+          "deathRatePct": 0.9,
+          "survivalPct": 22.1,
+          "causes": {
+            "boss": 4,
+            "battle": 1,
+            "elite": 1
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 664,
+            "avg": 126,
+            "sd": 36.5,
+            "p50": 122.2,
+            "p90": 175.8,
+            "p95": 193.73,
+            "max": 273.24,
+            "over90": 569,
+            "over90Pct": 85.69,
+            "se": 1.78
+          },
+          "boss": {
+            "n": 664,
+            "avg": 69.5,
+            "sd": 7.2,
+            "p50": 69.36,
+            "p90": 78.39,
+            "p95": 82.17,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "8": {
+          "entries": 664,
+          "cleared": 661,
+          "deaths": 3,
+          "deathRatePct": 0.45,
+          "survivalPct": 22,
+          "causes": {
+            "boss": 3
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 661,
+            "avg": 128.9,
+            "sd": 38.4,
+            "p50": 125.75,
+            "p90": 182.46,
+            "p95": 201.98,
+            "max": 309.34,
+            "over90": 573,
+            "over90Pct": 86.69,
+            "se": 1.87
+          },
+          "boss": {
+            "n": 661,
+            "avg": 70.6,
+            "sd": 7.6,
+            "p50": 70.58,
+            "p90": 80.89,
+            "p95": 82.49,
+            "max": 91.35,
+            "over90": 3,
+            "over90Pct": 0.45,
+            "se": 0.37
+          }
+        },
+        "9": {
+          "entries": 661,
+          "cleared": 661,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 22,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 661,
+            "avg": 132.5,
+            "sd": 40.6,
+            "p50": 125.89,
+            "p90": 187.37,
+            "p95": 208.28,
+            "max": 291.51,
+            "over90": 573,
+            "over90Pct": 86.69,
+            "se": 1.98
+          },
+          "boss": {
+            "n": 661,
+            "avg": 71.5,
+            "sd": 8,
+            "p50": 71.58,
+            "p90": 82.55,
+            "p95": 83.39,
+            "max": 94.18,
+            "over90": 2,
+            "over90Pct": 0.3,
+            "se": 0.39
+          }
+        },
+        "10": {
+          "entries": 661,
+          "cleared": 659,
+          "deaths": 2,
+          "deathRatePct": 0.3,
+          "survivalPct": 22,
+          "causes": {
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 659,
+            "avg": 136.6,
+            "sd": 42.7,
+            "p50": 132.22,
+            "p90": 193.35,
+            "p95": 211.08,
+            "max": 309.73,
+            "over90": 583,
+            "over90Pct": 88.47,
+            "se": 2.08
+          },
+          "boss": {
+            "n": 659,
+            "avg": 72.9,
+            "sd": 8.5,
+            "p50": 73.41,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 97.02,
+            "over90": 14,
+            "over90Pct": 2.12,
+            "se": 0.41
+          }
+        },
+        "11": {
+          "entries": 659,
+          "cleared": 659,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 22,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 659,
+            "avg": 136.1,
+            "sd": 43.8,
+            "p50": 127.06,
+            "p90": 196.57,
+            "p95": 212.59,
+            "max": 320.19,
+            "over90": 564,
+            "over90Pct": 85.58,
+            "se": 2.14
+          },
+          "boss": {
+            "n": 659,
+            "avg": 74.1,
+            "sd": 9,
+            "p50": 74.03,
+            "p90": 87.5,
+            "p95": 88.4,
+            "max": 99.85,
+            "over90": 17,
+            "over90Pct": 2.58,
+            "se": 0.44
+          }
+        },
+        "12": {
+          "entries": 659,
+          "cleared": 659,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 22,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 659,
+            "avg": 122.3,
+            "sd": 43.9,
+            "p50": 117.61,
+            "p90": 185.56,
+            "p95": 204.3,
+            "max": 284.06,
+            "over90": 481,
+            "over90Pct": 72.99,
+            "se": 2.14
+          },
+          "boss": {
+            "n": 659,
+            "avg": 56.4,
+            "sd": 6.9,
+            "p50": 55.95,
+            "p90": 66.57,
+            "p95": 67.44,
+            "max": 76.93,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "13": {
+          "entries": 659,
+          "cleared": 658,
+          "deaths": 1,
+          "deathRatePct": 0.15,
+          "survivalPct": 21.9,
+          "causes": {
+            "elite": 1
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 658,
+            "avg": 116.8,
+            "sd": 43.2,
+            "p50": 111.21,
+            "p90": 175.62,
+            "p95": 198.36,
+            "max": 339.58,
+            "over90": 464,
+            "over90Pct": 70.52,
+            "se": 2.11
+          },
+          "boss": {
+            "n": 658,
+            "avg": 50.1,
+            "sd": 6.3,
+            "p50": 50.03,
+            "p90": 58.69,
+            "p95": 60.35,
+            "max": 68.83,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.31
+          }
+        },
+        "14": {
+          "entries": 658,
+          "cleared": 654,
+          "deaths": 4,
+          "deathRatePct": 0.61,
+          "survivalPct": 21.8,
+          "causes": {
+            "boss": 2,
+            "elite": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 654,
+            "avg": 121.3,
+            "sd": 47.3,
+            "p50": 115.81,
+            "p90": 185.35,
+            "p95": 209.34,
+            "max": 318.12,
+            "over90": 476,
+            "over90Pct": 72.78,
+            "se": 2.32
+          },
+          "boss": {
+            "n": 654,
+            "avg": 50.9,
+            "sd": 6.6,
+            "p50": 50.91,
+            "p90": 60.05,
+            "p95": 61.98,
+            "max": 70.69,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "15": {
+          "entries": 654,
+          "cleared": 638,
+          "deaths": 16,
+          "deathRatePct": 2.45,
+          "survivalPct": 21.3,
+          "causes": {
+            "elite": 6,
+            "boss": 9,
+            "battle": 1
+          },
+          "bossDeaths": 9,
+          "time": {
+            "n": 638,
+            "avg": 125.6,
+            "sd": 51.6,
+            "p50": 116.74,
+            "p90": 199.88,
+            "p95": 223.71,
+            "max": 283.02,
+            "over90": 462,
+            "over90Pct": 72.41,
+            "se": 2.56
+          },
+          "boss": {
+            "n": 638,
+            "avg": 51.7,
+            "sd": 7,
+            "p50": 51.63,
+            "p90": 61.05,
+            "p95": 63.59,
+            "max": 72.53,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "16": {
+          "entries": 638,
+          "cleared": 625,
+          "deaths": 13,
+          "deathRatePct": 2.04,
+          "survivalPct": 20.8,
+          "causes": {
+            "boss": 12,
+            "battle": 1
+          },
+          "bossDeaths": 12,
+          "time": {
+            "n": 625,
+            "avg": 132.7,
+            "sd": 57,
+            "p50": 124.43,
+            "p90": 208.16,
+            "p95": 239.33,
+            "max": 355.77,
+            "over90": 474,
+            "over90Pct": 75.84,
+            "se": 2.86
+          },
+          "boss": {
+            "n": 625,
+            "avg": 53,
+            "sd": 7.1,
+            "p50": 52.93,
+            "p90": 62.25,
+            "p95": 65.2,
+            "max": 74.36,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "17": {
+          "entries": 625,
+          "cleared": 609,
+          "deaths": 16,
+          "deathRatePct": 2.56,
+          "survivalPct": 20.3,
+          "causes": {
+            "boss": 13,
+            "elite": 3
+          },
+          "bossDeaths": 13,
+          "time": {
+            "n": 609,
+            "avg": 142.1,
+            "sd": 56.9,
+            "p50": 133.99,
+            "p90": 215.47,
+            "p95": 250.55,
+            "max": 332.38,
+            "over90": 508,
+            "over90Pct": 83.42,
+            "se": 2.89
+          },
+          "boss": {
+            "n": 609,
+            "avg": 54,
+            "sd": 7.4,
+            "p50": 53.95,
+            "p90": 63.43,
+            "p95": 66.8,
+            "max": 76.2,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "18": {
+          "entries": 609,
+          "cleared": 599,
+          "deaths": 10,
+          "deathRatePct": 1.64,
+          "survivalPct": 20,
+          "causes": {
+            "boss": 9,
+            "elite": 1
+          },
+          "bossDeaths": 9,
+          "time": {
+            "n": 599,
+            "avg": 151,
+            "sd": 62.9,
+            "p50": 140.64,
+            "p90": 238.08,
+            "p95": 270.07,
+            "max": 390.91,
+            "over90": 499,
+            "over90Pct": 83.31,
+            "se": 3.22
+          },
+          "boss": {
+            "n": 599,
+            "avg": 58.2,
+            "sd": 8.2,
+            "p50": 58.2,
+            "p90": 68.72,
+            "p95": 72.59,
+            "max": 82.81,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.42
+          }
+        },
+        "19": {
+          "entries": 599,
+          "cleared": 596,
+          "deaths": 3,
+          "deathRatePct": 0.5,
+          "survivalPct": 19.9,
+          "causes": {
+            "elite": 2,
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 596,
+            "avg": 177.7,
+            "sd": 76.2,
+            "p50": 169.22,
+            "p90": 280.31,
+            "p95": 318.79,
+            "max": 433.54,
+            "over90": 537,
+            "over90Pct": 90.1,
+            "se": 3.91
+          },
+          "boss": {
+            "n": 596,
+            "avg": 58.4,
+            "sd": 8.4,
+            "p50": 58.69,
+            "p90": 68.74,
+            "p95": 73.43,
+            "max": 83.77,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.43
+          }
+        },
+        "20": {
+          "entries": 596,
+          "cleared": 594,
+          "deaths": 2,
+          "deathRatePct": 0.34,
+          "survivalPct": 19.8,
+          "causes": {
+            "boss": 1,
+            "elite": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 594,
+            "avg": 188.9,
+            "sd": 93.9,
+            "p50": 175.81,
+            "p90": 312.48,
+            "p95": 366.98,
+            "max": 610.27,
+            "over90": 523,
+            "over90Pct": 88.05,
+            "se": 4.83
+          },
+          "boss": {
+            "n": 594,
+            "avg": 53,
+            "sd": 7.5,
+            "p50": 53.35,
+            "p90": 62.18,
+            "p95": 66.73,
+            "max": 76.11,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        }
+      },
+      "pass10Pct": 22,
+      "clear20Pct": 19.8,
+      "deathPct": 80.2,
+      "avgDeathFloor": 2.89,
+      "avgRunSec": 759.3,
+      "causes": {
+        "elite": 995,
+        "boss": 1307,
+        "battle": 104
+      },
+      "difficultyId": "nightmare",
+      "regenBase": 16
+    },
+    "normalA2": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 105.6,
+            "sd": 22.9,
+            "p50": 101.66,
+            "p90": 135.76,
+            "p95": 147.15,
+            "max": 200.37,
+            "over90": 2061,
+            "over90Pct": 68.7,
+            "se": 0.52
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 2486,
+          "deaths": 514,
+          "deathRatePct": 17.13,
+          "survivalPct": 82.9,
+          "causes": {
+            "boss": 481,
+            "elite": 33
+          },
+          "bossDeaths": 481,
+          "time": {
+            "n": 2486,
+            "avg": 106.9,
+            "sd": 26.4,
+            "p50": 103.52,
+            "p90": 141.69,
+            "p95": 155.88,
+            "max": 216.88,
+            "over90": 1753,
+            "over90Pct": 70.51,
+            "se": 0.66
+          },
+          "boss": {
+            "n": 2486,
+            "avg": 64.9,
+            "sd": 5.3,
+            "p50": 64.3,
+            "p90": 71.92,
+            "p95": 74.36,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.13
+          }
+        },
+        "3": {
+          "entries": 2486,
+          "cleared": 1730,
+          "deaths": 756,
+          "deathRatePct": 30.41,
+          "survivalPct": 57.7,
+          "causes": {
+            "battle": 61,
+            "boss": 606,
+            "elite": 89
+          },
+          "bossDeaths": 606,
+          "time": {
+            "n": 1730,
+            "avg": 95.2,
+            "sd": 24.7,
+            "p50": 90.99,
+            "p90": 127.37,
+            "p95": 141.59,
+            "max": 205.13,
+            "over90": 900,
+            "over90Pct": 52.02,
+            "se": 0.74
+          },
+          "boss": {
+            "n": 1730,
+            "avg": 65,
+            "sd": 6,
+            "p50": 64.97,
+            "p90": 72.3,
+            "p95": 74.66,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.18
+          }
+        },
+        "4": {
+          "entries": 1730,
+          "cleared": 1254,
+          "deaths": 476,
+          "deathRatePct": 27.51,
+          "survivalPct": 41.8,
+          "causes": {
+            "boss": 248,
+            "elite": 209,
+            "battle": 19
+          },
+          "bossDeaths": 248,
+          "time": {
+            "n": 1254,
+            "avg": 115.1,
+            "sd": 32.5,
+            "p50": 111.56,
+            "p90": 158.97,
+            "p95": 172.87,
+            "max": 215.16,
+            "over90": 935,
+            "over90Pct": 74.56,
+            "se": 1.15
+          },
+          "boss": {
+            "n": 1254,
+            "avg": 65.8,
+            "sd": 6.4,
+            "p50": 65.43,
+            "p90": 74.29,
+            "p95": 74.95,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.23
+          }
+        },
+        "5": {
+          "entries": 1254,
+          "cleared": 1077,
+          "deaths": 177,
+          "deathRatePct": 14.11,
+          "survivalPct": 35.9,
+          "causes": {
+            "elite": 75,
+            "boss": 83,
+            "battle": 19
+          },
+          "bossDeaths": 83,
+          "time": {
+            "n": 1077,
+            "avg": 119.5,
+            "sd": 36.2,
+            "p50": 115.56,
+            "p90": 170.28,
+            "p95": 182.27,
+            "max": 233.53,
+            "over90": 814,
+            "over90Pct": 75.58,
+            "se": 1.38
+          },
+          "boss": {
+            "n": 1077,
+            "avg": 66.7,
+            "sd": 6.7,
+            "p50": 66.89,
+            "p90": 74.83,
+            "p95": 76.92,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.25
+          }
+        },
+        "6": {
+          "entries": 1077,
+          "cleared": 1020,
+          "deaths": 57,
+          "deathRatePct": 5.29,
+          "survivalPct": 34,
+          "causes": {
+            "boss": 40,
+            "battle": 8,
+            "elite": 9
+          },
+          "bossDeaths": 40,
+          "time": {
+            "n": 1020,
+            "avg": 122.4,
+            "sd": 26.9,
+            "p50": 121.72,
+            "p90": 157.26,
+            "p95": 166.41,
+            "max": 207.6,
+            "over90": 894,
+            "over90Pct": 87.65,
+            "se": 1.05
+          },
+          "boss": {
+            "n": 1020,
+            "avg": 77.3,
+            "sd": 8.2,
+            "p50": 77.43,
+            "p90": 87.15,
+            "p95": 91.36,
+            "max": 103.14,
+            "over90": 57,
+            "over90Pct": 5.59,
+            "se": 0.32
+          }
+        },
+        "7": {
+          "entries": 1020,
+          "cleared": 1005,
+          "deaths": 15,
+          "deathRatePct": 1.47,
+          "survivalPct": 33.5,
+          "causes": {
+            "elite": 4,
+            "boss": 10,
+            "battle": 1
+          },
+          "bossDeaths": 10,
+          "time": {
+            "n": 1005,
+            "avg": 118.9,
+            "sd": 30.2,
+            "p50": 117.91,
+            "p90": 159.34,
+            "p95": 168.15,
+            "max": 232.35,
+            "over90": 819,
+            "over90Pct": 81.49,
+            "se": 1.19
+          },
+          "boss": {
+            "n": 1005,
+            "avg": 68.1,
+            "sd": 7.6,
+            "p50": 68.26,
+            "p90": 78.39,
+            "p95": 79.94,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "8": {
+          "entries": 1005,
+          "cleared": 993,
+          "deaths": 12,
+          "deathRatePct": 1.19,
+          "survivalPct": 33.1,
+          "causes": {
+            "boss": 12
+          },
+          "bossDeaths": 12,
+          "time": {
+            "n": 993,
+            "avg": 121.8,
+            "sd": 31.9,
+            "p50": 121.53,
+            "p90": 164.71,
+            "p95": 176.37,
+            "max": 230.79,
+            "over90": 819,
+            "over90Pct": 82.48,
+            "se": 1.27
+          },
+          "boss": {
+            "n": 993,
+            "avg": 69.2,
+            "sd": 7.9,
+            "p50": 69.33,
+            "p90": 80.07,
+            "p95": 81.51,
+            "max": 86.86,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.32
+          }
+        },
+        "9": {
+          "entries": 993,
+          "cleared": 987,
+          "deaths": 6,
+          "deathRatePct": 0.6,
+          "survivalPct": 32.9,
+          "causes": {
+            "elite": 4,
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 987,
+            "avg": 126.5,
+            "sd": 32.3,
+            "p50": 125.96,
+            "p90": 169.4,
+            "p95": 179.77,
+            "max": 223.77,
+            "over90": 857,
+            "over90Pct": 86.83,
+            "se": 1.29
+          },
+          "boss": {
+            "n": 987,
+            "avg": 70.1,
+            "sd": 8.5,
+            "p50": 69.85,
+            "p90": 82.55,
+            "p95": 83.39,
+            "max": 89.55,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "10": {
+          "entries": 987,
+          "cleared": 980,
+          "deaths": 7,
+          "deathRatePct": 0.71,
+          "survivalPct": 32.7,
+          "causes": {
+            "boss": 6,
+            "elite": 1
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 980,
+            "avg": 127,
+            "sd": 35.6,
+            "p50": 125.13,
+            "p90": 177.31,
+            "p95": 190.91,
+            "max": 259.71,
+            "over90": 829,
+            "over90Pct": 84.59,
+            "se": 1.43
+          },
+          "boss": {
+            "n": 980,
+            "avg": 71.4,
+            "sd": 8.7,
+            "p50": 70.82,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 92.24,
+            "over90": 16,
+            "over90Pct": 1.63,
+            "se": 0.35
+          }
+        },
+        "11": {
+          "entries": 980,
+          "cleared": 968,
+          "deaths": 12,
+          "deathRatePct": 1.22,
+          "survivalPct": 32.3,
+          "causes": {
+            "boss": 9,
+            "elite": 3
+          },
+          "bossDeaths": 9,
+          "time": {
+            "n": 968,
+            "avg": 132.5,
+            "sd": 36.5,
+            "p50": 131.48,
+            "p90": 180.53,
+            "p95": 196,
+            "max": 236.19,
+            "over90": 836,
+            "over90Pct": 86.36,
+            "se": 1.47
+          },
+          "boss": {
+            "n": 968,
+            "avg": 72.5,
+            "sd": 9.1,
+            "p50": 72.19,
+            "p90": 84.77,
+            "p95": 87.75,
+            "max": 94.93,
+            "over90": 24,
+            "over90Pct": 2.48,
+            "se": 0.37
+          }
+        },
+        "12": {
+          "entries": 968,
+          "cleared": 959,
+          "deaths": 9,
+          "deathRatePct": 0.93,
+          "survivalPct": 32,
+          "causes": {
+            "boss": 6,
+            "battle": 2,
+            "elite": 1
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 959,
+            "avg": 118.6,
+            "sd": 38.3,
+            "p50": 116.69,
+            "p90": 169.66,
+            "p95": 186.25,
+            "max": 235.28,
+            "over90": 723,
+            "over90Pct": 75.39,
+            "se": 1.55
+          },
+          "boss": {
+            "n": 959,
+            "avg": 55.2,
+            "sd": 7.1,
+            "p50": 54.98,
+            "p90": 64.39,
+            "p95": 67.44,
+            "max": 73.15,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "13": {
+          "entries": 959,
+          "cleared": 952,
+          "deaths": 7,
+          "deathRatePct": 0.73,
+          "survivalPct": 31.7,
+          "causes": {
+            "boss": 4,
+            "elite": 2,
+            "battle": 1
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 952,
+            "avg": 113.3,
+            "sd": 38.6,
+            "p50": 110.67,
+            "p90": 165.54,
+            "p95": 178.52,
+            "max": 228.88,
+            "over90": 665,
+            "over90Pct": 69.85,
+            "se": 1.57
+          },
+          "boss": {
+            "n": 952,
+            "avg": 49.1,
+            "sd": 6.4,
+            "p50": 49.01,
+            "p90": 57.14,
+            "p95": 60.35,
+            "max": 65.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.26
+          }
+        },
+        "14": {
+          "entries": 952,
+          "cleared": 945,
+          "deaths": 7,
+          "deathRatePct": 0.74,
+          "survivalPct": 31.5,
+          "causes": {
+            "boss": 4,
+            "elite": 3
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 945,
+            "avg": 119,
+            "sd": 41.7,
+            "p50": 118.01,
+            "p90": 173.85,
+            "p95": 190.11,
+            "max": 267.61,
+            "over90": 696,
+            "over90Pct": 73.65,
+            "se": 1.7
+          },
+          "boss": {
+            "n": 945,
+            "avg": 49.9,
+            "sd": 6.7,
+            "p50": 49.56,
+            "p90": 58.03,
+            "p95": 61.98,
+            "max": 67.23,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.27
+          }
+        },
+        "15": {
+          "entries": 945,
+          "cleared": 944,
+          "deaths": 1,
+          "deathRatePct": 0.11,
+          "survivalPct": 31.5,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 944,
+            "avg": 123.2,
+            "sd": 45.6,
+            "p50": 120.82,
+            "p90": 184.84,
+            "p95": 201.36,
+            "max": 279.53,
+            "over90": 691,
+            "over90Pct": 73.2,
+            "se": 1.86
+          },
+          "boss": {
+            "n": 944,
+            "avg": 50.6,
+            "sd": 6.9,
+            "p50": 50.35,
+            "p90": 59.45,
+            "p95": 63.59,
+            "max": 68.97,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.28
+          }
+        },
+        "16": {
+          "entries": 944,
+          "cleared": 942,
+          "deaths": 2,
+          "deathRatePct": 0.21,
+          "survivalPct": 31.4,
+          "causes": {
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 942,
+            "avg": 129.1,
+            "sd": 46.7,
+            "p50": 125.39,
+            "p90": 193.18,
+            "p95": 212.04,
+            "max": 287.32,
+            "over90": 742,
+            "over90Pct": 78.77,
+            "se": 1.91
+          },
+          "boss": {
+            "n": 942,
+            "avg": 51.7,
+            "sd": 7.1,
+            "p50": 51.39,
+            "p90": 60.76,
+            "p95": 65.2,
+            "max": 70.72,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "17": {
+          "entries": 942,
+          "cleared": 925,
+          "deaths": 17,
+          "deathRatePct": 1.8,
+          "survivalPct": 30.8,
+          "causes": {
+            "boss": 16,
+            "elite": 1
+          },
+          "bossDeaths": 16,
+          "time": {
+            "n": 925,
+            "avg": 137.8,
+            "sd": 52.2,
+            "p50": 133.88,
+            "p90": 208,
+            "p95": 229.59,
+            "max": 378.1,
+            "over90": 750,
+            "over90Pct": 81.08,
+            "se": 2.15
+          },
+          "boss": {
+            "n": 925,
+            "avg": 52.8,
+            "sd": 7.4,
+            "p50": 52.52,
+            "p90": 62.26,
+            "p95": 66.8,
+            "max": 72.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "18": {
+          "entries": 925,
+          "cleared": 904,
+          "deaths": 21,
+          "deathRatePct": 2.27,
+          "survivalPct": 30.1,
+          "causes": {
+            "boss": 18,
+            "elite": 3
+          },
+          "bossDeaths": 18,
+          "time": {
+            "n": 904,
+            "avg": 146,
+            "sd": 54.7,
+            "p50": 141.92,
+            "p90": 219.69,
+            "p95": 237.34,
+            "max": 335.99,
+            "over90": 767,
+            "over90Pct": 84.85,
+            "se": 2.28
+          },
+          "boss": {
+            "n": 904,
+            "avg": 56.8,
+            "sd": 8.2,
+            "p50": 56.53,
+            "p90": 67.27,
+            "p95": 72.59,
+            "max": 78.75,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "19": {
+          "entries": 904,
+          "cleared": 895,
+          "deaths": 9,
+          "deathRatePct": 1,
+          "survivalPct": 29.8,
+          "causes": {
+            "elite": 3,
+            "boss": 6
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 895,
+            "avg": 170.8,
+            "sd": 68.8,
+            "p50": 163.95,
+            "p90": 268.88,
+            "p95": 290.78,
+            "max": 396.59,
+            "over90": 802,
+            "over90Pct": 89.61,
+            "se": 2.88
+          },
+          "boss": {
+            "n": 895,
+            "avg": 57,
+            "sd": 8.2,
+            "p50": 56.7,
+            "p90": 68.04,
+            "p95": 71.13,
+            "max": 79.65,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "20": {
+          "entries": 895,
+          "cleared": 886,
+          "deaths": 9,
+          "deathRatePct": 1.01,
+          "survivalPct": 29.5,
+          "causes": {
+            "boss": 8,
+            "elite": 1
+          },
+          "bossDeaths": 8,
+          "time": {
+            "n": 886,
+            "avg": 177.8,
+            "sd": 82,
+            "p50": 165.97,
+            "p90": 290.68,
+            "p95": 319.93,
+            "max": 441.42,
+            "over90": 771,
+            "over90Pct": 87.02,
+            "se": 3.45
+          },
+          "boss": {
+            "n": 886,
+            "avg": 51.6,
+            "sd": 7.5,
+            "p50": 51.43,
+            "p90": 61.46,
+            "p95": 63.35,
+            "max": 72.38,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.32
+          }
+        }
+      },
+      "pass10Pct": 32.7,
+      "clear20Pct": 29.5,
+      "deathPct": 70.5,
+      "avgDeathFloor": 3.9,
+      "avgRunSec": 1029.4,
+      "causes": {
+        "battle": 111,
+        "boss": 1562,
+        "elite": 441
+      },
+      "difficultyId": "normal",
+      "regenBase": 16
+    },
+    "hardA2": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 110.5,
+            "sd": 26.3,
+            "p50": 105.62,
+            "p90": 145.37,
+            "p95": 157.97,
+            "max": 219.55,
+            "over90": 2104,
+            "over90Pct": 70.13,
+            "se": 0.6
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 1573,
+          "deaths": 1427,
+          "deathRatePct": 47.57,
+          "survivalPct": 52.4,
+          "causes": {
+            "boss": 903,
+            "elite": 517,
+            "battle": 7
+          },
+          "bossDeaths": 903,
+          "time": {
+            "n": 1573,
+            "avg": 108.7,
+            "sd": 32.8,
+            "p50": 102.17,
+            "p90": 157.17,
+            "p95": 175.01,
+            "max": 237.3,
+            "over90": 1018,
+            "over90Pct": 64.72,
+            "se": 1.04
+          },
+          "boss": {
+            "n": 1573,
+            "avg": 66.2,
+            "sd": 5.5,
+            "p50": 65.38,
+            "p90": 74.02,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.17
+          }
+        },
+        "3": {
+          "entries": 1573,
+          "cleared": 994,
+          "deaths": 579,
+          "deathRatePct": 36.81,
+          "survivalPct": 33.1,
+          "causes": {
+            "boss": 396,
+            "battle": 114,
+            "elite": 69
+          },
+          "bossDeaths": 396,
+          "time": {
+            "n": 994,
+            "avg": 102.9,
+            "sd": 30.6,
+            "p50": 97.57,
+            "p90": 142.72,
+            "p95": 165.89,
+            "max": 224.06,
+            "over90": 611,
+            "over90Pct": 61.47,
+            "se": 1.22
+          },
+          "boss": {
+            "n": 994,
+            "avg": 66.7,
+            "sd": 5.9,
+            "p50": 66.74,
+            "p90": 73.6,
+            "p95": 77.2,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.24
+          }
+        },
+        "4": {
+          "entries": 994,
+          "cleared": 789,
+          "deaths": 205,
+          "deathRatePct": 20.62,
+          "survivalPct": 26.3,
+          "causes": {
+            "boss": 76,
+            "elite": 105,
+            "battle": 24
+          },
+          "bossDeaths": 76,
+          "time": {
+            "n": 789,
+            "avg": 127.2,
+            "sd": 37.6,
+            "p50": 125.05,
+            "p90": 175.32,
+            "p95": 193.36,
+            "max": 234.59,
+            "over90": 643,
+            "over90Pct": 81.5,
+            "se": 1.68
+          },
+          "boss": {
+            "n": 789,
+            "avg": 67.1,
+            "sd": 6.1,
+            "p50": 67.35,
+            "p90": 74.51,
+            "p95": 76.1,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.27
+          }
+        },
+        "5": {
+          "entries": 789,
+          "cleared": 742,
+          "deaths": 47,
+          "deathRatePct": 5.96,
+          "survivalPct": 24.7,
+          "causes": {
+            "battle": 7,
+            "boss": 22,
+            "elite": 18
+          },
+          "bossDeaths": 22,
+          "time": {
+            "n": 742,
+            "avg": 130,
+            "sd": 42.2,
+            "p50": 125.14,
+            "p90": 188.23,
+            "p95": 200.92,
+            "max": 256.13,
+            "over90": 600,
+            "over90Pct": 80.86,
+            "se": 1.94
+          },
+          "boss": {
+            "n": 742,
+            "avg": 67.6,
+            "sd": 6.2,
+            "p50": 67.68,
+            "p90": 74.83,
+            "p95": 76.92,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "6": {
+          "entries": 742,
+          "cleared": 734,
+          "deaths": 8,
+          "deathRatePct": 1.08,
+          "survivalPct": 24.5,
+          "causes": {
+            "boss": 3,
+            "elite": 2,
+            "battle": 3
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 734,
+            "avg": 130.1,
+            "sd": 29.8,
+            "p50": 129.49,
+            "p90": 168.17,
+            "p95": 179.32,
+            "max": 215.34,
+            "over90": 662,
+            "over90Pct": 90.19,
+            "se": 1.38
+          },
+          "boss": {
+            "n": 734,
+            "avg": 78.1,
+            "sd": 8,
+            "p50": 78.17,
+            "p90": 87.97,
+            "p95": 91.36,
+            "max": 103.14,
+            "over90": 45,
+            "over90Pct": 6.13,
+            "se": 0.37
+          }
+        },
+        "7": {
+          "entries": 734,
+          "cleared": 730,
+          "deaths": 4,
+          "deathRatePct": 0.54,
+          "survivalPct": 24.3,
+          "causes": {
+            "elite": 3,
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 730,
+            "avg": 128.4,
+            "sd": 34,
+            "p50": 127.72,
+            "p90": 172.8,
+            "p95": 183.04,
+            "max": 253.29,
+            "over90": 631,
+            "over90Pct": 86.44,
+            "se": 1.58
+          },
+          "boss": {
+            "n": 730,
+            "avg": 68.8,
+            "sd": 7.5,
+            "p50": 69.29,
+            "p90": 78.39,
+            "p95": 79.94,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "8": {
+          "entries": 730,
+          "cleared": 728,
+          "deaths": 2,
+          "deathRatePct": 0.27,
+          "survivalPct": 24.3,
+          "causes": {
+            "boss": 1,
+            "battle": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 728,
+            "avg": 129.2,
+            "sd": 35.4,
+            "p50": 127.99,
+            "p90": 177.26,
+            "p95": 188.68,
+            "max": 249.05,
+            "over90": 624,
+            "over90Pct": 85.71,
+            "se": 1.65
+          },
+          "boss": {
+            "n": 728,
+            "avg": 69.7,
+            "sd": 7.8,
+            "p50": 69.81,
+            "p90": 80.07,
+            "p95": 82.49,
+            "max": 86.86,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "9": {
+          "entries": 728,
+          "cleared": 726,
+          "deaths": 2,
+          "deathRatePct": 0.27,
+          "survivalPct": 24.2,
+          "causes": {
+            "elite": 2
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 726,
+            "avg": 134.1,
+            "sd": 35.7,
+            "p50": 133.58,
+            "p90": 182.43,
+            "p95": 192.74,
+            "max": 235.57,
+            "over90": 647,
+            "over90Pct": 89.12,
+            "se": 1.66
+          },
+          "boss": {
+            "n": 726,
+            "avg": 70.7,
+            "sd": 8.5,
+            "p50": 70.44,
+            "p90": 82.55,
+            "p95": 84.17,
+            "max": 89.55,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        },
+        "10": {
+          "entries": 726,
+          "cleared": 724,
+          "deaths": 2,
+          "deathRatePct": 0.28,
+          "survivalPct": 24.1,
+          "causes": {
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 724,
+            "avg": 132.7,
+            "sd": 38.9,
+            "p50": 130.6,
+            "p90": 188.33,
+            "p95": 200.97,
+            "max": 275.65,
+            "over90": 622,
+            "over90Pct": 85.91,
+            "se": 1.81
+          },
+          "boss": {
+            "n": 724,
+            "avg": 71.8,
+            "sd": 8.6,
+            "p50": 71.25,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 92.24,
+            "over90": 13,
+            "over90Pct": 1.8,
+            "se": 0.4
+          }
+        },
+        "11": {
+          "entries": 724,
+          "cleared": 723,
+          "deaths": 1,
+          "deathRatePct": 0.14,
+          "survivalPct": 24.1,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 723,
+            "avg": 137.7,
+            "sd": 38.3,
+            "p50": 137.89,
+            "p90": 187.84,
+            "p95": 204.03,
+            "max": 247.34,
+            "over90": 644,
+            "over90Pct": 89.07,
+            "se": 1.78
+          },
+          "boss": {
+            "n": 723,
+            "avg": 72.9,
+            "sd": 9,
+            "p50": 72.83,
+            "p90": 85.84,
+            "p95": 88.4,
+            "max": 94.93,
+            "over90": 20,
+            "over90Pct": 2.77,
+            "se": 0.42
+          }
+        },
+        "12": {
+          "entries": 723,
+          "cleared": 723,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 24.1,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 723,
+            "avg": 122.7,
+            "sd": 40.8,
+            "p50": 119.25,
+            "p90": 177.43,
+            "p95": 194.06,
+            "max": 245.52,
+            "over90": 551,
+            "over90Pct": 76.21,
+            "se": 1.9
+          },
+          "boss": {
+            "n": 723,
+            "avg": 55.5,
+            "sd": 7.1,
+            "p50": 55.44,
+            "p90": 64.75,
+            "p95": 67.44,
+            "max": 73.15,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "13": {
+          "entries": 723,
+          "cleared": 723,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 24.1,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 723,
+            "avg": 116.3,
+            "sd": 40,
+            "p50": 114.38,
+            "p90": 170.87,
+            "p95": 183.76,
+            "max": 236.44,
+            "over90": 514,
+            "over90Pct": 71.09,
+            "se": 1.87
+          },
+          "boss": {
+            "n": 723,
+            "avg": 49.4,
+            "sd": 6.4,
+            "p50": 49.21,
+            "p90": 57.63,
+            "p95": 60.35,
+            "max": 65.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "14": {
+          "entries": 723,
+          "cleared": 720,
+          "deaths": 3,
+          "deathRatePct": 0.41,
+          "survivalPct": 24,
+          "causes": {
+            "battle": 1,
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 720,
+            "avg": 121.8,
+            "sd": 42.6,
+            "p50": 119.69,
+            "p90": 177.4,
+            "p95": 193.87,
+            "max": 274.92,
+            "over90": 549,
+            "over90Pct": 76.25,
+            "se": 1.99
+          },
+          "boss": {
+            "n": 720,
+            "avg": 50.1,
+            "sd": 6.8,
+            "p50": 50.07,
+            "p90": 58.68,
+            "p95": 61.98,
+            "max": 67.23,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.32
+          }
+        },
+        "15": {
+          "entries": 720,
+          "cleared": 700,
+          "deaths": 20,
+          "deathRatePct": 2.78,
+          "survivalPct": 23.3,
+          "causes": {
+            "boss": 15,
+            "elite": 2,
+            "battle": 3
+          },
+          "bossDeaths": 15,
+          "time": {
+            "n": 700,
+            "avg": 124.4,
+            "sd": 48.4,
+            "p50": 119.53,
+            "p90": 190.42,
+            "p95": 211.31,
+            "max": 287.07,
+            "over90": 506,
+            "over90Pct": 72.29,
+            "se": 2.29
+          },
+          "boss": {
+            "n": 700,
+            "avg": 50.9,
+            "sd": 7,
+            "p50": 50.84,
+            "p90": 59.62,
+            "p95": 63.59,
+            "max": 68.97,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "16": {
+          "entries": 700,
+          "cleared": 682,
+          "deaths": 18,
+          "deathRatePct": 2.57,
+          "survivalPct": 22.7,
+          "causes": {
+            "boss": 8,
+            "elite": 8,
+            "battle": 2
+          },
+          "bossDeaths": 8,
+          "time": {
+            "n": 682,
+            "avg": 133.9,
+            "sd": 48.9,
+            "p50": 129.88,
+            "p90": 200.35,
+            "p95": 218.18,
+            "max": 295.36,
+            "over90": 551,
+            "over90Pct": 80.79,
+            "se": 2.34
+          },
+          "boss": {
+            "n": 682,
+            "avg": 52.1,
+            "sd": 7.3,
+            "p50": 52.13,
+            "p90": 61.04,
+            "p95": 65.2,
+            "max": 70.72,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "17": {
+          "entries": 682,
+          "cleared": 661,
+          "deaths": 21,
+          "deathRatePct": 3.08,
+          "survivalPct": 22,
+          "causes": {
+            "boss": 17,
+            "elite": 4
+          },
+          "bossDeaths": 17,
+          "time": {
+            "n": 661,
+            "avg": 143,
+            "sd": 54.1,
+            "p50": 139.86,
+            "p90": 216,
+            "p95": 239.07,
+            "max": 389.42,
+            "over90": 550,
+            "over90Pct": 83.21,
+            "se": 2.64
+          },
+          "boss": {
+            "n": 661,
+            "avg": 53.4,
+            "sd": 7.5,
+            "p50": 53.41,
+            "p90": 62.54,
+            "p95": 66.8,
+            "max": 72.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "18": {
+          "entries": 661,
+          "cleared": 645,
+          "deaths": 16,
+          "deathRatePct": 2.42,
+          "survivalPct": 21.5,
+          "causes": {
+            "boss": 15,
+            "elite": 1
+          },
+          "bossDeaths": 15,
+          "time": {
+            "n": 645,
+            "avg": 152.3,
+            "sd": 56,
+            "p50": 148.77,
+            "p90": 226.44,
+            "p95": 242.26,
+            "max": 327.33,
+            "over90": 563,
+            "over90Pct": 87.29,
+            "se": 2.76
+          },
+          "boss": {
+            "n": 645,
+            "avg": 57.6,
+            "sd": 8.2,
+            "p50": 57.61,
+            "p90": 67.65,
+            "p95": 72.59,
+            "max": 78.75,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.4
+          }
+        },
+        "19": {
+          "entries": 645,
+          "cleared": 644,
+          "deaths": 1,
+          "deathRatePct": 0.16,
+          "survivalPct": 21.5,
+          "causes": {
+            "battle": 1
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 644,
+            "avg": 178.4,
+            "sd": 71.8,
+            "p50": 172.15,
+            "p90": 279.15,
+            "p95": 299.91,
+            "max": 408.48,
+            "over90": 581,
+            "over90Pct": 90.22,
+            "se": 3.55
+          },
+          "boss": {
+            "n": 644,
+            "avg": 57.7,
+            "sd": 8.2,
+            "p50": 57.71,
+            "p90": 68.04,
+            "p95": 73.43,
+            "max": 79.65,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.41
+          }
+        },
+        "20": {
+          "entries": 644,
+          "cleared": 641,
+          "deaths": 3,
+          "deathRatePct": 0.47,
+          "survivalPct": 21.4,
+          "causes": {
+            "elite": 2,
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 641,
+            "avg": 186.7,
+            "sd": 85.5,
+            "p50": 178.97,
+            "p90": 302.28,
+            "p95": 331.63,
+            "max": 455.32,
+            "over90": 562,
+            "over90Pct": 87.68,
+            "se": 4.23
+          },
+          "boss": {
+            "n": 641,
+            "avg": 52.2,
+            "sd": 7.5,
+            "p50": 52.2,
+            "p90": 61.54,
+            "p95": 66.73,
+            "max": 72.38,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        }
+      },
+      "pass10Pct": 24.1,
+      "clear20Pct": 21.4,
+      "deathPct": 78.6,
+      "avgDeathFloor": 3.03,
+      "avgRunSec": 812.6,
+      "causes": {
+        "boss": 1463,
+        "elite": 733,
+        "battle": 163
+      },
+      "difficultyId": "nightmare",
+      "regenBase": 16
+    },
+    "o1": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 105.6,
+            "sd": 22.9,
+            "p50": 101.66,
+            "p90": 135.76,
+            "p95": 147.15,
+            "max": 200.37,
+            "over90": 2061,
+            "over90Pct": 68.7,
+            "se": 0.52
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 1720,
+          "deaths": 1280,
+          "deathRatePct": 42.67,
+          "survivalPct": 57.3,
+          "causes": {
+            "elite": 379,
+            "boss": 895,
+            "battle": 6
+          },
+          "bossDeaths": 895,
+          "time": {
+            "n": 1720,
+            "avg": 101.5,
+            "sd": 30.6,
+            "p50": 94.8,
+            "p90": 141.65,
+            "p95": 166.82,
+            "max": 268.86,
+            "over90": 986,
+            "over90Pct": 57.33,
+            "se": 0.92
+          },
+          "boss": {
+            "n": 1720,
+            "avg": 65.9,
+            "sd": 5.6,
+            "p50": 65.38,
+            "p90": 73.55,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.17
+          }
+        },
+        "3": {
+          "entries": 1720,
+          "cleared": 960,
+          "deaths": 760,
+          "deathRatePct": 44.19,
+          "survivalPct": 32,
+          "causes": {
+            "elite": 334,
+            "boss": 387,
+            "battle": 39
+          },
+          "bossDeaths": 387,
+          "time": {
+            "n": 960,
+            "avg": 113.6,
+            "sd": 41.1,
+            "p50": 104.08,
+            "p90": 169.99,
+            "p95": 196.26,
+            "max": 307.66,
+            "over90": 640,
+            "over90Pct": 66.67,
+            "se": 1.66
+          },
+          "boss": {
+            "n": 960,
+            "avg": 66.4,
+            "sd": 5.9,
+            "p50": 66.74,
+            "p90": 73.41,
+            "p95": 76.84,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.24
+          }
+        },
+        "4": {
+          "entries": 960,
+          "cleared": 781,
+          "deaths": 179,
+          "deathRatePct": 18.65,
+          "survivalPct": 26,
+          "causes": {
+            "elite": 82,
+            "boss": 82,
+            "battle": 15
+          },
+          "bossDeaths": 82,
+          "time": {
+            "n": 781,
+            "avg": 115.3,
+            "sd": 38.4,
+            "p50": 106.78,
+            "p90": 167.96,
+            "p95": 186.69,
+            "max": 282.93,
+            "over90": 551,
+            "over90Pct": 70.55,
+            "se": 1.72
+          },
+          "boss": {
+            "n": 781,
+            "avg": 67.2,
+            "sd": 6.2,
+            "p50": 67.35,
+            "p90": 74.51,
+            "p95": 76.1,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.28
+          }
+        },
+        "5": {
+          "entries": 781,
+          "cleared": 731,
+          "deaths": 50,
+          "deathRatePct": 6.4,
+          "survivalPct": 24.4,
+          "causes": {
+            "boss": 27,
+            "elite": 19,
+            "battle": 4
+          },
+          "bossDeaths": 27,
+          "time": {
+            "n": 731,
+            "avg": 124.3,
+            "sd": 41.8,
+            "p50": 113.41,
+            "p90": 181.83,
+            "p95": 205.51,
+            "max": 295.94,
+            "over90": 583,
+            "over90Pct": 79.75,
+            "se": 1.94
+          },
+          "boss": {
+            "n": 731,
+            "avg": 68,
+            "sd": 6.3,
+            "p50": 67.68,
+            "p90": 76.85,
+            "p95": 77.14,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "6": {
+          "entries": 731,
+          "cleared": 717,
+          "deaths": 14,
+          "deathRatePct": 1.92,
+          "survivalPct": 23.9,
+          "causes": {
+            "boss": 12,
+            "battle": 1,
+            "elite": 1
+          },
+          "bossDeaths": 12,
+          "time": {
+            "n": 717,
+            "avg": 125.2,
+            "sd": 30.5,
+            "p50": 121.95,
+            "p90": 167.77,
+            "p95": 179.09,
+            "max": 230.66,
+            "over90": 628,
+            "over90Pct": 87.59,
+            "se": 1.43
+          },
+          "boss": {
+            "n": 717,
+            "avg": 78.9,
+            "sd": 7.8,
+            "p50": 78.71,
+            "p90": 88.88,
+            "p95": 91.36,
+            "max": 98.43,
+            "over90": 56,
+            "over90Pct": 7.81,
+            "se": 0.36
+          }
+        },
+        "7": {
+          "entries": 717,
+          "cleared": 710,
+          "deaths": 7,
+          "deathRatePct": 0.98,
+          "survivalPct": 23.7,
+          "causes": {
+            "battle": 2,
+            "boss": 2,
+            "elite": 3
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 710,
+            "avg": 119.4,
+            "sd": 32,
+            "p50": 116.13,
+            "p90": 163.49,
+            "p95": 179.35,
+            "max": 247.52,
+            "over90": 591,
+            "over90Pct": 83.24,
+            "se": 1.51
+          },
+          "boss": {
+            "n": 710,
+            "avg": 69.5,
+            "sd": 7.2,
+            "p50": 69.36,
+            "p90": 78.39,
+            "p95": 82.17,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "8": {
+          "entries": 710,
+          "cleared": 708,
+          "deaths": 2,
+          "deathRatePct": 0.28,
+          "survivalPct": 23.6,
+          "causes": {
+            "battle": 1,
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 708,
+            "avg": 122.2,
+            "sd": 34.5,
+            "p50": 118.25,
+            "p90": 169.73,
+            "p95": 186.48,
+            "max": 282.9,
+            "over90": 584,
+            "over90Pct": 82.49,
+            "se": 1.62
+          },
+          "boss": {
+            "n": 708,
+            "avg": 70.5,
+            "sd": 7.5,
+            "p50": 70.58,
+            "p90": 80.89,
+            "p95": 82.49,
+            "max": 91.35,
+            "over90": 3,
+            "over90Pct": 0.42,
+            "se": 0.36
+          }
+        },
+        "9": {
+          "entries": 708,
+          "cleared": 702,
+          "deaths": 6,
+          "deathRatePct": 0.85,
+          "survivalPct": 23.4,
+          "causes": {
+            "boss": 2,
+            "battle": 1,
+            "elite": 3
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 702,
+            "avg": 126.6,
+            "sd": 36.7,
+            "p50": 120.49,
+            "p90": 175.72,
+            "p95": 193.39,
+            "max": 269.73,
+            "over90": 595,
+            "over90Pct": 84.76,
+            "se": 1.74
+          },
+          "boss": {
+            "n": 702,
+            "avg": 71.4,
+            "sd": 8,
+            "p50": 71.54,
+            "p90": 82.55,
+            "p95": 83.39,
+            "max": 94.18,
+            "over90": 2,
+            "over90Pct": 0.28,
+            "se": 0.38
+          }
+        },
+        "10": {
+          "entries": 702,
+          "cleared": 702,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 23.4,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 702,
+            "avg": 131.1,
+            "sd": 39.4,
+            "p50": 126.49,
+            "p90": 182.76,
+            "p95": 199.57,
+            "max": 289.96,
+            "over90": 605,
+            "over90Pct": 86.18,
+            "se": 1.86
+          },
+          "boss": {
+            "n": 702,
+            "avg": 72.8,
+            "sd": 8.5,
+            "p50": 73.24,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 97.02,
+            "over90": 14,
+            "over90Pct": 1.99,
+            "se": 0.4
+          }
+        },
+        "11": {
+          "entries": 702,
+          "cleared": 701,
+          "deaths": 1,
+          "deathRatePct": 0.14,
+          "survivalPct": 23.4,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 701,
+            "avg": 131.7,
+            "sd": 40.7,
+            "p50": 124.4,
+            "p90": 187.99,
+            "p95": 202.58,
+            "max": 303.41,
+            "over90": 594,
+            "over90Pct": 84.74,
+            "se": 1.93
+          },
+          "boss": {
+            "n": 701,
+            "avg": 74,
+            "sd": 8.9,
+            "p50": 73.99,
+            "p90": 87.5,
+            "p95": 88.4,
+            "max": 99.85,
+            "over90": 17,
+            "over90Pct": 2.43,
+            "se": 0.42
+          }
+        },
+        "12": {
+          "entries": 701,
+          "cleared": 701,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 23.4,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 701,
+            "avg": 118.7,
+            "sd": 41,
+            "p50": 114.52,
+            "p90": 176.49,
+            "p95": 194.14,
+            "max": 271.93,
+            "over90": 506,
+            "over90Pct": 72.18,
+            "se": 1.94
+          },
+          "boss": {
+            "n": 701,
+            "avg": 56.3,
+            "sd": 6.9,
+            "p50": 55.95,
+            "p90": 66.57,
+            "p95": 67.44,
+            "max": 76.93,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "13": {
+          "entries": 701,
+          "cleared": 699,
+          "deaths": 2,
+          "deathRatePct": 0.29,
+          "survivalPct": 23.3,
+          "causes": {
+            "elite": 1,
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 699,
+            "avg": 113.8,
+            "sd": 41.4,
+            "p50": 108.62,
+            "p90": 170.38,
+            "p95": 191.37,
+            "max": 327.52,
+            "over90": 473,
+            "over90Pct": 67.67,
+            "se": 1.96
+          },
+          "boss": {
+            "n": 699,
+            "avg": 50.1,
+            "sd": 6.3,
+            "p50": 50.03,
+            "p90": 58.69,
+            "p95": 60.35,
+            "max": 68.83,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "14": {
+          "entries": 699,
+          "cleared": 695,
+          "deaths": 4,
+          "deathRatePct": 0.57,
+          "survivalPct": 23.2,
+          "causes": {
+            "boss": 2,
+            "elite": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 695,
+            "avg": 118.3,
+            "sd": 45.8,
+            "p50": 112.41,
+            "p90": 181.19,
+            "p95": 203.87,
+            "max": 308.89,
+            "over90": 492,
+            "over90Pct": 70.79,
+            "se": 2.18
+          },
+          "boss": {
+            "n": 695,
+            "avg": 50.8,
+            "sd": 6.6,
+            "p50": 50.69,
+            "p90": 60.09,
+            "p95": 61.98,
+            "max": 70.69,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.31
+          }
+        },
+        "15": {
+          "entries": 695,
+          "cleared": 678,
+          "deaths": 17,
+          "deathRatePct": 2.45,
+          "survivalPct": 22.6,
+          "causes": {
+            "elite": 6,
+            "boss": 10,
+            "battle": 1
+          },
+          "bossDeaths": 10,
+          "time": {
+            "n": 678,
+            "avg": 123.3,
+            "sd": 49.8,
+            "p50": 115.08,
+            "p90": 195.31,
+            "p95": 218.1,
+            "max": 275.11,
+            "over90": 482,
+            "over90Pct": 71.09,
+            "se": 2.4
+          },
+          "boss": {
+            "n": 678,
+            "avg": 51.7,
+            "sd": 6.9,
+            "p50": 51.63,
+            "p90": 61.46,
+            "p95": 63.59,
+            "max": 72.53,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "16": {
+          "entries": 678,
+          "cleared": 664,
+          "deaths": 14,
+          "deathRatePct": 2.06,
+          "survivalPct": 22.1,
+          "causes": {
+            "boss": 14
+          },
+          "bossDeaths": 14,
+          "time": {
+            "n": 664,
+            "avg": 129.1,
+            "sd": 54.7,
+            "p50": 121.1,
+            "p90": 199.25,
+            "p95": 228.72,
+            "max": 345.21,
+            "over90": 496,
+            "over90Pct": 74.7,
+            "se": 2.66
+          },
+          "boss": {
+            "n": 664,
+            "avg": 52.9,
+            "sd": 7.1,
+            "p50": 52.84,
+            "p90": 62.25,
+            "p95": 65.2,
+            "max": 74.36,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "17": {
+          "entries": 664,
+          "cleared": 647,
+          "deaths": 17,
+          "deathRatePct": 2.56,
+          "survivalPct": 21.6,
+          "causes": {
+            "boss": 14,
+            "elite": 3
+          },
+          "bossDeaths": 14,
+          "time": {
+            "n": 647,
+            "avg": 139.1,
+            "sd": 54.9,
+            "p50": 131.33,
+            "p90": 210.03,
+            "p95": 244.02,
+            "max": 322.75,
+            "over90": 532,
+            "over90Pct": 82.23,
+            "se": 2.71
+          },
+          "boss": {
+            "n": 647,
+            "avg": 54,
+            "sd": 7.4,
+            "p50": 53.95,
+            "p90": 63.78,
+            "p95": 66.8,
+            "max": 76.2,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "18": {
+          "entries": 647,
+          "cleared": 636,
+          "deaths": 11,
+          "deathRatePct": 1.7,
+          "survivalPct": 21.2,
+          "causes": {
+            "boss": 10,
+            "elite": 1
+          },
+          "bossDeaths": 10,
+          "time": {
+            "n": 636,
+            "avg": 148.6,
+            "sd": 61.6,
+            "p50": 138.49,
+            "p90": 234.95,
+            "p95": 263.6,
+            "max": 380.09,
+            "over90": 530,
+            "over90Pct": 83.33,
+            "se": 3.06
+          },
+          "boss": {
+            "n": 636,
+            "avg": 58.2,
+            "sd": 8.2,
+            "p50": 58.13,
+            "p90": 68.72,
+            "p95": 72.59,
+            "max": 82.81,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.41
+          }
+        },
+        "19": {
+          "entries": 636,
+          "cleared": 634,
+          "deaths": 2,
+          "deathRatePct": 0.31,
+          "survivalPct": 21.1,
+          "causes": {
+            "elite": 2
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 634,
+            "avg": 173.2,
+            "sd": 73.3,
+            "p50": 164.78,
+            "p90": 272.52,
+            "p95": 309.61,
+            "max": 420.81,
+            "over90": 567,
+            "over90Pct": 89.43,
+            "se": 3.65
+          },
+          "boss": {
+            "n": 634,
+            "avg": 58.4,
+            "sd": 8.4,
+            "p50": 58.69,
+            "p90": 68.74,
+            "p95": 73.43,
+            "max": 83.77,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.42
+          }
+        },
+        "20": {
+          "entries": 634,
+          "cleared": 633,
+          "deaths": 1,
+          "deathRatePct": 0.16,
+          "survivalPct": 21.1,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 633,
+            "avg": 185,
+            "sd": 92.3,
+            "p50": 172.61,
+            "p90": 307.29,
+            "p95": 363.23,
+            "max": 597.01,
+            "over90": 554,
+            "over90Pct": 87.52,
+            "se": 4.6
+          },
+          "boss": {
+            "n": 633,
+            "avg": 53,
+            "sd": 7.6,
+            "p50": 53.35,
+            "p90": 62.18,
+            "p95": 66.73,
+            "max": 76.11,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.38
+          }
+        }
+      },
+      "pass10Pct": 23.4,
+      "clear20Pct": 21.1,
+      "deathPct": 78.9,
+      "avgDeathFloor": 3.01,
+      "avgRunSec": 773.8,
+      "causes": {
+        "elite": 836,
+        "boss": 1461,
+        "battle": 70
+      },
+      "difficultyId": "o1",
+      "regenBase": 16
+    },
+    "o1A2": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 105.6,
+            "sd": 22.9,
+            "p50": 101.66,
+            "p90": 135.76,
+            "p95": 147.15,
+            "max": 200.37,
+            "over90": 2061,
+            "over90Pct": 68.7,
+            "se": 0.52
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 1750,
+          "deaths": 1250,
+          "deathRatePct": 41.67,
+          "survivalPct": 58.3,
+          "causes": {
+            "boss": 941,
+            "elite": 309
+          },
+          "bossDeaths": 941,
+          "time": {
+            "n": 1750,
+            "avg": 104.7,
+            "sd": 28.3,
+            "p50": 100.42,
+            "p90": 144.28,
+            "p95": 160.88,
+            "max": 216.88,
+            "over90": 1122,
+            "over90Pct": 64.11,
+            "se": 0.85
+          },
+          "boss": {
+            "n": 1750,
+            "avg": 65.8,
+            "sd": 5.5,
+            "p50": 65.2,
+            "p90": 72.2,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.16
+          }
+        },
+        "3": {
+          "entries": 1750,
+          "cleared": 1105,
+          "deaths": 645,
+          "deathRatePct": 36.86,
+          "survivalPct": 36.8,
+          "causes": {
+            "boss": 484,
+            "battle": 83,
+            "elite": 78
+          },
+          "bossDeaths": 484,
+          "time": {
+            "n": 1105,
+            "avg": 97.3,
+            "sd": 26.7,
+            "p50": 92.59,
+            "p90": 131.51,
+            "p95": 151.82,
+            "max": 205.13,
+            "over90": 602,
+            "over90Pct": 54.48,
+            "se": 1.01
+          },
+          "boss": {
+            "n": 1105,
+            "avg": 66.3,
+            "sd": 6,
+            "p50": 66.02,
+            "p90": 73.41,
+            "p95": 77.2,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.23
+          }
+        },
+        "4": {
+          "entries": 1105,
+          "cleared": 854,
+          "deaths": 251,
+          "deathRatePct": 22.71,
+          "survivalPct": 28.5,
+          "causes": {
+            "boss": 114,
+            "battle": 23,
+            "elite": 114
+          },
+          "bossDeaths": 114,
+          "time": {
+            "n": 854,
+            "avg": 119.3,
+            "sd": 32.7,
+            "p50": 117.49,
+            "p90": 161.79,
+            "p95": 175.07,
+            "max": 215.16,
+            "over90": 677,
+            "over90Pct": 79.27,
+            "se": 1.4
+          },
+          "boss": {
+            "n": 854,
+            "avg": 67,
+            "sd": 6.2,
+            "p50": 67,
+            "p90": 74.51,
+            "p95": 76.1,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.27
+          }
+        },
+        "5": {
+          "entries": 854,
+          "cleared": 786,
+          "deaths": 68,
+          "deathRatePct": 7.96,
+          "survivalPct": 26.2,
+          "causes": {
+            "boss": 33,
+            "elite": 29,
+            "battle": 6
+          },
+          "bossDeaths": 33,
+          "time": {
+            "n": 786,
+            "avg": 122,
+            "sd": 36.6,
+            "p50": 118.23,
+            "p90": 173.04,
+            "p95": 183.13,
+            "max": 233.53,
+            "over90": 608,
+            "over90Pct": 77.35,
+            "se": 1.64
+          },
+          "boss": {
+            "n": 786,
+            "avg": 67.5,
+            "sd": 6.3,
+            "p50": 67.68,
+            "p90": 74.83,
+            "p95": 76.92,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.28
+          }
+        },
+        "6": {
+          "entries": 786,
+          "cleared": 772,
+          "deaths": 14,
+          "deathRatePct": 1.78,
+          "survivalPct": 25.7,
+          "causes": {
+            "boss": 8,
+            "elite": 4,
+            "battle": 2
+          },
+          "bossDeaths": 8,
+          "time": {
+            "n": 772,
+            "avg": 123.5,
+            "sd": 26.4,
+            "p50": 122.61,
+            "p90": 157.51,
+            "p95": 166.57,
+            "max": 200,
+            "over90": 685,
+            "over90Pct": 88.73,
+            "se": 1.19
+          },
+          "boss": {
+            "n": 772,
+            "avg": 78,
+            "sd": 8,
+            "p50": 78.05,
+            "p90": 87.82,
+            "p95": 91.36,
+            "max": 103.14,
+            "over90": 46,
+            "over90Pct": 5.96,
+            "se": 0.36
+          }
+        },
+        "7": {
+          "entries": 772,
+          "cleared": 769,
+          "deaths": 3,
+          "deathRatePct": 0.39,
+          "survivalPct": 25.6,
+          "causes": {
+            "elite": 3
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 769,
+            "avg": 120.8,
+            "sd": 30.2,
+            "p50": 120.14,
+            "p90": 159.84,
+            "p95": 169.47,
+            "max": 232.35,
+            "over90": 636,
+            "over90Pct": 82.7,
+            "se": 1.36
+          },
+          "boss": {
+            "n": 769,
+            "avg": 68.6,
+            "sd": 7.5,
+            "p50": 69.03,
+            "p90": 78.39,
+            "p95": 79.94,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "8": {
+          "entries": 769,
+          "cleared": 764,
+          "deaths": 5,
+          "deathRatePct": 0.65,
+          "survivalPct": 25.5,
+          "causes": {
+            "boss": 3,
+            "elite": 2
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 764,
+            "avg": 122.7,
+            "sd": 31.9,
+            "p50": 121.7,
+            "p90": 166.07,
+            "p95": 176.4,
+            "max": 230.79,
+            "over90": 635,
+            "over90Pct": 83.12,
+            "se": 1.44
+          },
+          "boss": {
+            "n": 764,
+            "avg": 69.6,
+            "sd": 7.9,
+            "p50": 69.72,
+            "p90": 80.07,
+            "p95": 82.49,
+            "max": 86.86,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "9": {
+          "entries": 764,
+          "cleared": 761,
+          "deaths": 3,
+          "deathRatePct": 0.39,
+          "survivalPct": 25.4,
+          "causes": {
+            "boss": 1,
+            "elite": 2
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 761,
+            "avg": 127.5,
+            "sd": 32.8,
+            "p50": 127.06,
+            "p90": 171.87,
+            "p95": 181.73,
+            "max": 221.16,
+            "over90": 660,
+            "over90Pct": 86.73,
+            "se": 1.49
+          },
+          "boss": {
+            "n": 761,
+            "avg": 70.5,
+            "sd": 8.5,
+            "p50": 70.23,
+            "p90": 82.55,
+            "p95": 84.03,
+            "max": 89.55,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        },
+        "10": {
+          "entries": 761,
+          "cleared": 760,
+          "deaths": 1,
+          "deathRatePct": 0.13,
+          "survivalPct": 25.3,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 760,
+            "avg": 127.7,
+            "sd": 35.7,
+            "p50": 125.83,
+            "p90": 178.56,
+            "p95": 190.12,
+            "max": 259.71,
+            "over90": 646,
+            "over90Pct": 85,
+            "se": 1.62
+          },
+          "boss": {
+            "n": 760,
+            "avg": 71.7,
+            "sd": 8.7,
+            "p50": 71.14,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 92.24,
+            "over90": 13,
+            "over90Pct": 1.71,
+            "se": 0.4
+          }
+        },
+        "11": {
+          "entries": 760,
+          "cleared": 758,
+          "deaths": 2,
+          "deathRatePct": 0.26,
+          "survivalPct": 25.3,
+          "causes": {
+            "boss": 1,
+            "elite": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 758,
+            "avg": 133.2,
+            "sd": 36.2,
+            "p50": 133.15,
+            "p90": 180.57,
+            "p95": 196.02,
+            "max": 236.19,
+            "over90": 660,
+            "over90Pct": 87.07,
+            "se": 1.65
+          },
+          "boss": {
+            "n": 758,
+            "avg": 72.8,
+            "sd": 9.1,
+            "p50": 72.47,
+            "p90": 85.54,
+            "p95": 88.4,
+            "max": 94.93,
+            "over90": 20,
+            "over90Pct": 2.64,
+            "se": 0.41
+          }
+        },
+        "12": {
+          "entries": 758,
+          "cleared": 757,
+          "deaths": 1,
+          "deathRatePct": 0.13,
+          "survivalPct": 25.2,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 757,
+            "avg": 119,
+            "sd": 38.4,
+            "p50": 116.69,
+            "p90": 170.65,
+            "p95": 186.46,
+            "max": 235.28,
+            "over90": 571,
+            "over90Pct": 75.43,
+            "se": 1.75
+          },
+          "boss": {
+            "n": 757,
+            "avg": 55.4,
+            "sd": 7.1,
+            "p50": 55.38,
+            "p90": 64.75,
+            "p95": 67.44,
+            "max": 73.15,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.32
+          }
+        },
+        "13": {
+          "entries": 757,
+          "cleared": 757,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 25.2,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 757,
+            "avg": 114,
+            "sd": 38.3,
+            "p50": 111.91,
+            "p90": 166.31,
+            "p95": 178.42,
+            "max": 228.88,
+            "over90": 536,
+            "over90Pct": 70.81,
+            "se": 1.74
+          },
+          "boss": {
+            "n": 757,
+            "avg": 49.3,
+            "sd": 6.4,
+            "p50": 49.13,
+            "p90": 57.31,
+            "p95": 60.35,
+            "max": 65.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "14": {
+          "entries": 757,
+          "cleared": 755,
+          "deaths": 2,
+          "deathRatePct": 0.26,
+          "survivalPct": 25.2,
+          "causes": {
+            "battle": 1,
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 755,
+            "avg": 119.1,
+            "sd": 41.3,
+            "p50": 117.33,
+            "p90": 172.77,
+            "p95": 189.15,
+            "max": 267.61,
+            "over90": 563,
+            "over90Pct": 74.57,
+            "se": 1.88
+          },
+          "boss": {
+            "n": 755,
+            "avg": 50,
+            "sd": 6.8,
+            "p50": 49.71,
+            "p90": 58.12,
+            "p95": 61.98,
+            "max": 67.23,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.31
+          }
+        },
+        "15": {
+          "entries": 755,
+          "cleared": 734,
+          "deaths": 21,
+          "deathRatePct": 2.78,
+          "survivalPct": 24.5,
+          "causes": {
+            "boss": 17,
+            "elite": 2,
+            "battle": 2
+          },
+          "bossDeaths": 17,
+          "time": {
+            "n": 734,
+            "avg": 122.2,
+            "sd": 46.8,
+            "p50": 117.65,
+            "p90": 185.64,
+            "p95": 207.01,
+            "max": 279.53,
+            "over90": 521,
+            "over90Pct": 70.98,
+            "se": 2.16
+          },
+          "boss": {
+            "n": 734,
+            "avg": 50.8,
+            "sd": 7.1,
+            "p50": 50.72,
+            "p90": 59.54,
+            "p95": 63.59,
+            "max": 68.97,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "16": {
+          "entries": 734,
+          "cleared": 715,
+          "deaths": 19,
+          "deathRatePct": 2.59,
+          "survivalPct": 23.8,
+          "causes": {
+            "boss": 12,
+            "battle": 1,
+            "elite": 6
+          },
+          "bossDeaths": 12,
+          "time": {
+            "n": 715,
+            "avg": 130.1,
+            "sd": 47,
+            "p50": 126.42,
+            "p90": 194.3,
+            "p95": 212.31,
+            "max": 287.32,
+            "over90": 567,
+            "over90Pct": 79.3,
+            "se": 2.2
+          },
+          "boss": {
+            "n": 715,
+            "avg": 52,
+            "sd": 7.3,
+            "p50": 52.07,
+            "p90": 61.04,
+            "p95": 65.2,
+            "max": 70.72,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "17": {
+          "entries": 715,
+          "cleared": 692,
+          "deaths": 23,
+          "deathRatePct": 3.22,
+          "survivalPct": 23.1,
+          "causes": {
+            "boss": 20,
+            "elite": 3
+          },
+          "bossDeaths": 20,
+          "time": {
+            "n": 692,
+            "avg": 139.8,
+            "sd": 52.4,
+            "p50": 136.47,
+            "p90": 210.54,
+            "p95": 232.65,
+            "max": 378.1,
+            "over90": 569,
+            "over90Pct": 82.23,
+            "se": 2.49
+          },
+          "boss": {
+            "n": 692,
+            "avg": 53.2,
+            "sd": 7.5,
+            "p50": 53.3,
+            "p90": 62.54,
+            "p95": 66.8,
+            "max": 72.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "18": {
+          "entries": 692,
+          "cleared": 678,
+          "deaths": 14,
+          "deathRatePct": 2.02,
+          "survivalPct": 22.6,
+          "causes": {
+            "boss": 14
+          },
+          "bossDeaths": 14,
+          "time": {
+            "n": 678,
+            "avg": 148.7,
+            "sd": 54.6,
+            "p50": 145.47,
+            "p90": 220.81,
+            "p95": 237.34,
+            "max": 318.19,
+            "over90": 585,
+            "over90Pct": 86.28,
+            "se": 2.63
+          },
+          "boss": {
+            "n": 678,
+            "avg": 57.4,
+            "sd": 8.3,
+            "p50": 57.28,
+            "p90": 67.27,
+            "p95": 72.59,
+            "max": 78.75,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.4
+          }
+        },
+        "19": {
+          "entries": 678,
+          "cleared": 675,
+          "deaths": 3,
+          "deathRatePct": 0.44,
+          "survivalPct": 22.5,
+          "causes": {
+            "boss": 2,
+            "battle": 1
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 675,
+            "avg": 173.2,
+            "sd": 69.7,
+            "p50": 167.17,
+            "p90": 271.35,
+            "p95": 291.65,
+            "max": 396.59,
+            "over90": 606,
+            "over90Pct": 89.78,
+            "se": 3.36
+          },
+          "boss": {
+            "n": 675,
+            "avg": 57.6,
+            "sd": 8.3,
+            "p50": 57.43,
+            "p90": 68.04,
+            "p95": 73.43,
+            "max": 79.65,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.4
+          }
+        },
+        "20": {
+          "entries": 675,
+          "cleared": 673,
+          "deaths": 2,
+          "deathRatePct": 0.3,
+          "survivalPct": 22.4,
+          "causes": {
+            "elite": 1,
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 673,
+            "avg": 182.2,
+            "sd": 82.3,
+            "p50": 174.92,
+            "p90": 294.31,
+            "p95": 321.76,
+            "max": 441.42,
+            "over90": 589,
+            "over90Pct": 87.52,
+            "se": 3.98
+          },
+          "boss": {
+            "n": 673,
+            "avg": 52,
+            "sd": 7.5,
+            "p50": 52.05,
+            "p90": 61.54,
+            "p95": 66.73,
+            "max": 72.38,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        }
+      },
+      "pass10Pct": 25.3,
+      "clear20Pct": 22.4,
+      "deathPct": 77.6,
+      "avgDeathFloor": 3.17,
+      "avgRunSec": 820,
+      "causes": {
+        "boss": 1654,
+        "elite": 554,
+        "battle": 119
+      },
+      "difficultyId": "o1",
+      "regenBase": 16
+    },
+    "o2": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 105.6,
+            "sd": 22.9,
+            "p50": 101.66,
+            "p90": 135.76,
+            "p95": 147.15,
+            "max": 200.37,
+            "over90": 2061,
+            "over90Pct": 68.7,
+            "se": 0.52
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 1494,
+          "deaths": 1506,
+          "deathRatePct": 50.2,
+          "survivalPct": 49.8,
+          "causes": {
+            "boss": 935,
+            "elite": 560,
+            "battle": 11
+          },
+          "bossDeaths": 935,
+          "time": {
+            "n": 1494,
+            "avg": 100.1,
+            "sd": 31.1,
+            "p50": 92.91,
+            "p90": 143.1,
+            "p95": 169.54,
+            "max": 268.86,
+            "over90": 806,
+            "over90Pct": 53.95,
+            "se": 1.01
+          },
+          "boss": {
+            "n": 1494,
+            "avg": 66.3,
+            "sd": 5.6,
+            "p50": 65.38,
+            "p90": 74.02,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.18
+          }
+        },
+        "3": {
+          "entries": 1494,
+          "cleared": 801,
+          "deaths": 693,
+          "deathRatePct": 46.39,
+          "survivalPct": 26.7,
+          "causes": {
+            "elite": 291,
+            "boss": 336,
+            "battle": 66
+          },
+          "bossDeaths": 336,
+          "time": {
+            "n": 801,
+            "avg": 116.4,
+            "sd": 42.2,
+            "p50": 106.66,
+            "p90": 173.39,
+            "p95": 200.34,
+            "max": 307.66,
+            "over90": 554,
+            "over90Pct": 69.16,
+            "se": 1.87
+          },
+          "boss": {
+            "n": 801,
+            "avg": 67,
+            "sd": 5.8,
+            "p50": 67.67,
+            "p90": 73.41,
+            "p95": 77.2,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.26
+          }
+        },
+        "4": {
+          "entries": 801,
+          "cleared": 686,
+          "deaths": 115,
+          "deathRatePct": 14.36,
+          "survivalPct": 22.9,
+          "causes": {
+            "boss": 48,
+            "elite": 56,
+            "battle": 11
+          },
+          "bossDeaths": 48,
+          "time": {
+            "n": 686,
+            "avg": 117.8,
+            "sd": 38.4,
+            "p50": 110.14,
+            "p90": 169.73,
+            "p95": 188.6,
+            "max": 282.93,
+            "over90": 504,
+            "over90Pct": 73.47,
+            "se": 1.84
+          },
+          "boss": {
+            "n": 686,
+            "avg": 67.6,
+            "sd": 6.1,
+            "p50": 67.8,
+            "p90": 74.51,
+            "p95": 76.29,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "5": {
+          "entries": 686,
+          "cleared": 659,
+          "deaths": 27,
+          "deathRatePct": 3.94,
+          "survivalPct": 22,
+          "causes": {
+            "elite": 12,
+            "boss": 13,
+            "battle": 2
+          },
+          "bossDeaths": 13,
+          "time": {
+            "n": 659,
+            "avg": 125.5,
+            "sd": 42.3,
+            "p50": 115.03,
+            "p90": 182.08,
+            "p95": 207.3,
+            "max": 295.94,
+            "over90": 528,
+            "over90Pct": 80.12,
+            "se": 2.06
+          },
+          "boss": {
+            "n": 659,
+            "avg": 68.2,
+            "sd": 6.3,
+            "p50": 67.68,
+            "p90": 76.92,
+            "p95": 77.6,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.31
+          }
+        },
+        "6": {
+          "entries": 659,
+          "cleared": 651,
+          "deaths": 8,
+          "deathRatePct": 1.21,
+          "survivalPct": 21.7,
+          "causes": {
+            "boss": 7,
+            "elite": 1
+          },
+          "bossDeaths": 7,
+          "time": {
+            "n": 651,
+            "avg": 125.2,
+            "sd": 30.5,
+            "p50": 121.95,
+            "p90": 167.82,
+            "p95": 179.92,
+            "max": 230.66,
+            "over90": 572,
+            "over90Pct": 87.86,
+            "se": 1.5
+          },
+          "boss": {
+            "n": 651,
+            "avg": 78.9,
+            "sd": 7.8,
+            "p50": 78.49,
+            "p90": 88.88,
+            "p95": 91.5,
+            "max": 98.43,
+            "over90": 54,
+            "over90Pct": 8.29,
+            "se": 0.38
+          }
+        },
+        "7": {
+          "entries": 651,
+          "cleared": 647,
+          "deaths": 4,
+          "deathRatePct": 0.61,
+          "survivalPct": 21.6,
+          "causes": {
+            "boss": 4
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 647,
+            "avg": 119.4,
+            "sd": 32.5,
+            "p50": 116.13,
+            "p90": 163.93,
+            "p95": 179.58,
+            "max": 247.52,
+            "over90": 536,
+            "over90Pct": 82.84,
+            "se": 1.6
+          },
+          "boss": {
+            "n": 647,
+            "avg": 69.5,
+            "sd": 7.3,
+            "p50": 69.36,
+            "p90": 78.39,
+            "p95": 82.17,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "8": {
+          "entries": 647,
+          "cleared": 646,
+          "deaths": 1,
+          "deathRatePct": 0.15,
+          "survivalPct": 21.5,
+          "causes": {
+            "elite": 1
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 646,
+            "avg": 122.8,
+            "sd": 34.5,
+            "p50": 120.12,
+            "p90": 171.3,
+            "p95": 188.39,
+            "max": 282.9,
+            "over90": 539,
+            "over90Pct": 83.44,
+            "se": 1.7
+          },
+          "boss": {
+            "n": 646,
+            "avg": 70.6,
+            "sd": 7.6,
+            "p50": 70.56,
+            "p90": 80.89,
+            "p95": 82.49,
+            "max": 91.35,
+            "over90": 3,
+            "over90Pct": 0.46,
+            "se": 0.37
+          }
+        },
+        "9": {
+          "entries": 646,
+          "cleared": 646,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 21.5,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 646,
+            "avg": 126.5,
+            "sd": 37,
+            "p50": 120.39,
+            "p90": 176.08,
+            "p95": 195.03,
+            "max": 269.73,
+            "over90": 546,
+            "over90Pct": 84.52,
+            "se": 1.83
+          },
+          "boss": {
+            "n": 646,
+            "avg": 71.5,
+            "sd": 8.1,
+            "p50": 71.58,
+            "p90": 82.55,
+            "p95": 83.39,
+            "max": 94.18,
+            "over90": 2,
+            "over90Pct": 0.31,
+            "se": 0.4
+          }
+        },
+        "10": {
+          "entries": 646,
+          "cleared": 644,
+          "deaths": 2,
+          "deathRatePct": 0.31,
+          "survivalPct": 21.5,
+          "causes": {
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 644,
+            "avg": 131.9,
+            "sd": 39.3,
+            "p50": 127.68,
+            "p90": 183.65,
+            "p95": 199.96,
+            "max": 289.96,
+            "over90": 561,
+            "over90Pct": 87.11,
+            "se": 1.94
+          },
+          "boss": {
+            "n": 644,
+            "avg": 72.9,
+            "sd": 8.5,
+            "p50": 73.24,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 97.02,
+            "over90": 14,
+            "over90Pct": 2.17,
+            "se": 0.42
+          }
+        },
+        "11": {
+          "entries": 644,
+          "cleared": 644,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 21.5,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 644,
+            "avg": 131.9,
+            "sd": 40.6,
+            "p50": 123.66,
+            "p90": 187.99,
+            "p95": 202.58,
+            "max": 303.41,
+            "over90": 550,
+            "over90Pct": 85.4,
+            "se": 2.01
+          },
+          "boss": {
+            "n": 644,
+            "avg": 74,
+            "sd": 9,
+            "p50": 73.99,
+            "p90": 87.5,
+            "p95": 88.4,
+            "max": 99.85,
+            "over90": 16,
+            "over90Pct": 2.48,
+            "se": 0.44
+          }
+        },
+        "12": {
+          "entries": 644,
+          "cleared": 644,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 21.5,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 644,
+            "avg": 118.6,
+            "sd": 41.6,
+            "p50": 114.18,
+            "p90": 178.14,
+            "p95": 194.14,
+            "max": 271.93,
+            "over90": 459,
+            "over90Pct": 71.27,
+            "se": 2.05
+          },
+          "boss": {
+            "n": 644,
+            "avg": 56.4,
+            "sd": 6.9,
+            "p50": 55.95,
+            "p90": 66.56,
+            "p95": 67.44,
+            "max": 76.93,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "13": {
+          "entries": 644,
+          "cleared": 640,
+          "deaths": 4,
+          "deathRatePct": 0.62,
+          "survivalPct": 21.3,
+          "causes": {
+            "boss": 3,
+            "elite": 1
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 640,
+            "avg": 113.9,
+            "sd": 41.6,
+            "p50": 108.74,
+            "p90": 169.23,
+            "p95": 192.6,
+            "max": 327.52,
+            "over90": 435,
+            "over90Pct": 67.97,
+            "se": 2.06
+          },
+          "boss": {
+            "n": 640,
+            "avg": 50.1,
+            "sd": 6.3,
+            "p50": 50.03,
+            "p90": 58.69,
+            "p95": 60.35,
+            "max": 68.83,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.31
+          }
+        },
+        "14": {
+          "entries": 640,
+          "cleared": 624,
+          "deaths": 16,
+          "deathRatePct": 2.5,
+          "survivalPct": 20.8,
+          "causes": {
+            "boss": 12,
+            "elite": 3,
+            "battle": 1
+          },
+          "bossDeaths": 12,
+          "time": {
+            "n": 624,
+            "avg": 119.3,
+            "sd": 46.5,
+            "p50": 114.04,
+            "p90": 182.95,
+            "p95": 204.94,
+            "max": 308.89,
+            "over90": 443,
+            "over90Pct": 70.99,
+            "se": 2.33
+          },
+          "boss": {
+            "n": 624,
+            "avg": 50.9,
+            "sd": 6.7,
+            "p50": 50.91,
+            "p90": 60.09,
+            "p95": 61.98,
+            "max": 70.69,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "15": {
+          "entries": 624,
+          "cleared": 602,
+          "deaths": 22,
+          "deathRatePct": 3.53,
+          "survivalPct": 20.1,
+          "causes": {
+            "boss": 17,
+            "elite": 4,
+            "battle": 1
+          },
+          "bossDeaths": 17,
+          "time": {
+            "n": 602,
+            "avg": 123.5,
+            "sd": 50.2,
+            "p50": 115.08,
+            "p90": 195.16,
+            "p95": 218.1,
+            "max": 275.11,
+            "over90": 428,
+            "over90Pct": 71.1,
+            "se": 2.56
+          },
+          "boss": {
+            "n": 602,
+            "avg": 51.9,
+            "sd": 7,
+            "p50": 51.76,
+            "p90": 61.46,
+            "p95": 63.59,
+            "max": 72.53,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "16": {
+          "entries": 602,
+          "cleared": 592,
+          "deaths": 10,
+          "deathRatePct": 1.66,
+          "survivalPct": 19.7,
+          "causes": {
+            "boss": 8,
+            "battle": 1,
+            "elite": 1
+          },
+          "bossDeaths": 8,
+          "time": {
+            "n": 592,
+            "avg": 130.6,
+            "sd": 55.7,
+            "p50": 122.35,
+            "p90": 203.36,
+            "p95": 238.78,
+            "max": 345.21,
+            "over90": 445,
+            "over90Pct": 75.17,
+            "se": 2.87
+          },
+          "boss": {
+            "n": 592,
+            "avg": 53.1,
+            "sd": 7.2,
+            "p50": 53.06,
+            "p90": 62.83,
+            "p95": 65.2,
+            "max": 74.36,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "17": {
+          "entries": 592,
+          "cleared": 586,
+          "deaths": 6,
+          "deathRatePct": 1.01,
+          "survivalPct": 19.5,
+          "causes": {
+            "boss": 4,
+            "elite": 2
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 586,
+            "avg": 139.4,
+            "sd": 55.4,
+            "p50": 131.33,
+            "p90": 210.03,
+            "p95": 244.17,
+            "max": 322.75,
+            "over90": 483,
+            "over90Pct": 82.42,
+            "se": 2.87
+          },
+          "boss": {
+            "n": 586,
+            "avg": 54,
+            "sd": 7.4,
+            "p50": 53.95,
+            "p90": 63.78,
+            "p95": 66.8,
+            "max": 76.2,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.38
+          }
+        },
+        "18": {
+          "entries": 586,
+          "cleared": 579,
+          "deaths": 7,
+          "deathRatePct": 1.19,
+          "survivalPct": 19.3,
+          "causes": {
+            "elite": 4,
+            "boss": 3
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 579,
+            "avg": 148.3,
+            "sd": 61.5,
+            "p50": 138.15,
+            "p90": 232.64,
+            "p95": 263.6,
+            "max": 380.09,
+            "over90": 484,
+            "over90Pct": 83.59,
+            "se": 3.2
+          },
+          "boss": {
+            "n": 579,
+            "avg": 58.3,
+            "sd": 8.2,
+            "p50": 58.2,
+            "p90": 68.72,
+            "p95": 72.59,
+            "max": 82.81,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.43
+          }
+        },
+        "19": {
+          "entries": 579,
+          "cleared": 576,
+          "deaths": 3,
+          "deathRatePct": 0.52,
+          "survivalPct": 19.2,
+          "causes": {
+            "boss": 1,
+            "elite": 2
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 576,
+            "avg": 173.5,
+            "sd": 74.2,
+            "p50": 164.35,
+            "p90": 274.48,
+            "p95": 309.95,
+            "max": 420.81,
+            "over90": 514,
+            "over90Pct": 89.24,
+            "se": 3.87
+          },
+          "boss": {
+            "n": 576,
+            "avg": 58.5,
+            "sd": 8.3,
+            "p50": 58.69,
+            "p90": 68.74,
+            "p95": 73.43,
+            "max": 83.77,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.43
+          }
+        },
+        "20": {
+          "entries": 576,
+          "cleared": 576,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 19.2,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 576,
+            "avg": 186.1,
+            "sd": 93.2,
+            "p50": 172.61,
+            "p90": 309.04,
+            "p95": 363.23,
+            "max": 597.01,
+            "over90": 505,
+            "over90Pct": 87.67,
+            "se": 4.87
+          },
+          "boss": {
+            "n": 576,
+            "avg": 53,
+            "sd": 7.5,
+            "p50": 53.35,
+            "p90": 62.18,
+            "p95": 66.73,
+            "max": 76.11,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        }
+      },
+      "pass10Pct": 21.5,
+      "clear20Pct": 19.2,
+      "deathPct": 80.8,
+      "avgDeathFloor": 2.82,
+      "avgRunSec": 710.7,
+      "causes": {
+        "elite": 938,
+        "boss": 1393,
+        "battle": 93
+      },
+      "difficultyId": "o2",
+      "regenBase": 16
+    },
+    "o2A2": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 3000,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 100,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 3000,
+            "avg": 105.6,
+            "sd": 22.9,
+            "p50": 101.66,
+            "p90": 135.76,
+            "p95": 147.15,
+            "max": 200.37,
+            "over90": 2061,
+            "over90Pct": 68.7,
+            "se": 0.52
+          },
+          "boss": {
+            "n": 3000,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 3000,
+          "cleared": 1467,
+          "deaths": 1533,
+          "deathRatePct": 51.1,
+          "survivalPct": 48.9,
+          "causes": {
+            "boss": 1048,
+            "elite": 483,
+            "battle": 2
+          },
+          "bossDeaths": 1048,
+          "time": {
+            "n": 1467,
+            "avg": 103.8,
+            "sd": 29.4,
+            "p50": 97.26,
+            "p90": 148.67,
+            "p95": 163.31,
+            "max": 216.88,
+            "over90": 892,
+            "over90Pct": 60.8,
+            "se": 0.96
+          },
+          "boss": {
+            "n": 1467,
+            "avg": 66.3,
+            "sd": 5.5,
+            "p50": 65.38,
+            "p90": 74.02,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.18
+          }
+        },
+        "3": {
+          "entries": 1467,
+          "cleared": 905,
+          "deaths": 562,
+          "deathRatePct": 38.31,
+          "survivalPct": 30.2,
+          "causes": {
+            "boss": 418,
+            "battle": 83,
+            "elite": 61
+          },
+          "bossDeaths": 418,
+          "time": {
+            "n": 905,
+            "avg": 100.3,
+            "sd": 27.4,
+            "p50": 95.67,
+            "p90": 136.91,
+            "p95": 154.82,
+            "max": 205.13,
+            "over90": 548,
+            "over90Pct": 60.55,
+            "se": 1.14
+          },
+          "boss": {
+            "n": 905,
+            "avg": 67,
+            "sd": 5.9,
+            "p50": 66.8,
+            "p90": 73.85,
+            "p95": 77.2,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.25
+          }
+        },
+        "4": {
+          "entries": 905,
+          "cleared": 742,
+          "deaths": 163,
+          "deathRatePct": 18.01,
+          "survivalPct": 24.7,
+          "causes": {
+            "boss": 70,
+            "elite": 85,
+            "battle": 8
+          },
+          "bossDeaths": 70,
+          "time": {
+            "n": 742,
+            "avg": 121,
+            "sd": 32.7,
+            "p50": 119.14,
+            "p90": 164.58,
+            "p95": 178.54,
+            "max": 215.16,
+            "over90": 599,
+            "over90Pct": 80.73,
+            "se": 1.51
+          },
+          "boss": {
+            "n": 742,
+            "avg": 67.3,
+            "sd": 6.1,
+            "p50": 67.35,
+            "p90": 74.51,
+            "p95": 76.1,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.28
+          }
+        },
+        "5": {
+          "entries": 742,
+          "cleared": 714,
+          "deaths": 28,
+          "deathRatePct": 3.77,
+          "survivalPct": 23.8,
+          "causes": {
+            "battle": 5,
+            "elite": 12,
+            "boss": 11
+          },
+          "bossDeaths": 11,
+          "time": {
+            "n": 714,
+            "avg": 122.4,
+            "sd": 36.9,
+            "p50": 118.44,
+            "p90": 173.71,
+            "p95": 184.46,
+            "max": 233.53,
+            "over90": 555,
+            "over90Pct": 77.73,
+            "se": 1.73
+          },
+          "boss": {
+            "n": 714,
+            "avg": 67.7,
+            "sd": 6.2,
+            "p50": 67.68,
+            "p90": 74.83,
+            "p95": 76.92,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "6": {
+          "entries": 714,
+          "cleared": 705,
+          "deaths": 9,
+          "deathRatePct": 1.26,
+          "survivalPct": 23.5,
+          "causes": {
+            "boss": 5,
+            "battle": 2,
+            "elite": 2
+          },
+          "bossDeaths": 5,
+          "time": {
+            "n": 705,
+            "avg": 123.9,
+            "sd": 26.4,
+            "p50": 122.87,
+            "p90": 157.7,
+            "p95": 167.29,
+            "max": 200,
+            "over90": 625,
+            "over90Pct": 88.65,
+            "se": 1.25
+          },
+          "boss": {
+            "n": 705,
+            "avg": 78.1,
+            "sd": 8,
+            "p50": 78.18,
+            "p90": 87.83,
+            "p95": 91.36,
+            "max": 103.14,
+            "over90": 43,
+            "over90Pct": 6.1,
+            "se": 0.38
+          }
+        },
+        "7": {
+          "entries": 705,
+          "cleared": 704,
+          "deaths": 1,
+          "deathRatePct": 0.14,
+          "survivalPct": 23.5,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 704,
+            "avg": 120.9,
+            "sd": 30.2,
+            "p50": 120.14,
+            "p90": 160,
+            "p95": 169.87,
+            "max": 232.35,
+            "over90": 581,
+            "over90Pct": 82.53,
+            "se": 1.43
+          },
+          "boss": {
+            "n": 704,
+            "avg": 68.7,
+            "sd": 7.5,
+            "p50": 69.36,
+            "p90": 78.39,
+            "p95": 79.94,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "8": {
+          "entries": 704,
+          "cleared": 704,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 23.5,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 704,
+            "avg": 123.1,
+            "sd": 31.9,
+            "p50": 122.45,
+            "p90": 165.4,
+            "p95": 176.37,
+            "max": 230.79,
+            "over90": 587,
+            "over90Pct": 83.38,
+            "se": 1.5
+          },
+          "boss": {
+            "n": 704,
+            "avg": 69.7,
+            "sd": 7.9,
+            "p50": 69.81,
+            "p90": 80.89,
+            "p95": 82.49,
+            "max": 86.86,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "9": {
+          "entries": 704,
+          "cleared": 701,
+          "deaths": 3,
+          "deathRatePct": 0.43,
+          "survivalPct": 23.4,
+          "causes": {
+            "elite": 1,
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 701,
+            "avg": 128.2,
+            "sd": 32.8,
+            "p50": 127.23,
+            "p90": 172.34,
+            "p95": 181.98,
+            "max": 221.16,
+            "over90": 612,
+            "over90Pct": 87.3,
+            "se": 1.55
+          },
+          "boss": {
+            "n": 701,
+            "avg": 70.6,
+            "sd": 8.5,
+            "p50": 70.44,
+            "p90": 82.55,
+            "p95": 85.05,
+            "max": 89.55,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.4
+          }
+        },
+        "10": {
+          "entries": 701,
+          "cleared": 701,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 23.4,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 701,
+            "avg": 127.8,
+            "sd": 35.8,
+            "p50": 125.87,
+            "p90": 179.22,
+            "p95": 190.36,
+            "max": 259.71,
+            "over90": 594,
+            "over90Pct": 84.74,
+            "se": 1.7
+          },
+          "boss": {
+            "n": 701,
+            "avg": 71.8,
+            "sd": 8.7,
+            "p50": 71.25,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 92.24,
+            "over90": 12,
+            "over90Pct": 1.71,
+            "se": 0.41
+          }
+        },
+        "11": {
+          "entries": 701,
+          "cleared": 701,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 23.4,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 701,
+            "avg": 133.2,
+            "sd": 35.9,
+            "p50": 133.15,
+            "p90": 180.53,
+            "p95": 195.74,
+            "max": 236.19,
+            "over90": 612,
+            "over90Pct": 87.3,
+            "se": 1.7
+          },
+          "boss": {
+            "n": 701,
+            "avg": 72.8,
+            "sd": 9.1,
+            "p50": 72.83,
+            "p90": 84.82,
+            "p95": 88.4,
+            "max": 94.93,
+            "over90": 19,
+            "over90Pct": 2.71,
+            "se": 0.43
+          }
+        },
+        "12": {
+          "entries": 701,
+          "cleared": 701,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 23.4,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 701,
+            "avg": 119,
+            "sd": 38.9,
+            "p50": 116.2,
+            "p90": 171.01,
+            "p95": 188.39,
+            "max": 235.28,
+            "over90": 527,
+            "over90Pct": 75.18,
+            "se": 1.84
+          },
+          "boss": {
+            "n": 701,
+            "avg": 55.5,
+            "sd": 7.1,
+            "p50": 55.44,
+            "p90": 64.75,
+            "p95": 67.44,
+            "max": 73.15,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "13": {
+          "entries": 701,
+          "cleared": 700,
+          "deaths": 1,
+          "deathRatePct": 0.14,
+          "survivalPct": 23.3,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 700,
+            "avg": 113.4,
+            "sd": 38.4,
+            "p50": 111.63,
+            "p90": 166.31,
+            "p95": 177.55,
+            "max": 228.88,
+            "over90": 492,
+            "over90Pct": 70.29,
+            "se": 1.82
+          },
+          "boss": {
+            "n": 700,
+            "avg": 49.4,
+            "sd": 6.4,
+            "p50": 49.2,
+            "p90": 57.31,
+            "p95": 60.35,
+            "max": 65.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "14": {
+          "entries": 700,
+          "cleared": 682,
+          "deaths": 18,
+          "deathRatePct": 2.57,
+          "survivalPct": 22.7,
+          "causes": {
+            "boss": 16,
+            "elite": 2
+          },
+          "bossDeaths": 16,
+          "time": {
+            "n": 682,
+            "avg": 119.7,
+            "sd": 41.9,
+            "p50": 117.99,
+            "p90": 173.86,
+            "p95": 189.15,
+            "max": 267.61,
+            "over90": 507,
+            "over90Pct": 74.34,
+            "se": 2.01
+          },
+          "boss": {
+            "n": 682,
+            "avg": 50.1,
+            "sd": 6.8,
+            "p50": 50.07,
+            "p90": 58.64,
+            "p95": 61.98,
+            "max": 67.23,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "15": {
+          "entries": 682,
+          "cleared": 653,
+          "deaths": 29,
+          "deathRatePct": 4.25,
+          "survivalPct": 21.8,
+          "causes": {
+            "boss": 19,
+            "elite": 8,
+            "battle": 2
+          },
+          "bossDeaths": 19,
+          "time": {
+            "n": 653,
+            "avg": 122.1,
+            "sd": 47.2,
+            "p50": 116.97,
+            "p90": 185.64,
+            "p95": 208.01,
+            "max": 279.53,
+            "over90": 461,
+            "over90Pct": 70.6,
+            "se": 2.31
+          },
+          "boss": {
+            "n": 653,
+            "avg": 51.1,
+            "sd": 7,
+            "p50": 50.84,
+            "p90": 59.62,
+            "p95": 63.59,
+            "max": 68.97,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "16": {
+          "entries": 653,
+          "cleared": 639,
+          "deaths": 14,
+          "deathRatePct": 2.14,
+          "survivalPct": 21.3,
+          "causes": {
+            "boss": 11,
+            "elite": 3
+          },
+          "bossDeaths": 11,
+          "time": {
+            "n": 639,
+            "avg": 131.7,
+            "sd": 47.7,
+            "p50": 127.81,
+            "p90": 197.69,
+            "p95": 213.2,
+            "max": 287.32,
+            "over90": 510,
+            "over90Pct": 79.81,
+            "se": 2.36
+          },
+          "boss": {
+            "n": 639,
+            "avg": 52.3,
+            "sd": 7.2,
+            "p50": 52.19,
+            "p90": 61.04,
+            "p95": 65.2,
+            "max": 70.72,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "17": {
+          "entries": 639,
+          "cleared": 626,
+          "deaths": 13,
+          "deathRatePct": 2.03,
+          "survivalPct": 20.9,
+          "causes": {
+            "boss": 13
+          },
+          "bossDeaths": 13,
+          "time": {
+            "n": 626,
+            "avg": 140.9,
+            "sd": 52.1,
+            "p50": 137.31,
+            "p90": 210.54,
+            "p95": 231.84,
+            "max": 378.1,
+            "over90": 523,
+            "over90Pct": 83.55,
+            "se": 2.61
+          },
+          "boss": {
+            "n": 626,
+            "avg": 53.5,
+            "sd": 7.4,
+            "p50": 53.41,
+            "p90": 62.54,
+            "p95": 66.8,
+            "max": 72.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "18": {
+          "entries": 626,
+          "cleared": 620,
+          "deaths": 6,
+          "deathRatePct": 0.96,
+          "survivalPct": 20.7,
+          "causes": {
+            "boss": 6
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 620,
+            "avg": 149.7,
+            "sd": 54.5,
+            "p50": 147.28,
+            "p90": 221.85,
+            "p95": 237.39,
+            "max": 318.19,
+            "over90": 539,
+            "over90Pct": 86.94,
+            "se": 2.74
+          },
+          "boss": {
+            "n": 620,
+            "avg": 57.6,
+            "sd": 8.2,
+            "p50": 57.6,
+            "p90": 67.65,
+            "p95": 72.59,
+            "max": 78.75,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.41
+          }
+        },
+        "19": {
+          "entries": 620,
+          "cleared": 620,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 20.7,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 620,
+            "avg": 174,
+            "sd": 69.5,
+            "p50": 168.64,
+            "p90": 271.52,
+            "p95": 291.65,
+            "max": 396.59,
+            "over90": 558,
+            "over90Pct": 90,
+            "se": 3.5
+          },
+          "boss": {
+            "n": 620,
+            "avg": 57.8,
+            "sd": 8.2,
+            "p50": 57.71,
+            "p90": 68.04,
+            "p95": 73.43,
+            "max": 79.65,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.41
+          }
+        },
+        "20": {
+          "entries": 620,
+          "cleared": 619,
+          "deaths": 1,
+          "deathRatePct": 0.16,
+          "survivalPct": 20.6,
+          "causes": {
+            "elite": 1
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 619,
+            "avg": 182.9,
+            "sd": 82.6,
+            "p50": 174.69,
+            "p90": 295.86,
+            "p95": 325.94,
+            "max": 441.42,
+            "over90": 542,
+            "over90Pct": 87.56,
+            "se": 4.16
+          },
+          "boss": {
+            "n": 619,
+            "avg": 52.2,
+            "sd": 7.4,
+            "p50": 52.2,
+            "p90": 61.54,
+            "p95": 66.73,
+            "max": 72.38,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.38
+          }
+        }
+      },
+      "pass10Pct": 23.4,
+      "clear20Pct": 20.6,
+      "deathPct": 79.4,
+      "avgDeathFloor": 2.9,
+      "avgRunSec": 755.2,
+      "causes": {
+        "boss": 1621,
+        "elite": 658,
+        "battle": 102
+      },
+      "difficultyId": "o2",
+      "regenBase": 16
+    },
+    "o3": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 2997,
+          "deaths": 3,
+          "deathRatePct": 0.1,
+          "survivalPct": 99.9,
+          "causes": {
+            "boss": 3
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 2997,
+            "avg": 107,
+            "sd": 23.8,
+            "p50": 102.87,
+            "p90": 138.6,
+            "p95": 149.93,
+            "max": 206.21,
+            "over90": 2065,
+            "over90Pct": 68.9,
+            "se": 0.55
+          },
+          "boss": {
+            "n": 2997,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 2997,
+          "cleared": 1214,
+          "deaths": 1783,
+          "deathRatePct": 59.49,
+          "survivalPct": 40.5,
+          "causes": {
+            "boss": 1018,
+            "elite": 729,
+            "battle": 36
+          },
+          "bossDeaths": 1018,
+          "time": {
+            "n": 1214,
+            "avg": 101,
+            "sd": 34.7,
+            "p50": 90.08,
+            "p90": 154.98,
+            "p95": 177.52,
+            "max": 278.32,
+            "over90": 609,
+            "over90Pct": 50.16,
+            "se": 1.25
+          },
+          "boss": {
+            "n": 1214,
+            "avg": 66.7,
+            "sd": 5.8,
+            "p50": 65.86,
+            "p90": 74.36,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.21
+          }
+        },
+        "3": {
+          "entries": 1214,
+          "cleared": 677,
+          "deaths": 537,
+          "deathRatePct": 44.23,
+          "survivalPct": 22.6,
+          "causes": {
+            "battle": 95,
+            "boss": 226,
+            "elite": 216
+          },
+          "bossDeaths": 226,
+          "time": {
+            "n": 677,
+            "avg": 122.1,
+            "sd": 45,
+            "p50": 110.43,
+            "p90": 181.67,
+            "p95": 206.85,
+            "max": 318.52,
+            "over90": 501,
+            "over90Pct": 74,
+            "se": 2.17
+          },
+          "boss": {
+            "n": 677,
+            "avg": 67.4,
+            "sd": 5.7,
+            "p50": 67.67,
+            "p90": 73.85,
+            "p95": 77.2,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.28
+          }
+        },
+        "4": {
+          "entries": 677,
+          "cleared": 611,
+          "deaths": 66,
+          "deathRatePct": 9.75,
+          "survivalPct": 20.4,
+          "causes": {
+            "boss": 28,
+            "battle": 3,
+            "elite": 35
+          },
+          "bossDeaths": 28,
+          "time": {
+            "n": 611,
+            "avg": 120.9,
+            "sd": 40.5,
+            "p50": 113.59,
+            "p90": 174.48,
+            "p95": 194.66,
+            "max": 292.13,
+            "over90": 461,
+            "over90Pct": 75.45,
+            "se": 2.05
+          },
+          "boss": {
+            "n": 611,
+            "avg": 67.8,
+            "sd": 5.9,
+            "p50": 67.96,
+            "p90": 74.51,
+            "p95": 76.99,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "5": {
+          "entries": 611,
+          "cleared": 598,
+          "deaths": 13,
+          "deathRatePct": 2.13,
+          "survivalPct": 19.9,
+          "causes": {
+            "boss": 11,
+            "battle": 1,
+            "elite": 1
+          },
+          "bossDeaths": 11,
+          "time": {
+            "n": 598,
+            "avg": 128.6,
+            "sd": 44.4,
+            "p50": 117.63,
+            "p90": 187.14,
+            "p95": 217.92,
+            "max": 306.13,
+            "over90": 487,
+            "over90Pct": 81.44,
+            "se": 2.27
+          },
+          "boss": {
+            "n": 598,
+            "avg": 68.2,
+            "sd": 6.3,
+            "p50": 67.74,
+            "p90": 76.92,
+            "p95": 77.6,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.32
+          }
+        },
+        "6": {
+          "entries": 598,
+          "cleared": 595,
+          "deaths": 3,
+          "deathRatePct": 0.5,
+          "survivalPct": 19.8,
+          "causes": {
+            "battle": 1,
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 595,
+            "avg": 127.5,
+            "sd": 31.8,
+            "p50": 124.64,
+            "p90": 171.19,
+            "p95": 183.34,
+            "max": 237.16,
+            "over90": 527,
+            "over90Pct": 88.57,
+            "se": 1.63
+          },
+          "boss": {
+            "n": 595,
+            "avg": 78.9,
+            "sd": 7.9,
+            "p50": 78.49,
+            "p90": 88.88,
+            "p95": 91.5,
+            "max": 98.43,
+            "over90": 50,
+            "over90Pct": 8.4,
+            "se": 0.4
+          }
+        },
+        "7": {
+          "entries": 595,
+          "cleared": 595,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 19.8,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 595,
+            "avg": 121.6,
+            "sd": 34.2,
+            "p50": 117.92,
+            "p90": 167.98,
+            "p95": 185.31,
+            "max": 255.47,
+            "over90": 496,
+            "over90Pct": 83.36,
+            "se": 1.76
+          },
+          "boss": {
+            "n": 595,
+            "avg": 69.5,
+            "sd": 7.3,
+            "p50": 69.36,
+            "p90": 78.39,
+            "p95": 82.17,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "8": {
+          "entries": 595,
+          "cleared": 595,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 19.8,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 595,
+            "avg": 124.5,
+            "sd": 35.9,
+            "p50": 121.38,
+            "p90": 175.58,
+            "p95": 193.54,
+            "max": 292.45,
+            "over90": 494,
+            "over90Pct": 83.03,
+            "se": 1.85
+          },
+          "boss": {
+            "n": 595,
+            "avg": 70.6,
+            "sd": 7.6,
+            "p50": 70.58,
+            "p90": 80.89,
+            "p95": 82.49,
+            "max": 91.35,
+            "over90": 3,
+            "over90Pct": 0.5,
+            "se": 0.39
+          }
+        },
+        "9": {
+          "entries": 595,
+          "cleared": 595,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 19.8,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 595,
+            "avg": 128.7,
+            "sd": 38.3,
+            "p50": 122.28,
+            "p90": 180.58,
+            "p95": 200.89,
+            "max": 271.42,
+            "over90": 504,
+            "over90Pct": 84.71,
+            "se": 1.97
+          },
+          "boss": {
+            "n": 595,
+            "avg": 71.6,
+            "sd": 8.1,
+            "p50": 71.75,
+            "p90": 82.55,
+            "p95": 83.39,
+            "max": 94.18,
+            "over90": 2,
+            "over90Pct": 0.34,
+            "se": 0.42
+          }
+        },
+        "10": {
+          "entries": 595,
+          "cleared": 595,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 19.8,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 595,
+            "avg": 135.1,
+            "sd": 41.2,
+            "p50": 131.11,
+            "p90": 188.97,
+            "p95": 208.76,
+            "max": 299.95,
+            "over90": 525,
+            "over90Pct": 88.24,
+            "se": 2.12
+          },
+          "boss": {
+            "n": 595,
+            "avg": 72.9,
+            "sd": 8.6,
+            "p50": 73.41,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 97.02,
+            "over90": 14,
+            "over90Pct": 2.35,
+            "se": 0.44
+          }
+        },
+        "11": {
+          "entries": 595,
+          "cleared": 595,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 19.8,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 595,
+            "avg": 134,
+            "sd": 42,
+            "p50": 125.19,
+            "p90": 192.19,
+            "p95": 207.06,
+            "max": 312.08,
+            "over90": 514,
+            "over90Pct": 86.39,
+            "se": 2.16
+          },
+          "boss": {
+            "n": 595,
+            "avg": 74,
+            "sd": 9,
+            "p50": 74.03,
+            "p90": 87.5,
+            "p95": 88.4,
+            "max": 99.85,
+            "over90": 15,
+            "over90Pct": 2.52,
+            "se": 0.46
+          }
+        },
+        "12": {
+          "entries": 595,
+          "cleared": 594,
+          "deaths": 1,
+          "deathRatePct": 0.17,
+          "survivalPct": 19.8,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 594,
+            "avg": 120.3,
+            "sd": 42.8,
+            "p50": 115.36,
+            "p90": 182.26,
+            "p95": 199.11,
+            "max": 276.59,
+            "over90": 426,
+            "over90Pct": 71.72,
+            "se": 2.2
+          },
+          "boss": {
+            "n": 594,
+            "avg": 56.4,
+            "sd": 7,
+            "p50": 55.89,
+            "p90": 66.57,
+            "p95": 68.13,
+            "max": 76.93,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "13": {
+          "entries": 594,
+          "cleared": 585,
+          "deaths": 9,
+          "deathRatePct": 1.52,
+          "survivalPct": 19.5,
+          "causes": {
+            "boss": 5,
+            "elite": 3,
+            "battle": 1
+          },
+          "bossDeaths": 5,
+          "time": {
+            "n": 585,
+            "avg": 114,
+            "sd": 41.3,
+            "p50": 108.78,
+            "p90": 169.03,
+            "p95": 189.25,
+            "max": 329.58,
+            "over90": 402,
+            "over90Pct": 68.72,
+            "se": 2.14
+          },
+          "boss": {
+            "n": 585,
+            "avg": 50.1,
+            "sd": 6.3,
+            "p50": 49.84,
+            "p90": 59.4,
+            "p95": 60.35,
+            "max": 68.83,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.33
+          }
+        },
+        "14": {
+          "entries": 585,
+          "cleared": 562,
+          "deaths": 23,
+          "deathRatePct": 3.93,
+          "survivalPct": 18.7,
+          "causes": {
+            "boss": 17,
+            "elite": 5,
+            "battle": 1
+          },
+          "bossDeaths": 17,
+          "time": {
+            "n": 562,
+            "avg": 119.2,
+            "sd": 46.6,
+            "p50": 114.04,
+            "p90": 182.95,
+            "p95": 205.14,
+            "max": 308.89,
+            "over90": 400,
+            "over90Pct": 71.17,
+            "se": 2.46
+          },
+          "boss": {
+            "n": 562,
+            "avg": 50.9,
+            "sd": 6.8,
+            "p50": 50.91,
+            "p90": 60.28,
+            "p95": 61.98,
+            "max": 70.69,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "15": {
+          "entries": 562,
+          "cleared": 549,
+          "deaths": 13,
+          "deathRatePct": 2.31,
+          "survivalPct": 18.3,
+          "causes": {
+            "boss": 11,
+            "battle": 2
+          },
+          "bossDeaths": 11,
+          "time": {
+            "n": 549,
+            "avg": 124.3,
+            "sd": 50.5,
+            "p50": 115.61,
+            "p90": 196.42,
+            "p95": 219.85,
+            "max": 275.11,
+            "over90": 393,
+            "over90Pct": 71.58,
+            "se": 2.7
+          },
+          "boss": {
+            "n": 549,
+            "avg": 51.9,
+            "sd": 7,
+            "p50": 51.76,
+            "p90": 61.61,
+            "p95": 63.59,
+            "max": 72.53,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.38
+          }
+        },
+        "16": {
+          "entries": 549,
+          "cleared": 543,
+          "deaths": 6,
+          "deathRatePct": 1.09,
+          "survivalPct": 18.1,
+          "causes": {
+            "elite": 2,
+            "boss": 4
+          },
+          "bossDeaths": 4,
+          "time": {
+            "n": 543,
+            "avg": 131.2,
+            "sd": 55.7,
+            "p50": 123.81,
+            "p90": 203.69,
+            "p95": 238.59,
+            "max": 341.83,
+            "over90": 408,
+            "over90Pct": 75.14,
+            "se": 2.99
+          },
+          "boss": {
+            "n": 543,
+            "avg": 53.1,
+            "sd": 7.3,
+            "p50": 52.93,
+            "p90": 63.16,
+            "p95": 65.2,
+            "max": 74.36,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        },
+        "17": {
+          "entries": 543,
+          "cleared": 532,
+          "deaths": 11,
+          "deathRatePct": 2.03,
+          "survivalPct": 17.7,
+          "causes": {
+            "boss": 8,
+            "elite": 3
+          },
+          "bossDeaths": 8,
+          "time": {
+            "n": 532,
+            "avg": 140.6,
+            "sd": 56.5,
+            "p50": 131.85,
+            "p90": 213.53,
+            "p95": 246.27,
+            "max": 322.75,
+            "over90": 439,
+            "over90Pct": 82.52,
+            "se": 3.07
+          },
+          "boss": {
+            "n": 532,
+            "avg": 54.1,
+            "sd": 7.5,
+            "p50": 53.95,
+            "p90": 64.14,
+            "p95": 66.8,
+            "max": 76.2,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.41
+          }
+        },
+        "18": {
+          "entries": 532,
+          "cleared": 530,
+          "deaths": 2,
+          "deathRatePct": 0.38,
+          "survivalPct": 17.7,
+          "causes": {
+            "boss": 2
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 530,
+            "avg": 147.2,
+            "sd": 61,
+            "p50": 136.33,
+            "p90": 230.93,
+            "p95": 262.93,
+            "max": 380.09,
+            "over90": 440,
+            "over90Pct": 83.02,
+            "se": 3.32
+          },
+          "boss": {
+            "n": 530,
+            "avg": 58.3,
+            "sd": 8.3,
+            "p50": 58.02,
+            "p90": 69.31,
+            "p95": 72.59,
+            "max": 82.81,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.45
+          }
+        },
+        "19": {
+          "entries": 530,
+          "cleared": 527,
+          "deaths": 3,
+          "deathRatePct": 0.57,
+          "survivalPct": 17.6,
+          "causes": {
+            "boss": 2,
+            "elite": 1
+          },
+          "bossDeaths": 2,
+          "time": {
+            "n": 527,
+            "avg": 174.4,
+            "sd": 75,
+            "p50": 164.78,
+            "p90": 275.72,
+            "p95": 309.95,
+            "max": 420.81,
+            "over90": 470,
+            "over90Pct": 89.18,
+            "se": 4.09
+          },
+          "boss": {
+            "n": 527,
+            "avg": 58.5,
+            "sd": 8.4,
+            "p50": 58.69,
+            "p90": 68.74,
+            "p95": 73.43,
+            "max": 83.77,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.46
+          }
+        },
+        "20": {
+          "entries": 527,
+          "cleared": 527,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 17.6,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 527,
+            "avg": 186.4,
+            "sd": 92.5,
+            "p50": 172.61,
+            "p90": 308.04,
+            "p95": 362.85,
+            "max": 597.01,
+            "over90": 466,
+            "over90Pct": 88.43,
+            "se": 5.05
+          },
+          "boss": {
+            "n": 527,
+            "avg": 53,
+            "sd": 7.6,
+            "p50": 53.35,
+            "p90": 62.18,
+            "p95": 66.73,
+            "max": 76.11,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.41
+          }
+        }
+      },
+      "pass10Pct": 19.8,
+      "clear20Pct": 17.6,
+      "deathPct": 82.4,
+      "avgDeathFloor": 2.65,
+      "avgRunSec": 660.9,
+      "causes": {
+        "boss": 1338,
+        "elite": 995,
+        "battle": 140
+      },
+      "difficultyId": "o3",
+      "regenBase": 16
+    },
+    "o3A2": {
+      "floors": {
+        "1": {
+          "entries": 3000,
+          "cleared": 2997,
+          "deaths": 3,
+          "deathRatePct": 0.1,
+          "survivalPct": 99.9,
+          "causes": {
+            "boss": 3
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 2997,
+            "avg": 107,
+            "sd": 23.8,
+            "p50": 102.87,
+            "p90": 138.6,
+            "p95": 149.93,
+            "max": 206.21,
+            "over90": 2065,
+            "over90Pct": 68.9,
+            "se": 0.55
+          },
+          "boss": {
+            "n": 2997,
+            "avg": 68.5,
+            "sd": 2.3,
+            "p50": 69.18,
+            "p90": 69.18,
+            "p95": 69.18,
+            "max": 74.95,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.05
+          }
+        },
+        "2": {
+          "entries": 2997,
+          "cleared": 1147,
+          "deaths": 1850,
+          "deathRatePct": 61.73,
+          "survivalPct": 38.2,
+          "causes": {
+            "boss": 1156,
+            "elite": 667,
+            "battle": 27
+          },
+          "bossDeaths": 1156,
+          "time": {
+            "n": 1147,
+            "avg": 105.6,
+            "sd": 33.5,
+            "p50": 94.14,
+            "p90": 158.92,
+            "p95": 171.13,
+            "max": 223.04,
+            "over90": 637,
+            "over90Pct": 55.54,
+            "se": 1.24
+          },
+          "boss": {
+            "n": 1147,
+            "avg": 67.2,
+            "sd": 5.6,
+            "p50": 66.37,
+            "p90": 77.91,
+            "p95": 77.91,
+            "max": 77.91,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.21
+          }
+        },
+        "3": {
+          "entries": 1147,
+          "cleared": 766,
+          "deaths": 381,
+          "deathRatePct": 33.22,
+          "survivalPct": 25.5,
+          "causes": {
+            "boss": 266,
+            "battle": 79,
+            "elite": 36
+          },
+          "bossDeaths": 266,
+          "time": {
+            "n": 766,
+            "avg": 103.6,
+            "sd": 28,
+            "p50": 99.17,
+            "p90": 140.66,
+            "p95": 161.73,
+            "max": 199.43,
+            "over90": 503,
+            "over90Pct": 65.67,
+            "se": 1.27
+          },
+          "boss": {
+            "n": 766,
+            "avg": 67.6,
+            "sd": 5.8,
+            "p50": 67.67,
+            "p90": 74.66,
+            "p95": 77.2,
+            "max": 80.88,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.26
+          }
+        },
+        "4": {
+          "entries": 766,
+          "cleared": 664,
+          "deaths": 102,
+          "deathRatePct": 13.32,
+          "survivalPct": 22.1,
+          "causes": {
+            "elite": 49,
+            "boss": 41,
+            "battle": 12
+          },
+          "bossDeaths": 41,
+          "time": {
+            "n": 664,
+            "avg": 124.9,
+            "sd": 33.8,
+            "p50": 123.23,
+            "p90": 170.06,
+            "p95": 183.49,
+            "max": 221.14,
+            "over90": 552,
+            "over90Pct": 83.13,
+            "se": 1.64
+          },
+          "boss": {
+            "n": 664,
+            "avg": 67.6,
+            "sd": 6,
+            "p50": 67.8,
+            "p90": 74.51,
+            "p95": 76.1,
+            "max": 83.85,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.29
+          }
+        },
+        "5": {
+          "entries": 664,
+          "cleared": 653,
+          "deaths": 11,
+          "deathRatePct": 1.66,
+          "survivalPct": 21.8,
+          "causes": {
+            "elite": 3,
+            "boss": 6,
+            "battle": 2
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 653,
+            "avg": 125.6,
+            "sd": 38.6,
+            "p50": 120.92,
+            "p90": 178.71,
+            "p95": 190.6,
+            "max": 240.3,
+            "over90": 517,
+            "over90Pct": 79.17,
+            "se": 1.89
+          },
+          "boss": {
+            "n": 653,
+            "avg": 67.9,
+            "sd": 6.2,
+            "p50": 68,
+            "p90": 74.83,
+            "p95": 76.92,
+            "max": 86.82,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.3
+          }
+        },
+        "6": {
+          "entries": 653,
+          "cleared": 650,
+          "deaths": 3,
+          "deathRatePct": 0.46,
+          "survivalPct": 21.7,
+          "causes": {
+            "boss": 3
+          },
+          "bossDeaths": 3,
+          "time": {
+            "n": 650,
+            "avg": 126.1,
+            "sd": 27.3,
+            "p50": 125.16,
+            "p90": 161.06,
+            "p95": 170.32,
+            "max": 204.61,
+            "over90": 580,
+            "over90Pct": 89.23,
+            "se": 1.34
+          },
+          "boss": {
+            "n": 650,
+            "avg": 78.3,
+            "sd": 8,
+            "p50": 78.49,
+            "p90": 87.97,
+            "p95": 91.36,
+            "max": 103.14,
+            "over90": 39,
+            "over90Pct": 6,
+            "se": 0.39
+          }
+        },
+        "7": {
+          "entries": 650,
+          "cleared": 649,
+          "deaths": 1,
+          "deathRatePct": 0.15,
+          "survivalPct": 21.6,
+          "causes": {
+            "elite": 1
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 649,
+            "avg": 123.8,
+            "sd": 31,
+            "p50": 123.76,
+            "p90": 163.79,
+            "p95": 173.66,
+            "max": 238.86,
+            "over90": 550,
+            "over90Pct": 84.75,
+            "se": 1.53
+          },
+          "boss": {
+            "n": 649,
+            "avg": 68.8,
+            "sd": 7.4,
+            "p50": 69.36,
+            "p90": 78.39,
+            "p95": 79.94,
+            "max": 88.52,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "8": {
+          "entries": 649,
+          "cleared": 648,
+          "deaths": 1,
+          "deathRatePct": 0.15,
+          "survivalPct": 21.6,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 648,
+            "avg": 125.6,
+            "sd": 33.5,
+            "p50": 124.44,
+            "p90": 170.56,
+            "p95": 181.3,
+            "max": 237.43,
+            "over90": 549,
+            "over90Pct": 84.72,
+            "se": 1.65
+          },
+          "boss": {
+            "n": 648,
+            "avg": 69.8,
+            "sd": 7.9,
+            "p50": 69.97,
+            "p90": 80.89,
+            "p95": 82.49,
+            "max": 86.86,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        },
+        "9": {
+          "entries": 648,
+          "cleared": 648,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 21.6,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 648,
+            "avg": 130.6,
+            "sd": 34.5,
+            "p50": 129.26,
+            "p90": 176.83,
+            "p95": 186.95,
+            "max": 227.25,
+            "over90": 572,
+            "over90Pct": 88.27,
+            "se": 1.7
+          },
+          "boss": {
+            "n": 648,
+            "avg": 70.6,
+            "sd": 8.5,
+            "p50": 70.56,
+            "p90": 82.55,
+            "p95": 85.05,
+            "max": 89.55,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.42
+          }
+        },
+        "10": {
+          "entries": 648,
+          "cleared": 647,
+          "deaths": 1,
+          "deathRatePct": 0.15,
+          "survivalPct": 21.6,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 647,
+            "avg": 130.8,
+            "sd": 37.5,
+            "p50": 128.65,
+            "p90": 185.69,
+            "p95": 196.18,
+            "max": 267.85,
+            "over90": 554,
+            "over90Pct": 85.63,
+            "se": 1.85
+          },
+          "boss": {
+            "n": 647,
+            "avg": 71.8,
+            "sd": 8.7,
+            "p50": 71.39,
+            "p90": 85.03,
+            "p95": 85.9,
+            "max": 92.24,
+            "over90": 12,
+            "over90Pct": 1.85,
+            "se": 0.43
+          }
+        },
+        "11": {
+          "entries": 647,
+          "cleared": 647,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 21.6,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 647,
+            "avg": 134.9,
+            "sd": 36.8,
+            "p50": 134.98,
+            "p90": 184.29,
+            "p95": 199.51,
+            "max": 235.5,
+            "over90": 570,
+            "over90Pct": 88.1,
+            "se": 1.81
+          },
+          "boss": {
+            "n": 647,
+            "avg": 72.8,
+            "sd": 9.1,
+            "p50": 72.83,
+            "p90": 85.84,
+            "p95": 88.4,
+            "max": 94.93,
+            "over90": 18,
+            "over90Pct": 2.78,
+            "se": 0.45
+          }
+        },
+        "12": {
+          "entries": 647,
+          "cleared": 647,
+          "deaths": 0,
+          "deathRatePct": 0,
+          "survivalPct": 21.6,
+          "causes": {},
+          "bossDeaths": 0,
+          "time": {
+            "n": 647,
+            "avg": 120.1,
+            "sd": 39.5,
+            "p50": 117.33,
+            "p90": 173.51,
+            "p95": 189.39,
+            "max": 239.19,
+            "over90": 490,
+            "over90Pct": 75.73,
+            "se": 1.95
+          },
+          "boss": {
+            "n": 647,
+            "avg": 55.5,
+            "sd": 7.1,
+            "p50": 55.38,
+            "p90": 64.75,
+            "p95": 67.44,
+            "max": 73.15,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.35
+          }
+        },
+        "13": {
+          "entries": 647,
+          "cleared": 640,
+          "deaths": 7,
+          "deathRatePct": 1.08,
+          "survivalPct": 21.3,
+          "causes": {
+            "boss": 7
+          },
+          "bossDeaths": 7,
+          "time": {
+            "n": 640,
+            "avg": 113.6,
+            "sd": 38.8,
+            "p50": 111.63,
+            "p90": 167.91,
+            "p95": 179.3,
+            "max": 230.11,
+            "over90": 451,
+            "over90Pct": 70.47,
+            "se": 1.92
+          },
+          "boss": {
+            "n": 640,
+            "avg": 49.3,
+            "sd": 6.4,
+            "p50": 49.13,
+            "p90": 57.63,
+            "p95": 60.35,
+            "max": 65.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.32
+          }
+        },
+        "14": {
+          "entries": 640,
+          "cleared": 615,
+          "deaths": 25,
+          "deathRatePct": 3.91,
+          "survivalPct": 20.5,
+          "causes": {
+            "elite": 5,
+            "boss": 17,
+            "battle": 3
+          },
+          "bossDeaths": 17,
+          "time": {
+            "n": 615,
+            "avg": 120.4,
+            "sd": 41.8,
+            "p50": 118.14,
+            "p90": 173.86,
+            "p95": 191,
+            "max": 267.61,
+            "over90": 461,
+            "over90Pct": 74.96,
+            "se": 2.11
+          },
+          "boss": {
+            "n": 615,
+            "avg": 50.2,
+            "sd": 6.8,
+            "p50": 50.07,
+            "p90": 58.68,
+            "p95": 61.98,
+            "max": 67.23,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.34
+          }
+        },
+        "15": {
+          "entries": 615,
+          "cleared": 595,
+          "deaths": 20,
+          "deathRatePct": 3.25,
+          "survivalPct": 19.8,
+          "causes": {
+            "elite": 8,
+            "boss": 10,
+            "battle": 2
+          },
+          "bossDeaths": 10,
+          "time": {
+            "n": 595,
+            "avg": 122.6,
+            "sd": 47.3,
+            "p50": 117.63,
+            "p90": 187.75,
+            "p95": 207.02,
+            "max": 279.53,
+            "over90": 421,
+            "over90Pct": 70.76,
+            "se": 2.43
+          },
+          "boss": {
+            "n": 595,
+            "avg": 51.2,
+            "sd": 7,
+            "p50": 50.88,
+            "p90": 60.04,
+            "p95": 63.59,
+            "max": 68.97,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.36
+          }
+        },
+        "16": {
+          "entries": 595,
+          "cleared": 583,
+          "deaths": 12,
+          "deathRatePct": 2.02,
+          "survivalPct": 19.4,
+          "causes": {
+            "battle": 1,
+            "boss": 10,
+            "elite": 1
+          },
+          "bossDeaths": 10,
+          "time": {
+            "n": 583,
+            "avg": 132.8,
+            "sd": 48,
+            "p50": 128.84,
+            "p90": 198.25,
+            "p95": 213.2,
+            "max": 287.32,
+            "over90": 469,
+            "over90Pct": 80.45,
+            "se": 2.49
+          },
+          "boss": {
+            "n": 583,
+            "avg": 52.4,
+            "sd": 7.1,
+            "p50": 52.22,
+            "p90": 61.04,
+            "p95": 65.2,
+            "max": 70.72,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.37
+          }
+        },
+        "17": {
+          "entries": 583,
+          "cleared": 575,
+          "deaths": 8,
+          "deathRatePct": 1.37,
+          "survivalPct": 19.2,
+          "causes": {
+            "boss": 6,
+            "battle": 1,
+            "elite": 1
+          },
+          "bossDeaths": 6,
+          "time": {
+            "n": 575,
+            "avg": 140.4,
+            "sd": 52,
+            "p50": 137.31,
+            "p90": 210.32,
+            "p95": 231.84,
+            "max": 378.1,
+            "over90": 477,
+            "over90Pct": 82.96,
+            "se": 2.72
+          },
+          "boss": {
+            "n": 575,
+            "avg": 53.5,
+            "sd": 7.4,
+            "p50": 53.41,
+            "p90": 62.54,
+            "p95": 66.8,
+            "max": 72.46,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        },
+        "18": {
+          "entries": 575,
+          "cleared": 574,
+          "deaths": 1,
+          "deathRatePct": 0.17,
+          "survivalPct": 19.1,
+          "causes": {
+            "elite": 1
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 574,
+            "avg": 148.9,
+            "sd": 54.1,
+            "p50": 145.68,
+            "p90": 219.94,
+            "p95": 235.81,
+            "max": 318.19,
+            "over90": 497,
+            "over90Pct": 86.59,
+            "se": 2.83
+          },
+          "boss": {
+            "n": 574,
+            "avg": 57.6,
+            "sd": 8.2,
+            "p50": 57.54,
+            "p90": 67.34,
+            "p95": 72.59,
+            "max": 78.75,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.43
+          }
+        },
+        "19": {
+          "entries": 574,
+          "cleared": 573,
+          "deaths": 1,
+          "deathRatePct": 0.17,
+          "survivalPct": 19.1,
+          "causes": {
+            "boss": 1
+          },
+          "bossDeaths": 1,
+          "time": {
+            "n": 573,
+            "avg": 173.9,
+            "sd": 69,
+            "p50": 168.64,
+            "p90": 271.35,
+            "p95": 291.04,
+            "max": 396.59,
+            "over90": 516,
+            "over90Pct": 90.05,
+            "se": 3.61
+          },
+          "boss": {
+            "n": 573,
+            "avg": 57.8,
+            "sd": 8.1,
+            "p50": 57.6,
+            "p90": 68.04,
+            "p95": 73.43,
+            "max": 79.65,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.43
+          }
+        },
+        "20": {
+          "entries": 573,
+          "cleared": 572,
+          "deaths": 1,
+          "deathRatePct": 0.17,
+          "survivalPct": 19.1,
+          "causes": {
+            "elite": 1
+          },
+          "bossDeaths": 0,
+          "time": {
+            "n": 572,
+            "avg": 183.5,
+            "sd": 82.7,
+            "p50": 174.44,
+            "p90": 296.66,
+            "p95": 333.04,
+            "max": 441.42,
+            "over90": 505,
+            "over90Pct": 88.29,
+            "se": 4.33
+          },
+          "boss": {
+            "n": 572,
+            "avg": 52.2,
+            "sd": 7.4,
+            "p50": 52.2,
+            "p90": 61.72,
+            "p95": 66.73,
+            "max": 72.38,
+            "over90": 0,
+            "over90Pct": 0,
+            "se": 0.39
+          }
+        }
+      },
+      "pass10Pct": 21.6,
+      "clear20Pct": 19.1,
+      "deathPct": 80.9,
+      "avgDeathFloor": 2.67,
+      "avgRunSec": 703.5,
+      "causes": {
+        "boss": 1528,
+        "elite": 773,
+        "battle": 127
+      },
+      "difficultyId": "o3",
+      "regenBase": 16
+    }
+  }
+}

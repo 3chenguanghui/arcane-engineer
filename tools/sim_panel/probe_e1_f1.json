@@ -1,0 +1,122 @@
+{
+  "meta": {
+    "runs": 10000,
+    "difficulty": "normal",
+    "seed": 20261108
+  },
+  "scenarios": [
+    {
+      "name": "A 基线（按权重）",
+      "runs": 10000,
+      "pass5": 4490,
+      "pass10": 3592,
+      "sumFloor": 86533,
+      "reach15": 3415,
+      "reach18": 3239,
+      "reach20": 3170,
+      "deathF2": 1744,
+      "deathF3": 2004,
+      "clearF20": 3155,
+      "pass5Pct": 44.9,
+      "pass10Pct": 35.9,
+      "avgFloor": 8.65,
+      "reach15Pct": 34.2,
+      "reach18Pct": 32.4,
+      "reach20Pct": 31.7,
+      "clearF20Pct": 31.6
+    },
+    {
+      "name": "A′ 真实保底",
+      "runs": 10000,
+      "pass5": 4597,
+      "pass10": 3644,
+      "sumFloor": 87825,
+      "reach15": 3458,
+      "reach18": 3278,
+      "reach20": 3211,
+      "deathF2": 1751,
+      "deathF3": 1652,
+      "clearF20": 3197,
+      "pass5Pct": 46,
+      "pass10Pct": 36.4,
+      "avgFloor": 8.78,
+      "reach15Pct": 34.6,
+      "reach18Pct": 32.8,
+      "reach20Pct": 32.1,
+      "clearF20Pct": 32
+    },
+    {
+      "name": "A + E1",
+      "runs": 10000,
+      "pass5": 5237,
+      "pass10": 4220,
+      "sumFloor": 97921,
+      "reach15": 3979,
+      "reach18": 3750,
+      "reach20": 3673,
+      "deathF2": 1348,
+      "deathF3": 1671,
+      "clearF20": 3650,
+      "pass5Pct": 52.4,
+      "pass10Pct": 42.2,
+      "avgFloor": 9.79,
+      "reach15Pct": 39.8,
+      "reach18Pct": 37.5,
+      "reach20Pct": 36.7,
+      "clearF20Pct": 36.5
+    },
+    {
+      "name": "A′ + E1",
+      "runs": 10000,
+      "pass5": 5337,
+      "pass10": 4234,
+      "sumFloor": 98734,
+      "reach15": 3975,
+      "reach18": 3759,
+      "reach20": 3674,
+      "deathF2": 1376,
+      "deathF3": 1387,
+      "clearF20": 3658,
+      "pass5Pct": 53.4,
+      "pass10Pct": 42.3,
+      "avgFloor": 9.87,
+      "reach15Pct": 39.8,
+      "reach18Pct": 37.6,
+      "reach20Pct": 36.7,
+      "clearF20Pct": 36.6
+    }
+  ],
+  "cardStats": {
+    "n": 9999,
+    "dud": 2505,
+    "allDud": 36,
+    "magicChanged": 3126,
+    "kinds": {
+      "tech": 1555,
+      "magic": 5631,
+      "relic": 2731,
+      "fusion": 82
+    },
+    "levels": {
+      "3": 8196,
+      "4": 1803
+    },
+    "slotsBefore": {
+      "fireball+frost": 5214,
+      "fireball+lavaFissure": 620,
+      "fireball+flameCone": 629,
+      "fireball+arcanePool": 577,
+      "fireball+collapseHole": 617,
+      "fireball+bolt": 568,
+      "fireball+mine": 621,
+      "fireball+frostRing": 577,
+      "fireball+runeOrbit": 576
+    },
+    "optionEffective": {
+      "0": 36,
+      "1": 407,
+      "2": 2341,
+      "3": 7215
+    }
+  }
+}

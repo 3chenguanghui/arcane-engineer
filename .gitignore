@@ -1,0 +1,26 @@
+# ===== 版本安全线：只把"改坏了需要找回来"的东西存进历史 =====
+# 下面被忽略的文件仍然原样留在硬盘上，只是不进入 Git 历史（都是可以重新生成的产物）
+
+# 浏览器 / 自动化测试用的用户目录（体积大、可重建）
+.testprofile*/
+.tmpprofile*/
+
+# 截图与临时探测产物（重新跑一次就能得到）
+.screenshots/
+shots/
+.optim/
+.seedwork/
+.merge_audit/
+.saveguard_backup/
+
+# 手工备份目录（本身就是副本，再存一遍等于重复占空间）
+backup/
+_backup/
+
+# 系统与工具垃圾
+node_modules/
+*.log
+*.tmp
+Thumbs.db
+desktop.ini
+.DS_Store

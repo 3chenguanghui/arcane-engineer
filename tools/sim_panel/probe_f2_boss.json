@@ -1,0 +1,981 @@
+{
+  "meta": {
+    "runs": 10000,
+    "difficulty": "normal",
+    "seed": 20261108
+  },
+  "floors": {
+    "A 基线": {
+      "1": {
+        "entries": 10000,
+        "deaths": 1,
+        "cleared": 9999,
+        "clearRatePct": 100,
+        "avgStaySec": 115.4,
+        "bossFights": 10000,
+        "avgBossSec": 74.9,
+        "bossDeaths": 1,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 88.6,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 0,
+          "boss": 1,
+          "other": 0
+        }
+      },
+      "2": {
+        "entries": 9999,
+        "deaths": 1744,
+        "cleared": 8255,
+        "clearRatePct": 82.6,
+        "avgStaySec": 108.5,
+        "bossFights": 9849,
+        "avgBossSec": 68,
+        "bossDeaths": 1594,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 59.2,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 150,
+          "boss": 1594,
+          "other": 0
+        }
+      },
+      "3": {
+        "entries": 8255,
+        "deaths": 2004,
+        "cleared": 6251,
+        "clearRatePct": 75.7,
+        "avgStaySec": 102.7,
+        "bossFights": 7511,
+        "avgBossSec": 64.7,
+        "bossDeaths": 1260,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 48.7,
+        "roomDeaths": {
+          "battle": 51,
+          "elite": 693,
+          "boss": 1260,
+          "other": 0
+        }
+      },
+      "4": {
+        "entries": 6251,
+        "deaths": 1040,
+        "cleared": 5211,
+        "clearRatePct": 83.4,
+        "avgStaySec": 103.9,
+        "bossFights": 5912,
+        "avgBossSec": 66.1,
+        "bossDeaths": 701,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.6,
+        "roomDeaths": {
+          "battle": 18,
+          "elite": 321,
+          "boss": 701,
+          "other": 0
+        }
+      },
+      "5": {
+        "entries": 5211,
+        "deaths": 721,
+        "cleared": 4490,
+        "clearRatePct": 86.2,
+        "avgStaySec": 111.3,
+        "bossFights": 4937,
+        "avgBossSec": 67.9,
+        "bossDeaths": 447,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.9,
+        "roomDeaths": {
+          "battle": 6,
+          "elite": 268,
+          "boss": 447,
+          "other": 0
+        }
+      },
+      "6": {
+        "entries": 4490,
+        "deaths": 381,
+        "cleared": 4109,
+        "clearRatePct": 91.5,
+        "avgStaySec": 124.1,
+        "bossFights": 4382,
+        "avgBossSec": 79.9,
+        "bossDeaths": 273,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 55.1,
+        "roomDeaths": {
+          "battle": 26,
+          "elite": 82,
+          "boss": 273,
+          "other": 0
+        }
+      },
+      "7": {
+        "entries": 4109,
+        "deaths": 212,
+        "cleared": 3897,
+        "clearRatePct": 94.8,
+        "avgStaySec": 120.5,
+        "bossFights": 4033,
+        "avgBossSec": 71.6,
+        "bossDeaths": 136,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.7,
+        "roomDeaths": {
+          "battle": 25,
+          "elite": 51,
+          "boss": 136,
+          "other": 0
+        }
+      },
+      "8": {
+        "entries": 3897,
+        "deaths": 145,
+        "cleared": 3752,
+        "clearRatePct": 96.3,
+        "avgStaySec": 125.3,
+        "bossFights": 3844,
+        "avgBossSec": 73,
+        "bossDeaths": 92,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 45.8,
+        "roomDeaths": {
+          "battle": 17,
+          "elite": 36,
+          "boss": 92,
+          "other": 0
+        }
+      },
+      "9": {
+        "entries": 3752,
+        "deaths": 105,
+        "cleared": 3647,
+        "clearRatePct": 97.2,
+        "avgStaySec": 128.8,
+        "bossFights": 3708,
+        "avgBossSec": 74.6,
+        "bossDeaths": 61,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 50,
+        "roomDeaths": {
+          "battle": 14,
+          "elite": 30,
+          "boss": 61,
+          "other": 0
+        }
+      },
+      "10": {
+        "entries": 3647,
+        "deaths": 55,
+        "cleared": 3592,
+        "clearRatePct": 98.5,
+        "avgStaySec": 134.7,
+        "bossFights": 3629,
+        "avgBossSec": 75.9,
+        "bossDeaths": 37,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 45.9,
+        "roomDeaths": {
+          "battle": 6,
+          "elite": 12,
+          "boss": 37,
+          "other": 0
+        }
+      }
+    },
+    "A′ 基线": {
+      "1": {
+        "entries": 10000,
+        "deaths": 1,
+        "cleared": 9999,
+        "clearRatePct": 100,
+        "avgStaySec": 115.4,
+        "bossFights": 10000,
+        "avgBossSec": 74.9,
+        "bossDeaths": 1,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 88.6,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 0,
+          "boss": 1,
+          "other": 0
+        }
+      },
+      "2": {
+        "entries": 9999,
+        "deaths": 1751,
+        "cleared": 8248,
+        "clearRatePct": 82.5,
+        "avgStaySec": 109.5,
+        "bossFights": 9883,
+        "avgBossSec": 68.1,
+        "bossDeaths": 1635,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 60.3,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 116,
+          "boss": 1635,
+          "other": 0
+        }
+      },
+      "3": {
+        "entries": 8248,
+        "deaths": 1652,
+        "cleared": 6596,
+        "clearRatePct": 80,
+        "avgStaySec": 93.9,
+        "bossFights": 8007,
+        "avgBossSec": 64.5,
+        "bossDeaths": 1411,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.9,
+        "roomDeaths": {
+          "battle": 98,
+          "elite": 143,
+          "boss": 1411,
+          "other": 0
+        }
+      },
+      "4": {
+        "entries": 6596,
+        "deaths": 1200,
+        "cleared": 5396,
+        "clearRatePct": 81.8,
+        "avgStaySec": 107.5,
+        "bossFights": 6153,
+        "avgBossSec": 66.3,
+        "bossDeaths": 757,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 50,
+        "roomDeaths": {
+          "battle": 27,
+          "elite": 416,
+          "boss": 757,
+          "other": 0
+        }
+      },
+      "5": {
+        "entries": 5396,
+        "deaths": 799,
+        "cleared": 4597,
+        "clearRatePct": 85.2,
+        "avgStaySec": 112.6,
+        "bossFights": 5067,
+        "avgBossSec": 67.7,
+        "bossDeaths": 470,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 48.4,
+        "roomDeaths": {
+          "battle": 20,
+          "elite": 309,
+          "boss": 470,
+          "other": 0
+        }
+      },
+      "6": {
+        "entries": 4597,
+        "deaths": 438,
+        "cleared": 4159,
+        "clearRatePct": 90.5,
+        "avgStaySec": 124,
+        "bossFights": 4433,
+        "avgBossSec": 80,
+        "bossDeaths": 274,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 56.6,
+        "roomDeaths": {
+          "battle": 43,
+          "elite": 121,
+          "boss": 274,
+          "other": 0
+        }
+      },
+      "7": {
+        "entries": 4159,
+        "deaths": 221,
+        "cleared": 3938,
+        "clearRatePct": 94.7,
+        "avgStaySec": 123.1,
+        "bossFights": 4071,
+        "avgBossSec": 71.8,
+        "bossDeaths": 133,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 49.7,
+        "roomDeaths": {
+          "battle": 27,
+          "elite": 61,
+          "boss": 133,
+          "other": 0
+        }
+      },
+      "8": {
+        "entries": 3938,
+        "deaths": 142,
+        "cleared": 3796,
+        "clearRatePct": 96.4,
+        "avgStaySec": 126.3,
+        "bossFights": 3878,
+        "avgBossSec": 73.2,
+        "bossDeaths": 82,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 48.4,
+        "roomDeaths": {
+          "battle": 15,
+          "elite": 45,
+          "boss": 82,
+          "other": 0
+        }
+      },
+      "9": {
+        "entries": 3796,
+        "deaths": 80,
+        "cleared": 3716,
+        "clearRatePct": 97.9,
+        "avgStaySec": 131.8,
+        "bossFights": 3763,
+        "avgBossSec": 74.8,
+        "bossDeaths": 47,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 53.6,
+        "roomDeaths": {
+          "battle": 8,
+          "elite": 25,
+          "boss": 47,
+          "other": 0
+        }
+      },
+      "10": {
+        "entries": 3716,
+        "deaths": 72,
+        "cleared": 3644,
+        "clearRatePct": 98.1,
+        "avgStaySec": 135.9,
+        "bossFights": 3696,
+        "avgBossSec": 76.1,
+        "bossDeaths": 52,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 50.3,
+        "roomDeaths": {
+          "battle": 8,
+          "elite": 12,
+          "boss": 52,
+          "other": 0
+        }
+      }
+    },
+    "A + E1": {
+      "1": {
+        "entries": 10000,
+        "deaths": 1,
+        "cleared": 9999,
+        "clearRatePct": 100,
+        "avgStaySec": 115.4,
+        "bossFights": 10000,
+        "avgBossSec": 74.9,
+        "bossDeaths": 1,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 88.6,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 0,
+          "boss": 1,
+          "other": 0
+        }
+      },
+      "2": {
+        "entries": 9999,
+        "deaths": 1348,
+        "cleared": 8651,
+        "clearRatePct": 86.5,
+        "avgStaySec": 106,
+        "bossFights": 9908,
+        "avgBossSec": 66.4,
+        "bossDeaths": 1257,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 58.9,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 91,
+          "boss": 1257,
+          "other": 0
+        }
+      },
+      "3": {
+        "entries": 8651,
+        "deaths": 1671,
+        "cleared": 6980,
+        "clearRatePct": 80.7,
+        "avgStaySec": 103.5,
+        "bossFights": 8006,
+        "avgBossSec": 64.4,
+        "bossDeaths": 1026,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 49.2,
+        "roomDeaths": {
+          "battle": 31,
+          "elite": 614,
+          "boss": 1026,
+          "other": 0
+        }
+      },
+      "4": {
+        "entries": 6980,
+        "deaths": 976,
+        "cleared": 6004,
+        "clearRatePct": 86,
+        "avgStaySec": 104.1,
+        "bossFights": 6662,
+        "avgBossSec": 65.6,
+        "bossDeaths": 658,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 48.5,
+        "roomDeaths": {
+          "battle": 8,
+          "elite": 310,
+          "boss": 658,
+          "other": 0
+        }
+      },
+      "5": {
+        "entries": 6004,
+        "deaths": 767,
+        "cleared": 5237,
+        "clearRatePct": 87.2,
+        "avgStaySec": 110.2,
+        "bossFights": 5703,
+        "avgBossSec": 67.4,
+        "bossDeaths": 466,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.2,
+        "roomDeaths": {
+          "battle": 11,
+          "elite": 290,
+          "boss": 466,
+          "other": 0
+        }
+      },
+      "6": {
+        "entries": 5237,
+        "deaths": 417,
+        "cleared": 4820,
+        "clearRatePct": 92,
+        "avgStaySec": 122.3,
+        "bossFights": 5122,
+        "avgBossSec": 79.4,
+        "bossDeaths": 302,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 53.1,
+        "roomDeaths": {
+          "battle": 29,
+          "elite": 86,
+          "boss": 302,
+          "other": 0
+        }
+      },
+      "7": {
+        "entries": 4820,
+        "deaths": 238,
+        "cleared": 4582,
+        "clearRatePct": 95.1,
+        "avgStaySec": 119.3,
+        "bossFights": 4728,
+        "avgBossSec": 70.9,
+        "bossDeaths": 146,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 44.4,
+        "roomDeaths": {
+          "battle": 23,
+          "elite": 69,
+          "boss": 146,
+          "other": 0
+        }
+      },
+      "8": {
+        "entries": 4582,
+        "deaths": 173,
+        "cleared": 4409,
+        "clearRatePct": 96.2,
+        "avgStaySec": 124.2,
+        "bossFights": 4514,
+        "avgBossSec": 72.8,
+        "bossDeaths": 105,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.7,
+        "roomDeaths": {
+          "battle": 14,
+          "elite": 54,
+          "boss": 105,
+          "other": 0
+        }
+      },
+      "9": {
+        "entries": 4409,
+        "deaths": 111,
+        "cleared": 4298,
+        "clearRatePct": 97.5,
+        "avgStaySec": 128.8,
+        "bossFights": 4363,
+        "avgBossSec": 74,
+        "bossDeaths": 65,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.5,
+        "roomDeaths": {
+          "battle": 11,
+          "elite": 35,
+          "boss": 65,
+          "other": 0
+        }
+      },
+      "10": {
+        "entries": 4298,
+        "deaths": 78,
+        "cleared": 4220,
+        "clearRatePct": 98.2,
+        "avgStaySec": 133.3,
+        "bossFights": 4268,
+        "avgBossSec": 75.9,
+        "bossDeaths": 48,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 45.3,
+        "roomDeaths": {
+          "battle": 6,
+          "elite": 24,
+          "boss": 48,
+          "other": 0
+        }
+      }
+    },
+    "A′ + E1": {
+      "1": {
+        "entries": 10000,
+        "deaths": 1,
+        "cleared": 9999,
+        "clearRatePct": 100,
+        "avgStaySec": 115.4,
+        "bossFights": 10000,
+        "avgBossSec": 74.9,
+        "bossDeaths": 1,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 88.6,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 0,
+          "boss": 1,
+          "other": 0
+        }
+      },
+      "2": {
+        "entries": 9999,
+        "deaths": 1376,
+        "cleared": 8623,
+        "clearRatePct": 86.2,
+        "avgStaySec": 106.6,
+        "bossFights": 9933,
+        "avgBossSec": 66.4,
+        "bossDeaths": 1310,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 59.7,
+        "roomDeaths": {
+          "battle": 0,
+          "elite": 66,
+          "boss": 1310,
+          "other": 0
+        }
+      },
+      "3": {
+        "entries": 8623,
+        "deaths": 1387,
+        "cleared": 7236,
+        "clearRatePct": 83.9,
+        "avgStaySec": 93.4,
+        "bossFights": 8449,
+        "avgBossSec": 64,
+        "bossDeaths": 1213,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 48.4,
+        "roomDeaths": {
+          "battle": 65,
+          "elite": 109,
+          "boss": 1213,
+          "other": 0
+        }
+      },
+      "4": {
+        "entries": 7236,
+        "deaths": 1077,
+        "cleared": 6159,
+        "clearRatePct": 85.1,
+        "avgStaySec": 108.6,
+        "bossFights": 6870,
+        "avgBossSec": 65.7,
+        "bossDeaths": 711,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 50.6,
+        "roomDeaths": {
+          "battle": 19,
+          "elite": 347,
+          "boss": 711,
+          "other": 0
+        }
+      },
+      "5": {
+        "entries": 6159,
+        "deaths": 822,
+        "cleared": 5337,
+        "clearRatePct": 86.7,
+        "avgStaySec": 112.6,
+        "bossFights": 5868,
+        "avgBossSec": 67.3,
+        "bossDeaths": 531,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 49.5,
+        "roomDeaths": {
+          "battle": 12,
+          "elite": 279,
+          "boss": 531,
+          "other": 0
+        }
+      },
+      "6": {
+        "entries": 5337,
+        "deaths": 427,
+        "cleared": 4910,
+        "clearRatePct": 92,
+        "avgStaySec": 123.1,
+        "bossFights": 5200,
+        "avgBossSec": 79.5,
+        "bossDeaths": 290,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 54.7,
+        "roomDeaths": {
+          "battle": 31,
+          "elite": 106,
+          "boss": 290,
+          "other": 0
+        }
+      },
+      "7": {
+        "entries": 4910,
+        "deaths": 268,
+        "cleared": 4642,
+        "clearRatePct": 94.5,
+        "avgStaySec": 120.4,
+        "bossFights": 4806,
+        "avgBossSec": 71,
+        "bossDeaths": 164,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 48.8,
+        "roomDeaths": {
+          "battle": 20,
+          "elite": 84,
+          "boss": 164,
+          "other": 0
+        }
+      },
+      "8": {
+        "entries": 4642,
+        "deaths": 182,
+        "cleared": 4460,
+        "clearRatePct": 96.1,
+        "avgStaySec": 125.7,
+        "bossFights": 4572,
+        "avgBossSec": 72.9,
+        "bossDeaths": 112,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 48.7,
+        "roomDeaths": {
+          "battle": 25,
+          "elite": 45,
+          "boss": 112,
+          "other": 0
+        }
+      },
+      "9": {
+        "entries": 4460,
+        "deaths": 124,
+        "cleared": 4336,
+        "clearRatePct": 97.2,
+        "avgStaySec": 130.5,
+        "bossFights": 4414,
+        "avgBossSec": 74.2,
+        "bossDeaths": 78,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 50.4,
+        "roomDeaths": {
+          "battle": 12,
+          "elite": 34,
+          "boss": 78,
+          "other": 0
+        }
+      },
+      "10": {
+        "entries": 4336,
+        "deaths": 102,
+        "cleared": 4234,
+        "clearRatePct": 97.6,
+        "avgStaySec": 135.8,
+        "bossFights": 4299,
+        "avgBossSec": 76,
+        "bossDeaths": 65,
+        "bossTimeouts": 0,
+        "bossWithin3s": 0,
+        "avgBossDeathSec": 47.4,
+        "roomDeaths": {
+          "battle": 7,
+          "elite": 30,
+          "boss": 65,
+          "other": 0
+        }
+      }
+    }
+  },
+  "f2": {
+    "A 基线": {
+      "deaths": 1744,
+      "bossDeaths": 1594,
+      "bossTimeouts": 0,
+      "bossHpDeaths": 1594,
+      "bossWithin3s": 0
+    },
+    "A′ 基线": {
+      "deaths": 1751,
+      "bossDeaths": 1635,
+      "bossTimeouts": 0,
+      "bossHpDeaths": 1635,
+      "bossWithin3s": 0
+    },
+    "A + E1": {
+      "deaths": 1348,
+      "bossDeaths": 1257,
+      "bossTimeouts": 0,
+      "bossHpDeaths": 1257,
+      "bossWithin3s": 0
+    },
+    "A′ + E1": {
+      "deaths": 1376,
+      "bossDeaths": 1310,
+      "bossTimeouts": 0,
+      "bossHpDeaths": 1310,
+      "bossWithin3s": 0
+    }
+  },
+  "decompose": {
+    "A": {
+      "saved10": 1574,
+      "lost10": 946,
+      "saved20": 1515,
+      "lost20": 1012,
+      "saved10ByRoom": {
+        "battle": 52,
+        "elite": 424,
+        "boss": 1098
+      },
+      "saved10ByFloor": {
+        "2": 251,
+        "3": 408,
+        "4": 304,
+        "5": 219,
+        "6": 144,
+        "7": 101,
+        "8": 69,
+        "9": 45,
+        "10": 33
+      },
+      "saved10BossCause": {
+        "timeout": 0,
+        "hp": 1098,
+        "within3s": 0
+      },
+      "saved20ByRoom": {
+        "battle": 47,
+        "elite": 393,
+        "boss": 1075
+      },
+      "saved20ByFloor": {
+        "2": 210,
+        "3": 350,
+        "4": 277,
+        "5": 184,
+        "6": 119,
+        "7": 86,
+        "8": 52,
+        "9": 35,
+        "10": 25,
+        "11": 15,
+        "12": 13,
+        "13": 24,
+        "14": 21,
+        "15": 31,
+        "16": 21,
+        "17": 22,
+        "18": 23,
+        "19": 7
+      },
+      "netDeathByFloor": {
+        "0": -495,
+        "1": 0,
+        "2": 396,
+        "3": 333,
+        "4": 64,
+        "5": -46,
+        "6": -36,
+        "7": -26,
+        "8": -28,
+        "9": -6,
+        "10": -23,
+        "11": -30,
+        "12": -14,
+        "13": -9,
+        "14": -11,
+        "15": -21,
+        "16": -27,
+        "17": -5,
+        "18": -9,
+        "19": 1,
+        "20": -8
+      }
+    },
+    "A′": {
+      "saved10": 1574,
+      "lost10": 984,
+      "saved20": 1517,
+      "lost20": 1054,
+      "saved10ByRoom": {
+        "battle": 83,
+        "elite": 362,
+        "boss": 1129
+      },
+      "saved10ByFloor": {
+        "2": 242,
+        "3": 339,
+        "4": 338,
+        "5": 274,
+        "6": 157,
+        "7": 83,
+        "8": 64,
+        "9": 36,
+        "10": 41
+      },
+      "saved10BossCause": {
+        "timeout": 0,
+        "hp": 1129,
+        "within3s": 0
+      },
+      "saved20ByRoom": {
+        "battle": 83,
+        "elite": 323,
+        "boss": 1111
+      },
+      "saved20ByFloor": {
+        "2": 190,
+        "3": 297,
+        "4": 287,
+        "5": 250,
+        "6": 132,
+        "7": 71,
+        "8": 51,
+        "9": 26,
+        "10": 29,
+        "11": 19,
+        "12": 13,
+        "13": 25,
+        "14": 17,
+        "15": 28,
+        "16": 37,
+        "17": 16,
+        "18": 23,
+        "19": 6
+      },
+      "netDeathByFloor": {
+        "0": -461,
+        "1": 0,
+        "2": 375,
+        "3": 265,
+        "4": 123,
+        "5": -23,
+        "6": 11,
+        "7": -47,
+        "8": -40,
+        "9": -44,
+        "10": -30,
+        "11": -13,
+        "12": -24,
+        "13": -2,
+        "14": -34,
+        "15": -14,
+        "16": -8,
+        "17": -14,
+        "18": -20,
+        "19": 2,
+        "20": -2
+      }
+    }
+  },
+  "roomDeaths": {
+    "A 基线": {
+      "battle": 179,
+      "elite": 1712,
+      "boss": 4954
+    },
+    "A′ 基线": {
+      "battle": 263,
+      "elite": 1319,
+      "boss": 5221
+    },
+    "A + E1": {
+      "battle": 160,
+      "elite": 1670,
+      "boss": 4520
+    },
+    "A′ + E1": {
+      "battle": 219,
+      "elite": 1181,
+      "boss": 4942
+    }
+  }
+}

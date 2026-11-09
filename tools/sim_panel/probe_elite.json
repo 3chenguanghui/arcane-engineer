@@ -1,0 +1,227 @@
+{
+  "meta": {
+    "runs": 10000,
+    "difficulty": "normal",
+    "plan": "C",
+    "approachSeconds": 4
+  },
+  "floors": {
+    "18": {
+      "floor": 18,
+      "deaths": 3,
+      "deathTimeMedian": 46.972791750572796,
+      "deathTimeP25": 46.972791750572796,
+      "deathTimeP75": 76.67359987232804,
+      "ttdMedian": 28.052037284970073,
+      "ttdP25": 28.052037284970073,
+      "zeroKill": 0,
+      "timeout": 0,
+      "killedMedian": 1,
+      "zeroKillWithin3s": 0,
+      "buckets": {
+        "<=1s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=3s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=5s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=10s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=20s": {
+          "deathTime": 0,
+          "ttd": 0
+        }
+      },
+      "avgEntryHpRatio": 0.40908638078367227,
+      "avgIncoming": 2.065167895905883,
+      "avgNetDps": 1.1151678959058833,
+      "avgEnemyCount": 6,
+      "avgTotalHp": 3524.3333333333335,
+      "rangedMix": 0.27777777777777773,
+      "magics": {
+        "0": 3,
+        "1": 3
+      },
+      "techs": {
+        "nanite": 2,
+        "phase": 2,
+        "concentrator": 1,
+        "magnet": 1,
+        "amp": 1,
+        "rewind": 1
+      },
+      "profiles": {
+        "novice": 2,
+        "veteran": 1
+      },
+      "comps": {
+        "melee83/ranged17": 2,
+        "melee50/ranged50": 1
+      },
+      "shares": {
+        "deathWithin3s": 0,
+        "deathWithin5s": 0,
+        "ttdWithin3s": 0,
+        "ttdWithin5s": 0,
+        "zeroKill": 0,
+        "timeout": 0
+      }
+    },
+    "19": {
+      "floor": 19,
+      "deaths": 7,
+      "deathTimeMedian": 75.62325675046588,
+      "deathTimeP25": 52.62340024699048,
+      "deathTimeP75": 236,
+      "ttdMedian": 65.7343600756737,
+      "ttdP25": 37.858315596791606,
+      "zeroKill": 1,
+      "timeout": 3,
+      "killedMedian": 2,
+      "zeroKillWithin3s": 0,
+      "buckets": {
+        "<=1s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=3s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=5s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=10s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=20s": {
+          "deathTime": 0,
+          "ttd": 1
+        }
+      },
+      "avgEntryHpRatio": 0.6173911519075926,
+      "avgIncoming": 1.6290563118421801,
+      "avgNetDps": -0.5847829738721055,
+      "avgEnemyCount": 6,
+      "avgTotalHp": 6007.142857142857,
+      "rangedMix": 0.1904761904761905,
+      "magics": {
+        "0": 7,
+        "1": 7
+      },
+      "techs": {
+        "amp": 1,
+        "nanite": 3,
+        "magnet": 2,
+        "field": 2
+      },
+      "profiles": {
+        "novice": 3,
+        "veteran": 4
+      },
+      "comps": {
+        "melee83/ranged17": 4,
+        "melee100/ranged0": 2,
+        "melee33/ranged67": 1
+      },
+      "shares": {
+        "deathWithin3s": 0,
+        "deathWithin5s": 0,
+        "ttdWithin3s": 0,
+        "ttdWithin5s": 0,
+        "zeroKill": 0.14285714285714285,
+        "timeout": 0.42857142857142855
+      }
+    },
+    "20": {
+      "floor": 20,
+      "deaths": 23,
+      "deathTimeMedian": 236,
+      "deathTimeP25": 66.98658043323704,
+      "deathTimeP75": 236,
+      "ttdMedian": 999,
+      "ttdP25": 52.134108993757266,
+      "zeroKill": 0,
+      "timeout": 13,
+      "killedMedian": 5,
+      "zeroKillWithin3s": 0,
+      "buckets": {
+        "<=1s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=3s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=5s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=10s": {
+          "deathTime": 0,
+          "ttd": 0
+        },
+        "<=20s": {
+          "deathTime": 0,
+          "ttd": 0
+        }
+      },
+      "avgEntryHpRatio": 0.7336773276681927,
+      "avgIncoming": 1.6487313768557104,
+      "avgNetDps": -0.9990947101008115,
+      "avgEnemyCount": 6.608695652173913,
+      "avgTotalHp": 6652.782608695652,
+      "rangedMix": 0.26501035196687367,
+      "magics": {
+        "0": 23,
+        "1": 23
+      },
+      "techs": {
+        "field": 6,
+        "amp": 4,
+        "nanite": 11,
+        "phase": 8,
+        "magnet": 4,
+        "concentrator": 3,
+        "capacitor": 1,
+        "rewind": 1
+      },
+      "profiles": {
+        "veteran": 12,
+        "bot": 5,
+        "novice": 6
+      },
+      "comps": {
+        "melee50/ranged50": 3,
+        "melee100/ranged0": 5,
+        "melee83/ranged17": 3,
+        "melee71/ranged29": 4,
+        "melee43/ranged57": 2,
+        "melee86/ranged14": 2,
+        "melee67/ranged33": 2,
+        "melee57/ranged43": 2
+      },
+      "shares": {
+        "deathWithin3s": 0,
+        "deathWithin5s": 0,
+        "ttdWithin3s": 0,
+        "ttdWithin5s": 0,
+        "zeroKill": 0,
+        "timeout": 0.5652173913043478
+      }
+    }
+  },
+  "within3": [],
+  "sampleCount": 1719
+}

@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>烬 · 标题页方案实验室 A/B/C</title>
+<style>
+  /* ============================================================
+     烬 · 标题页三方案实验室（单文件 / 零外链 / 零图片 / canvas 现画）
+     A 符号化  —— 巨大破碎符印居中，文字绕它排，靠形状立住
+     B 场景化  —— 半抽象烬世界剪影 + 上升余烬柱，标题压上三分之一
+     C 极简    —— 大面积留白，一行标题 + 极小状态行，靠排印与呼吸
+     切换：?v=a|b|c，或键盘 1/2/3；M 打开"更多设置"抽屉；D 打开实测指标
+     ============================================================ */
+
+  /* ---------- 令牌（全部沿用主文件 :root，不新增色板） ---------- */
+  :root{
+    --bg: #070b14;
+    --bg-deep: #03060c;
+    --panel: #121d31;
+    --panel-2: #16233a;
+    --line: rgba(126,164,214,.24);
+    --line-strong: rgba(120,190,255,.46);
+    --text-1: #eaf5ff;
+    --text-2: #c3d7ef;
+    --text-3: #a8bfdc;
+    --text-4: #8ea6c2;
+    --tech: #3ee6ff;
+    --magic: #b085ff;
+    --gold: #ffc247;
+    --warn: #ffb84d;
+    --bad: #ff6b7f;
+    --fs-xs: 11px;
+    --fs-sm: 12px;
+    --fs-md: 14px;
+    --fs-lg: 18px;
+    --fs-xl: 24px;
+    --r-sm: 8px;
+    --r-md: 12px;
+    --r-lg: 16px;
+    --mono: "Cascadia Mono", "Consolas", "Courier New", monospace;
+    --sans: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+    --ease: cubic-bezier(.2,.9,.25,1);
+  }
+
+  html,body{ height:100%; margin:0; overflow:hidden; background:var(--bg-deep); }
+  body{
+    font-family:var(--sans); color:var(--text-1);
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+    user-select:none;
+  }
+
+  #stage{
+    position:fixed; inset:0; overflow:hidden; isolation:isolate;
+    /* 展示层字号：三套各自一档，其余全部落在 6 档之内 */
+    --display: clamp(64px, min(26vh, 18vw), 340px);
+  }
+  #bg{ position:absolute; inset:0; display:block; width:100%; height:100%; z-index:0; }
+
+  /* ---------- 版面骨架（三套共用同一份 DOM） ---------- */
+  .screen{
+    position:absolute; inset:0; z-index:2; box-sizing:border-box;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    padding:5vh 5vw; pointer-events:none;
+  }
+  .lockup, .actions{ display:flex; flex-direction:column; align-items:center; }
+  .screen button{ pointer-events:auto; }
+
+  /* ---------- 眉标（L3，11px 等宽拉丁） ---------- */
+  .kicker{
+    display:flex; align-items:center; gap:10px; white-space:nowrap;
+    font-family:var(--mono); font-size:var(--fs-xs); letter-spacing:.30em;
+    color:var(--tech); opacity:.72;
+    animation:riseIn .9s var(--ease) both;
+  }
+  .kicker .sig{
+    width:5px; height:5px; border-radius:50%; background:var(--tech);
+    box-shadow:0 0 10px rgba(62,230,255,.9);
+  }
+  .kicker .sep{ opacity:.45; }
+
+  /* ---------- 字标「烬」（展示层） ----------
+     金色只给主角：标题 + 主行动。其余一律青（交互）/紫（点缀）。
+     不做渐变裁字，避免与 text-shadow 叠出脏边；用四层光晕把字"点着"。 */
+  .wordmark{
+    margin:0; font-weight:700; font-size:var(--display); line-height:1;
+    letter-spacing:.02em; color:#ffd166;
+    text-shadow:
+      0 0 2px rgba(255,244,206,.70),
+      0 0 20px rgba(255,190,70,.42),
+      0 0 56px rgba(255,140,30,.26),
+      0 12px 34px rgba(0,0,0,.72);
+  }
+
+  /* ---------- 气质短句（L3，14px） ---------- */
+  .tagline{
+    margin:0; font-size:var(--fs-md); line-height:1.5; letter-spacing:.08em;
+    color:var(--text-2); opacity:.94;
+  }
+
+  /* ---------- 主行动：全局唯一的大实心块 ----------
+     金色渐变 + 深墨字；没有任何第二个元素用实心块，形状即权重。 */
+  .primary{
+    position:relative; display:inline-flex; align-items:center; gap:16px;
+    height:clamp(56px, 8.2vh, 74px); padding:0 clamp(26px,3.6vw,54px);
+    border:0; border-radius:9px; cursor:pointer; overflow:hidden;
+    font-family:var(--sans); font-weight:700; letter-spacing:.16em; color:#1a1203;
+    background:linear-gradient(180deg,#ffe08a 0%, #ffc247 42%, #ef9a17 100%);
+    box-shadow:
+      0 0 0 1px rgba(255,226,150,.5) inset,
+      0 10px 30px rgba(0,0,0,.55),
+      0 0 48px rgba(255,170,50,.20);
+    transition:filter .18s var(--ease), transform .18s var(--ease), box-shadow .18s var(--ease);
+    animation:riseIn 1s var(--ease) both;
+  }
+  .primary:hover{ filter:brightness(1.09); box-shadow:0 0 0 1px rgba(255,236,180,.65) inset, 0 12px 36px rgba(0,0,0,.58), 0 0 66px rgba(255,170,50,.32); }
+  .primary:active{ transform:translateY(1px) scale(.996); }
+  .primary .label{ line-height:1; }
+  .primary kbd{
+    font-family:var(--mono); font-size:var(--fs-xs); letter-spacing:.1em; font-weight:400;
+    color:rgba(26,18,3,.62); border:1px solid rgba(26,18,3,.30); border-radius:3px; padding:2px 6px;
+  }
+  /* 一道很慢的扫光：科技感来自"有东西在块上流动"，不用彩色 */
+  .primary::after{
+    content:''; position:absolute; inset:-1px; pointer-events:none;
+    background:linear-gradient(102deg, transparent 32%, rgba(255,255,255,.42) 47%, transparent 60%);
+    transform:translateX(-125%); animation:sheen 6.4s linear infinite;
+  }
+
+  /* ---------- 次级入口：纯文字链 + 一条渐隐细线（不是胶囊、不是描边） ---------- */
+  .secondary{
+    position:relative; display:inline-flex; align-items:center; gap:10px;
+    margin-top:clamp(10px,1.8vh,18px); padding:6px 2px;
+    background:none; border:0; cursor:pointer;
+    color:var(--text-3); font-family:var(--sans); font-size:var(--fs-sm); letter-spacing:.14em;
+    transition:color .18s var(--ease);
+  }
+  .secondary::after{
+    content:''; position:absolute; left:0; right:0; bottom:0; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(62,230,255,.42), transparent);
+    opacity:.75;
+  }
+  .secondary:hover{ color:#dff4ff; }
+  .secondary kbd{
+    font-family:var(--mono); font-size:var(--fs-xs); color:rgba(168,191,220,.8);
+    border:1px solid rgba(120,170,230,.28); border-radius:3px; padding:1px 5px;
+  }
+
+  /* ---------- 署名（L3，12px，右下角，不挤字标） ---------- */
+  .sign{
+    position:absolute; right:max(20px,2.6vw); bottom:max(16px,2.2vh);
+    display:flex; align-items:center; gap:9px;
+    font-size:var(--fs-sm); letter-spacing:.12em; color:var(--text-4);
+    animation:riseIn 1.2s var(--ease) both; z-index:3;
+  }
+  .sign i{ width:16px; height:2px; background:linear-gradient(90deg, rgba(255,194,71,.85), rgba(255,194,71,0)); }
+
+  /* ---------- 方案 A · 符号化 ----------
+     符印居中，字标坐在符印核心的暗井里；一条倾斜光带当"底座"。 */
+  #stage[data-v="a"] .screen{ gap:clamp(16px,3.4vh,44px); }
+  #stage[data-v="a"] .lockup{ gap:0; }
+  #stage[data-v="a"] .kicker{ margin-bottom:clamp(10px,2.4vh,28px); }
+  /* 字脚与短句之间留出"光带位"，否则金带会从短句中间穿过去 */
+  #stage[data-v="a"] .tagline{ margin-top:clamp(20px,3.4vh,40px); }
+  #stage[data-v="a"] .primary{ min-width:min(430px,80vw); }
+  #stage[data-v="a"] .primary .label{ font-size:var(--fs-xl); }
+
+  /* ---------- 方案 B · 场景化 ----------
+     文字走左侧竖列，世界（残塔 / 地平线 / 余烬柱）在右边与字后。 */
+  #stage[data-v="b"]{ --display:clamp(60px, min(23vh, 16.5vw), 300px); }
+  #stage[data-v="b"] .screen{ display:block; padding:0; }
+  #stage[data-v="b"] .lockup{
+    position:absolute; left:7vw; top:20vh; align-items:flex-start; max-width:62vw;
+  }
+  #stage[data-v="b"] .kicker{ margin-bottom:clamp(8px,1.8vh,20px); }
+  #stage[data-v="b"] .tagline{ margin-top:clamp(8px,1.6vh,16px); }
+  #stage[data-v="b"] .actions{
+    position:absolute; left:7vw; bottom:13vh; align-items:flex-start;
+  }
+  #stage[data-v="b"] .primary{ min-width:min(300px,64vw); }
+  #stage[data-v="b"] .primary .label{ font-size:var(--fs-lg); }
+
+  /* ---------- 方案 C · 极简 ----------
+     字号差刻意压平，层级交给"形状 + 留白"：实心块 vs 细链 vs 小字。 */
+  #stage[data-v="c"]{ --display:clamp(52px, min(19vh, 13.5vw), 224px); }
+  #stage[data-v="c"] .screen{ gap:clamp(26px,5.2vh,66px); }
+  #stage[data-v="c"] .lockup{ gap:clamp(12px,2.2vh,26px); }
+  #stage[data-v="c"] .kicker{ letter-spacing:.34em; opacity:.64; }
+  #stage[data-v="c"] .tagline{ letter-spacing:.20em; color:var(--text-3); }
+  #stage[data-v="c"] .primary{
+    height:clamp(44px,6.4vh,54px); padding:0 clamp(26px,3vw,44px);
+    min-width:min(240px,60vw); gap:12px; letter-spacing:.22em;
+  }
+  #stage[data-v="c"] .primary .label{ font-size:var(--fs-md); }
+  #stage[data-v="c"] .secondary{ margin-top:8px; }
+
+  /* ---------- "更多设置"抽屉（二级设置全部关在这里，第一屏永不出现） ---------- */
+  .drawer{
+    position:absolute; left:50%; bottom:0; z-index:7;
+    width:min(900px,94vw); max-height:70vh; overflow-y:auto; box-sizing:border-box;
+    padding:20px 24px 30px; border:1px solid var(--line); border-bottom:0;
+    border-radius:var(--r-md) var(--r-md) 0 0;
+    background:linear-gradient(180deg, rgba(18,29,49,.985), rgba(6,10,18,.99));
+    box-shadow:0 -18px 60px rgba(0,0,0,.6);
+    visibility:hidden; transform:translate(-50%,104%);
+    transition:transform .34s var(--ease), visibility .34s;
+  }
+  body.drawer-open .drawer{ visibility:visible; transform:translate(-50%,0); }
+  .drawer-head{ display:flex; align-items:baseline; justify-content:space-between; gap:12px; margin-bottom:14px; }
+  .drawer-head span{ font-size:var(--fs-md); letter-spacing:.16em; color:var(--text-1); }
+  .drawer-head button{
+    background:none; border:0; cursor:pointer; padding:4px 2px;
+    font-family:var(--mono); font-size:var(--fs-sm); letter-spacing:.12em; color:var(--text-3);
+  }
+  .drawer-body{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px 26px; }
+  .dsec{ min-width:0; }
+  .dsec h3{
+    margin:0 0 8px; font-family:var(--mono); font-weight:400;
+    font-size:var(--fs-sm); letter-spacing:.16em; color:var(--text-4);
+  }
+  /* 难度：方角分段，不是胶囊 */
+  .seg{ display:grid; grid-template-columns:repeat(3,1fr); border:1px solid var(--line); border-radius:4px; overflow:hidden; }
+  .seg button{
+    height:36px; border:0; border-right:1px solid var(--line); cursor:pointer;
+    background:rgba(9,16,26,.7); color:var(--text-3);
+    font-family:var(--sans); font-size:var(--fs-sm); letter-spacing:.1em;
+  }
+  .seg button:last-child{ border-right:0; }
+  .seg button[aria-pressed="true"]{ background:rgba(20,60,82,.55); color:#eaf7ff; box-shadow:inset 0 0 18px rgba(62,230,255,.12); }
+  /* 挑战：细刻度数字条，选中只有金色下划线 */
+  .numstrip{ display:flex; flex-wrap:wrap; gap:2px 0; border-top:1px solid rgba(126,164,214,.16); padding-top:6px; }
+  .numstrip button{
+    position:relative; width:34px; height:26px; border:0; background:none; cursor:pointer;
+    font-family:var(--mono); font-size:var(--fs-xs); color:var(--text-3);
+  }
+  .numstrip button::after{ content:''; position:absolute; left:8px; right:8px; bottom:3px; height:1px; background:transparent; }
+  .numstrip button[aria-pressed="true"]{ color:var(--gold); }
+  .numstrip button[aria-pressed="true"]::after{ background:rgba(255,194,71,.75); }
+  /* 种子 */
+  .seedrow{ display:flex; gap:8px; }
+  .seedrow input{
+    flex:1; min-width:0; height:32px; padding:0 10px; box-sizing:border-box;
+    border:1px solid var(--line); border-radius:4px;
+    background:rgba(6,12,22,.8); color:var(--text-1);
+    font-family:var(--mono); font-size:var(--fs-sm);
+  }
+  .seedrow button{
+    height:32px; padding:0 12px; border:1px solid var(--line); border-radius:4px; cursor:pointer;
+    background:rgba(9,16,26,.7); color:var(--text-2);
+    font-family:var(--sans); font-size:var(--fs-sm);
+  }
+  /* 偏好：小方图标开关，不是长胶囊 */
+  .itoggles{ display:flex; gap:18px; }
+  .itoggle{
+    display:flex; align-items:center; gap:8px; background:none; border:0; cursor:pointer;
+    color:var(--text-3); font-family:var(--sans); font-size:var(--fs-sm); letter-spacing:.08em;
+  }
+  .itoggle .ico{
+    width:26px; height:26px; border:1px solid rgba(120,170,230,.34); border-radius:4px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .itoggle .ico i{ width:9px; height:9px; border-radius:2px; background:transparent; border:1px solid rgba(62,230,255,.45); }
+  .itoggle[aria-pressed="true"] .ico i{ background:var(--tech); border-color:var(--tech); box-shadow:0 0 10px rgba(62,230,255,.7); }
+  .itoggle[aria-pressed="true"]{ color:#dff4ff; }
+  .dnote{ margin:0; font-size:var(--fs-sm); line-height:1.7; color:var(--text-3); }
+  .dnote b{ color:var(--gold); font-weight:700; }
+
+  /* ---------- 抽屉遮罩：抽屉打开时把第一屏压暗，权重不打架 ---------- */
+  .scrim{
+    position:absolute; inset:0; z-index:6; background:rgba(3,6,12,.66);
+    opacity:0; visibility:hidden; transition:opacity .3s var(--ease), visibility .3s;
+  }
+  body.drawer-open .scrim{ opacity:1; visibility:visible; }
+
+  /* ---------- 指标层 / 操作提示（仅调试可见，不进画面） ---------- */
+  .metrics{
+    position:absolute; right:16px; top:16px; z-index:8; width:min(470px,92vw);
+    padding:12px 14px; box-sizing:border-box; border:1px solid var(--line); border-radius:var(--r-sm);
+    background:rgba(7,11,20,.94); font-family:var(--mono); font-size:var(--fs-sm);
+    line-height:1.65; color:var(--text-3); pointer-events:none;
+  }
+  .metrics .mh{ color:var(--tech); letter-spacing:.16em; margin-bottom:6px; }
+  .metrics .row{ display:flex; justify-content:space-between; gap:12px; border-top:1px solid rgba(126,164,214,.14); padding-top:3px; margin-top:3px; }
+  .metrics .row b{ color:var(--text-1); font-weight:400; }
+  .metrics .ok{ color:#47e8a7; }
+  .metrics .ng{ color:#ff6b7f; }
+  .hint{
+    position:absolute; left:18px; bottom:16px; z-index:5; pointer-events:none;
+    font-family:var(--mono); font-size:var(--fs-sm); letter-spacing:.1em;
+    color:rgba(168,191,220,.55); transition:opacity .6s var(--ease);
+  }
+  .hint.fade{ opacity:0; }
+
+  @keyframes riseIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:none; } }
+  @keyframes sheen{ 0%,68%{ transform:translateX(-125%); } 100%{ transform:translateX(125%); } }
+
+  button:focus-visible{ outline:2px solid rgba(62,230,255,.75); outline-offset:3px; }
+
+  @media (prefers-reduced-motion: reduce){
+    .kicker,.wordmark,.primary,.secondary,.sign{ animation:none; }
+    .primary::after{ animation:none; opacity:0; }
+  }
+</style>
+</head>
+<body>
+<div id="stage" data-v="a">
+  <canvas id="bg" aria-hidden="true"></canvas>
+
+  <main class="screen">
+    <!-- 第一屏只留五件：标题 / 一句短句 / 一个主行动 / 一个次级入口 / 署名 -->
+    <section class="lockup">
+      <div class="kicker"><span class="sig"></span>EMBERFALL<span class="sep">·</span>ROGUE PROTOCOL</div>
+      <h1 class="wordmark" id="wordmark">烬</h1>
+      <p class="tagline">魔法 × 科技实时肉鸽 · 清空每一层，再往下一层</p>
+    </section>
+
+    <div class="actions">
+      <button class="primary" id="btnStart" type="button"><span class="label">开始探索</span><kbd>Enter</kbd></button>
+      <button class="secondary" id="btnContinue" type="button"><span>继续上次 · 第 5 层</span><kbd>C</kbd></button>
+    </div>
+
+    <div class="sign"><i></i>陈光辉 制作</div>
+  </main>
+
+  <!-- 二级设置：难度 / 挑战 / 种子 / 偏好 / 记录，全部收在这里，默认不可见 -->
+  <div class="scrim" id="scrim"></div>
+  <aside class="drawer" id="drawer" aria-hidden="true">
+    <div class="drawer-head"><span>更多设置</span><button type="button" id="drawerClose">关闭 · M</button></div>
+    <div class="drawer-body">
+      <section class="dsec">
+        <h3>难度</h3>
+        <div class="seg" role="group" aria-label="难度">
+          <button type="button" aria-pressed="false">简单</button>
+          <button type="button" aria-pressed="true">普通</button>
+          <button type="button" aria-pressed="false">困难</button>
+        </div>
+      </section>
+      <section class="dsec">
+        <h3>偏好</h3>
+        <div class="itoggles">
+          <button class="itoggle" type="button" aria-pressed="true"><span class="ico"><i></i></span>背景动效</button>
+          <button class="itoggle" type="button" aria-pressed="true"><span class="ico"><i></i></span>声音</button>
+        </div>
+      </section>
+      <section class="dsec">
+        <h3>挑战等级</h3>
+        <div class="numstrip" role="group" aria-label="挑战等级">
+          <button type="button" aria-pressed="true">0</button>
+          <button type="button" aria-pressed="false">1</button>
+          <button type="button" aria-pressed="false">2</button>
+          <button type="button" aria-pressed="false">3</button>
+          <button type="button" aria-pressed="false">4</button>
+          <button type="button" aria-pressed="false">5</button>
+          <button type="button" aria-pressed="false">6</button>
+          <button type="button" aria-pressed="false">7</button>
+          <button type="button" aria-pressed="false">8</button>
+          <button type="button" aria-pressed="false">9</button>
+          <button type="button" aria-pressed="false">10</button>
+        </div>
+      </section>
+      <section class="dsec">
+        <h3>种子</h3>
+        <div class="seedrow">
+          <input id="seedInput" type="text" maxlength="24" placeholder="自定义种子" aria-label="自定义种子">
+          <button type="button">今日挑战</button>
+          <button type="button">用种子开始</button>
+        </div>
+      </section>
+      <section class="dsec">
+        <h3>记录</h3>
+        <p class="dnote">最佳楼层 <b>5</b> · 奥术结晶 <b>2</b> · 已完成 <b>23</b> 局</p>
+      </section>
+      <section class="dsec">
+        <h3>入口</h3>
+        <p class="dnote">说明 / 帮助 · 天赋 · 图鉴 · 存档槽</p>
+      </section>
+    </div>
+  </aside>
+
+  <div class="hint" id="hint">1 / 2 / 3 切换方案 · M 更多设置 · D 实测指标</div>
+  <div class="metrics" id="metrics" hidden></div>
+</div>
+
+<script>
+/* ============================================================
+   烬 · 标题页方案实验室 —— 绘制与实测脚本
+   全部图形：canvas 原语（弧 / 多边形 / 渐变 / 发光 / 噪声）
+   运行期零网络请求、零图片、零字体外链
+   ============================================================ */
+(function () {
+  'use strict';
+
+  var stage = document.getElementById('stage');
+  var cv = document.getElementById('bg');
+  var ctx = cv.getContext('2d', { alpha: false });
+  var wordmark = document.getElementById('wordmark');
+  var btnStart = document.getElementById('btnStart');
+  var btnContinue = document.getElementById('btnContinue');
+  var taglineEl = document.querySelector('.tagline');
+  var kickerEl = document.querySelector('.kicker');
+  var signEl = document.querySelector('.sign');
+  var metricsEl = document.getElementById('metrics');
+  var hintEl = document.getElementById('hint');
+
+  var W = 0, H = 0, DPR = 1;
+  var scene = { stars: [], ridges: [], ruins: [], crystals: [], embers: [], rubble: [] };
+  var grain = null;
+  var anchor = { title: { x: 0, y: 0, w: 0, h: 0, bottom: 0 }, primary: { x: 0, y: 0, w: 0, h: 0 } };
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var metricsOn = false;
+  var lastMetricsAt = 0;
+
+  /* ---------- 小工具 ---------- */
+
+  /** 十六进制转 RGB 三元组 */
+  function hexToRgb(hex) {
+    var h = String(hex).replace('#', '');
+    if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+    return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+  }
+
+  /** 带透明度的 rgba 字符串 */
+  function rgba(hex, a) {
+    var c = hexToRgb(hex);
+    return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')';
+  }
+
+  /** 确定性随机数发生器（布景几何用；表现层粒子一律 Math.random） */
+  function mulberry32(seed) {
+    var a = seed >>> 0;
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      var t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /** 相对亮度（WCAG） */
+  function relLum(rgb) {
+    var f = function (v) {
+      v = v / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]);
+  }
+
+  /** 对比度（WCAG 2.1） */
+  function contrastRatio(a, b) {
+    var l1 = relLum(a), l2 = relLum(b);
+    return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+  }
+
+  /* ---------- 画布尺寸 / 布景重建 ---------- */
+
+  /** 按视口与 DPR 重设画布；随后重建噪点、布景与锚点 */
+  function sizeCanvas() {
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    W = stage.clientWidth;
+    H = stage.clientHeight;
+    cv.width = Math.max(1, Math.round(W * DPR));
+    cv.height = Math.max(1, Math.round(H * DPR));
+    cv.style.width = W + 'px';
+    cv.style.height = H + 'px';
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    buildGrain();
+    buildScene();
+    measureAnchors();
+  }
+
+  /** 生成 96×96 的噪点贴图（只做一次），压掉大面积渐变的"塑料感" */
+  function buildGrain() {
+    var n = 96;
+    var off = document.createElement('canvas');
+    off.width = n; off.height = n;
+    var g = off.getContext('2d');
+    var img = g.createImageData(n, n);
+    for (var i = 0; i < n * n; i++) {
+      var v = Math.random() * 255;
+      img.data[i * 4] = v;
+      img.data[i * 4 + 1] = v;
+      img.data[i * 4 + 2] = v;
+      img.data[i * 4 + 3] = Math.random() * 24;
+    }
+    g.putImageData(img, 0, 0);
+    grain = ctx.createPattern(off, 'repeat');
+  }
+
+  /** 量取标题与主按钮的中心/包围盒，供画布让图形对准 DOM 文字 */
+  function measureAnchors() {
+    var r = wordmark.getBoundingClientRect();
+    anchor.title = { x: r.left + r.width / 2, y: r.top + r.height / 2, w: r.width, h: r.height, bottom: r.bottom };
+    var p = btnStart.getBoundingClientRect();
+    anchor.primary = { x: p.left + p.width / 2, y: p.top + p.height / 2, w: p.width, h: p.height };
+  }
+
+  /** 构建方案 B 的确定性布景（星点 / 远山三层 / 残塔 / 前景碎石 / 余烬） */
+  function buildScene() {
+    var rnd = mulberry32(20261108);
+
+    scene.stars = [];
+    for (var i = 0; i < 92; i++) {
+      scene.stars.push({
+        x: rnd() * W,
+        y: rnd() * H * 0.58,
+        r: 0.4 + rnd() * 1.25,
+        a: 0.12 + rnd() * 0.42,
+        tw: rnd() * Math.PI * 2
+      });
+    }
+
+    scene.ridges = [0.60, 0.665, 0.735].map(function (k, idx) {
+      var base = H * k;
+      var pts = [];
+      var n = 24;
+      for (var j = 0; j <= n; j++) {
+        var x = -30 + (W + 60) * j / n;
+        var amp = H * (0.014 + idx * 0.008);
+        var y = base - Math.abs(Math.sin(j * 1.9 + idx * 2.1)) * amp * (0.5 + rnd() * 0.9);
+        pts.push([x, y]);
+      }
+      return {
+        base: base,
+        pts: pts,
+        color: ['rgba(30,46,70,.55)', 'rgba(15,25,40,.82)', 'rgba(6,11,19,.96)'][idx]
+      };
+    });
+
+    scene.ruins = [
+      { x: W * 0.585, w: W * 0.085, h: H * 0.30, base: H * 0.638, col: 'rgba(26,40,60,.38)', win: false },
+      { x: W * 0.775, w: W * 0.098, h: H * 0.39, base: H * 0.658, col: 'rgba(12,20,32,.86)', win: true },
+      { x: W * 0.920, w: W * 0.072, h: H * 0.26, base: H * 0.676, col: 'rgba(6,10,17,.95)', win: false }
+    ];
+
+    // 近景山脊：压在画面最底部，给"开始探索"一块立得住的地
+    scene.foreground = (function () {
+      var pts = [[-30, H]];
+      var n = 18;
+      for (var j = 0; j <= n; j++) {
+        var x = -30 + (W + 60) * j / n;
+        var y = H * (0.885 - 0.085 * Math.abs(Math.sin(j * 0.85 + 0.5)) - 0.018 * rnd());
+        if (j === 0 || j === n) y = H * 0.93;
+        pts.push([x, y]);
+      }
+      pts.push([W + 30, H]);
+      return pts;
+    })();
+
+    scene.rubble = [
+      [[-40, H], [W * 0.30, H], [W * 0.235, H * 0.905], [W * 0.17, H * 0.945], [W * 0.06, H * 0.975], [-40, H * 0.99]],
+      [[W + 40, H], [W * 0.62, H], [W * 0.70, H * 0.925], [W * 0.80, H * 0.955], [W * 0.90, H * 0.985], [W + 40, H * 0.995]]
+    ];
+
+    scene.embers = [];
+    for (var e = 0; e < 74; e++) {
+      scene.embers.push({
+        off: (Math.random() - 0.5) * 1.0,
+        seed: Math.random(),
+        speed: 0.035 + Math.random() * 0.075,
+        size: 0.8 + Math.random() * 2.2,
+        warm: Math.random() < 0.72
+      });
+    }
+
+    // 空中飘的零散余烬：让整个场景的空气"活着"，同时点题
+    scene.air = [];
+    for (var ai = 0; ai < 18; ai++) {
+      scene.air.push({ fx: rnd(), ph: rnd(), sp: 0.018 + rnd() * 0.045, sz: 0.7 + rnd() * 1.4 });
+    }
+  }
+
+  /* ---------- 方案 A 绘制：破碎符印 + 核心暗井 + 倾斜光带 ---------- */
+
+  /** 画方案 A 的一帧（t 为秒） */
+  function drawA(t) {
+    var cx = anchor.title.x;
+    var cy = anchor.title.y;
+    var R = Math.min(H * 0.30, W * 0.26);
+
+    // 1) 底：以符印为源的暗场渐变
+    var bg = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W, H) * 0.9);
+    bg.addColorStop(0, '#0a1222');
+    bg.addColorStop(0.42, '#060b15');
+    bg.addColorStop(1, '#03060c');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2) 紫气团（同色低频大斑，不抢主体）
+    var haze = ctx.createRadialGradient(cx, cy, R * 0.2, cx, cy, R * 2.4);
+    haze.addColorStop(0, rgba('#b085ff', 0.13));
+    haze.addColorStop(0.5, rgba('#b085ff', 0.05));
+    haze.addColorStop(1, 'rgba(176,133,255,0)');
+    ctx.fillStyle = haze;
+    ctx.fillRect(0, 0, W, H);
+
+    // 3) 底部青色反光（让下半屏不空）
+    var low = ctx.createRadialGradient(cx, cy + R * 1.35, 0, cx, cy + R * 1.35, R * 1.7);
+    low.addColorStop(0, rgba('#3ee6ff', 0.07));
+    low.addColorStop(1, 'rgba(62,230,255,0)');
+    ctx.fillStyle = low;
+    ctx.fillRect(0, 0, W, H);
+
+    // 4) 核心暗井：把标题所在位置压暗，金色字才有对比
+    var well = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * 0.95);
+    well.addColorStop(0, 'rgba(3,6,12,.90)');
+    well.addColorStop(0.55, 'rgba(3,6,12,.62)');
+    well.addColorStop(1, 'rgba(3,6,12,0)');
+    ctx.fillStyle = well;
+    ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+
+    // 5) 破碎外环：三段弧，缺口随时间缓慢漂移
+    var rot = t * 0.055;
+    var gap = 0.13 + Math.sin(t * 0.4) * 0.02;
+    ctx.save();
+    ctx.lineCap = 'butt';
+    for (var k = 0; k < 3; k++) {
+      var a0 = rot + k * Math.PI * 2 / 3 + gap;
+      var a1 = rot + (k + 1) * Math.PI * 2 / 3 - gap;
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, a0, a1);
+      ctx.strokeStyle = rgba('#b085ff', 0.42);
+      ctx.lineWidth = 2;
+      ctx.shadowColor = rgba('#b085ff', 0.55);
+      ctx.shadowBlur = 22;
+      ctx.stroke();
+      ctx.shadowBlur = 0;
+      // 破损处补一小段更亮的青，像被烧过
+      // 注意：两段 arc 必须各自独立路径，否则会被一条穿过圆心的弦连起来
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, a0 - 0.05, a0 - 0.012);
+      ctx.strokeStyle = rgba('#3ee6ff', 0.5);
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(cx, cy, R, a1 + 0.012, a1 + 0.05);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 6) 刻度假环：内侧细环 + 64 根短刻线
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cx, cy, R * 0.86, 0, Math.PI * 2);
+    ctx.strokeStyle = rgba('#3ee6ff', 0.16);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    for (var i2 = 0; i2 < 64; i2++) {
+      var ang = i2 * Math.PI * 2 / 64 - rot * 0.5;
+      var long = (i2 % 8 === 0);
+      var r0 = R * 0.88;
+      var r1 = R * (long ? 0.955 : 0.922);
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang) * r0, cy + Math.sin(ang) * r0);
+      ctx.lineTo(cx + Math.cos(ang) * r1, cy + Math.sin(ang) * r1);
+      ctx.strokeStyle = rgba('#3ee6ff', long ? 0.30 : 0.13);
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    // 7) 几何核心：全部放在 0.66R 之外，绝不穿过字面（穿过会变成乱线）
+    ctx.save();
+    ctx.translate(cx, cy);
+    polygon(R * 0.985, 4, rot * 0.7, rgba('#3ee6ff', 0.08), 1);
+    polygon(R * 0.78, 9, -rot * 1.1, rgba('#b085ff', 0.16), 1);
+    polygon(R * 0.665, 8, rot * 1.5, rgba('#3ee6ff', 0.07), 1);
+    ctx.restore();
+
+    // 8) 符文带：20 个程序化符形，绕环排布
+    drawRunes(cx, cy, R * 0.735, rot, t);
+
+    // 9) "底座"：一条倾斜金带压在字脚与短句之间的空档里，字不再悬空
+    var bandW = Math.min(W * 0.46, anchor.title.w * 2.1);
+    var bandH = Math.max(3, anchor.title.h * 0.018);
+    ctx.save();
+    ctx.translate(cx, anchor.title.bottom + anchor.title.h * 0.028);
+    ctx.rotate(-0.055);
+    var band = ctx.createLinearGradient(-bandW / 2, 0, bandW / 2, 0);
+    band.addColorStop(0, rgba('#ffc247', 0));
+    band.addColorStop(0.28, rgba('#ffc247', 0.24));
+    band.addColorStop(0.50, 'rgba(255,238,196,.80)');
+    band.addColorStop(0.72, rgba('#ffc247', 0.24));
+    band.addColorStop(1, rgba('#ffc247', 0));
+    ctx.fillStyle = band;
+    ctx.shadowColor = 'rgba(255,170,50,.55)';
+    ctx.shadowBlur = 18;
+    ctx.fillRect(-bandW / 2, -bandH / 2, bandW, bandH);
+    ctx.shadowBlur = 0;
+    // 青细线：科技感的一笔，不是第二条光带
+    ctx.fillStyle = rgba('#3ee6ff', 0.30);
+    ctx.fillRect(-bandW * 0.36, -bandH - 7, bandW * 0.72, 1);
+    ctx.restore();
+
+    // 10) 余烬粒子：绕环上升，金 / 紫交替
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var p = 0; p < 30; p++) {
+      var ph = (t * (0.10 + (p % 5) * 0.02) + p * 0.137) % 1;
+      var ang2 = (p / 30) * Math.PI * 2 + t * 0.06;
+      var rad = R * (0.55 + ph * 0.9);
+      var px = cx + Math.cos(ang2) * rad;
+      var py = cy + Math.sin(ang2 * 0.9) * rad * 0.86 - ph * R * 0.22;
+      var alpha = Math.sin(Math.PI * ph) * 0.6;
+      ctx.beginPath();
+      ctx.arc(px, py, 1 + (p % 3), 0, Math.PI * 2);
+      ctx.fillStyle = (p % 6 === 0) ? rgba('#b085ff', alpha) : 'rgba(255,198,110,' + alpha + ')';
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 11) 地面反光：下半屏给一层冷光与"落点"，避免画面头重脚轻
+    var floor = ctx.createLinearGradient(0, H * 0.68, 0, H);
+    floor.addColorStop(0, 'rgba(62,230,255,0)');
+    floor.addColorStop(0.55, 'rgba(62,230,255,.035)');
+    floor.addColorStop(1, 'rgba(62,230,255,.075)');
+    ctx.fillStyle = floor;
+    ctx.fillRect(0, H * 0.68, W, H * 0.32);
+
+    // 11b) 地面魔法阵：把符印"投"到脚下，既补下半屏也补一层纵深
+    var gcy = H * 0.885;
+    var grx = Math.min(W * 0.27, 520);
+    var gry = Math.max(9, H * 0.026);
+    ctx.save();
+    ctx.beginPath();
+    ctx.ellipse(cx, gcy, grx, gry, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = rgba('#b085ff', 0.16);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.ellipse(cx, gcy, grx * 0.70, gry * 0.70, 0, 0, Math.PI * 2);
+    ctx.strokeStyle = rgba('#3ee6ff', 0.10);
+    ctx.stroke();
+    for (var gi = 0; gi < 24; gi++) {
+      var ga = gi * Math.PI * 2 / 24;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ga) * grx, gcy + Math.sin(ga) * gry);
+      ctx.lineTo(cx + Math.cos(ga) * grx * 1.06, gcy + Math.sin(ga) * gry * 1.12);
+      ctx.strokeStyle = rgba('#3ee6ff', 0.10);
+      ctx.stroke();
+    }
+    // 阵心一小团暖光
+    var core = ctx.createRadialGradient(cx, gcy, 0, cx, gcy, grx * 0.55);
+    core.addColorStop(0, 'rgba(255,170,60,.10)');
+    core.addColorStop(1, 'rgba(255,170,60,0)');
+    ctx.fillStyle = core;
+    ctx.fillRect(cx - grx, gcy - gry * 3, grx * 2, gry * 6);
+    ctx.restore();
+
+    // 11c) 地面上零散上升的余烬：让下半屏也"有东西在动"
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var ge = 0; ge < 14; ge++) {
+      var gph = (t * (0.08 + (ge % 4) * 0.02) + ge * 0.11) % 1;
+      var gx = cx + Math.sin(ge * 2.7) * grx * 0.82 * (1 - gph * 0.35);
+      var gy = gcy - gph * H * 0.16;
+      var ga2 = Math.sin(Math.PI * gph) * 0.30;
+      ctx.beginPath();
+      ctx.arc(gx, gy, 1 + (ge % 2), 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255,180,90,' + ga2 + ')';
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 主按钮脚下的一小池暖光，让行动有"重量"
+    var pool = ctx.createRadialGradient(anchor.primary.x, anchor.primary.y + anchor.primary.h * 0.6, 0,
+      anchor.primary.x, anchor.primary.y + anchor.primary.h * 0.6, Math.min(W * 0.34, 420));
+    pool.addColorStop(0, 'rgba(255,194,71,.10)');
+    pool.addColorStop(0.5, 'rgba(255,170,50,.04)');
+    pool.addColorStop(1, 'rgba(255,170,50,0)');
+    ctx.fillStyle = pool;
+    ctx.fillRect(0, H * 0.6, W, H * 0.4);
+
+    // 12) 暗角
+    var vig = ctx.createRadialGradient(cx, cy, Math.min(W, H) * 0.30, cx, cy, Math.max(W, H) * 0.95);
+    vig.addColorStop(0, 'rgba(3,6,12,0)');
+    vig.addColorStop(1, 'rgba(3,6,12,.82)');
+    ctx.fillStyle = vig;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  /** 以中心为原点画正多边形描边 */
+  function polygon(r, sides, rotation, color, lw) {
+    ctx.beginPath();
+    for (var i = 0; i < sides; i++) {
+      var a = rotation + i * Math.PI * 2 / sides;
+      var x = Math.cos(a) * r, y = Math.sin(a) * r;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lw;
+    ctx.stroke();
+  }
+
+  /** 画符文带：每个符形是 2~3 笔短线，朝外排布 */
+  function drawRunes(cx, cy, r, rot, t) {
+    var n = 20;
+    for (var i = 0; i < n; i++) {
+      var a = rot * 1.2 + i * Math.PI * 2 / n;
+      var x = cx + Math.cos(a) * r;
+      var y = cy + Math.sin(a) * r;
+      var fade = 0.22 + 0.10 * Math.sin(t * 1.2 + i);
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(a + Math.PI / 2);
+      ctx.strokeStyle = rgba('#b085ff', fade);
+      ctx.lineWidth = 1;
+      var s = Math.max(4, r * 0.042);
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.lineTo(0, s);
+      ctx.moveTo(-s * 0.8, -s * 0.35);
+      ctx.lineTo(s * 0.8, -s * 0.35 * (i % 3 === 0 ? -1 : 1));
+      if (i % 4 === 0) {
+        ctx.moveTo(-s * 0.6, s * 0.7);
+        ctx.lineTo(s * 0.6, s * 0.7);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+
+  /* ---------- 方案 B 绘制：残塔剪影 + 上升余烬柱 ---------- */
+
+  /** 画方案 B 的一帧 */
+  function drawB(t) {
+    // 1) 夜空：上深下亮，地平线附近压一点暖
+    var sky = ctx.createLinearGradient(0, 0, 0, H);
+    sky.addColorStop(0, '#04060c');
+    sky.addColorStop(0.34, '#070d18');
+    sky.addColorStop(0.58, '#101b2b');
+    sky.addColorStop(0.68, '#1b2b41');
+    sky.addColorStop(1, '#080d16');
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, H);
+
+    // 2) 地平线暖辉（紫一点点，避免纯橙显得廉价）
+    var glow = ctx.createRadialGradient(W * 0.52, H * 0.655, 0, W * 0.52, H * 0.655, W * 0.55);
+    glow.addColorStop(0, 'rgba(255,150,60,.20)');
+    glow.addColorStop(0.32, 'rgba(255,120,50,.09)');
+    glow.addColorStop(0.62, 'rgba(176,133,255,.045)');
+    glow.addColorStop(1, 'rgba(176,133,255,0)');
+    ctx.fillStyle = glow;
+    ctx.fillRect(0, 0, W, H);
+
+    // 3) 星点（微闪）
+    for (var i = 0; i < scene.stars.length; i++) {
+      var s = scene.stars[i];
+      var a = s.a * (0.6 + 0.4 * Math.sin(t * 1.1 + s.tw));
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(196,224,255,' + a + ')';
+      ctx.fill();
+    }
+
+    // 4) 三层远山（越远越亮，空气透视）
+    for (var rI = 0; rI < scene.ridges.length; rI++) {
+      var rid = scene.ridges[rI];
+      ctx.beginPath();
+      ctx.moveTo(-30, H);
+      for (var j = 0; j < rid.pts.length; j++) ctx.lineTo(rid.pts[j][0], rid.pts[j][1]);
+      ctx.lineTo(W + 30, H);
+      ctx.closePath();
+      ctx.fillStyle = rid.color;
+      ctx.fill();
+    }
+
+    // 5) 残塔剪影（右半场；左半场留给文字）
+    for (var u = 0; u < scene.ruins.length; u++) drawTower(scene.ruins[u], t, u);
+
+    // 5b) 空中零散余烬：缓慢上升，极低亮度
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    for (var ai2 = 0; ai2 < scene.air.length; ai2++) {
+      var ar = scene.air[ai2];
+      var aph = (ar.ph + t * ar.sp) % 1;
+      ctx.beginPath();
+      ctx.arc(
+        ar.fx * W + Math.sin(aph * 5 + ar.ph * 7) * W * 0.01,
+        H * 0.86 - aph * H * 0.72,
+        ar.sz, 0, Math.PI * 2
+      );
+      ctx.fillStyle = 'rgba(255,176,96,' + (Math.sin(Math.PI * aph) * 0.26) + ')';
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // 6) 上升余烬柱：标题的"底座"，从地平线直插到字脚
+    drawEmberColumn(t);
+
+    // 7) 前景碎石（近景层，最暗）
+    for (var q = 0; q < scene.rubble.length; q++) {
+      var poly = scene.rubble[q];
+      ctx.beginPath();
+      for (var v = 0; v < poly.length; v++) {
+        if (v === 0) ctx.moveTo(poly[v][0], poly[v][1]); else ctx.lineTo(poly[v][0], poly[v][1]);
+      }
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(4,7,12,.95)';
+      ctx.fill();
+    }
+
+    // 7b) 近景山脊：铺满底部，主按钮踩在它上面；顶缘一道极细冷光把前后景分开
+    ctx.beginPath();
+    var fg = scene.foreground;
+    for (var v2 = 0; v2 < fg.length; v2++) {
+      if (v2 === 0) ctx.moveTo(fg[v2][0], fg[v2][1]); else ctx.lineTo(fg[v2][0], fg[v2][1]);
+    }
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(3,5,9,.98)';
+    ctx.fill();
+
+    ctx.beginPath();
+    for (var v3 = 1; v3 < fg.length - 1; v3++) {
+      if (v3 === 1) ctx.moveTo(fg[v3][0], fg[v3][1]); else ctx.lineTo(fg[v3][0], fg[v3][1]);
+    }
+    var rim = ctx.createLinearGradient(0, 0, W, 0);
+    rim.addColorStop(0, rgba('#3ee6ff', 0.10));
+    rim.addColorStop(0.55, rgba('#3ee6ff', 0.05));
+    rim.addColorStop(1, rgba('#3ee6ff', 0));
+    ctx.strokeStyle = rim;
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    // 8) 暗角 + 左侧压暗，保证左列文字始终可读
+    var vig2 = ctx.createLinearGradient(0, 0, W * 0.55, 0);
+    vig2.addColorStop(0, 'rgba(3,5,10,.62)');
+    vig2.addColorStop(0.62, 'rgba(3,5,10,.10)');
+    vig2.addColorStop(1, 'rgba(3,5,10,0)');
+    ctx.fillStyle = vig2;
+    ctx.fillRect(0, 0, W, H);
+
+    var vig3 = ctx.createRadialGradient(W * 0.5, H * 0.5, Math.min(W, H) * 0.35, W * 0.5, H * 0.5, Math.max(W, H) * 0.92);
+    vig3.addColorStop(0, 'rgba(2,4,9,0)');
+    vig3.addColorStop(1, 'rgba(2,4,9,.72)');
+    ctx.fillStyle = vig3;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  /** 画一座断裂残塔：一侧留残尖、一侧崩成阶梯（第三座镜像），近景那座带拱门 */
+  function drawTower(u, t, idx) {
+    var w = u.w, h = u.h, cx = u.x, base = u.base;
+    var dir = (idx === 2) ? -1 : 1;
+
+    ctx.beginPath();
+    ctx.moveTo(cx + dir * (-w / 2), base);
+    ctx.lineTo(cx + dir * (-w * 0.40), base - h * 0.30);
+    ctx.lineTo(cx + dir * (-w * 0.40), base - h * 0.62);   // 完整墙段
+    ctx.lineTo(cx + dir * (-w * 0.26), base - h * 0.64);   // 断裂台阶
+    ctx.lineTo(cx + dir * (-w * 0.24), base - h * 0.93);   // 细尖上升
+    ctx.lineTo(cx + dir * (-w * 0.08), base - h * 0.99);   // 残尖
+    ctx.lineTo(cx + dir * (-w * 0.02), base - h * 0.70);   // 崩落斜切
+    ctx.lineTo(cx + dir * (w * 0.12), base - h * 0.66);    // 碎肩
+    ctx.lineTo(cx + dir * (w * 0.14), base - h * 0.44);
+    ctx.lineTo(cx + dir * (w * 0.30), base - h * 0.46);
+    ctx.lineTo(cx + dir * (w * 0.32), base - h * 0.22);
+    ctx.lineTo(cx + dir * (w * 0.46), base - h * 0.24);
+    ctx.lineTo(cx + dir * (w / 2), base);
+    ctx.closePath();
+    ctx.fillStyle = u.col;
+    ctx.fill();
+
+    // 楼层横缝：把"塔"和"晶体"区分开
+    ctx.strokeStyle = 'rgba(3,6,11,.5)';
+    ctx.lineWidth = 1;
+    for (var f = 0; f < 3; f++) {
+      var fy = base - h * (0.26 + f * 0.15);
+      var fw = w * (0.30 - f * 0.03);
+      ctx.beginPath();
+      ctx.moveTo(cx - dir * fw, fy);
+      ctx.lineTo(cx + dir * (fw * 0.85), fy);
+      ctx.stroke();
+    }
+
+    // 左缘轮廓光：把塔从背景里"切"出来
+    ctx.beginPath();
+    ctx.moveTo(cx - dir * w / 2, base);
+    ctx.lineTo(cx - dir * w * 0.40, base - h * 0.30);
+    ctx.lineTo(cx - dir * w * 0.40, base - h * 0.62);
+    ctx.strokeStyle = rgba('#3ee6ff', idx === 1 ? 0.22 : 0.09);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // 近景那座：底层拱门（门内一点余烬暖光）+ 四道窗缝冷光
+    if (u.win) {
+      var aw = w * 0.17, ah = h * 0.22;
+      ctx.beginPath();
+      ctx.moveTo(cx - aw / 2, base);
+      ctx.quadraticCurveTo(cx, base - ah * 1.55, cx + aw / 2, base);
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(2,4,8,.96)';
+      ctx.fill();
+      var ag = ctx.createLinearGradient(0, base, 0, base - ah);
+      ag.addColorStop(0, 'rgba(255,150,60,.09)');
+      ag.addColorStop(1, 'rgba(255,150,60,0)');
+      ctx.fillStyle = ag;
+      ctx.fill();
+
+      for (var r = 0; r < 4; r++) {
+        for (var c2 = 0; c2 < 2; c2++) {
+          var wx = cx - w * 0.10 + c2 * w * 0.19;
+          var wy = base - h * (0.44 + r * 0.10);
+          ctx.fillStyle = rgba('#3ee6ff', 0.05 + 0.03 * Math.sin(t * 0.9 + r));
+          ctx.fillRect(wx, wy, w * 0.09, h * 0.012);
+        }
+      }
+    }
+  }
+
+  /** 上升余烬柱：竖直光柱 + 上升金色粒子 */
+  function drawEmberColumn(t) {
+    var cx = anchor.title.x;
+    var top = anchor.title.y - anchor.title.h * 0.55;
+    var bottom = H * 0.985;
+
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+
+    // 光柱：下宽上窄，两端都收口，避免出现生硬的梯形边
+    var shaft = ctx.createLinearGradient(0, bottom, 0, top);
+    shaft.addColorStop(0, 'rgba(255,130,45,.05)');
+    shaft.addColorStop(0.18, 'rgba(255,152,56,.17)');
+    shaft.addColorStop(0.55, 'rgba(255,182,82,.06)');
+    shaft.addColorStop(1, 'rgba(255,194,71,0)');
+    var wBot = W * 0.048, wTop = W * 0.013;
+    ctx.beginPath();
+    ctx.moveTo(cx - wBot, bottom);
+    ctx.lineTo(cx - wTop, top);
+    ctx.lineTo(cx + wTop, top);
+    ctx.lineTo(cx + wBot, bottom);
+    ctx.closePath();
+    ctx.fillStyle = shaft;
+    ctx.fill();
+
+    // 粒子：越小越暗、越大越亮，带一点点辉光
+    for (var i = 0; i < scene.embers.length; i++) {
+      var e = scene.embers[i];
+      var ph = (e.seed + t * e.speed) % 1;
+      var y = bottom - ph * (bottom - top) * 1.02;
+      var spread = W * (0.028 + ph * 0.05);
+      var x = cx + e.off * spread * 2 + Math.sin(ph * 7 + e.seed * 9) * W * 0.012;
+      var alpha = Math.sin(Math.PI * ph) * 0.78;
+      ctx.shadowColor = 'rgba(255,150,60,.65)';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(x, y, e.size, 0, Math.PI * 2);
+      ctx.fillStyle = e.warm
+        ? 'rgba(255,' + (180 + Math.round(e.seed * 50)) + ',105,' + alpha + ')'
+        : 'rgba(255,120,70,' + (alpha * 0.9) + ')';
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    ctx.restore();
+
+    // 字脚再压一道很窄的暖光，让标题"贴"在柱子上
+    var ledge = ctx.createLinearGradient(cx - anchor.title.w * 0.7, 0, cx + anchor.title.w * 0.7, 0);
+    ledge.addColorStop(0, 'rgba(255,194,71,0)');
+    ledge.addColorStop(0.5, 'rgba(255,210,120,.32)');
+    ledge.addColorStop(1, 'rgba(255,194,71,0)');
+    ctx.fillStyle = ledge;
+    ctx.fillRect(cx - anchor.title.w * 0.7, anchor.title.bottom + 6, anchor.title.w * 1.4, 2);
+  }
+
+  /* ---------- 方案 C 绘制：几乎空白，只剩一层呼吸 ---------- */
+
+  /** 画方案 C 的一帧 */
+  function drawC(t) {
+    var cx = anchor.title.x;
+    var cy = anchor.title.y;
+
+    var bg = ctx.createLinearGradient(0, 0, 0, H);
+    bg.addColorStop(0, '#05080f');
+    bg.addColorStop(0.55, '#070c15');
+    bg.addColorStop(1, '#03060b');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
+
+    // 标题后的极暗光池：像舞台顶光打下来
+    var pool = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(W * 0.30, anchor.title.h * 1.1));
+    pool.addColorStop(0, 'rgba(255,194,71,' + (0.055 + 0.012 * Math.sin(t * 0.55)) + ')');
+    pool.addColorStop(0.55, 'rgba(255,194,71,.018)');
+    pool.addColorStop(1, 'rgba(255,194,71,0)');
+    ctx.fillStyle = pool;
+    ctx.fillRect(0, 0, W, H);
+
+    // 短句下面一条极细金线（唯一"底座"，不与短句争行）
+    var tRect = taglineEl.getBoundingClientRect();
+    var lineY = tRect.bottom + Math.max(10, H * 0.018);
+    var lineW = Math.min(W * 0.40, Math.max(tRect.width * 1.25, anchor.title.w * 1.6));
+    var g = ctx.createLinearGradient(cx - lineW / 2, 0, cx + lineW / 2, 0);
+    g.addColorStop(0, 'rgba(255,194,71,.44)');
+    g.addColorStop(0.58, 'rgba(255,194,71,.26)');
+    g.addColorStop(1, 'rgba(255,194,71,0)');
+    ctx.fillStyle = g;
+    ctx.fillRect(cx - lineW / 2, lineY, lineW, 1);
+
+    // 线首一颗紫色小点：全场唯一的"紫"，同时当线的起点标记
+    ctx.beginPath();
+    ctx.arc(cx - lineW / 2, lineY + 0.5, 2.4, 0, Math.PI * 2);
+    ctx.fillStyle = rgba('#b085ff', 0.75);
+    ctx.fill();
+  }
+
+  /* ---------- 噪点 ---------- */
+
+  /** 全屏叠一层极轻噪点（压渐变 banding） */
+  function drawGrain() {
+    if (!grain) return;
+    ctx.globalAlpha = 0.62;
+    ctx.fillStyle = grain;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+  }
+
+  /* ---------- 主循环 ---------- */
+
+  var t0 = 0;
+
+  /** rAF 主循环：按方案重绘，随后（若指标开启）采样测对比度 */
+  function frame(now) {
+    if (!t0) t0 = now;
+    var t = reduceMotion ? 3.2 : (now - t0) / 1000;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+
+    if (stage.dataset.v === 'b') drawB(t);
+    else if (stage.dataset.v === 'c') drawC(t);
+    else drawA(t);
+
+    drawGrain();
+
+    if (metricsOn && now - lastMetricsAt > 400) {
+      lastMetricsAt = now;
+      updateMetrics();
+    }
+    requestAnimationFrame(frame);
+  }
+
+  /* ---------- 实测指标（D 键） ---------- */
+
+  /** 取画布在某 CSS 坐标处的颜色（用于真实背景对比度） */
+  function sampleBg(x, y) {
+    var px = Math.round(x * (cv.width / Math.max(1, stage.clientWidth)));
+    var py = Math.round(y * (cv.height / Math.max(1, stage.clientHeight)));
+    try {
+      var d = ctx.getImageData(px, py, 1, 1).data;
+      return [d[0], d[1], d[2]];
+    } catch (e) {
+      return [6, 10, 18];
+    }
+  }
+
+  /** 一行的 HTML */
+  function mrow(k, v, cls) {
+    return '<div class="row"><span>' + k + '</span><b class="' + (cls || '') + '">' + v + '</b></div>';
+  }
+
+  /** 汇总一屏是否装下、三层字号、标题面积、各层对比度 */
+  function updateMetrics() {
+    var ih = window.innerHeight, iw = window.innerWidth;
+    var sh = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+    var one = sh <= ih;
+
+    var tr = wordmark.getBoundingClientRect();
+    var titlePx = parseFloat(getComputedStyle(wordmark).fontSize);
+    var areaPct = (tr.width * tr.height) / (iw * ih) * 100;
+
+    var pLabel = btnStart.querySelector('.label');
+    var l2 = parseFloat(getComputedStyle(pLabel).fontSize);
+    var l3tag = parseFloat(getComputedStyle(taglineEl).fontSize);
+    var l3k = parseFloat(getComputedStyle(kickerEl).fontSize);
+    var l3s = parseFloat(getComputedStyle(signEl).fontSize);
+
+    var titleBg = sampleBg(tr.left + tr.width * 0.5, tr.top + tr.height * 0.5);
+    var tagBg = sampleBg(taglineEl.getBoundingClientRect().left + 30, taglineEl.getBoundingClientRect().top + 6);
+    var kickBg = sampleBg(kickerEl.getBoundingClientRect().left + 30, kickerEl.getBoundingClientRect().top + 6);
+    var signBg = sampleBg(signEl.getBoundingClientRect().left + 30, signEl.getBoundingClientRect().top + 6);
+
+    var cTitle = contrastRatio(hexToRgb('#ffd166'), titleBg);
+    var cTag = contrastRatio(hexToRgb('#c3d7ef'), tagBg);
+    var cKick = contrastRatio(hexToRgb('#3ee6ff'), kickBg);
+    var cSign = contrastRatio(hexToRgb('#8ea6c2'), signBg);
+    var cBtn = contrastRatio(hexToRgb('#1a1203'), hexToRgb('#ffc247'));
+
+    var html = '';
+    html += '<div class="mh">实测 · 方案 ' + stage.dataset.v.toUpperCase() + '</div>';
+    html += mrow('视口', iw + '×' + ih);
+    html += mrow('scrollHeight / innerHeight', sh + ' / ' + ih, one ? 'ok' : 'ng');
+    html += mrow('一屏成立', one ? 'PASS 零滚动' : 'FAIL 需滚动', one ? 'ok' : 'ng');
+    html += mrow('L1 字标', titlePx.toFixed(1) + 'px · ' + Math.round(tr.width) + '×' + Math.round(tr.height) + ' · 占比 ' + areaPct.toFixed(2) + '%');
+    html += mrow('L1 对比', cTitle.toFixed(2) + ':1');
+    html += mrow('L2 主行动', l2.toFixed(0) + 'px · ' + cBtn.toFixed(2) + ':1');
+    html += mrow('L3 短句 / 眉标 / 署名', l3tag.toFixed(0) + ' / ' + l3k.toFixed(0) + ' / ' + l3s.toFixed(0) + 'px');
+    html += mrow('L3 对比', cTag.toFixed(2) + ' / ' + cKick.toFixed(2) + ' / ' + cSign.toFixed(2) + ':1');
+    metricsEl.innerHTML = html;
+  }
+
+  /* ---------- 交互 ---------- */
+
+  /** 切换方案（a / b / c），重排后重新量锚点 */
+  function setScheme(v) {
+    if (v !== 'a' && v !== 'b' && v !== 'c') v = 'a';
+    stage.dataset.v = v;
+    requestAnimationFrame(function () {
+      measureAnchors();
+      if (metricsOn) updateMetrics();
+    });
+  }
+
+  /** 打开 / 关闭"更多设置"抽屉 */
+  function toggleDrawer(open) {
+    var on = (typeof open === 'boolean') ? open : !document.body.classList.contains('drawer-open');
+    document.body.classList.toggle('drawer-open', on);
+    document.getElementById('drawer').setAttribute('aria-hidden', on ? 'false' : 'true');
+  }
+
+  /** 显示 / 隐藏指标面板 */
+  function toggleMetrics() {
+    metricsOn = !metricsOn;
+    metricsEl.hidden = !metricsOn;
+    if (metricsOn) updateMetrics();
+  }
+
+  var params = new URLSearchParams(window.location.search);
+  setScheme((params.get('v') || 'a').toLowerCase());
+  if (params.get('drawer') === '1') toggleDrawer(true);
+
+  document.getElementById('drawerClose').addEventListener('click', function () { toggleDrawer(false); });
+  document.getElementById('scrim').addEventListener('click', function () { toggleDrawer(false); });
+
+  // 抽屉里的假交互：分段 / 数字条 / 图标开关，仅演示形状语言
+  document.querySelectorAll('.seg button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      b.parentNode.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      b.setAttribute('aria-pressed', 'true');
+    });
+  });
+  document.querySelectorAll('.numstrip button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      b.parentNode.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', 'false'); });
+      b.setAttribute('aria-pressed', 'true');
+    });
+  });
+  document.querySelectorAll('.itoggle').forEach(function (b) {
+    b.addEventListener('click', function () {
+      b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true');
+    });
+  });
+
+  // 键盘：1/2/3 切换方案，M 抽屉，D 指标
+  window.addEventListener('keydown', function (ev) {
+    if (ev.key === '1') setScheme('a');
+    else if (ev.key === '2') setScheme('b');
+    else if (ev.key === '3') setScheme('c');
+    else if (ev.key === 'm' || ev.key === 'M') toggleDrawer();
+    else if (ev.key === 'd' || ev.key === 'D') toggleMetrics();
+    else if (ev.key === 'Escape') toggleDrawer(false);
+  });
+
+  // 操作提示：5 秒后淡出，动鼠标再回来
+  var hintTimer = setTimeout(function () { hintEl.classList.add('fade'); }, 5000);
+  stage.addEventListener('mousemove', function () {
+    hintEl.classList.remove('fade');
+    clearTimeout(hintTimer);
+    hintTimer = setTimeout(function () { hintEl.classList.add('fade'); }, 4000);
+  });
+
+  window.addEventListener('resize', function () {
+    sizeCanvas();
+    if (metricsOn) updateMetrics();
+  });
+
+  // 字体就绪后再量一次锚点，避免中文字重排后符印对不准
+  if (document.fonts && document.fonts.ready) {
+    document.fonts.ready.then(function () { measureAnchors(); });
+  }
+
+  sizeCanvas();
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

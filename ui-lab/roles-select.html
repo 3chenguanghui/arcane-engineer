@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>烬 · 开场角色选择（原型）</title>
+<style>
+/* ============================================================
+   设计令牌：全部沿用主文件现有体系（深蓝面板 / 科技青 / 魔法紫 / 金·红）
+   字号只用 5 档 + 展示层；中文一律 ≥ 12px。
+   ============================================================ */
+:root{
+  --bg:#070b14;
+  --surface-1:#0d1424;
+  --surface-2:#131e33;
+  --panel:#121d31;
+  --line:rgba(126,164,214,.24);
+  --line-strong:rgba(120,190,255,.46);
+  --text-1:#eaf5ff;
+  --text-3:#a8bfdc;
+  --tech:#3ee6ff;
+  --magic:#b085ff;
+  --gold:#ffc247;
+  --good:#47e8a7;
+  --bad:#ff6b7f;
+  --ease:cubic-bezier(.2,.9,.25,1);
+  --mono:"Cascadia Mono","Consolas","Courier New",monospace;
+  --sans:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+  /* 六档字号 */
+  --fs-display:72px;
+  --fs-24:24px;
+  --fs-18:18px;
+  --fs-14:14px;
+  --fs-12:12px;
+  --fs-11:11px;
+  --r-sm:4px; --r-md:8px; --r-lg:12px;
+}
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(900px 520px at 50% -10%, rgba(62,230,255,.10), transparent 62%),
+    radial-gradient(760px 460px at 88% 22%, rgba(176,133,255,.09), transparent 64%),
+    linear-gradient(180deg,#050810,#070d18 42%,#05080f);
+  color:var(--text-1);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:18px;
+  padding:26px 16px 60px;
+}
+
+/* ============ 游戏屏幕外框（模拟嵌在标题页里的观感） ============ */
+.screen{
+  position:relative;
+  width:min(1180px,96vw);
+  aspect-ratio:1180/700;
+  border-radius:16px;
+  border:1px solid var(--line);
+  overflow:hidden;
+  background:
+    radial-gradient(680px 420px at 50% 18%, rgba(62,230,255,.10), transparent 66%),
+    radial-gradient(520px 380px at 82% 72%, rgba(176,133,255,.10), transparent 68%),
+    linear-gradient(180deg,#0a1120,#070c16 58%,#05080f);
+  box-shadow:0 28px 80px rgba(0,0,0,.62), inset 0 0 0 1px rgba(255,255,255,.02);
+}
+/* 屏幕内的星点（纯几何，不用图片） */
+.screen::before{
+  content:"";
+  position:absolute; inset:0;
+  background-image:
+    radial-gradient(1.5px 1.5px at 12% 18%, rgba(234,245,255,.42), transparent 60%),
+    radial-gradient(1.5px 1.5px at 26% 32%, rgba(234,245,255,.24), transparent 60%),
+    radial-gradient(1.5px 1.5px at 71% 16%, rgba(234,245,255,.30), transparent 60%),
+    radial-gradient(1.5px 1.5px at 84% 40%, rgba(234,245,255,.20), transparent 60%),
+    radial-gradient(1.5px 1.5px at 63% 76%, rgba(234,245,255,.22), transparent 60%),
+    radial-gradient(1.5px 1.5px at 33% 84%, rgba(234,245,255,.18), transparent 60%);
+  pointer-events:none;
+}
+/* 底部法阵（三层同心弧，缓慢旋转） */
+.screen::after{
+  content:"";
+  position:absolute; left:50%; bottom:-210px;
+  width:620px; height:620px; margin-left:-310px;
+  border-radius:50%;
+  border:1px solid rgba(62,230,255,.16);
+  box-shadow:0 0 0 22px rgba(62,230,255,.03), 0 0 0 96px rgba(176,133,255,.026);
+  pointer-events:none;
+  animation:spin 38s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ============ 标题页层 ============ */
+.title-layer{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  text-align:center;
+  transition:filter .35s var(--ease), opacity .35s var(--ease), transform .35s var(--ease);
+}
+.title-layer::before{ /* 标题页被选择页压暗时，仍能看见轮廓 */
+  content:"";
+  position:absolute; inset:0;
+  background:radial-gradient(560px 320px at 50% 44%, rgba(62,230,255,.10), transparent 70%);
+  pointer-events:none;
+}
+.title-inner{position:relative; display:flex; flex-direction:column; align-items:center; gap:6px;}
+.kicker{
+  margin:0 0 10px;
+  font-family:var(--mono);
+  font-size:var(--fs-12);
+  letter-spacing:.28em;
+  color:var(--text-3);
+  text-transform:uppercase;
+}
+.logo{
+  margin:0;
+  font-size:clamp(40px,9vw,var(--fs-display));
+  font-weight:800;
+  letter-spacing:.10em;
+  color:#fff;
+  text-shadow:0 0 26px rgba(62,230,255,.42), 0 0 64px rgba(176,133,255,.26);
+  line-height:1;
+}
+.logo-en{
+  margin:6px 0 0;
+  font-family:var(--mono);
+  font-size:var(--fs-12);
+  letter-spacing:.62em;
+  color:var(--tech);
+  opacity:.82;
+}
+.tagline{
+  margin:16px 0 22px;
+  font-size:var(--fs-14);
+  color:var(--text-3);
+  letter-spacing:.06em;
+}
+.btn-start{
+  padding:11px 30px;
+  font-family:var(--sans);
+  font-size:var(--fs-14);
+  letter-spacing:.16em;
+  color:#06121d;
+  border:0; border-radius:var(--r-md);
+  background:linear-gradient(180deg,#7ff2ff,#3ee6ff);
+  box-shadow:0 0 22px rgba(62,230,255,.34);
+  cursor:pointer;
+  transition:transform 120ms var(--ease), box-shadow 120ms var(--ease);
+}
+.btn-start:hover{transform:translateY(-2px); box-shadow:0 0 30px rgba(62,230,255,.5);}
+/* 署名：位置与级差保持原样，不因选择页出现而移动 */
+.title-foot{
+  position:absolute; left:0; right:0; bottom:16px;
+  display:flex; justify-content:center;
+}
+.author{
+  margin:0;
+  font-family:var(--mono);
+  font-size:var(--fs-12);
+  letter-spacing:.22em;
+  color:rgba(168,191,220,.66);
+}
+
+/* ============ 角色选择层（覆盖在标题页之上） ============ */
+.role-layer{
+  position:absolute; inset:0;
+  display:flex; align-items:center; justify-content:center;
+  padding:22px;
+  background:linear-gradient(180deg, rgba(4,8,15,.60), rgba(3,6,12,.80));
+  transition:opacity .3s var(--ease), visibility .3s var(--ease);
+}
+.role-layer.hidden{opacity:0; visibility:hidden; pointer-events:none;}
+/* 选择页打开时，标题页整体降亮并轻微后缩，保证“看得出它嵌在标题页上” */
+.screen.show-role .title-layer{filter:brightness(.55) blur(1px); transform:scale(.985);}
+
+.sheet{
+  width:min(1020px,100%);
+  max-height:100%;
+  display:flex; flex-direction:column; gap:14px;
+  padding:18px 20px 16px;
+  border-radius:var(--r-lg);
+  border:1px solid rgba(255,194,71,.26);
+  background:linear-gradient(180deg, rgba(19,30,51,.98), rgba(9,14,25,.99));
+  box-shadow:0 26px 70px rgba(0,0,0,.66), 0 0 0 1px rgba(62,230,255,.05) inset;
+  animation:sheetIn .34s var(--ease) both;
+}
+@keyframes sheetIn{from{opacity:0; transform:translateY(10px) scale(.99);} to{opacity:1; transform:none;}}
+
+.sheet-head{
+  display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;
+}
+.sheet-head h2{
+  margin:0;
+  font-size:var(--fs-24);
+  letter-spacing:.10em;
+  color:#ffe6ae;
+}
+.sheet-hint{
+  margin:0;
+  font-size:var(--fs-12);
+  color:var(--text-3);
+  letter-spacing:.04em;
+}
+kbd{
+  display:inline-block;
+  min-width:18px;
+  margin:0 2px;
+  padding:1px 5px;
+  font-family:var(--mono);
+  font-size:var(--fs-11);
+  color:var(--text-1);
+  text-align:center;
+  border:1px solid var(--line-strong);
+  border-radius:var(--r-sm);
+  background:rgba(13,20,36,.9);
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+
+/* ---- 角色卡 ---- */
+.card{
+  --tone:var(--tech);
+  position:relative;
+  display:flex; flex-direction:column; gap:9px;
+  padding:16px 15px 14px;
+  text-align:left;
+  color:var(--text-1);
+  font-family:var(--sans);
+  border-radius:var(--r-md);
+  border:1px solid var(--line);
+  background:linear-gradient(180deg, rgba(19,30,51,.92), rgba(11,17,30,.95));
+  cursor:pointer;
+  transition:transform 120ms var(--ease), border-color 120ms var(--ease),
+             box-shadow 120ms var(--ease), background 120ms var(--ease);
+}
+.card:hover{
+  transform:translateY(-3px);
+  border-color:color-mix(in srgb, var(--tone) 62%, transparent);
+  box-shadow:0 12px 28px rgba(0,0,0,.46), 0 0 22px color-mix(in srgb, var(--tone) 26%, transparent);
+}
+.card:hover .sigil{filter:drop-shadow(0 0 12px var(--tone));}
+.card.is-on{
+  border-color:var(--gold);
+  box-shadow:0 0 0 1px rgba(255,194,71,.22), 0 14px 34px rgba(0,0,0,.5), 0 0 30px rgba(255,194,71,.20);
+}
+.card.is-on::before{
+  content:"";
+  position:absolute; left:12px; right:12px; top:-1px; height:2px;
+  border-radius:2px;
+  background:linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+.key{
+  position:absolute; right:10px; top:10px;
+  width:18px; height:18px;
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--mono); font-size:var(--fs-11); color:var(--text-3);
+  border:1px solid var(--line); border-radius:var(--r-sm);
+}
+.card.is-on .key{color:#0b1220; background:var(--gold); border-color:var(--gold);}
+.check{
+  position:absolute; right:10px; top:36px;
+  width:18px; height:18px;
+  display:none; align-items:center; justify-content:center;
+  font-size:var(--fs-12); color:#0b1220;
+  background:var(--gold); border-radius:50%;
+}
+.card.is-on .check{display:flex;}
+.card:focus-visible{
+  outline:2px solid var(--line-strong);
+  outline-offset:2px;
+}
+
+.sigil{display:block; width:56px; height:56px; color:var(--tone); filter:drop-shadow(0 0 7px color-mix(in srgb, var(--tone) 45%, transparent)); transition:filter 120ms var(--ease);}
+.sigil svg{width:100%; height:100%;}
+
+.card-head{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap;}
+.card-head h3{
+  margin:0;
+  font-size:var(--fs-18);
+  letter-spacing:.10em;
+  color:var(--text-1);
+}
+.badge{
+  font-size:var(--fs-12);
+  color:color-mix(in srgb, var(--tone) 78%, var(--text-3));
+  letter-spacing:.04em;
+}
+.oneliner{
+  margin:0;
+  font-size:var(--fs-12);
+  line-height:1.55;
+  color:var(--text-3);
+  min-height:37px;
+}
+
+.stats{display:flex; flex-direction:column; gap:6px;}
+.stat{display:flex; align-items:center; gap:8px;}
+.stat .k{width:16px; font-family:var(--mono); font-size:var(--fs-11); color:var(--text-3);}
+.stat .v{width:30px; font-family:var(--mono); font-size:var(--fs-14); color:var(--text-1); text-align:right;}
+.bar{position:relative; flex:1; height:6px; border-radius:3px; background:rgba(255,255,255,.06); overflow:hidden;}
+.bar b{
+  position:absolute; left:0; top:0; bottom:0;
+  border-radius:3px;
+  background:linear-gradient(90deg, color-mix(in srgb, var(--tone) 55%, transparent), var(--tone));
+  box-shadow:0 0 10px color-mix(in srgb, var(--tone) 45%, transparent);
+}
+.role-row{display:flex; gap:8px;}
+.role-row .bar{opacity:.92;}
+
+.line{display:flex; flex-direction:column; gap:4px;}
+.line .label{
+  font-size:var(--fs-12);
+  color:rgba(168,191,220,.72);
+  letter-spacing:.06em;
+}
+.chips{display:flex; gap:6px; flex-wrap:wrap;}
+.chip{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:3px 8px;
+  font-size:var(--fs-12);
+  color:var(--text-1);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+  background:rgba(13,20,36,.7);
+}
+.chip svg{width:13px; height:13px; color:var(--tone); flex:none;}
+.line p{
+  margin:0;
+  font-size:var(--fs-12);
+  line-height:1.5;
+  color:var(--text-3);
+}
+
+/* ---- 底部确认条 ---- */
+.sheet-foot{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding-top:10px;
+  border-top:1px solid var(--line);
+  flex-wrap:wrap;
+}
+.confirm-text{
+  margin:0;
+  font-size:var(--fs-12);
+  color:var(--text-3);
+  letter-spacing:.04em;
+}
+.confirm-text b{color:var(--gold);}
+.btn-confirm{
+  padding:9px 22px;
+  font-family:var(--sans);
+  font-size:var(--fs-14);
+  letter-spacing:.10em;
+  color:#1a1200;
+  border:0; border-radius:var(--r-md);
+  background:linear-gradient(180deg,#ffd97a,#ffc247);
+  box-shadow:0 0 20px rgba(255,194,71,.28);
+  cursor:pointer;
+  transition:transform 120ms var(--ease), box-shadow 120ms var(--ease), opacity 120ms var(--ease);
+}
+.btn-confirm:hover{transform:translateY(-2px); box-shadow:0 0 28px rgba(255,194,71,.46);}
+.btn-confirm.done{
+  background:linear-gradient(180deg,#8ff0c4,#47e8a7);
+  box-shadow:0 0 24px rgba(71,232,167,.34);
+}
+
+/* ---- 原型用的视图切换 ---- */
+.view-switch{
+  position:absolute; right:14px; top:12px;
+  display:flex; gap:6px;
+  z-index:5;
+}
+.view-switch button{
+  padding:5px 11px;
+  font-family:var(--sans);
+  font-size:var(--fs-12);
+  color:var(--text-3);
+  border:1px solid var(--line);
+  border-radius:var(--r-sm);
+  background:rgba(7,11,20,.72);
+  cursor:pointer;
+  transition:color 120ms var(--ease), border-color 120ms var(--ease);
+}
+.view-switch button.on{color:var(--text-1); border-color:var(--line-strong); background:rgba(19,30,51,.9);}
+
+/* ============ bot 实测面板 ============ */
+.bot-panel{
+  width:min(1180px,96vw);
+  border:1px solid var(--line);
+  border-radius:var(--r-lg);
+  background:linear-gradient(180deg, rgba(13,20,36,.9), rgba(9,14,25,.94));
+  overflow:hidden;
+}
+.bot-panel summary{
+  padding:12px 16px;
+  font-size:var(--fs-14);
+  color:var(--text-1);
+  letter-spacing:.04em;
+  cursor:pointer;
+  list-style:none;
+}
+.bot-panel summary::-webkit-details-marker{display:none;}
+.bot-panel summary::before{content:"▸ "; color:var(--tech); font-family:var(--mono);}
+.bot-panel[open] summary::before{content:"▾ ";}
+.bot-body{padding:0 16px 16px; display:flex; flex-direction:column; gap:10px;}
+.bot-note{
+  margin:0;
+  font-size:var(--fs-12);
+  line-height:1.6;
+  color:var(--text-3);
+}
+.bot-note code{
+  font-family:var(--mono);
+  font-size:var(--fs-11);
+  color:var(--tech);
+  background:rgba(62,230,255,.08);
+  padding:1px 5px; border-radius:var(--r-sm);
+}
+table.bot{
+  width:100%;
+  border-collapse:collapse;
+  font-size:var(--fs-12);
+}
+table.bot th, table.bot td{
+  padding:8px 10px;
+  text-align:left;
+  border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+table.bot th{
+  font-size:var(--fs-12);
+  letter-spacing:.02em;
+  color:rgba(168,191,220,.78);
+  font-weight:400;
+}
+table.bot td.num{font-family:var(--mono); font-size:var(--fs-14); color:var(--text-1);}
+table.bot td small{font-family:var(--mono); font-size:var(--fs-11); color:var(--text-3);}
+table.bot tr.base td{color:var(--text-3);}
+.bot-verdict{
+  margin:0;
+  font-size:var(--fs-12);
+  color:var(--text-3);
+  line-height:1.6;
+}
+.bot-verdict b{color:var(--good);}
+
+/* ============ 响应式：三列 → 单列 ============ */
+@media (max-width:1100px){
+  .screen{aspect-ratio:auto; height:auto; min-height:0;}
+  .title-layer{position:relative; inset:auto; min-height:560px;}
+  .screen.show-role .title-layer{display:none;}
+  .role-layer{position:relative; inset:auto; padding:14px;}
+  .sheet{max-height:none; overflow:visible;}
+  .grid{grid-template-columns:1fr;}
+  .card{flex-direction:row; flex-wrap:wrap; align-items:center; gap:12px 16px;}
+  .card .oneliner{flex:1 1 100%; min-height:0;}
+  .stats{flex:1 1 220px;}
+  .line{flex:1 1 100%;}
+}
+@media (max-width:620px){
+  .card{flex-direction:column; align-items:flex-start;}
+  .role-layer{padding:12px;}
+  .sheet{padding:14px 14px 12px;}
+}
+@media (prefers-reduced-motion:reduce){
+  .card, .sheet, .title-layer, .btn-start, .btn-confirm{transition:none; animation:none;}
+  .screen::after{animation:none;}
+  .card:hover{transform:none;}
+}
+</style>
+</head>
+<body>
+
+<div class="screen show-role" id="screen">
+
+  <!-- ========== 标题页（原样保留：署名不移动） ========== -->
+  <section class="title-layer" id="titleLayer">
+    <div class="title-inner">
+      <p class="kicker">EMBERFALL · v1.7.0</p>
+      <h1 class="logo">烬</h1>
+      <p class="logo-en">EMBERFALL</p>
+      <p class="tagline">在熄灭之前，把最后一点火递下去。</p>
+      <button class="btn-start" type="button">开始探索</button>
+    </div>
+    <div class="title-foot">
+      <p class="author">陈光辉 制作</p>
+    </div>
+  </section>
+
+  <!-- ========== 角色选择层 ========== -->
+  <section class="role-layer" id="roleLayer" aria-label="选择角色">
+    <div class="sheet">
+      <div class="sheet-head">
+        <h2>选择角色</h2>
+        <p class="sheet-hint">开局种子 · 三选一 · 按 <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 高亮 · <kbd>Enter</kbd> 确认</p>
+      </div>
+
+      <div class="grid" id="grid" role="radiogroup" aria-label="三个角色"></div>
+
+      <div class="sheet-foot">
+        <p class="confirm-text" id="confirmText">未选择 · 按 1 / 2 / 3 高亮，Enter 确认</p>
+        <button class="btn-confirm" type="button" id="btnConfirm">确认并开始</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 原型专用：在标题页与选择页之间切换，检查嵌入观感 -->
+  <div class="view-switch" id="viewSwitch">
+    <button type="button" data-view="title">标题页</button>
+    <button type="button" data-view="role" class="on">选择页</button>
+  </div>
+</div>
+
+<!-- ========== bot 实测数据（引擎模拟器跑出来的，不是页面内自造模型） ========== -->
+<section class="bot-panel">
+  <details open>
+    <summary>自动 bot 实测 · 引擎模拟器 · 每角色 400 局</summary>
+    <div class="bot-body">
+      <p class="bot-note">
+        跑法：<code>node tools\role_probe.js --runs 400</code>（复用 <code>tools/sim_panel/sim.js</code>，
+        普通难度、机器人档案、0 天赋、20 层上限；同种子两次结果完全一致）。
+        角色差异通过模拟器自带的 <code>charSpec</code> 探针注入，模拟器本体一行未改。
+      </p>
+
+      <table class="bot">
+        <thead>
+          <tr>
+            <th>角色</th><th>样本</th><th>F1–3 存活率</th><th>F1–3 平均耗时</th><th>平均死亡层</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>守拙</td><td class="num">400</td>
+            <td class="num">66.8% <small>267/400</small></td>
+            <td class="num">379.8s <small>n=267</small></td>
+            <td class="num">5.72 <small>251 例死亡</small></td>
+          </tr>
+          <tr>
+            <td>疾火</td><td class="num">400</td>
+            <td class="num">68.8% <small>275/400</small></td>
+            <td class="num">275.0s <small>n=275</small></td>
+            <td class="num">4.88 <small>328 例死亡</small></td>
+          </tr>
+          <tr>
+            <td>观星</td><td class="num">400</td>
+            <td class="num">69.8% <small>279/400</small></td>
+            <td class="num">295.7s <small>n=279</small></td>
+            <td class="num">4.47 <small>251 例死亡</small></td>
+          </tr>
+          <tr class="base">
+            <td>无角色（基线）</td><td class="num">400</td>
+            <td class="num">64.5% <small>258/400</small></td>
+            <td class="num">308.8s <small>n=258</small></td>
+            <td class="num">4.63 <small>280 例死亡</small></td>
+          </tr>
+        </tbody>
+      </table>
+
+      <p class="bot-verdict">
+        三角色 F1–3 存活率 <b>66.8% / 68.8% / 69.8%</b>，极差 <b>3.0 个百分点</b>（门槛 8pp 以内），
+        且三值互不相等 —— 不是坑，也不是假选择。
+        守拙活得最久（平均死亡层 5.72）但清得最慢（379.8s）；疾火最快（275.0s）却更容易在 4.88 层倒下；
+        观星居中偏稳。
+      </p>
+
+      <p class="bot-note">
+        未建模项：起始奥能上限、移速、冷却（模拟器只结算生命 / 技能组 / 回蓝 / 奖励偏好）。
+        这三项在参数表里仍有值，只是不进入本轮 bot 统计。
+      </p>
+    </div>
+  </details>
+</section>
+
+<script>
+/* ============================================================
+   角色数据：五个旋钮（生命 / 奥能 / 技能组 / 被动 / 成长偏向）
+   数值来自 tools/role_probe.js 的最终标定结果，界面与探针同源。
+   ============================================================ */
+const ROLES = [
+  {
+    id: 'warden',
+    name: '守拙',
+    badge: '硬碰 · 近身爆裂',
+    tone: 'var(--tech)',
+    oneliner: '血最厚、蓝最薄、走得最慢；贴上去，把一整圈一起烧掉。',
+    hp: 132, hpMaxRef: 140,
+    ae: 76, aeMaxRef: 140,
+    skills: ['flameCone', 'fireball'],
+    passive: '奥能回复 +2/s · 移速 ×0.90（重）',
+    growth: '奖励偏生存：输出 45 / 生存 55',
+    note: '最爽：贴脸同时炸开焰锥 + 火球，一圈小怪一起碎。弱点：蓝薄、腿短，被远程拉扯。'
+  },
+  {
+    id: 'ember',
+    name: '疾火',
+    badge: '精准 · 远程点杀',
+    tone: 'var(--gold)',
+    oneliner: '血最薄、蓝最厚；单发点杀，来回光轮把远程怪一层层剥掉。',
+    hp: 96, hpMaxRef: 140,
+    ae: 130, aeMaxRef: 140,
+    skills: ['fireball', 'blade'],
+    passive: '奥能回复 +4/s · 移速 ×1.06（快）',
+    growth: '奖励偏输出：输出 85 / 生存 15',
+    note: '最爽：一发火球接回旋光轮，两只排队的怪同时清掉。弱点：96 生命，一次贴身就掉 7%。'
+  },
+  {
+    id: 'gazer',
+    name: '观星',
+    badge: '均衡 · 资源循环',
+    tone: 'var(--magic)',
+    oneliner: '不靠血也不靠爆发，靠回蓝把每一发都续上。',
+    hp: 96, hpMaxRef: 140,
+    ae: 112, aeMaxRef: 140,
+    skills: ['fireball', 'frost'],
+    passive: '奥能回复 +2/s · 移速 ×1.02（匀）',
+    growth: '奖励均衡：输出 55 / 生存 45',
+    note: '最爽：蓝条见底时下一发已经转好，冰环把追兵按住。弱点：单发爆发最低，清大群靠拖。'
+  }
+];
+
+/* 技能 id → 显示名（与主文件 MAGIC_CONFIG 一致） */
+const SKILL_NAMES = {
+  fireball: '火球',
+  frost: '冰环',
+  frostRing: '冰霜环',
+  flameCone: '焰锥',
+  blade: '光轮'
+};
+
+/* ---------- 纯几何符印：不使用任何图片资源 ---------- */
+
+/**
+ * 生成角色符印 SVG。
+ * @param {string} id 角色 id
+ * @returns {string} SVG 字符串
+ */
+function sigilSvg(id) {
+  if (id === 'warden') {
+    // 守拙：六边形护壳 + 内环 + 四段短弧
+    return '<svg viewBox="0 0 64 64" aria-hidden="true">'
+      + '<polygon points="32,4 56,18 56,46 32,60 8,46 8,18" fill="none" stroke="currentColor" stroke-width="1.7" opacity=".85"/>'
+      + '<circle cx="32" cy="32" r="13" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/>'
+      + '<path d="M15 22 A19 19 0 0 1 22 14" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".9"/>'
+      + '<path d="M49 22 A19 19 0 0 0 42 14" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".9"/>'
+      + '<path d="M15 42 A19 19 0 0 0 22 50" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".9"/>'
+      + '<path d="M49 42 A19 19 0 0 1 42 50" fill="none" stroke="currentColor" stroke-width="2.2" opacity=".9"/>'
+      + '<circle cx="32" cy="32" r="3" fill="currentColor" opacity=".9"/>'
+      + '</svg>';
+  }
+  if (id === 'ember') {
+    // 疾火：上下对置的尖弧构成矛尖 + 中心点 + 四向短线
+    return '<svg viewBox="0 0 64 64" aria-hidden="true">'
+      + '<path d="M32 6 L41 28 L32 23 L23 28 Z" fill="currentColor" opacity=".85"/>'
+      + '<path d="M32 58 L24 38 L32 42 L40 38 Z" fill="currentColor" opacity=".38"/>'
+      + '<circle cx="32" cy="32" r="3.4" fill="currentColor"/>'
+      + '<line x1="32" y1="10" x2="32" y2="4" stroke="currentColor" stroke-width="1.4" opacity=".6"/>'
+      + '<line x1="58" y1="32" x2="52" y2="32" stroke="currentColor" stroke-width="1.4" opacity=".6"/>'
+      + '<line x1="12" y1="32" x2="6" y2="32" stroke="currentColor" stroke-width="1.4" opacity=".6"/>'
+      + '<line x1="32" y1="54" x2="32" y2="60" stroke="currentColor" stroke-width="1.4" opacity=".6"/>'
+      + '</svg>';
+  }
+  // 观星：双环反向 + 三个节点 + 连接弧
+  return '<svg viewBox="0 0 64 64" aria-hidden="true">'
+    + '<circle cx="32" cy="32" r="21" fill="none" stroke="currentColor" stroke-width="1.7" opacity=".9"/>'
+    + '<circle cx="32" cy="32" r="12" fill="none" stroke="currentColor" stroke-width="1.2" opacity=".55"/>'
+    + '<path d="M32 11 A21 21 0 0 1 50 43" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".85"/>'
+    + '<path d="M32 53 A21 21 0 0 1 14 21" fill="none" stroke="currentColor" stroke-width="2.4" opacity=".85"/>'
+    + '<circle cx="32" cy="11" r="3.2" fill="currentColor"/>'
+    + '<circle cx="50" cy="43" r="3.2" fill="currentColor"/>'
+    + '<circle cx="14" cy="21" r="3.2" fill="currentColor"/>'
+    + '</svg>';
+}
+
+/**
+ * 生成技能小图标（同样是纯几何）。
+ * @param {string} id 技能 id
+ * @returns {string} SVG 字符串
+ */
+function skillSvg(id) {
+  if (id === 'fireball') {
+    return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 2 L13 13 L8 10.5 L3 13 Z" fill="currentColor" opacity=".9"/></svg>';
+  }
+  if (id === 'frost' || id === 'frostRing') {
+    return '<svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="1.6" fill="currentColor"/></svg>';
+  }
+  if (id === 'flameCone') {
+    return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 13 L2 4 L14 4 Z" fill="currentColor" opacity=".28"/><path d="M8 13 L8 4" stroke="currentColor" stroke-width="1.4"/></svg>';
+  }
+  // blade：回旋光轮
+  return '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8 A5 5 0 1 0 8 13" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="8" cy="8" r="1.4" fill="currentColor"/></svg>';
+}
+
+/* ---------- 渲染与交互 ---------- */
+
+let selected = 0;        // 当前高亮序号
+let confirmed = false;   // 是否已确认
+
+/**
+ * 渲染三张角色卡（数据驱动，不写死 HTML）。
+ */
+function renderCards() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+  ROLES.forEach((role, index) => {
+    const card = document.createElement('div');
+    card.className = 'card' + (index === selected ? ' is-on' : '');
+    card.dataset.index = String(index);
+    card.tabIndex = 0;
+    card.style.setProperty('--tone', role.tone);
+    card.setAttribute('role', 'radio');
+    card.setAttribute('aria-checked', index === selected ? 'true' : 'false');
+    card.setAttribute('aria-label', role.name + ' · ' + role.badge);
+    card.innerHTML =
+      '<span class="key">' + (index + 1) + '</span>'
+      + '<span class="check" aria-hidden="true">✓</span>'
+      + '<span class="sigil">' + sigilSvg(role.id) + '</span>'
+      + '<div class="card-head"><h3>' + role.name + '</h3><span class="badge">' + role.badge + '</span></div>'
+      + '<p class="oneliner">' + role.oneliner + '</p>'
+      + '<div class="stats">'
+      +   '<div class="stat"><span class="k">HP</span><span class="v">' + role.hp + '</span><i class="bar"><b style="width:' + Math.round(role.hp / role.hpMaxRef * 100) + '%"></b></i></div>'
+      +   '<div class="stat"><span class="k">AE</span><span class="v">' + role.ae + '</span><i class="bar"><b style="width:' + Math.round(role.ae / role.aeMaxRef * 100) + '%"></b></i></div>'
+      + '</div>'
+      + '<div class="line"><span class="label">技能组</span><div class="chips">'
+      +   role.skills.map((s) => '<span class="chip">' + skillSvg(s) + SKILL_NAMES[s] + '</span>').join('')
+      + '</div></div>'
+      + '<div class="line"><span class="label">被动</span><p>' + role.passive + '</p></div>'
+      + '<div class="line"><span class="label">成长偏向</span><p>' + role.growth + '</p></div>';
+    card.addEventListener('click', () => selectIndex(index));
+    card.addEventListener('dblclick', () => { selectIndex(index); confirmRole(); });
+    grid.appendChild(card);
+  });
+}
+
+/**
+ * 切换高亮角色。
+ * @param {number} index 0~2
+ */
+function selectIndex(index) {
+  if (!Number.isInteger(index) || index < 0 || index >= ROLES.length) return;
+  selected = index;
+  if (confirmed) { confirmed = false; updateFoot(); }
+  renderCards();
+}
+
+/**
+ * 确认当前角色：原型不真开一局，只把底部状态改为“已选择”。
+ */
+function confirmRole() {
+  confirmed = true;
+  updateFoot();
+}
+
+/**
+ * 同步底部提示与按钮文案。
+ */
+function updateFoot() {
+  const text = document.getElementById('confirmText');
+  const btn = document.getElementById('btnConfirm');
+  const role = ROLES[selected];
+  if (confirmed) {
+    text.innerHTML = '已选择 · <b>' + role.name + '</b> —— 按 Enter 进入第 1 层';
+    btn.textContent = '进入第 1 层';
+    btn.classList.add('done');
+  } else {
+    text.textContent = '高亮 · ' + role.name + ' · 按 1 / 2 / 3 切换，Enter 确认';
+    btn.textContent = '确认并开始';
+    btn.classList.remove('done');
+  }
+}
+
+/**
+ * 在“标题页 / 选择页”之间切换，用来检查选择页嵌在标题页上的观感。
+ * @param {string} view 'title' | 'role'
+ */
+function setView(view) {
+  const screen = document.getElementById('screen');
+  const layer = document.getElementById('roleLayer');
+  const isRole = view === 'role';
+  screen.classList.toggle('show-role', isRole);
+  layer.classList.toggle('hidden', !isRole);
+  Array.prototype.forEach.call(document.querySelectorAll('#viewSwitch button'), (b) => {
+    b.classList.toggle('on', b.dataset.view === view);
+  });
+}
+
+/**
+ * 键盘：1/2/3 选择、方向键移动、Enter 确认。
+ * @param {KeyboardEvent} event
+ */
+function onKeyDown(event) {
+  const layer = document.getElementById('roleLayer');
+  if (layer.classList.contains('hidden')) return;   // 标题页视图下不接管按键
+  const key = event.key;
+  if (key === '1' || key === '2' || key === '3') {
+    selectIndex(Number(key) - 1);
+    event.preventDefault();
+    return;
+  }
+  if (key === 'ArrowRight' || key === 'ArrowDown') {
+    selectIndex((selected + 1) % ROLES.length);
+    event.preventDefault();
+    return;
+  }
+  if (key === 'ArrowLeft' || key === 'ArrowUp') {
+    selectIndex((selected + ROLES.length - 1) % ROLES.length);
+    event.preventDefault();
+    return;
+  }
+  if (key === 'Enter') {
+    confirmRole();
+    event.preventDefault();
+  }
+}
+
+/* 初始化 */
+renderCards();
+updateFoot();
+document.getElementById('btnConfirm').addEventListener('click', confirmRole);
+Array.prototype.forEach.call(document.querySelectorAll('#viewSwitch button'), (btn) => {
+  btn.addEventListener('click', () => setView(btn.dataset.view));
+});
+window.addEventListener('keydown', onKeyDown);
+</script>
+</body>
+</html>

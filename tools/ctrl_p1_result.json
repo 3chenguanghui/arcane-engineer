@@ -1,0 +1,211 @@
+{
+  "time": "2026-11-08T14:29:46.575Z",
+  "fileMd5Before": "6B4F1421E4FEB9FE627DBA9F760C8DA1",
+  "fileMd5After": "6B4F1421E4FEB9FE627DBA9F760C8DA1",
+  "asserts": [
+    {
+      "id": "V1",
+      "name": "页面加载：__errors 为空、canvas 宽高 >0",
+      "pass": true,
+      "detail": {
+        "errors": [],
+        "mirror": [],
+        "cw": 780,
+        "ch": 1688,
+        "ready": "complete"
+      }
+    },
+    {
+      "id": "V2",
+      "name": "触屏识别：body.touch-ui 且 pointer: coarse",
+      "pass": true,
+      "detail": {
+        "touchUi": true,
+        "coarse": true,
+        "anyCoarse": true,
+        "maxTouchPoints": 5,
+        "copyApi": false
+      }
+    },
+    {
+      "id": "V3",
+      "name": "顶部首次提示已触屏化",
+      "pass": true,
+      "detail": {
+        "text": "点地图键看全屏地图 · 点技能树键看技能树",
+        "hasM": false,
+        "hasT": false
+      }
+    },
+    {
+      "id": "V4",
+      "name": "底部操作行：含摇杆/右侧点按施法，不含键位",
+      "pass": true,
+      "detail": {
+        "count": 1,
+        "raw": "摇杆移动　右侧点按施法　左侧点按拖动瞄准",
+        "norm": "摇杆移动 右侧点按施法 左侧点按拖动瞄准",
+        "hasStick": true,
+        "hasCast": true,
+        "hasLeft": false,
+        "hasJ": false,
+        "hasK": false,
+        "hasHPause": false
+      }
+    },
+    {
+      "id": "V5",
+      "name": "键帽清零：可见 kbd=0 且 DOM 仍有 kbd",
+      "pass": true,
+      "detail": {
+        "total": 40,
+        "visible": 0,
+        "samples": []
+      }
+    },
+    {
+      "id": "V6",
+      "name": "融合提示不含 <kbd> / 按 F（连续调用两次后仍成立）",
+      "pass": true,
+      "detail": {
+        "buildFusionHint": "skip(buildFusionHint 不存在; 已用 updateFusionHint×2)",
+        "before": "获得 力场发生器 后可点融合键 融合",
+        "after": "获得 力场发生器 后可点融合键 融合"
+      }
+    },
+    {
+      "id": "V7",
+      "name": "过载提示不含按 F",
+      "pass": true,
+      "detail": {
+        "text": "再点融合键过载",
+        "hasWF": false
+      }
+    },
+    {
+      "id": "V8",
+      "name": "画布门提示：点交互键进入、无双祭坛按 E",
+      "pass": true,
+      "detail": {
+        "enterHint": "点交互键进入",
+        "altarFooter": "站到祭坛旁点交互键选择（另一座会碎裂）",
+        "enterHasE": false,
+        "altarHasE": false
+      }
+    },
+    {
+      "id": "V9",
+      "name": "教学第一条 = 摇杆移动，右侧点按施法",
+      "pass": true,
+      "detail": {
+        "hint": "摇杆移动，右侧点按施法",
+        "hasWASD": false,
+        "hasLeft": false,
+        "total": 5
+      }
+    },
+    {
+      "id": "V10",
+      "name": "toast 翻译：点交互键购买、不含按 E",
+      "pass": true,
+      "detail": {
+        "text": "商店 · 靠近展台点交互键购买",
+        "hasE": false,
+        "cls": "toast is-on"
+      }
+    },
+    {
+      "id": "V11",
+      "name": "地图提示不含滚轮/M/Esc",
+      "pass": true,
+      "detail": {
+        "text": "双指缩放 · 单指拖动 · 点关闭退出",
+        "count": 1,
+        "hasWheel": false,
+        "hasM": false,
+        "hasEsc": false
+      }
+    },
+    {
+      "id": "V12",
+      "name": "设置页 BGM：不含按 N、含点顶部喇叭",
+      "pass": true,
+      "detail": {
+        "text": "BGM 为低频氛围层，默认关闭，宁简不吵。点顶部喇叭可随时静音 / 恢复。",
+        "count": 12,
+        "hasN": false,
+        "hasSpeaker": true
+      }
+    },
+    {
+      "id": "V13",
+      "name": "点开始进入 playing，期间无新增 console error",
+      "pass": true,
+      "detail": {
+        "clicked": true,
+        "modeAt500ms": "title",
+        "charSelectOpen": true,
+        "modeFinal": "playing",
+        "consoleErrors": 0,
+        "exceptions": 0
+      }
+    },
+    {
+      "id": "V14",
+      "name": "桌面端不受污染：无 touch-ui、原键位文案、kbd 可见",
+      "pass": true,
+      "detail": {
+        "hostDesktop": {
+          "touchUi": true,
+          "coarse": false,
+          "anyCoarse": true,
+          "maxTouchPoints": 10,
+          "introText": "点地图键看全屏地图 · 点技能树键看技能树",
+          "enterHint": "点交互键进入",
+          "kbdVisible": 0,
+          "kbdTotal": 40
+        },
+        "hostIsTouchHardware": true,
+        "nonTouchDesktop": {
+          "touchUi": false,
+          "coarse": false,
+          "anyCoarse": true,
+          "maxTouchPoints": 0,
+          "introText": "按 M 看全屏地图 · 按 T 看技能树",
+          "enterHint": "按 E 进入",
+          "kbdVisible": 7,
+          "kbdTotal": 49
+        }
+      }
+    },
+    {
+      "id": "V15",
+      "name": "触屏摇杆冒烟：移动时 axis 非 0、松手后归零",
+      "pass": true,
+      "detail": {
+        "mid": {
+          "axis": {
+            "x": 0.707,
+            "y": 0.707
+          },
+          "active": true,
+          "moveId": 2
+        },
+        "after": {
+          "axis": {
+            "x": 0,
+            "y": 0
+          },
+          "active": false,
+          "moveId": null
+        },
+        "midMag": 0.707,
+        "afterMag": 0
+      }
+    }
+  ],
+  "passCount": 15,
+  "total": 15,
+  "fileSizeBefore": 2787026,
+  "fileSizeAfter": 2787026
+}

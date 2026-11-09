@@ -1,0 +1,167 @@
+{
+  "at": "2026-11-08T14:48:32.434Z",
+  "version": "1.8.0",
+  "dir": "D:\\其他\\TRAE宝\\奥术工程师\\dist\\emberfall_v1.8.0",
+  "files": [
+    {
+      "name": "更新说明.md",
+      "bytes": 7179,
+      "kb": 7,
+      "md5": "4F9C1381498A477B12A9808776834448"
+    },
+    {
+      "name": "烬_v1.8.0.html",
+      "bytes": 2812871,
+      "kb": 2747,
+      "md5": "8FF34DFF349A161FBBE0E4CD7A5271C8"
+    },
+    {
+      "name": "说明.html",
+      "bytes": 7453,
+      "kb": 7,
+      "md5": "5C83A5098DF0A27B670206F6D2341F67"
+    }
+  ],
+  "gameBytes": 7179,
+  "gameMd5": "4F9C1381498A477B12A9808776834448",
+  "totalBytes": 2827503,
+  "checks": [
+    {
+      "name": "P2 全新目录 + 零缓存 profile 下发布包可直接开局",
+      "ok": true,
+      "detail": {
+        "boot": {
+          "mode": "title",
+          "status": "playing",
+          "canvas": true,
+          "titleVersion": "v1.8.0",
+          "hasStart": true,
+          "version": "1.8.0"
+        },
+        "playable": {
+          "mode": "playing",
+          "status": "playing",
+          "floor": 1,
+          "rooms": 5,
+          "enemies": 9,
+          "playerHp": 100,
+          "aether": 100,
+          "closed": true,
+          "aboutVersion": "v1.8.0 · 烬 · 纯魔法爽感版"
+        }
+      }
+    },
+    {
+      "name": "P3 无外部资源请求（0 条 http/https，仅本地 file://）",
+      "ok": true,
+      "detail": {
+        "external": [],
+        "local": [
+          "术工程师/dist/emberfall_v1.8.0/烬_v1.8.0.html"
+        ]
+      }
+    },
+    {
+      "name": "P1a 版本号在标题页与关于面板一致",
+      "ok": true,
+      "detail": {
+        "title": "v1.8.0",
+        "about": "v1.8.0 · 烬 · 纯魔法爽感版",
+        "ver": "1.8.0"
+      }
+    },
+    {
+      "name": "P1b 说明页数据源与游戏同版本",
+      "ok": true,
+      "detail": {
+        "ver": "1.8.0"
+      }
+    },
+    {
+      "name": "P4 包内正式文件固定（3 个，无测试脚本 / 截图 / 临时目录）",
+      "ok": true,
+      "detail": {
+        "files": [
+          "更新说明.md",
+          "烬_v1.8.0.html",
+          "说明.html"
+        ],
+        "forbidden": []
+      }
+    },
+    {
+      "name": "P5 说明页可被普通玩家读懂（按键 / 难度 / 前五层 / 配方 / FAQ 均在且版本一致）",
+      "ok": true,
+      "detail": {
+        "len": 1738,
+        "hasVer": true,
+        "key": true,
+        "diff": true,
+        "floors": true,
+        "recipes": true,
+        "faq": true,
+        "rows": 43,
+        "nums": {
+          "enemy": 33,
+          "exclusive": 11,
+          "fusion": 13,
+          "ach": 38,
+          "formation": 8
+        }
+      }
+    },
+    {
+      "name": "P7 说明页数字与配置真值一致（敌人 / 专属怪 / 配方 / 成就 / 编队）",
+      "ok": true,
+      "detail": {
+        "guide": {
+          "enemy": 33,
+          "exclusive": 11,
+          "fusion": 13,
+          "ach": 38,
+          "formation": 8
+        },
+        "truth": {
+          "enemy": 33,
+          "exclusive": 11,
+          "fusion": 13,
+          "ach": 38,
+          "formation": 8
+        }
+      }
+    },
+    {
+      "name": "P1c 更新说明与源码同版本、同游戏名",
+      "ok": true,
+      "detail": {
+        "ver": "1.8.0",
+        "title": "烬",
+        "head": "# 烬 v1.8.0 · 更新说明"
+      }
+    },
+    {
+      "name": "P6 包体大小与文件清单已生成（单文件游戏 < 5MB，总体 < 6MB）",
+      "ok": true,
+      "detail": {
+        "totalBytes": 2827503,
+        "totalMB": 2.7,
+        "sizes": [
+          {
+            "name": "更新说明.md",
+            "kb": 7
+          },
+          {
+            "name": "烬_v1.8.0.html",
+            "kb": 2747
+          },
+          {
+            "name": "说明.html",
+            "kb": 7
+          }
+        ]
+      }
+    }
+  ],
+  "runtimeErrors": [],
+  "externalRequests": []
+}

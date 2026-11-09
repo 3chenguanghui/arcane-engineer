@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>原型3 · 引信 — 战斗中的时机决策</title>
+<style>
+  html,body{margin:0;padding:0;background:#070605;overflow:hidden;font-family:"Microsoft YaHei","Noto Sans SC",sans-serif;}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;}
+  canvas{display:block;max-width:100vw;max-height:100vh;cursor:crosshair;}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="cv" width="1280" height="760"></canvas></div>
+
+<!-- ================= 纯逻辑核心：不碰 DOM，可被 Node 提取跑自测 ================= -->
+<script id="core">
+const Core = (function () {
+  'use strict';
+
+  // ===== 可调参数区 =====
+  const CFG = {
+    playerHP: 160,
+    moveSpeed: 210,
+    windTime: 1.25,           // 从 0 蓄到 100% 所需秒数
+    perfectMin: 0.68,         // 完美区间下限：低于此值只是刮痧
+    perfectMax: 0.86,         // 完美区间上限；超过会过热自爆
+    weakDmg: 8, weakScale: 25, weakRadius: 150,
+    perfectDmg: 40, perfectScale: 80, perfectRadius: 250,
+    overDmg: 30, overRadius: 260, selfOverDmg: 20,
+    cancelCost: 2,            // 取消蓄力的自损
+    teleRadius: 110,          // 敌人预警圈半径
+    waveHeal: 14,             // 每清一波回血
+    maxTime: 240,
+    arena: { x: 60, y: 105, w: 1160, h: 545 },
+  };
+
+  // 敌人模板（冷却拉长，制造清晰的安全窗口，让“抓时机”成为主玩法）
+  const ENEMY_TYPES = {
+    grunt: { name: '灰卫', hp: 38, speed: 66, atk: 8,  tele: 1.00, cd: 3.2, r: 13, color: '#b5533c' },
+    brute: { name: '炉兽', hp: 82, speed: 50, atk: 13, tele: 1.15, cd: 3.6, r: 20, color: '#8a5a2a' },
+    boss:  { name: '引信主教', hp: 220, speed: 44, atk: 16, tele: 0.90, cd: 2.8, r: 30, color: '#a02020' },
+  };
+
+  // 四波敌人（数量减少，保证每波都有可读的安全窗口）
+  const WAVES = [
+    ['grunt', 'grunt'],
+    ['grunt', 'brute'],
+    ['grunt', 'grunt', 'grunt'],
+    ['boss', 'grunt'],
+  ];
+
+  // 出生点（尽量离玩家远）
+  const SPAWNS = [
+    { x: 130, y: 160 }, { x: 1150, y: 160 }, { x: 640, y: 130 },
+    { x: 130, y: 560 }, { x: 1150, y: 560 }, { x: 640, y: 610 },
+    { x: 330, y: 140 }, { x: 950, y: 600 },
+  ];
+
+  // 三种自测策略：移动/闪避逻辑一致，只改变“何时开始蓄、何时松手”
+  const POLICIES = [
+    { id: 'eager',  name: '抢蓄', desc: '一有机会就蓄，到 58% 立刻放（低于完美区，刮痧）' },
+    { id: 'greedy', name: '贪蓄', desc: '蓄到 82% 才放，伤害高但常被抓打断' },
+    { id: 'reader', name: '读招', desc: '先算安全窗口再蓄，危险时提前放或取消' },
+  ];
+
+  /** 32 位可复现随机数生成器 */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = (a + 0x6D2B79F5) | 0;
+      let t = Math.imul(a ^ (a >>> 15), 1 | a);
+      t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /** 两点距离 */
+  function dist(a, b) { return Math.hypot(a.x - b.x, a.y - b.y); }
+
+  /** 把敌人限制在场地内 */
+  function clampToArena(o, pad) {
+    const a = CFG.arena;
+    const p = pad || 0;
+    o.x = Math.max(a.x + p, Math.min(a.x + a.w - p, o.x));
+    o.y = Math.max(a.y + p, Math.min(a.y + a.h - p, o.y));
+  }
+
+  /**
+   * 估算某只敌人“下一次能威胁到玩家”的剩余秒数。
+   * 追逐中：冷却 cd 结束才开始预警，预警 teleTime 秒后落招 → cd + teleTime
+   * 已预警中：这一招过后要重新等冷却 → wind + cdMax + teleTime
+   * 被眩晕：暂时不会出招 → 视为安全
+   */
+  function timeToThreat(e) {
+    if (e.stun > 0) return 99;
+    if (e.state === 'wind') return e.wind + e.cdMax + e.teleTime;
+    return e.cd + e.teleTime;
+  }
+
+  /** 统计玩家周围 radius 内的敌人数量 */
+  function countWithin(s, radius) {
+    let n = 0;
+    for (let i = 0; i < s.enemies.length; i++) {
+      if (dist(s.player, s.enemies[i]) <= radius) n++;
+    }
+    return n;
+  }
+
+  /** 生成一只敌人 */
+  function makeEnemy(s, type) {
+    const t = ENEMY_TYPES[type];
+    // 选一个离玩家足够远的出生点
+    let pt = SPAWNS[Math.floor(s.rng() * SPAWNS.length)];
+    for (let i = 0; i < 12; i++) {
+      const cand = SPAWNS[Math.floor(s.rng() * SPAWNS.length)];
+      if (dist(cand, s.player) > 300) { pt = cand; break; }
+    }
+    return {
+      type: type, name: t.name, x: pt.x, y: pt.y,
+      hp: t.hp, maxHp: t.hp, r: t.r, speed: t.speed, atk: t.atk,
+      teleTime: t.tele, cdMax: t.cd, cd: 0.5 + s.rng() * 1.0,
+      state: 'chase', wind: 0, center: null, stun: 0, color: t.color,
+    };
+  }
+
+  /** 生成下一波 */
+  function spawnWave(s) {
+    const wave = WAVES[s.waveIndex];
+    for (let i = 0; i < wave.length; i++) s.enemies.push(makeEnemy(s, wave[i]));
+    s.waveIndex++;
+    s.waveState = 'active';
+    s.events.push({ type: 'wave', index: s.waveIndex });
+  }
+
+  /** 创建一局 */
+  function createRun(seed) {
+    const rng = mulberry32((seed >>> 0) || 1);
+    const s = {
+      seed: (seed >>> 0) || 1, rng: rng,
+      time: 0, over: false, result: '', reason: '',
+      player: {
+        x: 640, y: 400, hp: CFG.playerHP, maxHp: CFG.playerHP,
+        charge: 0, winding: false, stun: 0, invuln: 0, cancelCd: 0,
+      },
+      enemies: [],
+      waveIndex: 0, waveState: 'active', waveTimer: 0,
+      events: [],
+      stats: { perfects: 0, weaks: 0, overheats: 0, interrupted: 0, hitsTaken: 0, damageTaken: 0, kills: 0, slams: 0 },
+    };
+    spawnWave(s);
+    return s;
+  }
+
+  /** 判定失败 */
+  function checkLose(s) {
+    if (s.over) return true;
+    if (s.player.hp <= 0) {
+      s.over = true; s.result = 'lose'; s.reason = '生命耗尽';
+      s.events.push({ type: 'over' });
+      return true;
+    }
+    return false;
+  }
+
+  /** 松手/蓄满：按蓄力比例结算重击 */
+  function release(s) {
+    const p = s.player;
+    const charge = p.charge;
+    p.winding = false;
+    p.charge = 0;
+    p.cancelCd = 0.18;
+
+    let kind, dmg, radius;
+    if (charge >= CFG.perfectMax) {
+      kind = 'overheat';
+      dmg = CFG.overDmg;
+      radius = CFG.overRadius;
+      p.hp -= CFG.selfOverDmg;
+      p.stun = Math.max(p.stun, 0.65);
+      s.stats.overheats++;
+    } else if (charge >= CFG.perfectMin) {
+      kind = 'perfect';
+      dmg = CFG.perfectDmg + charge * CFG.perfectScale;
+      radius = CFG.perfectRadius;
+      s.stats.perfects++;
+    } else {
+      kind = 'weak';
+      dmg = CFG.weakDmg + charge * CFG.weakScale;
+      radius = CFG.weakRadius;
+      s.stats.weaks++;
+    }
+    s.stats.slams++;
+
+    for (let i = 0; i < s.enemies.length; i++) {
+      const e = s.enemies[i];
+      if (dist(p, e) <= radius + e.r) {
+        e.hp -= dmg;
+        if (kind === 'perfect') {
+          e.stun = Math.max(e.stun, 1.1);
+          if (e.state === 'wind') { e.state = 'chase'; e.center = null; e.cd = e.cdMax; }
+        }
+      }
+    }
+
+    // 清理死亡敌人
+    const alive = [];
+    for (let i = 0; i < s.enemies.length; i++) {
+      if (s.enemies[i].hp <= 0) {
+        s.stats.kills++;
+        s.events.push({ type: 'kill', x: s.enemies[i].x, y: s.enemies[i].y, color: s.enemies[i].color });
+      } else alive.push(s.enemies[i]);
+    }
+    s.enemies = alive;
+
+    s.events.push({ type: 'slam', x: p.x, y: p.y, charge: charge, radius: radius, kind: kind, damage: Math.round(dmg) });
+    checkLose(s);
+  }
+
+  /** 敌人更新：追击、预警、落招 */
+  function updateEnemies(s, dt) {
+    const p = s.player;
+    for (let i = 0; i < s.enemies.length; i++) {
+      const e = s.enemies[i];
+      if (e.stun > 0) { e.stun -= dt; continue; }
+
+      if (e.state === 'wind') {
+        e.wind -= dt;
+        if (e.wind <= 0) {
+          // 预警落点锁定在起手瞬间的玩家位置
+          if (dist(p, e.center) <= CFG.teleRadius && p.invuln <= 0) {
+            p.hp -= e.atk;
+            p.invuln = 0.38;
+            s.stats.damageTaken += e.atk;
+            s.stats.hitsTaken++;
+            if (p.winding) {
+              p.winding = false; p.charge = 0; p.stun = Math.max(p.stun, 0.35);
+              s.stats.interrupted++;
+            }
+            s.events.push({ type: 'hurt', x: p.x, y: p.y, dmg: e.atk });
+          }
+          s.events.push({ type: 'enemyattack', x: e.center.x, y: e.center.y });
+          e.state = 'chase'; e.center = null; e.cd = e.cdMax;
+        }
+        continue;
+      }
+
+      e.cd -= dt;
+      const d = dist(p, e);
+      if (e.cd <= 0 && d < 330) {
+        e.state = 'wind';
+        e.wind = e.teleTime;
+        e.center = { x: p.x, y: p.y };
+        s.events.push({ type: 'telegraph', x: p.x, y: p.y });
+        continue;
+      }
+      if (d > e.r + 26) {
+        const dx = p.x - e.x, dy = p.y - e.y;
+        const l = Math.hypot(dx, dy) || 1;
+        e.x += dx / l * e.speed * dt;
+        e.y += dy / l * e.speed * dt;
+        clampToArena(e, 6);
+      }
+    }
+  }
+
+  /** 单步推进：input = {mx,my,wind,cancel} */
+  function step(s, dt, input) {
+    if (s.over) return;
+    s.time += dt;
+    const p = s.player;
+    p.invuln = Math.max(0, p.invuln - dt);
+    if (p.stun > 0) p.stun -= dt;
+    p.cancelCd = Math.max(0, p.cancelCd - dt);
+
+    // 主动取消：付出生命，避免被打断
+    if (p.winding && input.cancel) {
+      p.winding = false; p.charge = 0;
+      p.hp -= CFG.cancelCost;
+      p.cancelCd = 0.25;
+      s.events.push({ type: 'cancel', x: p.x, y: p.y });
+      if (checkLose(s)) return;
+    }
+
+    // 蓄力 / 松手
+    if (p.stun <= 0) {
+      if (p.winding) {
+        if (!input.wind) release(s);
+        else {
+          p.charge += dt / CFG.windTime;
+          if (p.charge >= 1) release(s);
+        }
+      } else if (input.wind && p.cancelCd <= 0) {
+        p.winding = true;
+        p.charge = 0;
+        s.events.push({ type: 'windstart', x: p.x, y: p.y });
+      }
+    }
+    if (s.over) return;
+
+    // 移动：蓄力时定身
+    if (!p.winding && p.stun <= 0) {
+      let mx = input.mx || 0, my = input.my || 0;
+      const l = Math.hypot(mx, my);
+      if (l > 0.01) {
+        p.x += mx / l * CFG.moveSpeed * dt;
+        p.y += my / l * CFG.moveSpeed * dt;
+        clampToArena(p, 22);
+      }
+    }
+
+    updateEnemies(s, dt);
+    if (checkLose(s)) return;
+
+    // 清波与下一波
+    if (s.enemies.length === 0 && s.waveState === 'active') {
+      s.waveState = 'clear';
+      s.waveTimer = 1.3;
+      p.hp = Math.min(p.maxHp, p.hp + CFG.waveHeal);
+      s.events.push({ type: 'waveclear', index: s.waveIndex });
+    }
+    if (s.waveState === 'clear') {
+      s.waveTimer -= dt;
+      if (s.waveTimer <= 0) {
+        if (s.waveIndex >= WAVES.length) {
+          s.over = true; s.result = 'win'; s.reason = '四波清空';
+          s.events.push({ type: 'over' });
+        } else {
+          spawnWave(s);
+        }
+      }
+    }
+
+    if (!s.over && s.time >= CFG.maxTime) {
+      s.over = true; s.result = 'lose'; s.reason = '时间耗尽';
+      s.events.push({ type: 'over' });
+    }
+  }
+
+  /** 机器人输入：三种策略共用移动/闪避，只改蓄力时机 */
+  function botInput(s, policy) {
+    const p = s.player;
+    const input = { mx: 0, my: 0, wind: false, cancel: false };
+    if (s.over || p.stun > 0) return input;
+
+    // 当前是否有预警圈罩住玩家
+    let danger = null;
+    for (let i = 0; i < s.enemies.length; i++) {
+      const e = s.enemies[i];
+      if (e.state === 'wind' && e.center && dist(p, e.center) <= CFG.teleRadius + 4) { danger = e; break; }
+    }
+
+    if (p.winding) {
+      if (danger) {
+        if (policy === 'reader') {
+          if (p.charge >= 0.60) return input;  // 放出去，然后闪
+          input.cancel = true;                 // 还没进完美区，取消保命
+          return input;
+        }
+        input.wind = true;
+        return input;
+      }
+      if (policy === 'eager' && p.charge >= 0.58) return input;
+      if (policy === 'greedy' && p.charge >= 0.82) return input;
+      if (policy === 'reader') {
+        if (p.charge >= 0.78 && countWithin(s, 250) > 0) return input;
+        if (p.charge >= 0.84) return input;
+      }
+      input.wind = true;
+      return input;
+    }
+
+    const ready = p.cancelCd <= 0 && p.stun <= 0;
+    const near = countWithin(s, 340) > 0;
+    if (ready && near && policy === 'eager') { input.wind = true; return input; }
+    if (ready && near && policy === 'greedy') { input.wind = true; return input; }
+
+    if (policy === 'reader') {
+      if (danger) {
+        const dx = p.x - danger.center.x, dy = p.y - danger.center.y;
+        const l = Math.hypot(dx, dy) || 1;
+        input.mx = dx / l; input.my = dy / l;
+        return input;
+      }
+      // 读招的核心：先算“全场最短安全窗口”。窗口足够蓄到完美区才起手，
+      // 否则宁可不蓄、先贴近敌人等下一轮冷却，避免蓄到一半被逼取消。
+      if (ready && s.enemies.length) {
+        let safe = 99;
+        for (let i = 0; i < s.enemies.length; i++) {
+          const t = timeToThreat(s.enemies[i]);
+          if (t < safe) safe = t;
+        }
+        const need = CFG.windTime * 0.78 + 0.06;   // 蓄到 0.78 所需时间，留一点余量
+        const inRange = countWithin(s, CFG.perfectRadius - 30) > 0;
+        if (safe >= need && inRange) { input.wind = true; return input; }
+      }
+    }
+
+    // 只要场上还有预警，就先保命：躲出圈后原地等它落地，绝不回身
+    const activeTele = [];
+    for (let i = 0; i < s.enemies.length; i++) {
+      if (s.enemies[i].state === 'wind') activeTele.push(s.enemies[i]);
+    }
+    if (activeTele.length) {
+      let closest = activeTele[0], cd = dist(p, closest.center);
+      for (let i = 1; i < activeTele.length; i++) {
+        const d = dist(p, activeTele[i].center);
+        if (d < cd) { cd = d; closest = activeTele[i]; }
+      }
+      if (cd < CFG.teleRadius + 70) {
+        const dx = p.x - closest.center.x, dy = p.y - closest.center.y;
+        const l = Math.hypot(dx, dy) || 1;
+        input.mx = dx / l; input.my = dy / l;
+      }
+      return input;
+    }
+
+    // 靠近最近的敌人，方便一砸多
+    if (s.enemies.length) {
+      let nearest = s.enemies[0], nd = 1e9;
+      for (let i = 0; i < s.enemies.length; i++) {
+        const d = dist(p, s.enemies[i]);
+        if (d < nd) { nd = d; nearest = s.enemies[i]; }
+      }
+      if (nd > 145) {
+        const dx = nearest.x - p.x, dy = nearest.y - p.y;
+        const l = Math.hypot(dx, dy) || 1;
+        input.mx = dx / l; input.my = dy / l;
+      }
+    }
+    return input;
+  }
+
+  /** 自动跑一局 */
+  function autoRun(policy, seed) {
+    const s = createRun(seed);
+    let guard = 0;
+    while (!s.over && guard++ < 7000) {
+      const input = botInput(s, policy);
+      step(s, 0.05, input);
+      s.events.length = 0;
+    }
+    if (!s.over) { s.over = true; s.result = 'lose'; s.reason = '超时'; }
+    return {
+      win: s.result === 'win',
+      time: s.time,
+      hp: s.player.hp,
+      reason: s.reason,
+      perfects: s.stats.perfects,
+      weaks: s.stats.weaks,
+      overheats: s.stats.overheats,
+      interrupted: s.stats.interrupted,
+      hits: s.stats.hitsTaken,
+      damage: s.stats.damageTaken,
+    };
+  }
+
+  /** 自测入口：三种策略各跑 games 局 */
+  function runBatch(games) {
+    const n = games || 200;
+    return POLICIES.map(function (p) {
+      const r = {
+        id: p.id, name: p.name, desc: p.desc, games: n,
+        wins: 0, winRate: 0, avgTime: 0, avgPerfect: 0, avgOverheat: 0,
+        avgInterrupted: 0, avgHp: 0, loseHp: 0, loseTime: 0,
+      };
+      let time = 0, perfect = 0, overheat = 0, interrupted = 0, hp = 0;
+      for (let i = 1; i <= n; i++) {
+        const g = autoRun(p.id, i * 7919 + 29);
+        if (g.win) r.wins++;
+        else if (g.reason === '时间耗尽' || g.reason === '超时') r.loseTime++;
+        else r.loseHp++;
+        time += g.time; perfect += g.perfects; overheat += g.overheats;
+        interrupted += g.interrupted; hp += Math.max(0, g.hp);
+      }
+      r.winRate = r.wins / n;
+      r.avgTime = time / n;
+      r.avgPerfect = perfect / n;
+      r.avgOverheat = overheat / n;
+      r.avgInterrupted = interrupted / n;
+      r.avgHp = hp / n;
+      return r;
+    });
+  }
+
+  return {
+    CFG: CFG, POLICIES: POLICIES, WAVES: WAVES, ENEMY_TYPES: ENEMY_TYPES,
+    createRun: createRun, step: step, botInput: botInput, runBatch: runBatch, autoRun: autoRun,
+  };
+})();
+</script>
+
+<!-- ================= 画面与交互 ================= -->
+<script>
+(function () {
+  'use strict';
+  const cv = document.getElementById('cv');
+  const ctx = cv.getContext('2d');
+  const W = 1280, H = 760;
+  const C = Core.CFG;
+
+  // ===== 配色（铁灰 / 炉火 / 引信绿） =====
+  const PAL = {
+    bg0: '#060504', bg1: '#15100c', bg2: '#24170f',
+    floor: '#1b1612', line: 'rgba(255,150,80,.10)',
+    text: '#f0e5d5', dim: '#988a7a',
+    ember: '#ff8a3c', gold: '#ffc46b', perfect: '#8fe0a0',
+    red: '#e05038', bad: '#d05040', ok: '#8fd08f',
+  };
+
+  // ===== 运行时 =====
+  let run = Core.createRun((Math.random() * 1e9) | 0);
+  let test = null, showTest = false;
+  let keys = {};
+  let rings = [], floats = [], parts = [];
+  let shake = 0, time = 0, last = performance.now();
+  let banner = '', bannerLife = 0;
+  let hurtFlash = 0;
+
+  // ===== 音效 =====
+  let AC = null;
+  /** 播放短促合成音效 */
+  function sfx(type) {
+    try {
+      AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+      const now = AC.currentTime;
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.connect(g); g.connect(AC.destination);
+      if (type === 'perfect') { o.type = 'triangle'; o.frequency.setValueAtTime(320, now); o.frequency.exponentialRampToValueAtTime(880, now + 0.16); g.gain.setValueAtTime(0.09, now); }
+      else if (type === 'weak') { o.type = 'sine'; o.frequency.setValueAtTime(200, now); o.frequency.exponentialRampToValueAtTime(120, now + 0.12); g.gain.setValueAtTime(0.05, now); }
+      else if (type === 'over') { o.type = 'sawtooth'; o.frequency.setValueAtTime(120, now); o.frequency.exponentialRampToValueAtTime(35, now + 0.3); g.gain.setValueAtTime(0.1, now); }
+      else if (type === 'hurt') { o.type = 'square'; o.frequency.setValueAtTime(90, now); g.gain.setValueAtTime(0.06, now); }
+      else { o.type = 'triangle'; o.frequency.setValueAtTime(240, now); o.frequency.exponentialRampToValueAtTime(520, now + 0.2); g.gain.setValueAtTime(0.07, now); }
+      g.gain.exponentialRampToValueAtTime(0.0001, now + 0.3);
+      o.start(now); o.stop(now + 0.31);
+    } catch (e) { /* 静音可玩 */ }
+  }
+
+  /** 屏幕坐标 → 设计坐标 */
+  function toDesign(e) {
+    const r = cv.getBoundingClientRect();
+    return { x: (e.clientX - r.left) * (W / r.width), y: (e.clientY - r.top) * (H / r.height) };
+  }
+
+  /** 矩形命中 */
+  function inRect(p, r) { return p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h; }
+
+  /** 圆角矩形路径 */
+  function roundRect(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  /** 按钮 */
+  function button(r, label, sub, color, active) {
+    ctx.save();
+    roundRect(r.x, r.y, r.w, r.h, 8);
+    const g = ctx.createLinearGradient(r.x, r.y, r.x, r.y + r.h);
+    g.addColorStop(0, active ? color : '#241a14');
+    g.addColorStop(1, active ? '#140c08' : '#100b08');
+    ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = active ? color : 'rgba(255,150,90,.22)';
+    ctx.lineWidth = 1.5; ctx.stroke();
+    ctx.fillStyle = active ? PAL.text : '#6b5a4d';
+    ctx.font = 'bold 16px "Microsoft YaHei"'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(label, r.x + r.w / 2, r.y + (sub ? r.h / 2 - 8 : r.h / 2));
+    if (sub) {
+      ctx.font = '10px "Microsoft YaHei"'; ctx.fillStyle = active ? 'rgba(255,230,200,.7)' : '#574a40';
+      ctx.fillText(sub, r.x + r.w / 2, r.y + r.h / 2 + 11);
+    }
+    ctx.restore();
+  }
+
+  /** 条形 */
+  function bar(x, y, w, h, ratio, color, back) {
+    ctx.save();
+    roundRect(x, y, w, h, h / 2); ctx.fillStyle = back || 'rgba(255,255,255,.08)'; ctx.fill();
+    roundRect(x, y, Math.max(0, w * Math.max(0, Math.min(1, ratio))), h, h / 2); ctx.fillStyle = color; ctx.fill();
+    ctx.restore();
+  }
+
+  // ===== 背景 =====
+  function drawBackground() {
+    const g = ctx.createRadialGradient(640, 380, 80, 640, 400, 760);
+    g.addColorStop(0, '#1b130d');
+    g.addColorStop(0.55, '#0e0a07');
+    g.addColorStop(1, '#040302');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+
+    // 锻炉地砖
+    ctx.strokeStyle = 'rgba(255,140,70,.055)'; ctx.lineWidth = 1;
+    for (let x = 60; x <= 1220; x += 80) {
+      ctx.beginPath(); ctx.moveTo(x, 105); ctx.lineTo(x, 650); ctx.stroke();
+    }
+    for (let y = 105; y <= 650; y += 80) {
+      ctx.beginPath(); ctx.moveTo(60, y); ctx.lineTo(1220, y); ctx.stroke();
+    }
+    // 场地边框
+    ctx.strokeStyle = 'rgba(255,150,80,.18)'; ctx.lineWidth = 2;
+    ctx.strokeRect(60, 105, 1160, 545);
+
+    // 余烬
+    for (let i = 0; i < 50; i++) {
+      const x = (i * 149.3 + time * (12 + i % 6) * 0.7) % 1280;
+      const y = 690 - ((time * (20 + i % 8) + i * 97) % 620);
+      ctx.fillStyle = 'rgba(255,130,60,' + (0.05 + 0.10 * Math.abs(Math.sin(time + i))).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(x, y, 1 + (i % 3), 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // ===== 敌人 =====
+  function drawEnemy(e) {
+    ctx.save();
+    // 预警圈
+    if (e.state === 'wind' && e.center) {
+      const ratio = 1 - e.wind / e.teleTime;
+      ctx.fillStyle = 'rgba(220,70,50,' + (0.08 + ratio * 0.18).toFixed(3) + ')';
+      ctx.beginPath(); ctx.arc(e.center.x, e.center.y, C.teleRadius, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = 'rgba(240,100,70,' + (0.35 + ratio * 0.5).toFixed(3) + ')';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(e.center.x, e.center.y, C.teleRadius, 0, Math.PI * 2); ctx.stroke();
+      // 内圈随倒计时收缩
+      ctx.strokeStyle = 'rgba(255,190,150,.75)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(e.center.x, e.center.y, C.teleRadius * (1 - ratio), 0, Math.PI * 2); ctx.stroke();
+    }
+
+    // 身体
+    ctx.translate(e.x, e.y);
+    const r = e.r;
+    ctx.fillStyle = e.color;
+    ctx.strokeStyle = e.stun > 0 ? PAL.gold : 'rgba(255,200,160,.5)';
+    ctx.lineWidth = e.stun > 0 ? 2.5 : 1.5;
+    ctx.beginPath();
+    if (e.type === 'grunt') {
+      ctx.moveTo(0, -r); ctx.lineTo(r, r); ctx.lineTo(-r, r); ctx.closePath();
+    } else if (e.type === 'brute') {
+      ctx.moveTo(-r, -r * 0.8); ctx.lineTo(r, -r * 0.8); ctx.lineTo(r * 0.8, r); ctx.lineTo(-r * 0.8, r); ctx.closePath();
+    } else {
+      for (let i = 0; i < 6; i++) {
+        const a = Math.PI / 3 * i - Math.PI / 2;
+        const px = Math.cos(a) * r, py = Math.sin(a) * r;
+        if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+    }
+    ctx.fill(); ctx.stroke();
+
+    // 眼睛
+    ctx.fillStyle = e.stun > 0 ? '#ffe9a0' : '#1a0705';
+    ctx.beginPath(); ctx.arc(0, -r * 0.15, Math.max(2, r * 0.16), 0, Math.PI * 2); ctx.fill();
+
+    // 血条
+    if (e.hp < e.maxHp) {
+      const bw = r * 2.4;
+      ctx.fillStyle = 'rgba(0,0,0,.55)';
+      ctx.fillRect(-bw / 2, -r - 12, bw, 4);
+      ctx.fillStyle = PAL.red;
+      ctx.fillRect(-bw / 2, -r - 12, bw * Math.max(0, e.hp / e.maxHp), 4);
+    }
+    ctx.restore();
+  }
+
+  // ===== 玩家 =====
+  function drawPlayer() {
+    const p = run.player;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+    // 受击闪烁
+    if (p.invuln > 0 && Math.floor(p.invuln * 20) % 2 === 0) ctx.globalAlpha = 0.5;
+
+    // 蓄力弧
+    if (p.charge > 0) {
+      const start = -Math.PI / 2;
+      const end = start + p.charge * Math.PI * 2;
+      ctx.strokeStyle = p.charge >= C.perfectMin && p.charge <= C.perfectMax ? PAL.perfect : (p.charge > C.perfectMax ? PAL.red : PAL.dim);
+      ctx.lineWidth = 4;
+      ctx.beginPath(); ctx.arc(0, 0, 26, start, end); ctx.stroke();
+      // 完美区间刻度
+      ctx.strokeStyle = 'rgba(140,220,160,.35)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(0, 0, 30, start + C.perfectMin * Math.PI * 2, start + C.perfectMax * Math.PI * 2); ctx.stroke();
+    }
+
+    // 身体
+    const g = ctx.createRadialGradient(0, 0, 2, 0, 0, 22);
+    g.addColorStop(0, '#fff4d0'); g.addColorStop(0.4, '#ffb050'); g.addColorStop(1, 'rgba(255,100,20,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, 22, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffe9b0';
+    ctx.beginPath(); ctx.arc(0, 0, 8, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = 'rgba(255,200,120,.8)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, 0, 15, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+
+  // ===== HUD =====
+  function drawHUD() {
+    // 目标
+    roundRect(22, 14, 700, 74, 10);
+    ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,150,80,.18)'; ctx.stroke();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = PAL.gold; ctx.font = 'bold 16px "Microsoft YaHei"';
+    ctx.fillText('你要做什么', 40, 36);
+    ctx.fillStyle = PAL.text; ctx.font = '14px "Microsoft YaHei"';
+    ctx.fillText('按住空格蓄力，在 68%~86% 区间松手打出完美熔击；超过 86% 会自爆。', 40, 58);
+    ctx.fillStyle = PAL.dim; ctx.font = '12px "Microsoft YaHei"';
+    ctx.fillText('WASD 走位 · 空格蓄力/松手 · Shift 取消（−' + C.cancelCost + ' 生命） · 清掉 4 波', 40, 78);
+
+    // 生命
+    ctx.fillStyle = PAL.dim; ctx.font = '13px "Microsoft YaHei"';
+    ctx.fillText('生命 ' + Math.max(0, Math.round(run.player.hp)) + ' / ' + run.player.maxHp, 26, 112);
+    bar(26, 124, 300, 20, run.player.hp / run.player.maxHp, run.player.hp < 35 ? PAL.red : '#c05a4a', 'rgba(255,255,255,.08)');
+
+    // 波次
+    ctx.textAlign = 'right';
+    ctx.fillStyle = PAL.gold; ctx.font = 'bold 20px "Microsoft YaHei"';
+    ctx.fillText('第 ' + Math.min(run.waveIndex, Core.WAVES.length) + ' / ' + Core.WAVES.length + ' 波', 1240, 38);
+    ctx.fillStyle = PAL.dim; ctx.font = '13px "Microsoft YaHei"';
+    ctx.fillText('场上敌人 ' + run.enemies.length + ' · 已击杀 ' + run.stats.kills, 1240, 64);
+
+    // 蓄力条
+    const bx = 300, by = 692, bw = 620, bh = 22;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = PAL.dim; ctx.font = '13px "Microsoft YaHei"';
+    ctx.fillText('蓄力 ' + Math.round(run.player.charge * 100) + '%', bx, by - 16);
+    ctx.textAlign = 'right';
+    ctx.fillStyle = PAL.perfect; 
+    ctx.fillText('完美区间 68%~86%', bx + bw, by - 16);
+
+    roundRect(bx, by, bw, bh, bh / 2); ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fill();
+    // 完美区间底色
+    ctx.fillStyle = 'rgba(120,220,150,.22)';
+    ctx.fillRect(bx + bw * C.perfectMin, by, bw * (C.perfectMax - C.perfectMin), bh);
+    // 过热区
+    ctx.fillStyle = 'rgba(220,70,50,.22)';
+    ctx.fillRect(bx + bw * C.perfectMax, by, bw * (1 - C.perfectMax), bh);
+    // 当前蓄力
+    const cc = run.player.charge;
+    ctx.fillStyle = cc >= C.perfectMin && cc <= C.perfectMax ? PAL.perfect : (cc > C.perfectMax ? PAL.red : PAL.ember);
+    roundRect(bx, by, Math.max(2, bw * Math.min(1, cc)), bh, bh / 2); ctx.fill();
+    // 刻度
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1;
+    [C.perfectMin, C.perfectMax].forEach(function (m) {
+      ctx.beginPath(); ctx.moveTo(bx + bw * m, by - 4); ctx.lineTo(bx + bw * m, by + bh + 4); ctx.stroke();
+    });
+
+    // 按钮
+    button({ x: 958, y: 682, w: 150, h: 42 }, '跑 200 局自测', '对比三种时机', '#33281c', !showTest);
+    button({ x: 1122, y: 682, w: 110, h: 42 }, '重开', '', '#2a1d14', true);
+
+    ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,235,210,.35)'; ctx.font = '11px "Microsoft YaHei"';
+    ctx.fillText('R 重开 · T 自测 · 空格松开即出招', 640, 748);
+
+    // 波纹文字
+    if (bannerLife > 0) {
+      ctx.globalAlpha = Math.min(1, bannerLife);
+      ctx.fillStyle = PAL.gold; ctx.font = 'bold 34px "Microsoft YaHei"'; ctx.textAlign = 'center';
+      ctx.fillText(banner, 640, 360);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  // ===== 自测面板 =====
+  function drawTestPanel() {
+    ctx.fillStyle = 'rgba(0,0,0,.75)'; ctx.fillRect(0, 0, W, H);
+    const px = 230, py = 150, pw = 820, ph = 470;
+    roundRect(px, py, pw, ph, 12);
+    ctx.fillStyle = '#140f0b'; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,150,90,.42)'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = PAL.gold; ctx.font = 'bold 24px "Microsoft YaHei"';
+    ctx.fillText('可量化自测 · 每种时机策略 200 局', px + 32, py + 40);
+    ctx.fillStyle = PAL.dim; ctx.font = '13px "Microsoft YaHei"';
+    ctx.fillText('三种策略的移动与闪避完全一致，只改变“何时开始蓄力、何时松手”，胜率差可归因于时机决策。', px + 32, py + 74);
+
+    if (!test) {
+      ctx.fillStyle = PAL.text; ctx.font = '16px "Microsoft YaHei"';
+      ctx.fillText('正在跑……', px + 32, py + 130);
+    } else {
+      const colX = [px + 32, px + 260, px + 400, px + 540, px + 660];
+      ctx.font = 'bold 14px "Microsoft YaHei"'; ctx.fillStyle = PAL.dim;
+      ctx.fillText('策略', colX[0], py + 112);
+      ctx.fillText('胜率', colX[1], py + 112);
+      ctx.fillText('平均用时', colX[2], py + 112);
+      ctx.fillText('完美 / 过载', colX[3], py + 112);
+      ctx.fillText('被打断', colX[4], py + 112);
+      for (let i = 0; i < test.length; i++) {
+        const r = test[i];
+        const y = py + 158 + i * 76;
+        ctx.fillStyle = 'rgba(255,255,255,.04)'; roundRect(px + 24, y - 26, pw - 48, 62, 8); ctx.fill();
+        ctx.fillStyle = i === 2 ? PAL.perfect : PAL.text; ctx.font = 'bold 17px "Microsoft YaHei"';
+        ctx.fillText(r.name, colX[0], y);
+        ctx.fillStyle = PAL.dim; ctx.font = '11px "Microsoft YaHei"';
+        ctx.fillText(r.desc, colX[0], y + 19);
+        ctx.fillStyle = r.winRate >= 0.5 ? PAL.ok : (r.winRate >= 0.2 ? PAL.gold : PAL.bad);
+        ctx.font = 'bold 26px "Microsoft YaHei"';
+        ctx.fillText((r.winRate * 100).toFixed(1) + '%', colX[1], y);
+        ctx.fillStyle = PAL.text; ctx.font = '16px "Microsoft YaHei"';
+        ctx.fillText(r.avgTime.toFixed(0) + ' 秒', colX[2], y);
+        ctx.fillText(r.avgPerfect.toFixed(1) + ' / ' + r.avgOverheat.toFixed(1), colX[3], y);
+        ctx.fillText(r.avgInterrupted.toFixed(1) + ' 次', colX[4], y);
+      }
+      const best = test.slice().sort(function (a, b) { return b.winRate - a.winRate; })[0];
+      const worst = test.slice().sort(function (a, b) { return a.winRate - b.winRate; })[0];
+      const gap = (best.winRate - worst.winRate) * 100;
+      ctx.fillStyle = gap >= 20 ? PAL.ok : PAL.bad;
+      ctx.font = 'bold 16px "Microsoft YaHei"';
+      ctx.fillText('判定：最佳「' + best.name + '」' + (best.winRate * 100).toFixed(1) + '% vs 最差「' + worst.name + '」' + (worst.winRate * 100).toFixed(1) + '% ，差距 ' + gap.toFixed(1) + ' 个百分点 → ' + (gap >= 20 ? '时机决策确实改变结果' : '差距不足，需要调参'), px + 32, py + 402);
+      ctx.fillStyle = PAL.dim; ctx.font = '12px "Microsoft YaHei"';
+      ctx.fillText('抢蓄没进完美区就松手，几乎打不出伤害，还会在预警中硬蓄到自爆；贪蓄伤害高但常在蓄力中被抓；读招先等敌人出招再蓄。', px + 32, py + 430);
+    }
+    button({ x: px + pw - 150, y: py + ph - 58, w: 118, h: 38 }, '关闭', '', '#33241a', true);
+  }
+
+  // ===== 结束层 =====
+  function drawOver() {
+    ctx.fillStyle = 'rgba(0,0,0,.72)'; ctx.fillRect(0, 0, W, H);
+    const px = 340, py = 230, pw = 600, ph = 290;
+    roundRect(px, py, pw, ph, 12);
+    ctx.fillStyle = '#120d09'; ctx.fill();
+    ctx.strokeStyle = run.result === 'win' ? 'rgba(140,220,150,.55)' : 'rgba(220,80,60,.55)';
+    ctx.lineWidth = 2; ctx.stroke();
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = run.result === 'win' ? PAL.ok : PAL.bad;
+    ctx.font = 'bold 38px "Microsoft YaHei"';
+    ctx.fillText(run.result === 'win' ? '四波清空' : '引信烧尽', px + pw / 2, py + 70);
+    ctx.fillStyle = PAL.text; ctx.font = '16px "Microsoft YaHei"';
+    ctx.fillText(run.reason, px + pw / 2, py + 112);
+    ctx.fillStyle = PAL.dim; ctx.font = '14px "Microsoft YaHei"';
+    ctx.fillText('用时 ' + run.time.toFixed(1) + ' 秒 · 完美 ' + run.stats.perfects + ' 次 · 被打断 ' + run.stats.interrupted + ' 次', px + pw / 2, py + 146);
+    ctx.fillText('过载 ' + run.stats.overheats + ' 次 · 承受伤害 ' + run.stats.damageTaken, px + pw / 2, py + 170);
+    button({ x: px + 110, y: py + 208, w: 160, h: 46 }, '再来一局', '', '#33241a', true);
+    button({ x: px + 330, y: py + 208, w: 160, h: 46 }, '跑自测', '', '#243328', true);
+  }
+
+  // ===== 事件 → 画面反馈 =====
+  /** 处理核心抛出的战斗事件 */
+  function drainEvents() {
+    const evs = run.events.splice(0);
+    for (let i = 0; i < evs.length; i++) {
+      const ev = evs[i];
+      if (ev.type === 'slam') {
+        const col = ev.kind === 'perfect' ? '#9ff0b0' : (ev.kind === 'overheat' ? '#ff6a40' : '#ffb070');
+        rings.push({ x: ev.x, y: ev.y, r: 18, max: ev.radius, life: 0.55, color: col });
+        floats.push({ x: ev.x, y: ev.y - 44, text: (ev.kind === 'perfect' ? '完美 ' : ev.kind === 'overheat' ? '过载 ' : '') + ev.damage, color: col, life: 1.0 });
+        shake = Math.min(1, shake + (ev.kind === 'perfect' ? 0.55 : ev.kind === 'overheat' ? 0.8 : 0.2));
+        sfx(ev.kind === 'perfect' ? 'perfect' : ev.kind === 'overheat' ? 'over' : 'weak');
+      } else if (ev.type === 'hurt') {
+        floats.push({ x: ev.x, y: ev.y - 30, text: '-' + ev.dmg, color: PAL.red, life: 0.9 });
+        hurtFlash = 0.25; shake = Math.min(1, shake + 0.35);
+        sfx('hurt');
+      } else if (ev.type === 'kill') {
+        for (let k = 0; k < 18; k++) {
+          const a = Math.random() * Math.PI * 2, v = 40 + Math.random() * 160;
+          parts.push({ x: ev.x, y: ev.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, life: 0.5 + Math.random() * 0.5, max: 1, color: ev.color, size: 2 + Math.random() * 3 });
+        }
+      } else if (ev.type === 'wave') {
+        banner = '第 ' + ev.index + ' 波'; bannerLife = 1.4;
+        sfx('wave');
+      } else if (ev.type === 'waveclear') {
+        banner = '清波 · 回血'; bannerLife = 1.1;
+        sfx('wave');
+      } else if (ev.type === 'cancel') {
+        floats.push({ x: ev.x, y: ev.y - 34, text: '取消', color: PAL.dim, life: 0.7 });
+      }
+    }
+  }
+
+  // ===== 主循环 =====
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now; time += dt;
+
+    if (!showTest && !run.over) {
+      let mx = 0, my = 0;
+      if (keys['a'] || keys['arrowleft']) mx -= 1;
+      if (keys['d'] || keys['arrowright']) mx += 1;
+      if (keys['w'] || keys['arrowup']) my -= 1;
+      if (keys['s'] || keys['arrowdown']) my += 1;
+      Core.step(run, dt, { mx: mx, my: my, wind: !!keys[' '], cancel: !!keys['shift'] });
+    }
+    drainEvents();
+
+    // 粒子/波纹/飘字
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i]; p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 160 * dt; p.vx *= 0.97;
+      if (p.life <= 0) parts.splice(i, 1);
+    }
+    for (let i = rings.length - 1; i >= 0; i--) {
+      const r = rings[i]; r.life -= dt; r.r += (r.max - r.r) * Math.min(1, dt * 12);
+      if (r.life <= 0) rings.splice(i, 1);
+    }
+    for (let i = floats.length - 1; i >= 0; i--) {
+      const f = floats[i]; f.life -= dt; f.y -= 36 * dt;
+      if (f.life <= 0) floats.splice(i, 1);
+    }
+    if (shake > 0) shake = Math.max(0, shake - dt * 2.4);
+    if (hurtFlash > 0) hurtFlash = Math.max(0, hurtFlash - dt * 2);
+    if (bannerLife > 0) bannerLife = Math.max(0, bannerLife - dt);
+
+    ctx.save();
+    if (shake > 0.01) ctx.translate((Math.random() - 0.5) * shake * 14, (Math.random() - 0.5) * shake * 14);
+    drawBackground();
+    for (let i = 0; i < run.enemies.length; i++) drawEnemy(run.enemies[i]);
+    drawPlayer();
+
+    // 波纹
+    for (const r of rings) {
+      ctx.globalAlpha = Math.max(0, r.life / 0.55);
+      ctx.strokeStyle = r.color; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+    // 粒子
+    for (const p of parts) {
+      ctx.globalAlpha = Math.max(0, p.life / p.max);
+      ctx.fillStyle = p.color;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // 飘字
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const f of floats) {
+      ctx.globalAlpha = Math.max(0, f.life);
+      ctx.fillStyle = f.color; ctx.font = 'bold 24px "Microsoft YaHei"';
+      ctx.fillText(f.text, f.x, f.y);
+    }
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    if (hurtFlash > 0) {
+      ctx.fillStyle = 'rgba(200,40,20,' + (hurtFlash * 0.8).toFixed(3) + ')';
+      ctx.fillRect(0, 0, W, H);
+    }
+
+    drawHUD();
+    if (showTest) drawTestPanel();
+    else if (run.over) drawOver();
+
+    requestAnimationFrame(frame);
+  }
+
+  /** 重开 */
+  function reset() {
+    run = Core.createRun((Math.random() * 1e9) | 0);
+    keys = {}; rings = []; floats = []; parts = [];
+    shake = 0; banner = ''; bannerLife = 0; hurtFlash = 0;
+    showTest = false; test = null;
+  }
+
+  /** 跑自测 */
+  function doTest() {
+    showTest = true;
+    test = Core.runBatch(200);
+    window.__lastTest = test;
+    sfx('wave');
+  }
+
+  // ===== 事件 =====
+  cv.addEventListener('mousedown', function (e) {
+    const p = toDesign(e);
+    if (showTest) {
+      if (inRect(p, { x: 230 + 820 - 150, y: 150 + 470 - 58, w: 118, h: 38 })) showTest = false;
+      return;
+    }
+    if (run.over) {
+      if (inRect(p, { x: 450, y: 438, w: 160, h: 46 })) reset();
+      else if (inRect(p, { x: 670, y: 438, w: 160, h: 46 })) doTest();
+      return;
+    }
+    if (inRect(p, { x: 958, y: 682, w: 150, h: 42 })) { doTest(); return; }
+    if (inRect(p, { x: 1122, y: 682, w: 110, h: 42 })) { reset(); return; }
+  });
+
+  window.addEventListener('keydown', function (e) {
+    const k = e.key.toLowerCase();
+    if (k === ' ') e.preventDefault();
+    if (k === 'r') { reset(); return; }
+    if (k === 't') { doTest(); return; }
+    if (k === 'escape' && showTest) { showTest = false; return; }
+    keys[k] = true;
+    if (e.shiftKey) keys['shift'] = true;
+  });
+
+  window.addEventListener('keyup', function (e) {
+    const k = e.key.toLowerCase();
+    keys[k] = false;
+    if (!e.shiftKey) keys['shift'] = false;
+  });
+
+  window.addEventListener('blur', function () { keys = {}; });
+
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

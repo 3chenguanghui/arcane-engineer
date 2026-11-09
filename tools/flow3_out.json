@@ -1,0 +1,409 @@
+﻿{
+  "assertions": [
+    {
+      "name": "开局进入战斗",
+      "ok": true,
+      "detail": "playing"
+    },
+    {
+      "name": "每层 4–7 房间",
+      "ok": true,
+      "detail": 5
+    },
+    {
+      "name": "敌人全部绑定房间或为走廊巡逻怪",
+      "ok": true,
+      "detail": 6
+    },
+    {
+      "name": "无休整/宝箱/事件房刷怪",
+      "ok": true,
+      "detail": "{\"1:battle\":3,\"2:battle\":3}"
+    },
+    {
+      "name": "机械层敌人 art=mech",
+      "ok": true,
+      "detail": "mech"
+    },
+    {
+      "name": "机械层 ≥3 种房间变体",
+      "ok": true,
+      "detail": "2/0/1 全层=2,2,0,1,1"
+    },
+    {
+      "name": "本层房型 ≥4 种",
+      "ok": true,
+      "detail": "start,battle,chest,rest"
+    },
+    {
+      "name": "门已生成",
+      "ok": true,
+      "detail": 12
+    },
+    {
+      "name": "区域怪池 = 机械五种（P0 扩池）",
+      "ok": true,
+      "detail": "riveter,patrol,assembler,welder,crawler"
+    },
+    {
+      "name": "第 1 层走廊无巡逻怪（走廊安全规则保留）",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "name": "所有房间守军在所属房间内（房间分区成立）",
+      "ok": true,
+      "detail": "{\"total\":6,\"bad\":[],\"patrolBad\":[]}"
+    },
+    {
+      "name": "走廊巡逻怪没有一只钻进房间",
+      "ok": true,
+      "detail": "[]"
+    },
+    {
+      "name": "找到真实走廊点",
+      "ok": true,
+      "detail": "{\"x\":480.7540951871015,\"y\":763.403732811013}"
+    },
+    {
+      "name": "走廊不算进入房间（不触发战斗）",
+      "ok": true,
+      "detail": "{\"inRoom\":false,\"currentRoomId\":-1,\"hp\":100,\"enemiesNear\":0,\"doorsClosed\":0}"
+    },
+    {
+      "name": "走廊里门全部打开",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "name": "找到宝箱/事件房（逐层搜索）",
+      "ok": true,
+      "detail": "{\"floor\":1,\"room\":{\"id\":3,\"type\":\"chest\",\"cx\":1289.9998788704984,\"cy\":700.2934107760622}}"
+    },
+    {
+      "name": "宝箱/事件触发一次性奖励",
+      "ok": true,
+      "detail": "{\"rewarded\":true,\"crystals\":1,\"aether\":100,\"hp\":50}"
+    },
+    {
+      "name": "宝箱发结晶",
+      "ok": true,
+      "detail": "0→1"
+    },
+    {
+      "name": "存在有怪战斗房",
+      "ok": true,
+      "detail": "{\"id\":1,\"cx\":856.2606835075918,\"cy\":718.2944407050311,\"count\":3}"
+    },
+    {
+      "name": "进房触发落闸（门变红）",
+      "ok": true,
+      "detail": "{\"locked\":true,\"cleared\":false,\"currentRoomId\":1,\"doors\":[true,true,true,true]}"
+    },
+    {
+      "name": "清房后开门（即使顺带清层也不锁着）",
+      "ok": true,
+      "detail": "{\"cleared\":true,\"locked\":false,\"doors\":[false,false,false,false],\"mode\":\"playing\"}"
+    },
+    {
+      "name": "连杀计数到 5",
+      "ok": true,
+      "detail": "{\"count\":5,\"timer\":2.6,\"best\":5}"
+    },
+    {
+      "name": "5 连发奥能 +18",
+      "ok": true,
+      "detail": "2.5336000000000056→21"
+    },
+    {
+      "name": "HUD 显示连杀",
+      "ok": true,
+      "detail": "×5  2.6s"
+    },
+    {
+      "name": "第 2 层存在精英房",
+      "ok": true,
+      "detail": "{\"id\":4,\"type\":\"elite\",\"x\":348.3458153634036,\"y\":530.5623627949792,\"w\":356.87821732065447,\"h\":311.27842650557466,\"cx\":526.7849240237308,\"cy\":686.2015760477666,\"cleared\":false,\"locked\":false,\"variant\":1}"
+    },
+    {
+      "name": "精英房只刷强化版",
+      "ok": true,
+      "detail": "[{\"t\":\"graveter\",\"elite\":true,\"hp\":187},{\"t\":\"runesprite\",\"elite\":true,\"hp\":94},{\"t\":\"hexer\",\"elite\":true,\"hp\":135}]"
+    },
+    {
+      "name": "符文层敌人 art=rune",
+      "ok": true,
+      "detail": "rune"
+    },
+    {
+      "name": "渲染位置无越界（越界敌人数 = 0）",
+      "ok": true,
+      "detail": "outsideNow=0"
+    },
+    {
+      "name": "单帧瞬时越界 ≤ 7px（同帧内已夹回）",
+      "ok": true,
+      "detail": "maxLeak=4.8 samples=10"
+    },
+    {
+      "name": "全清后战斗房全部标记已清",
+      "ok": true,
+      "detail": "{\"mode\":\"reward\",\"floorCleared\":true,\"combatRooms\":3,\"clearedCombatRooms\":3,\"closedDoors\":0}"
+    },
+    {
+      "name": "全清后所有门打开",
+      "ok": true,
+      "detail": 0
+    },
+    {
+      "name": "全清后进入奖励面板",
+      "ok": true,
+      "detail": "reward"
+    },
+    {
+      "name": "选择奖励后回到 playing",
+      "ok": true,
+      "detail": "playing"
+    },
+    {
+      "name": "下楼到下一层并重建房间/门",
+      "ok": true,
+      "detail": "{\"floor\":3,\"mode\":\"playing\",\"enemies\":10,\"rooms\":5,\"doors\":11}"
+    },
+    {
+      "name": "死亡进入结算",
+      "ok": true,
+      "detail": "{\"mode\":\"result\",\"status\":\"dead\"}"
+    },
+    {
+      "name": "重开回到第 1 层满血",
+      "ok": true,
+      "detail": "{\"mode\":\"playing\",\"status\":\"playing\",\"floor\":1,\"hp\":100,\"hpMax\":100,\"enemies\":9,\"rooms\":7}"
+    },
+    {
+      "name": "帧率 ≥ 60",
+      "ok": true,
+      "detail": 120
+    },
+    {
+      "name": "无运行时错误",
+      "ok": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": {
+    "floor1": {
+      "rooms": [
+        {
+          "id": 0,
+          "type": "start",
+          "variant": 2
+        },
+        {
+          "id": 1,
+          "type": "battle",
+          "variant": 2
+        },
+        {
+          "id": 2,
+          "type": "battle",
+          "variant": 0
+        },
+        {
+          "id": 3,
+          "type": "chest",
+          "variant": 1
+        },
+        {
+          "id": 4,
+          "type": "rest",
+          "variant": 1
+        }
+      ],
+      "doors": 12,
+      "corridorRects": 8,
+      "groups": {
+        "1:battle": 3,
+        "2:battle": 3
+      }
+    },
+    "roomGuards": 6,
+    "patrols1": 0,
+    "corridor": {
+      "inRoom": false,
+      "currentRoomId": -1,
+      "hp": 100,
+      "enemiesNear": 0,
+      "doorsClosed": 0
+    },
+    "utilityFloor1": [
+      "chest",
+      "rest"
+    ],
+    "utilityRooms": {
+      "floor": 1,
+      "room": {
+        "id": 3,
+        "type": "chest",
+        "cx": 1289.9998788704984,
+        "cy": 700.2934107760622
+      }
+    },
+    "utility": {
+      "floor": 1,
+      "room": {
+        "id": 3,
+        "type": "chest",
+        "cx": 1289.9998788704984,
+        "cy": 700.2934107760622
+      },
+      "before": {
+        "c": 0,
+        "hp": 100
+      },
+      "after": {
+        "rewarded": true,
+        "crystals": 1,
+        "aether": 100,
+        "hp": 50
+      }
+    },
+    "locked": {
+      "locked": true,
+      "cleared": false,
+      "currentRoomId": 1,
+      "doors": [
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "opened": {
+      "killed": 3,
+      "cleared": true,
+      "locked": false,
+      "doors": [
+        false,
+        false,
+        false,
+        false
+      ],
+      "mode": "playing"
+    },
+    "combo": {
+      "combo": {
+        "count": 5,
+        "timer": 2.6,
+        "best": 5
+      },
+      "aetherBefore": 2.5336000000000056,
+      "aetherAfter": 21,
+      "hudCombo": "×5  2.6s",
+      "hudRoom": "休整点"
+    },
+    "elite": {
+      "room": {
+        "id": 4,
+        "type": "elite",
+        "x": 348.3458153634036,
+        "y": 530.5623627949792,
+        "w": 356.87821732065447,
+        "h": 311.27842650557466,
+        "cx": 526.7849240237308,
+        "cy": 686.2015760477666,
+        "cleared": false,
+        "locked": false,
+        "variant": 1
+      },
+      "pool": [
+        "graveter",
+        "runesprite",
+        "hexer"
+      ],
+      "hp": [
+        187,
+        94,
+        135
+      ],
+      "allElite": true
+    },
+    "leak": {
+      "maxLeak": 4.8,
+      "outsideNow": 0,
+      "samples": 10,
+      "detail": [
+        {
+          "roomId": 0,
+          "type": "battle",
+          "leaks": [
+            0.65,
+            0,
+            0
+          ],
+          "outNow": 0
+        },
+        {
+          "roomId": 1,
+          "type": "battle",
+          "leaks": [
+            0.83,
+            0.54,
+            0,
+            0
+          ],
+          "outNow": 0
+        },
+        {
+          "roomId": 4,
+          "type": "elite",
+          "leaks": [
+            0,
+            0,
+            4.8
+          ],
+          "outNow": 0
+        }
+      ]
+    },
+    "floorClear": {
+      "mode": "reward",
+      "floorCleared": true,
+      "combatRooms": 3,
+      "clearedCombatRooms": 3,
+      "closedDoors": 0
+    },
+    "fps": 120,
+    "mechRooms": [
+      {
+        "id": 0,
+        "type": "rest",
+        "v": 2,
+        "cx": 1176.7045815126503,
+        "cy": 619.5758452611967
+      },
+      {
+        "id": 1,
+        "type": "start",
+        "v": 1,
+        "cx": 229.9170671822697,
+        "cy": 930.037481193036
+      },
+      {
+        "id": 2,
+        "type": "battle",
+        "v": 0,
+        "cx": 398.0740407774773,
+        "cy": 384.75462811008094
+      },
+      {
+        "id": 3,
+        "type": "elite",
+        "v": 1,
+        "cx": 713.799316129011,
+        "cy": 1023.0860132987613
+      }
+    ],
+    "errors": []
+  }
+}

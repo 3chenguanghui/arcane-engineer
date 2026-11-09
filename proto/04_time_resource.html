@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型 4 · 时间作为唯一资源</title>
+<style>
+  /* ============================================================
+     基础排版：深色炉烬配色，左画布右面板
+     ============================================================ */
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(circle at 50% 0%, #1b1410 0%, #0a0807 55%, #050404 100%);
+    color: #e8ddcf;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  #app {
+    display: flex; gap: 18px;
+    height: 100%; padding: 18px;
+    align-items: stretch; justify-content: center;
+  }
+  #stage {
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+  }
+  canvas {
+    display: block;
+    width: min(72vh, 660px);
+    height: min(72vh, 660px);
+    border-radius: 10px;
+    box-shadow: 0 0 0 1px #3a2a1c, 0 18px 50px rgba(0,0,0,0.65);
+    cursor: crosshair;
+  }
+  #panel {
+    width: 330px; flex: 0 0 330px;
+    display: flex; flex-direction: column; gap: 12px;
+    overflow-y: auto; padding-right: 4px;
+  }
+  .card {
+    background: linear-gradient(180deg, rgba(40,28,20,0.92), rgba(22,16,12,0.92));
+    border: 1px solid #3d2c1e;
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  h1 {
+    font-size: 17px; margin: 0 0 6px;
+    letter-spacing: 1px; color: #ffb066;
+  }
+  h2 {
+    font-size: 13px; margin: 0 0 8px;
+    color: #c9a47a; letter-spacing: 1px; font-weight: 600;
+  }
+  .objective {
+    font-size: 12.5px; line-height: 1.75; color: #d8c8b4;
+  }
+  .objective b { color: #ffcf7a; }
+  .objective .danger { color: #ff7a5c; }
+  #clockWrap { margin-top: 4px; }
+  #clockNums {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 5px;
+  }
+  #clockBig {
+    font-size: 30px; font-weight: 800; color: #ffd9a0;
+    font-variant-numeric: tabular-nums; line-height: 1;
+  }
+  #clockBig.low { color: #ff6b4a; }
+  #clockUnit { font-size: 12px; color: #a8876a; }
+  #clockTrack {
+    height: 10px; border-radius: 6px; background: #241a13;
+    overflow: hidden; border: 1px solid #3c2a1c;
+  }
+  #clockFill {
+    height: 100%; width: 100%;
+    background: linear-gradient(90deg, #ff8a3d, #ffcf6a);
+    transition: width 0.12s linear;
+  }
+  #clockFill.low { background: linear-gradient(90deg, #ff3b2f, #ff7a4a); }
+  .row {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12.5px; margin-top: 6px; color: #bda78e;
+  }
+  .pips { display: flex; gap: 4px; }
+  .pip {
+    width: 13px; height: 13px; border-radius: 3px;
+    background: #3a2018; border: 1px solid #5a3324;
+  }
+  .pip.on { background: #ff6a4a; box-shadow: 0 0 8px rgba(255,90,60,0.55); }
+  #intents { display: flex; flex-direction: column; gap: 5px; }
+  .intent {
+    display: flex; align-items: center; gap: 7px;
+    font-size: 12px; color: #d3bda6;
+  }
+  .intent .tag {
+    flex: 0 0 auto; font-size: 10px; padding: 2px 5px; border-radius: 4px;
+    background: #3a2418; color: #ffb37a; border: 1px solid #5a3926;
+  }
+  .intent .t { margin-left: auto; font-variant-numeric: tabular-nums; color: #ff9d6b; }
+  .keys { font-size: 12px; line-height: 1.9; color: #9c8b78; }
+  .keys kbd {
+    display: inline-block; padding: 1px 6px; margin-right: 3px;
+    background: #2b1f17; border: 1px solid #4a3424; border-radius: 4px;
+    color: #e5c9a5; font-family: inherit; font-size: 11px;
+  }
+  button {
+    font-family: inherit; cursor: pointer;
+    background: linear-gradient(180deg, #6a3a1f, #472413);
+    color: #ffd8b0; border: 1px solid #8a4d2a; border-radius: 7px;
+    padding: 9px 12px; font-size: 13px; letter-spacing: 1px;
+    transition: filter 0.15s;
+  }
+  button:hover { filter: brightness(1.18); }
+  button:active { transform: translateY(1px); }
+  #btnTest {
+    width: 100%;
+    background: linear-gradient(180deg, #2a4d5a, #16303a);
+    border-color: #3f7a8c; color: #bfe9f5;
+  }
+  #testOut {
+    margin: 0; font-size: 11.5px; line-height: 1.65;
+    color: #b9d9c9; white-space: pre-wrap; word-break: break-all;
+    font-family: Consolas, "Microsoft YaHei", monospace;
+  }
+  #banner {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    padding: 18px 30px; border-radius: 12px; text-align: center;
+    background: rgba(10, 6, 4, 0.92); border: 1px solid #6a3a1f;
+    box-shadow: 0 0 60px rgba(0,0,0,0.8);
+    display: none; pointer-events: none; min-width: 260px;
+  }
+  #banner.show { display: block; }
+  #banner .big { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  #banner .sub { font-size: 12.5px; color: #b9a48d; line-height: 1.7; }
+  .win .big { color: #8fe3a8; }
+  .lose .big { color: #ff6b4a; }
+  #floaters {
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+  }
+  .floater {
+    position: absolute; font-size: 14px; font-weight: 700;
+    color: #ff9d6b; text-shadow: 0 2px 6px rgba(0,0,0,0.9);
+    animation: floatUp 0.85s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateY(-38px) scale(1.15); }
+  }
+  @media (max-width: 1080px) {
+    #app { flex-direction: column; align-items: center; overflow-y: auto; }
+    #panel { width: min(92vw, 660px); flex: 0 0 auto; }
+    canvas { width: min(80vh, 92vw); height: auto; aspect-ratio: 1; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv" width="660" height="660"></canvas>
+    <div id="banner"></div>
+    <div id="floaters"></div>
+  </div>
+
+  <div id="panel">
+    <div class="card">
+      <h1>余烬赛跑 · 时间即生命</h1>
+      <div class="objective">
+        <b>目标：</b>在时钟归零前清空 <b>5 波</b>敌人，再走到顶部裂隙撤离。<br>
+        <b>每走一步 −1 刻，每次施法 −3 刻，等待 −1 刻。</b><br>
+        <span class="danger">钟声归零 = 烧尽，和血量无关。</span>
+      </div>
+      <div id="clockWrap">
+        <div id="clockNums">
+          <span id="clockBig">160</span>
+          <span id="clockUnit">刻 / 于 160 刻烧尽</span>
+        </div>
+        <div id="clockTrack"><div id="clockFill"></div></div>
+      </div>
+      <div class="row">
+        <span>生命</span>
+        <span class="pips" id="hpPips"></span>
+      </div>
+      <div class="row">
+        <span>波次</span>
+        <span id="waveText">1 / 3</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>即将发生（按刻排序）</h2>
+      <div id="intents"></div>
+    </div>
+
+    <div class="card">
+      <h2>操作</h2>
+      <div class="keys">
+        <kbd>W A S D</kbd><kbd>方向键</kbd> 移动（−1 刻）<br>
+        <kbd>J</kbd> 或 <kbd>左键</kbd> 施法（−3 刻，直线 4 格）<br>
+        <kbd>空格</kbd> 等待（−1 刻）<br>
+        <kbd>R</kbd> 重开
+      </div>
+    </div>
+
+    <div class="card">
+      <button id="btnTest">跑 200 局自测（激进 / 保守 / 算时）</button>
+      <pre id="testOut">尚未运行。点上面按钮。</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     核心逻辑（无 DOM、可被测试脚本单独提取）
+     ------------------------------------------------------------
+     设计要点：
+     1) 玩家每次动作都推进全局时钟，敌人按"时刻表"在同一时钟上行动；
+     2) 时钟归零即失败，所以"等"本身也是消耗；
+     3) 击杀敌人会删掉它未来所有行动，等于把时间买回来。
+     ============================================================ -->
+<script id="core">
+const Core = (function () {
+  'use strict';
+
+  /* ---------- 常量 ---------- */
+  const W = 9;                    // 网格宽
+  const H = 9;                    // 网格高
+  const DEADLINE = 160;           // 一局总刻数（归零即烧尽）
+  const PLAYER_MAX_HP = 9;        // 玩家生命
+  const CAST_DAMAGE = 2;          // 每次施法伤害
+  const CAST_RANGE = 4;           // 施法直线射程
+  const COST = { move: 1, cast: 3, wait: 1 };
+  const EXIT = { x: 4, y: 0 };    // 撤离点（第三波清完后启用）
+
+  /* ---------- 波次表 ----------
+     type: slag=邻近爆炸 / cross=十字射线 / clock=烧钟（扣刻数）
+     hp / period（每隔几刻行动一次）/ offset（开局后几刻第一次行动） */
+  const WAVE_DEFS = [
+    [
+      { type: 'slag',  x: 1, y: 2, hp: 2, period: 5, offset: 3 },
+      { type: 'slag',  x: 7, y: 2, hp: 2, period: 5, offset: 5 },
+      { type: 'cross', x: 4, y: 1, hp: 3, period: 7, offset: 6 }
+    ],
+    [
+      { type: 'slag',  x: 2, y: 3, hp: 2, period: 4, offset: 2 },
+      { type: 'cross', x: 6, y: 2, hp: 3, period: 6, offset: 4 },
+      { type: 'cross', x: 2, y: 1, hp: 3, period: 6, offset: 5 }
+    ],
+    [
+      { type: 'clock', x: 4, y: 1, hp: 4, period: 6, offset: 3 },
+      { type: 'slag',  x: 1, y: 3, hp: 2, period: 4, offset: 2 },
+      { type: 'slag',  x: 7, y: 3, hp: 2, period: 4, offset: 4 }
+    ],
+    [
+      { type: 'slag',  x: 3, y: 2, hp: 2, period: 4, offset: 2 },
+      { type: 'slag',  x: 5, y: 2, hp: 2, period: 4, offset: 3 },
+      { type: 'cross', x: 1, y: 1, hp: 3, period: 6, offset: 4 },
+      { type: 'cross', x: 7, y: 1, hp: 3, period: 6, offset: 5 }
+    ],
+    [
+      { type: 'clock', x: 4, y: 1, hp: 5, period: 5, offset: 3 },
+      { type: 'cross', x: 2, y: 2, hp: 3, period: 6, offset: 4 },
+      { type: 'cross', x: 6, y: 2, hp: 3, period: 6, offset: 5 },
+      { type: 'slag',  x: 4, y: 3, hp: 2, period: 4, offset: 2 }
+    ]
+  ];
+
+  const TYPE_NAME = { slag: '熔渣', cross: '驭火者', clock: '烧钟' };
+
+  /* ---------- 随机数（种子可复现） ---------- */
+  /**
+   * mulberry32 伪随机：同一 seed 永远得到同一串数，保证自测可复现
+   * @param {number} seed 种子
+   * @returns {function():number} 返回 0–1 的随机函数
+   */
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /* ---------- 基础工具 ---------- */
+  /**
+   * 曼哈顿距离
+   * @param {number} x1 起点 x
+   * @param {number} y1 起点 y
+   * @param {number} x2 终点 x
+   * @param {number} y2 终点 y
+   * @returns {number} 距离
+   */
+  function manhattan(x1, y1, x2, y2) {
+    return Math.abs(x1 - x2) + Math.abs(y1 - y2);
+  }
+
+  /**
+   * 坐标是否在地图内
+   * @param {number} x x
+   * @param {number} y y
+   * @returns {boolean} 是否合法
+   */
+  function inBounds(x, y) {
+    return x >= 0 && x < W && y >= 0 && y < H;
+  }
+
+  /**
+   * 某格子上是否有活着的敌人
+   * @param {Object} st 局面
+   * @param {number} x x
+   * @param {number} y y
+   * @returns {Object|null} 敌人或 null
+   */
+  function enemyAt(st, x, y) {
+    for (let i = 0; i < st.enemies.length; i += 1) {
+      const e = st.enemies[i];
+      if (e.alive && e.x === x && e.y === y) return e;
+    }
+    return null;
+  }
+
+  /**
+   * 存活敌人列表
+   * @param {Object} st 局面
+   * @returns {Array} 敌人数组
+   */
+  function aliveEnemies(st) {
+    return st.enemies.filter(function (e) { return e.alive; });
+  }
+
+  /**
+   * 该类型敌人的行动覆盖了哪些格子
+   * @param {Object} e 敌人
+   * @returns {Array<{x:number,y:number}>} 格子列表
+   */
+  function areaOf(e) {
+    const out = [];
+    if (e.type === 'slag') {
+      // 邻近 8 格 + 自身格（切比雪夫距离 ≤ 1）
+      for (let dy = -1; dy <= 1; dy += 1) {
+        for (let dx = -1; dx <= 1; dx += 1) {
+          if (inBounds(e.x + dx, e.y + dy)) out.push({ x: e.x + dx, y: e.y + dy });
+        }
+      }
+    } else if (e.type === 'cross') {
+      // 同行同列，各 3 格（比玩家射程短 1 格：想打到它，必须站进它的火力线）
+      for (let k = 1; k <= 3; k += 1) {
+        if (inBounds(e.x + k, e.y)) out.push({ x: e.x + k, y: e.y });
+        if (inBounds(e.x - k, e.y)) out.push({ x: e.x - k, y: e.y });
+        if (inBounds(e.x, e.y + k)) out.push({ x: e.x, y: e.y + k });
+        if (inBounds(e.x, e.y - k)) out.push({ x: e.x, y: e.y - k });
+      }
+    }
+    // clock 不占格子（它扣的是刻数）
+    return out;
+  }
+
+  /**
+   * 预测 (from, to] 时间段内所有敌人行动（不改变局面）
+   * @param {Object} st 局面
+   * @param {number} from 起始刻（不含）
+   * @param {number} to 结束刻（含）
+   * @returns {Array<{at:number, e:Object, kind:string}>} 按时间排序的行动
+   */
+  function eventsBetween(st, from, to) {
+    const list = [];
+    st.enemies.forEach(function (e) {
+      if (!e.alive) return;
+      let at = e.nextAt;
+      // 敌人静态不动，行程可直接推算
+      let guard = 0;
+      while (at <= to && guard < 64) {
+        if (at > from) list.push({ at: at, e: e, kind: e.type });
+        at += e.period;
+        guard += 1;
+      }
+    });
+    list.sort(function (a, b) {
+      return a.at - b.at || a.e.id - b.e.id;
+    });
+    return list;
+  }
+
+  /**
+   * 判断某格在 (from, to] 内是否会被打中
+   * @param {Object} st 局面
+   * @param {number} x 格子 x
+   * @param {number} y 格子 y
+   * @param {number} from 起始刻
+   * @param {number} to 结束刻
+   * @returns {boolean} true = 会被打中
+   */
+  function threatenedAt(st, x, y, from, to) {
+    const evs = eventsBetween(st, from, to);
+    for (let i = 0; i < evs.length; i += 1) {
+      const ev = evs[i];
+      if (ev.e.type === 'clock') continue;
+      const area = areaOf(ev.e);
+      for (let k = 0; k < area.length; k += 1) {
+        if (area[k].x === x && area[k].y === y) return true;
+      }
+    }
+    return false;
+  }
+
+  /* ---------- 局面构建 ---------- */
+  /**
+   * 生成某一波敌人（相对当前时刻排行动表）
+   * @param {Object} st 局面
+   * @param {number} waveIndex 波次下标 0–2
+   * @returns {void}
+   */
+  function spawnWave(st, waveIndex) {
+    const defs = WAVE_DEFS[waveIndex] || [];
+    defs.forEach(function (d, i) {
+      st.enemies.push({
+        id: st.nextEnemyId,
+        type: d.type,
+        name: TYPE_NAME[d.type] + '·' + (i + 1),
+        x: d.x, y: d.y,
+        hp: d.hp, maxHp: d.hp,
+        period: d.period,
+        nextAt: st.t + d.offset,
+        alive: true
+      });
+      st.nextEnemyId += 1;
+    });
+  }
+
+  /**
+   * 开一局
+   * @param {number} seed 随机种子
+   * @returns {Object} 局面
+   */
+  function newRun(seed) {
+    const st = {
+      seed: seed >>> 0,
+      rng: mulberry32(seed >>> 0),
+      t: 0,
+      deadline: DEADLINE,
+      wave: 0,
+      wavesTotal: WAVE_DEFS.length,
+      player: { x: 4, y: 8, hp: PLAYER_MAX_HP, maxHp: PLAYER_MAX_HP },
+      enemies: [],
+      nextEnemyId: 1,
+      status: 'playing',          // playing | win | lose
+      reason: null,               // time | hp | exit
+      exitOpen: false,
+      lastAction: null,
+      prevPos: null,
+      steps: 0,
+      hitsTaken: 0,
+      timeBurned: 0               // 被烧钟额外扣掉的刻数（统计用）
+    };
+    spawnWave(st, 0);
+    return st;
+  }
+
+  /* ---------- 结算 ---------- */
+  /**
+   * 结算所有到点的敌人行动（严格按时刻顺序）
+   * @param {Object} st 局面
+   * @returns {Array} 本次结算的行动记录（给渲染层做反馈）
+   */
+  function resolveEvents(st) {
+    const fired = [];
+    let guard = 0;
+    while (guard < 128) {
+      // 找最早到点的行动
+      let best = null;
+      st.enemies.forEach(function (e) {
+        if (!e.alive) return;
+        if (e.nextAt <= st.t && (!best || e.nextAt < best.nextAt ||
+            (e.nextAt === best.nextAt && e.id < best.id))) {
+          best = e;
+        }
+      });
+      if (!best) break;
+
+      // 烧钟：额外烧掉 2 刻（并且会连锁触发更多行动，所以用 while）
+      if (best.type === 'clock') {
+        st.deadline -= 2;
+        st.timeBurned += 2;
+        fired.push({ id: best.id, kind: 'clock', at: best.nextAt, x: best.x, y: best.y });
+      } else {
+        const area = areaOf(best);
+        let hit = false;
+        for (let i = 0; i < area.length; i += 1) {
+          if (area[i].x === st.player.x && area[i].y === st.player.y) { hit = true; break; }
+        }
+        if (hit) {
+          st.player.hp -= 1;
+          st.hitsTaken += 1;
+        }
+        fired.push({ id: best.id, kind: best.type, at: best.nextAt, x: best.x, y: best.y, hit: hit });
+      }
+      best.nextAt += best.period;
+      guard += 1;
+    }
+    return fired;
+  }
+
+  /**
+   * 清波检查：清空当前波后自动刷下一波；最后一波清完开撤离点
+   * @param {Object} st 局面
+   * @returns {void}
+   */
+  function checkWave(st) {
+    if (aliveEnemies(st).length > 0) return;
+    if (st.wave < st.wavesTotal - 1) {
+      st.wave += 1;
+      spawnWave(st, st.wave);
+    } else {
+      st.exitOpen = true;
+    }
+  }
+
+  /* ---------- 玩家动作 ---------- */
+  /**
+   * 执行一个动作：先落地，再推时钟，再结算敌人行动
+   * 顺序很关键：先移动再结算 = "在爆炸前挪出去"能成立
+   * @param {Object} st 局面
+   * @param {Object} action {type:'move'|'cast'|'wait', dx?, dy?}
+   * @returns {Object} 本次动作结果（给渲染层）
+   */
+  function act(st, action) {
+    if (!st || st.status !== 'playing' || !action) return null;
+    const type = action.type;
+    const record = { type: type, cost: 0, cast: null, moved: null, fired: [], blocked: null };
+
+    if (type === 'move') {
+      const nx = st.player.x + (action.dx || 0);
+      const ny = st.player.y + (action.dy || 0);
+      if (!inBounds(nx, ny) || enemyAt(st, nx, ny)) {
+        record.blocked = 'move';
+        return record;                       // 非法移动不花时间
+      }
+      st.prevPos = { x: st.player.x, y: st.player.y };   // 防抖：让策略知道上一格
+      st.player.x = nx;
+      st.player.y = ny;
+      record.moved = { x: nx, y: ny };
+      record.cost = COST.move;
+    } else if (type === 'cast') {
+      const dx = action.dx || 0;
+      const dy = action.dy || 0;
+      if ((dx === 0 && dy === 0) || (dx !== 0 && dy !== 0)) {
+        record.blocked = 'cast';
+        return record;
+      }
+      const hits = [];
+      for (let k = 1; k <= CAST_RANGE; k += 1) {
+        const tx = st.player.x + dx * k;
+        const ty = st.player.y + dy * k;
+        if (!inBounds(tx, ty)) break;
+        const e = enemyAt(st, tx, ty);
+        if (e) {
+          e.hp -= CAST_DAMAGE;
+          if (e.hp <= 0) e.alive = false;
+          hits.push({ id: e.id, x: tx, y: ty, dead: !e.alive });
+        }
+      }
+      record.cast = { dx: dx, dy: dy, hits: hits };
+      record.cost = COST.cast;
+    } else if (type === 'wait') {
+      record.cost = COST.wait;
+    } else {
+      return null;
+    }
+
+    // 推时钟
+    st.t += record.cost;
+    st.steps += 1;
+    // 结算敌人行动
+    record.fired = resolveEvents(st);
+
+    // 判负：血尽 or 烧尽
+    if (st.player.hp <= 0) {
+      st.status = 'lose';
+      st.reason = 'hp';
+    } else if (st.t >= st.deadline) {
+      st.status = 'lose';
+      st.reason = 'time';
+    }
+
+    // 清波 / 撤离
+    checkWave(st);
+    if (st.status === 'playing' && st.exitOpen &&
+        st.player.x === EXIT.x && st.player.y === EXIT.y) {
+      st.status = 'win';
+      st.reason = 'exit';
+    }
+
+    st.lastAction = record;
+    return record;
+  }
+
+  /* ---------- 自测机器人 ---------- */
+
+  /**
+   * 找当前能直线打到的敌人方向（优先血少的，烧钟最高优先）
+   * @param {Object} st 局面
+   * @returns {Array<{dx:number,dy:number,targets:Array}>} 候选方向
+   */
+  function castOptions(st) {
+    const dirs = [{ dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 }];
+    const out = [];
+    dirs.forEach(function (d) {
+      const targets = [];
+      for (let k = 1; k <= CAST_RANGE; k += 1) {
+        const tx = st.player.x + d.dx * k;
+        const ty = st.player.y + d.dy * k;
+        if (!inBounds(tx, ty)) break;
+        const e = enemyAt(st, tx, ty);
+        if (e) targets.push(e);
+      }
+      if (targets.length) out.push({ dx: d.dx, dy: d.dy, targets: targets });
+    });
+    // 烧钟优先，其次总血量最低
+    out.sort(function (a, b) {
+      const ca = a.targets.some(function (e) { return e.type === 'clock'; }) ? 1 : 0;
+      const cb = b.targets.some(function (e) { return e.type === 'clock'; }) ? 1 : 0;
+      if (ca !== cb) return cb - ca;
+      const ha = a.targets.reduce(function (s, e) { return s + e.hp; }, 0);
+      const hb = b.targets.reduce(function (s, e) { return s + e.hp; }, 0);
+      return ha - hb;
+    });
+    return out;
+  }
+
+  /**
+   * 朝某目标走一步（四向贪心，避开敌人格）
+   * @param {Object} st 局面
+   * @param {number} tx 目标 x
+   * @param {number} ty 目标 y
+   * @returns {Object|null} move 动作
+   */
+  function stepToward(st, tx, ty) {
+    const dx = Math.sign(tx - st.player.x);
+    const dy = Math.sign(ty - st.player.y);
+    const tries = [];
+    if (Math.abs(tx - st.player.x) >= Math.abs(ty - st.player.y)) {
+      if (dx) tries.push({ dx: dx, dy: 0 });
+      if (dy) tries.push({ dx: 0, dy: dy });
+    } else {
+      if (dy) tries.push({ dx: 0, dy: dy });
+      if (dx) tries.push({ dx: dx, dy: 0 });
+    }
+    for (let i = 0; i < tries.length; i += 1) {
+      const nx = st.player.x + tries[i].dx;
+      const ny = st.player.y + tries[i].dy;
+      if (inBounds(nx, ny) && !enemyAt(st, nx, ny)) {
+        return { type: 'move', dx: tries[i].dx, dy: tries[i].dy };
+      }
+    }
+    return null;
+  }
+
+  /**
+   * 找相邻的安全格（在接下来 horizon 刻内不挨打）
+   * @param {Object} st 局面
+   * @param {number} horizon 观察窗口（刻）
+   * @param {boolean} awayFromEnemy 是否优先远离敌人
+   * @param {boolean} strict true = 没有绝对安全格就返回 null
+   * @returns {Object|null} move 动作
+   */
+  function findSafeStep(st, horizon, awayFromEnemy, strict) {
+    const dirs = [{ dx: 1, dy: 0 }, { dx: -1, dy: 0 }, { dx: 0, dy: 1 }, { dx: 0, dy: -1 }];
+    let best = null;
+    let bestScore = -Infinity;
+    dirs.forEach(function (d) {
+      const nx = st.player.x + d.dx;
+      const ny = st.player.y + d.dy;
+      if (!inBounds(nx, ny) || enemyAt(st, nx, ny)) return;
+      // 移动本身花 1 刻，所以检查 (t+1, t+1+horizon]
+      const safe = !threatenedAt(st, nx, ny, st.t + 1, st.t + 1 + horizon);
+      if (strict && !safe) return;
+      let score = 0;
+      if (safe) score += 100;
+      // 防抖：刚离开的格子扣分，避免在两张"都危险"的格子间来回横跳
+      if (st.prevPos && st.prevPos.x === nx && st.prevPos.y === ny) score -= 40;
+      if (awayFromEnemy) {
+        let near = 99;
+        aliveEnemies(st).forEach(function (e) {
+          near = Math.min(near, manhattan(nx, ny, e.x, e.y));
+        });
+        score += near * 3;
+      } else {
+        // 靠近可直线攻击的位置
+        aliveEnemies(st).forEach(function (e) {
+          if (e.x === nx || e.y === ny) score += 6;
+        });
+      }
+      if (score > bestScore) { bestScore = score; best = { type: 'move', dx: d.dx, dy: d.dy }; }
+    });
+    return best;
+  }
+
+  /**
+   * 估算清场还需要多少刻（施法次数 × 3 + 走位粗估）
+   * @param {Object} st 局面
+   * @returns {number} 估算刻数
+   */
+  function estimateNeed(st) {
+    let castsLeft = 0;
+    aliveEnemies(st).forEach(function (e) {
+      castsLeft += Math.ceil(e.hp / CAST_DAMAGE);
+    });
+    // 后续波次按平均值补
+    const wavesLeft = st.wavesTotal - 1 - st.wave;
+    if (wavesLeft > 0) castsLeft += wavesLeft * 4;
+    return castsLeft * COST.cast + 4;
+  }
+
+  /**
+   * 各类策略的大脑
+   * @param {Object} st 局面
+   * @param {string} policy aggressive | conservative | balanced
+   * @returns {Object|null} 下一步动作
+   */
+  function chooseAction(st, policy) {
+    if (st.status !== 'playing') return null;
+    const options = castOptions(st);
+
+    // 撤离点打开：直奔出口
+    if (st.exitOpen) {
+      if (st.player.x === EXIT.x && st.player.y === EXIT.y) return null;
+      return stepToward(st, EXIT.x, EXIT.y);
+    }
+
+    if (policy === 'aggressive') {
+      if (options.length) {
+        // 永远打，不躲
+        return { type: 'cast', dx: options[0].dx, dy: options[0].dy };
+      }
+      const target = aliveEnemies(st)[0];
+      if (!target) return { type: 'wait' };
+      return stepToward(st, target.x, target.y) || { type: 'wait' };
+    }
+
+    if (policy === 'conservative') {
+      // 1) 当前格在 4 刻内有威胁 → 立刻躲
+      if (threatenedAt(st, st.player.x, st.player.y, st.t, st.t + 4)) {
+        const safe = findSafeStep(st, 8, true);
+        if (safe) return safe;
+        // 没安全格就等（等也会烧刻，这正是"慢就是死"）
+        return { type: 'wait' };
+      }
+      // 2) 只有确认施法 3 刻内安全才打
+      if (options.length && !threatenedAt(st, st.player.x, st.player.y, st.t, st.t + 3)) {
+        return { type: 'cast', dx: options[0].dx, dy: options[0].dy };
+      }
+      // 3) 否则继续躲
+      const safe = findSafeStep(st, 8, true);
+      if (safe) return safe;
+      return { type: 'wait' };
+    }
+
+    // balanced：按预算决定敢不敢冒险
+    const remain = st.deadline - st.t;
+    const need = estimateNeed(st);
+    const urgent = remain < need * 1.2;
+    const fragile = st.player.hp <= 3;
+    const dangerDuringCast = threatenedAt(st, st.player.x, st.player.y, st.t, st.t + 3);
+
+    // 施法期间会挨打：先找"绝对安全且仍在射线上"的相邻格
+    if (options.length && !urgent && dangerDuringCast) {
+      const safe = findSafeStep(st, 4, false, true);
+      if (safe) return safe;
+    }
+    // 血少且马上要挨打：无条件躲（严格安全，宁可绕路）
+    if (fragile && threatenedAt(st, st.player.x, st.player.y, st.t, st.t + 2)) {
+      const safe = findSafeStep(st, 4, true, true);
+      if (safe) return safe;
+    }
+    if (options.length) {
+      return { type: 'cast', dx: options[0].dx, dy: options[0].dy };
+    }
+
+    // 找"同行/同列且在射程内"的位置
+    const alive = aliveEnemies(st);
+    if (alive.length) {
+      const e = alive[0];
+      const tx = e.x;
+      const ty = e.y;
+      // 先走到能直线打到的位置
+      const px = st.player.x;
+      const py = st.player.y;
+      if (px !== tx && py !== ty) {
+        const viaX = { x: tx, y: py };
+        const viaY = { x: px, y: ty };
+        const pick = manhattan(px, py, viaX.x, viaX.y) <= manhattan(px, py, viaY.x, viaY.y) ? viaX : viaY;
+        return stepToward(st, pick.x, pick.y) || { type: 'wait' };
+      }
+      // 已经在同行/同列，靠近到 4 格内
+      if (manhattan(px, py, tx, ty) > CAST_RANGE) {
+        return stepToward(st, tx, ty) || { type: 'wait' };
+      }
+      return { type: 'wait' };
+    }
+    return { type: 'wait' };
+  }
+
+  /**
+   * 自动玩一局
+   * @param {string} policy 策略名
+   * @param {number} seed 种子
+   * @returns {{win:boolean,reason:string,t:number,steps:number,hp:number}} 结果
+   */
+  function autoplay(policy, seed) {
+    const st = newRun(seed);
+    let guard = 0;
+    while (st.status === 'playing' && guard < 400) {
+      const action = chooseAction(st, policy);
+      if (!action) break;
+      act(st, action);
+      guard += 1;
+    }
+    return {
+      win: st.status === 'win',
+      reason: st.status === 'win' ? 'exit' : (st.reason || 'stuck'),
+      t: st.t,
+      steps: st.steps,
+      hp: st.player.hp
+    };
+  }
+
+  /**
+   * 批量跑 n 局并汇总
+   * @param {string} policy 策略名
+   * @param {number} n 局数
+   * @returns {{policy:string,n:number,winRate:number,timeout:number,dead:number,avgSteps:number,avgLeft:number}}
+   */
+  function runBatch(policy, n) {
+    let win = 0, timeout = 0, dead = 0, steps = 0, left = 0;
+    for (let i = 0; i < n; i += 1) {
+      const r = autoplay(policy, 1000 + i * 7919);
+      if (r.win) { win += 1; left += Math.max(0, DEADLINE - r.t); }
+      else if (r.reason === 'time') timeout += 1;
+      else dead += 1;
+      steps += r.steps;
+    }
+    return {
+      policy: policy,
+      n: n,
+      winRate: win / n,
+      timeout: timeout / n,
+      dead: dead / n,
+      avgSteps: steps / n,
+      avgLeft: win ? left / win : 0
+    };
+  }
+
+  /* ---------- 对外接口 ---------- */
+  return {
+    W: W, H: H, DEADLINE: DEADLINE, COST: COST, EXIT: EXIT,
+    PLAYER_MAX_HP: PLAYER_MAX_HP, CAST_RANGE: CAST_RANGE, CAST_DAMAGE: CAST_DAMAGE,
+    TYPE_NAME: TYPE_NAME,
+    newRun: newRun,
+    act: act,
+    aliveEnemies: aliveEnemies,
+    enemyAt: enemyAt,
+    areaOf: areaOf,
+    eventsBetween: eventsBetween,
+    threatenedAt: threatenedAt,
+    castOptions: castOptions,
+    chooseAction: chooseAction,
+    autoplay: autoplay,
+    runBatch: runBatch,
+    manhattan: manhattan
+  };
+})();
+</script>
+
+<!-- ============================================================
+     渲染与输入层（依赖 Core）
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  const canvas = document.getElementById('cv');
+  const ctx = canvas.getContext('2d');
+  const TILE = 66;
+  const PAD = 33;
+
+  let st = Core.newRun(Date.now() % 100000);
+  let visual = {
+    cast: null,          // {dx,dy,until}
+    hitFlash: 0,
+    deathMarks: [],      // 敌人死亡位置残留
+    floaters: []
+  };
+
+  /**
+   * 网格坐标 → 画布像素（取格子中心）
+   * @param {number} x 格子 x
+   * @param {number} y 格子 y
+   * @returns {{x:number,y:number}} 像素坐标
+   */
+  function cellCenter(x, y) {
+    return { x: PAD + x * TILE + TILE / 2, y: PAD + y * TILE + TILE / 2 };
+  }
+
+  /**
+   * 画布像素 → 网格坐标
+   * @param {number} px 像素 x
+   * @param {number} py 像素 y
+   * @returns {{x:number,y:number}} 格子坐标
+   */
+  function pixelToCell(px, py) {
+    return {
+      x: Math.floor((px - PAD) / TILE),
+      y: Math.floor((py - PAD) / TILE)
+    };
+  }
+
+  /**
+   * 重开一局
+   * @param {number} seed 种子
+   * @returns {void}
+   */
+  function restart(seed) {
+    st = Core.newRun(seed);
+    visual = { cast: null, hitFlash: 0, deathMarks: [], floaters: [] };
+    hideBanner();
+    syncPanel();
+  }
+
+  /* ---------- 绘制 ---------- */
+  /**
+   * 画地板与网格
+   * @returns {void}
+   */
+  function drawFloor() {
+    // 底色
+    ctx.fillStyle = '#120d0a';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let y = 0; y < Core.H; y += 1) {
+      for (let x = 0; x < Core.W; x += 1) {
+        const cx = PAD + x * TILE;
+        const cy = PAD + y * TILE;
+        const shade = 0.5 + ((x * 7 + y * 13) % 5) * 0.035;
+        ctx.fillStyle = 'rgba(' + Math.round(38 * shade) + ',' +
+          Math.round(28 * shade) + ',' + Math.round(21 * shade) + ',1)';
+        ctx.fillRect(cx + 1, cy + 1, TILE - 2, TILE - 2);
+        // 细网格线
+        ctx.strokeStyle = 'rgba(120, 82, 52, 0.16)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(cx + 0.5, cy + 0.5, TILE - 1, TILE - 1);
+      }
+    }
+
+    // 撤离点
+    if (st.exitOpen) {
+      const p = cellCenter(Core.EXIT.x, Core.EXIT.y);
+      const pulse = 0.5 + 0.5 * Math.sin(performance.now() / 260);
+      const grad = ctx.createRadialGradient(p.x, p.y, 4, p.x, p.y, TILE * 0.62);
+      grad.addColorStop(0, 'rgba(140, 255, 210, ' + (0.55 * pulse) + ')');
+      grad.addColorStop(1, 'rgba(140, 255, 210, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(p.x - TILE, p.y - TILE, TILE * 2, TILE * 2);
+      ctx.strokeStyle = 'rgba(160, 255, 220, 0.9)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, TILE * 0.3, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(190, 255, 232, 0.95)';
+      ctx.font = 'bold 13px "Microsoft YaHei"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('撤离', p.x, p.y);
+    }
+  }
+
+  /**
+   * 画敌人未来的打击范围（预告）
+   * @returns {void}
+   */
+  function drawTelegraph() {
+    const evs = Core.eventsBetween(st, st.t, st.t + 8);
+    const map = new Map();
+    evs.forEach(function (ev) {
+      if (ev.e.type === 'clock') return;
+      const area = Core.areaOf(ev.e);
+      area.forEach(function (a) {
+        const key = a.x + ',' + a.y;
+        if (!map.has(key) || map.get(key).at > ev.at) map.set(key, { x: a.x, y: a.y, at: ev.at });
+      });
+    });
+    map.forEach(function (cell) {
+      const p = cellCenter(cell.x, cell.y);
+      const left = Math.max(1, cell.at - st.t);
+      const alpha = 0.10 + 0.055 * (9 - Math.min(9, left));
+      ctx.fillStyle = 'rgba(255, 70, 40, ' + alpha + ')';
+      ctx.fillRect(PAD + cell.x * TILE + 2, PAD + cell.y * TILE + 2, TILE - 4, TILE - 4);
+      ctx.strokeStyle = 'rgba(255, 96, 60, 0.55)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(PAD + cell.x * TILE + 2.5, PAD + cell.y * TILE + 2.5, TILE - 5, TILE - 5);
+      ctx.fillStyle = 'rgba(255, 186, 150, 0.9)';
+      ctx.font = 'bold 16px Consolas';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(String(left), p.x, p.y);
+    });
+  }
+
+  /**
+   * 画一个敌人（形状按类型区分）
+   * @param {Object} e 敌人
+   * @returns {void}
+   */
+  function drawEnemy(e) {
+    const p = cellCenter(e.x, e.y);
+    const r = e.type === 'clock' ? 22 : 20;
+    ctx.save();
+    ctx.translate(p.x, p.y);
+
+    // 类型外形
+    if (e.type === 'slag') {
+      ctx.fillStyle = '#4a2a1c';
+      ctx.strokeStyle = '#ff8a4a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < 8; i += 1) {
+        const ang = (Math.PI * 2 * i) / 8;
+        const rr = r + (i % 2 ? -4 : 2);
+        ctx.lineTo(Math.cos(ang) * rr, Math.sin(ang) * rr);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // 裂纹
+      ctx.strokeStyle = 'rgba(255, 170, 90, 0.75)';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.moveTo(-8, -6); ctx.lineTo(2, 2); ctx.lineTo(-3, 10);
+      ctx.stroke();
+    } else if (e.type === 'cross') {
+      ctx.fillStyle = '#2d2438';
+      ctx.strokeStyle = '#c48bff';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -r - 2); ctx.lineTo(r + 2, 0);
+      ctx.lineTo(0, r + 2); ctx.lineTo(-r - 2, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(230, 190, 255, 0.85)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(-9, 0); ctx.lineTo(9, 0);
+      ctx.moveTo(0, -9); ctx.lineTo(0, 9);
+      ctx.stroke();
+    } else {
+      // 烧钟：六边形 + 指针
+      ctx.fillStyle = '#3a1e16';
+      ctx.strokeStyle = '#ffcf6a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (let i = 0; i < 6; i += 1) {
+        const ang = (Math.PI * 2 * i) / 6 - Math.PI / 2;
+        ctx.lineTo(Math.cos(ang) * r, Math.sin(ang) * r);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      const ang = (performance.now() / 420) % (Math.PI * 2);
+      ctx.strokeStyle = '#ffe9b0';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(Math.cos(ang) * 11, Math.sin(ang) * 11);
+      ctx.stroke();
+    }
+
+    // 血条
+    const w = 34;
+    const hpW = e.maxHp ? (e.hp / e.maxHp) * w : 0;
+    ctx.fillStyle = 'rgba(0,0,0,0.6)';
+    ctx.fillRect(-w / 2, r + 7, w, 4);
+    ctx.fillStyle = e.type === 'clock' ? '#ffcf6a' : '#ff7a5c';
+    ctx.fillRect(-w / 2, r + 7, hpW, 4);
+
+    // 下一击倒计时
+    const left = Math.max(1, e.nextAt - st.t);
+    ctx.fillStyle = e.type === 'clock' ? 'rgba(255, 220, 150, 0.95)' : 'rgba(255, 150, 120, 0.95)';
+    ctx.font = 'bold 11px Consolas';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText((e.type === 'clock' ? '烧 ' : '') + left, 0, -r - 9);
+
+    ctx.restore();
+  }
+
+  /**
+   * 画玩家
+   * @returns {void}
+   */
+  function drawPlayer() {
+    const p = cellCenter(st.player.x, st.player.y);
+    const t = performance.now() / 1000;
+    const pulse = 1 + Math.sin(t * 6) * 0.06;
+
+    // 外发光
+    const grad = ctx.createRadialGradient(p.x, p.y, 2, p.x, p.y, 34);
+    grad.addColorStop(0, 'rgba(255, 220, 150, 0.55)');
+    grad.addColorStop(1, 'rgba(255, 150, 60, 0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 34, 0, Math.PI * 2);
+    ctx.fill();
+
+    // 本体
+    ctx.fillStyle = '#ffb066';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 15 * pulse, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#fff0d0';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // 内核
+    ctx.fillStyle = '#fff6e0';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 6, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  /**
+   * 画施法光束（短促动画）
+   * @returns {void}
+   */
+  function drawCastFx() {
+    if (!visual.cast) return;
+    const now = performance.now();
+    if (now > visual.cast.until) { visual.cast = null; return; }
+    const life = (visual.cast.until - now) / 220;
+    const p = cellCenter(st.player.x, st.player.y);
+    const dx = visual.cast.dx;
+    const dy = visual.cast.dy;
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, life);
+    ctx.strokeStyle = '#ffd27a';
+    ctx.lineWidth = 5;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(p.x, p.y);
+    ctx.lineTo(p.x + dx * TILE * Core.CAST_RANGE, p.y + dy * TILE * Core.CAST_RANGE);
+    ctx.stroke();
+    ctx.strokeStyle = 'rgba(255, 255, 220, 0.9)';
+    ctx.lineWidth = 1.8;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /**
+   * 画死亡残留
+   * @returns {void}
+   */
+  function drawDeathMarks() {
+    const now = performance.now();
+    visual.deathMarks = visual.deathMarks.filter(function (m) { return now - m.born < 700; });
+    visual.deathMarks.forEach(function (m) {
+      const life = 1 - (now - m.born) / 700;
+      const p = cellCenter(m.x, m.y);
+      ctx.strokeStyle = 'rgba(255, 170, 90, ' + life + ')';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 12 + (1 - life) * 22, 0, Math.PI * 2);
+      ctx.stroke();
+    });
+  }
+
+  /**
+   * 受击红闪
+   * @returns {void}
+   */
+  function drawHitFlash() {
+    if (visual.hitFlash <= 0) return;
+    ctx.fillStyle = 'rgba(255, 40, 20, ' + (visual.hitFlash * 0.16) + ')';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  /**
+   * 主渲染
+   * @returns {void}
+   */
+  function render() {
+    drawFloor();
+    drawTelegraph();
+    st.enemies.forEach(function (e) { if (e.alive) drawEnemy(e); });
+    drawDeathMarks();
+    drawPlayer();
+    drawCastFx();
+    drawHitFlash();
+  }
+
+  /* ---------- 面板同步 ---------- */
+  /**
+   * 刷新右侧面板（时钟 / 血 / 波次 / 意图列表）
+   * @returns {void}
+   */
+  function syncPanel() {
+    const left = Math.max(0, st.deadline - st.t);
+    const clockBig = document.getElementById('clockBig');
+    const fill = document.getElementById('clockFill');
+    const ratio = left / st.deadline;
+    clockBig.textContent = String(left);
+    clockBig.classList.toggle('low', left <= 18);
+    document.getElementById('clockUnit').textContent = '刻 / 于 ' + st.deadline + ' 刻烧尽';
+    fill.style.width = Math.max(0, Math.min(100, ratio * 100)) + '%';
+    fill.classList.toggle('low', left <= 18);
+
+    // 生命
+    const pips = document.getElementById('hpPips');
+    pips.innerHTML = '';
+    for (let i = 0; i < st.player.maxHp; i += 1) {
+      const span = document.createElement('span');
+      span.className = 'pip' + (i < st.player.hp ? ' on' : '');
+      pips.appendChild(span);
+    }
+
+    document.getElementById('waveText').textContent =
+      (st.wave + 1) + ' / ' + st.wavesTotal + (st.exitOpen ? ' · 已开撤离' : '');
+
+    // 即将发生
+    const intents = document.getElementById('intents');
+    intents.innerHTML = '';
+    const evs = Core.eventsBetween(st, st.t, st.t + 12).slice(0, 6);
+    if (!evs.length) {
+      intents.innerHTML = '<div class="intent"><span class="tag">空</span>没有排定的行动</div>';
+    }
+    evs.forEach(function (ev) {
+      const div = document.createElement('div');
+      div.className = 'intent';
+      const label = ev.e.type === 'clock' ? '烧钟扣刻' :
+        (ev.e.type === 'slag' ? '邻近爆炸' : '十字射线');
+      div.innerHTML = '<span class="tag">' + Core.TYPE_NAME[ev.e.type] + '</span>' +
+        '<span>' + label + '</span>' +
+        '<span class="t">' + (ev.at - st.t) + ' 刻</span>';
+      intents.appendChild(div);
+    });
+  }
+
+  /* ---------- 飘字 ---------- */
+  /**
+   * 在屏幕上弹一个数字飘字
+   * @param {string} text 文本
+   * @param {number} cellX 格子 x
+   * @param {number} cellY 格子 y
+   * @param {string} color 颜色
+   * @returns {void}
+   */
+  function floatText(text, cellX, cellY, color) {
+    const p = cellCenter(cellX, cellY);
+    const div = document.createElement('div');
+    div.className = 'floater';
+    div.textContent = text;
+    div.style.left = p.x + 'px';
+    div.style.top = p.y + 'px';
+    if (color) div.style.color = color;
+    div.style.transform = 'translate(-50%, -50%)';
+    document.getElementById('floaters').appendChild(div);
+    setTimeout(function () { div.remove(); }, 900);
+  }
+
+  /* ---------- 结算横幅 ---------- */
+  /**
+   * 显示胜负横幅
+   * @param {boolean} win 是否胜利
+   * @returns {void}
+   */
+  function showBanner(win) {
+    const b = document.getElementById('banner');
+    b.className = 'show ' + (win ? 'win' : 'lose');
+    const used = st.t;
+    if (win) {
+      b.innerHTML = '<div class="big">撤离成功</div>' +
+        '<div class="sub">用时 ' + used + ' 刻，剩余 ' + (st.deadline - st.t) + ' 刻<br>' +
+        '按 R 再来一局</div>';
+    } else if (st.reason === 'time') {
+      b.innerHTML = '<div class="big">烧尽</div>' +
+        '<div class="sub">时钟归零。你活了 ' + used + ' 刻，<br>' +
+        '但敌人还在按表行动。慢，就是死。<br>按 R 重开</div>';
+    } else {
+      b.innerHTML = '<div class="big">熄灭</div>' +
+        '<div class="sub">生命被打空（' + st.hitsTaken + ' 次命中）。<br>按 R 重开</div>';
+    }
+  }
+
+  /**
+   * 隐藏横幅
+   * @returns {void}
+   */
+  function hideBanner() {
+    document.getElementById('banner').className = '';
+  }
+
+  /* ---------- 动作执行 ---------- */
+  /**
+   * 执行动作并同步渲染状态
+   * @param {Object} action 动作
+   * @returns {void}
+   */
+  function doAction(action) {
+    if (st.status !== 'playing') return;
+    const beforeHp = st.player.hp;
+    const rec = Core.act(st, action);
+    if (!rec) return;
+
+    if (rec.cast) {
+      visual.cast = { dx: rec.cast.dx, dy: rec.cast.dy, until: performance.now() + 220 };
+      rec.cast.hits.forEach(function (h) {
+        floatText(h.dead ? '击杀' : '−' + Core.CAST_DAMAGE, h.x, h.y, h.dead ? '#ffd27a' : '#ff9d6b');
+        if (h.dead) visual.deathMarks.push({ x: h.x, y: h.y, born: performance.now() });
+      });
+    }
+    if (rec.cost > 0) {
+      floatText('−' + rec.cost + ' 刻', st.player.x, st.player.y, '#ffcf6a');
+    }
+    rec.fired.forEach(function (f) {
+      if (f.kind === 'clock') {
+        floatText('烧钟 −2 刻', f.x, f.y, '#ff6b4a');
+      } else if (f.hit) {
+        floatText('−1 生命', st.player.x, st.player.y, '#ff4a3a');
+      }
+    });
+    if (st.player.hp < beforeHp) visual.hitFlash = 1;
+
+    if (st.status === 'lose' || st.status === 'win') showBanner(st.status === 'win');
+    syncPanel();
+  }
+
+  /* ---------- 输入 ---------- */
+  /**
+   * 键盘输入
+   * @param {KeyboardEvent} ev 事件
+   * @returns {void}
+   */
+  function onKey(ev) {
+    const k = ev.key.toLowerCase();
+    if (k === 'r') { restart(Date.now() % 100000); ev.preventDefault(); return; }
+    if (st.status !== 'playing') return;
+    if (k === 'w' || k === 'arrowup') { doAction({ type: 'move', dx: 0, dy: -1 }); ev.preventDefault(); }
+    else if (k === 's' || k === 'arrowdown') { doAction({ type: 'move', dx: 0, dy: 1 }); ev.preventDefault(); }
+    else if (k === 'a' || k === 'arrowleft') { doAction({ type: 'move', dx: -1, dy: 0 }); ev.preventDefault(); }
+    else if (k === 'd' || k === 'arrowright') { doAction({ type: 'move', dx: 1, dy: 0 }); ev.preventDefault(); }
+    else if (k === ' ') { doAction({ type: 'wait' }); ev.preventDefault(); }
+    else if (k === 'j') {
+      const opt = Core.castOptions(st)[0];
+      if (opt) doAction({ type: 'cast', dx: opt.dx, dy: opt.dy });
+      else floatText('没有目标在直线上', st.player.x, st.player.y, '#9c8b78');
+      ev.preventDefault();
+    }
+  }
+
+  /**
+   * 鼠标点击：点到同行/同列 4 格内 = 朝该方向施法，否则忽略
+   * @param {MouseEvent} ev 事件
+   * @returns {void}
+   */
+  function onClick(ev) {
+    if (st.status !== 'playing') return;
+    const rect = canvas.getBoundingClientRect();
+    const scale = canvas.width / rect.width;
+    const cell = pixelToCell((ev.clientX - rect.left) * scale, (ev.clientY - rect.top) * scale);
+    const dx = cell.x - st.player.x;
+    const dy = cell.y - st.player.y;
+    if (dx === 0 && dy === 0) return;
+    if ((dx === 0) !== (dy === 0) && Math.abs(dx + dy) <= Core.CAST_RANGE) {
+      doAction({ type: 'cast', dx: Math.sign(dx), dy: Math.sign(dy) });
+    } else {
+      floatText('只能直线施法', st.player.x, st.player.y, '#9c8b78');
+    }
+  }
+
+  /* ---------- 自测 ---------- */
+  /**
+   * 运行三种策略各 200 局并打印
+   * @returns {void}
+   */
+  function runSelfTest() {
+    const out = document.getElementById('testOut');
+    out.textContent = '运行中……';
+    // 延迟一帧，让"运行中"先画出来
+    setTimeout(function () {
+      const t0 = performance.now();
+      const rows = ['aggressive', 'conservative', 'balanced'].map(function (p) {
+        return Core.runBatch(p, 200);
+      });
+      const ms = Math.round(performance.now() - t0);
+      const name = { aggressive: '激进', conservative: '保守', balanced: '算时' };
+      const lines = rows.map(function (r) {
+        return name[r.policy].padEnd(3, ' ') +
+          '  胜率 ' + (r.winRate * 100).toFixed(1) + '%' +
+          ' | 超时 ' + (r.timeout * 100).toFixed(1) + '%' +
+          ' | 阵亡 ' + (r.dead * 100).toFixed(1) + '%' +
+          ' | 平均动作 ' + r.avgSteps.toFixed(1) +
+          ' | 胜局余刻 ' + r.avgLeft.toFixed(1);
+      });
+      out.textContent = lines.join('\n') + '\n\n（200 局 × 3 策略，耗时 ' + ms + 'ms）';
+      window.__lastTest = { rows: rows, ms: ms };
+    }, 30);
+  }
+
+  /* ---------- 启动 ---------- */
+  document.addEventListener('keydown', onKey);
+  canvas.addEventListener('click', onClick);
+  document.getElementById('btnTest').addEventListener('click', runSelfTest);
+
+  syncPanel();
+  (function loop() {
+    render();
+    if (st.status === 'playing') syncPanel();
+    visual.hitFlash = Math.max(0, visual.hitFlash - 0.06);
+    requestAnimationFrame(loop);
+  })();
+
+  /* 供外部验收读取 */
+  window.__proto4 = { restart: restart, getState: function () { return st; } };
+})();
+</script>
+</body>
+</html>

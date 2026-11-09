@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>首领机制 V2 · 独立预览</title>
+<style>
+  html, body { margin: 0; background: #0b0810; color: #e8e2f0; font: 14px/1.5 system-ui, sans-serif; }
+  .wrap { display: flex; gap: 16px; padding: 16px; }
+  canvas { background: #120d18; border: 1px solid #2c2236; border-radius: 10px; }
+  .panel { width: 260px; }
+  h1 { font-size: 17px; margin: 0 0 6px; }
+  .hint { color: #9b90ab; font-size: 12px; margin-bottom: 12px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  button { background: #221a2c; color: #dcd4ea; border: 1px solid #3a2f4a; border-radius: 6px; padding: 5px 9px; cursor: pointer; }
+  button.on { background: #4a3a86; border-color: #7d66d1; color: #fff; }
+  label { display: block; margin: 6px 0; cursor: pointer; }
+  .mono { font-family: ui-monospace, Consolas, monospace; color: #a99ec0; font-size: 12px; white-space: pre-wrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <canvas id="cv" width="820" height="620"></canvas>
+  <div class="panel">
+    <h1>首领机制 V2 预览</h1>
+    <div class="hint">WASD / 方向键移动。切换层数看不同机制。<br>这个页面只演示机制，不改主文件。</div>
+    <div class="row" id="floors"></div>
+    <label><input type="checkbox" id="press" checked> M1 液压合拢（机械 · 奇数层）</label>
+    <label><input type="checkbox" id="beam" checked> M2 熔核火柱（机械 · 偶数层）</label>
+    <label><input type="checkbox" id="sigilOrder" checked> M3 刻印按序（符文 F7+）</label>
+    <label><input type="checkbox" id="gravityTide" checked> M4 引力潮汐（虚空 F13+）</label>
+    <div class="row" style="margin-top:12px">
+      <button id="reset">重置血量</button>
+      <button id="pause">暂停</button>
+    </div>
+    <div class="mono" id="state"></div>
+  </div>
+</div>
+
+<script src="boss-mech-v2.js"></script>
+<script>
+/* -------------------------------------------------------------------------
+ * 独立演示：一个房间 + 一个不动首领 + 四个可切换机制
+ * ---------------------------------------------------------------------- */
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+const room = { cx: 380, cy: 300, w: 700, h: 540 };
+const boss = { x: room.cx, y: room.cy, radius: 38, name: '演示首领', bossKind: 'mech', facing: 1.57, roomId: 0 };
+const player = { x: room.cx, y: room.cy + 190, radius: 12, speed: 190 };
+let floor = 1;
+let hp = 100;
+let hurt = 0;
+let paused = false;
+let elapsed = 0;
+const keys = {};
+const sig = [];
+
+/* 环境注入：演示页自己处理伤害/波纹/走位 */
+BOSS_MECH_V2.setEnv({
+  player: () => player,
+  room: () => room,
+  damagePlayer: (amount, x, y) => { hp = Math.max(0, hp - amount); hurt = 0.35; },
+  addRing: (x, y, r, color, grow, life, shape) => sig.push({ x, y, r, color, grow, life, t: 0, shape }),
+  shake: () => {},
+  playSfx: () => {},
+  walkable: (x, y, r) => x > room.cx - room.w / 2 + r && x < room.cx + room.w / 2 - r
+    && y > room.cy - room.h / 2 + r && y < room.cy + room.h / 2 - r
+});
+
+/* 层数按钮：1–5 机械交替，7 符文，13 虚空 */
+const floorBtns = document.getElementById('floors');
+[1, 2, 3, 4, 5, 7, 13].forEach((f) => {
+  const b = document.createElement('button');
+  b.textContent = 'F' + f;
+  b.dataset.f = f;
+  b.onclick = () => setFloor(f);
+  floorBtns.appendChild(b);
+});
+
+/**
+ * 切换层数并重新挂机制
+ * @param {number} f 层数
+ * @returns {void}
+ */
+function setFloor(f) {
+  floor = f;
+  boss.bossKind = f <= 6 ? 'mech' : (f <= 12 ? 'rune' : 'void');
+  BOSS_MECH_V2.attach(boss, f);
+  hp = 100;
+  [...floorBtns.children].forEach((b) => b.classList.toggle('on', +b.dataset.f === f));
+}
+setFloor(1);
+// 截图/联调：?floor=7 直接切层；?show=press&freeze=1 定格在预警帧
+try {
+  const q = new URLSearchParams(location.search);
+  const qf = parseInt(q.get('floor'), 10);
+  if (qf >= 1) setFloor(qf);
+  const show = q.get('show');
+  if (show) { showcase(show); if (q.get('freeze') === '1') paused = true; draw(); }
+} catch (e) { /* 忽略 */ }
+
+/**
+ * 把某个机制直接摆到"预警/生效"帧，供截图与人工验收
+ * @param {string} id 机制 id
+ * @returns {boolean} 是否摆成功
+ */
+function showcase(id) {
+  const C = BOSS_MECH_V2.CONFIG;
+  const v2 = boss.v2;
+  if (!v2 || v2.mech !== id) return false;
+  const pad = 46;
+  const minX = room.cx - room.w / 2 + pad;
+  const maxX = room.cx + room.w / 2 - pad;
+  const minY = room.cy - room.h / 2 + pad;
+  const maxY = room.cy + room.h / 2 - pad;
+  if (id === 'press') {
+    v2.phase = 'tell';
+    v2.timer = C.press.tell;
+    v2.data = { vertical: false, gap: player.x, minX, maxX, minY, maxY };
+  } else if (id === 'beam') {
+    const aim = Math.atan2(player.y - boss.y, player.x - boss.x);
+    v2.phase = 'sweep';
+    v2.timer = 2.4;
+    v2.data = { aim, a: aim - 0.20, elapsed: 0 };
+  } else if (id === 'sigilOrder') {
+    v2.sigils = [
+      { x: room.cx + 170, y: room.cy + 96, state: 'armed', flash: 0 },
+      { x: room.cx, y: room.cy + 140, state: 'wait', flash: 0 },
+      { x: room.cx - 170, y: room.cy + 96, state: 'wait', flash: 0 }
+    ];
+    v2.index = 0;
+    v2.phase = 'run';
+    v2.timer = 0.75;
+  } else if (id === 'gravityTide') {
+    v2.data = { sign: -1, warn: true };
+    v2.timer = 0.45;
+  } else {
+    return false;
+  }
+  return true;
+}
+
+/* 四个独立开关：只改自己那一项，其余照常 */
+['press', 'beam', 'sigilOrder', 'gravityTide'].forEach((id) => {
+  const el = document.getElementById(id);
+  el.onchange = () => {
+    BOSS_MECH_V2.CONFIG.on[id] = el.checked;
+    // 关掉当前机制后重新挂载，等价于"只关这一场"，不影响别的机制
+    BOSS_MECH_V2.attach(boss, floor);
+  };
+});
+
+document.getElementById('reset').onclick = () => { hp = 100; hurt = 0; };
+document.getElementById('pause').onclick = (e) => {
+  paused = !paused;
+  e.target.textContent = paused ? '继续' : '暂停';
+};
+
+window.addEventListener('keydown', (e) => {
+  keys[e.key.toLowerCase()] = true;
+  if ([' ', 'arrowup', 'arrowdown', 'arrowleft', 'arrowright'].includes(e.key.toLowerCase())) e.preventDefault();
+});
+window.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+
+/**
+ * 每帧更新：玩家移动 + 机制推进
+ * @param {number} dt 帧时长
+ * @returns {void}
+ */
+function update(dt) {
+  elapsed += dt;
+  hurt = Math.max(0, hurt - dt);
+  if (!paused) {
+    const k = player.speed * dt;
+    let dx = 0, dy = 0;
+    if (keys.a || keys.arrowleft) dx -= k;
+    if (keys.d || keys.arrowright) dx += k;
+    if (keys.w || keys.arrowup) dy -= k;
+    if (keys.s || keys.arrowdown) dy += k;
+    const nx = player.x + dx;
+    const ny = player.y + dy;
+    if (nx > room.cx - room.w / 2 + 14 && nx < room.cx + room.w / 2 - 14) player.x = nx;
+    if (ny > room.cy - room.h / 2 + 14 && ny < room.cy + room.h / 2 - 14) player.y = ny;
+    BOSS_MECH_V2.tick(boss, dt);
+  }
+  sig.forEach((s) => { s.t += dt; s.r += s.grow * dt; });
+  for (let i = sig.length - 1; i >= 0; i -= 1) if (sig[i].t >= sig[i].life) sig.splice(i, 1);
+}
+
+/**
+ * 绘制：房间 → 机制 → 首领 → 玩家 → HUD
+ * @returns {void}
+ */
+function draw() {
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  // 地面网格
+  ctx.strokeStyle = 'rgba(120, 100, 160, 0.12)';
+  ctx.lineWidth = 1;
+  for (let gx = room.cx - room.w / 2; gx <= room.cx + room.w / 2; gx += 40) {
+    ctx.beginPath(); ctx.moveTo(gx, room.cy - room.h / 2); ctx.lineTo(gx, room.cy + room.h / 2); ctx.stroke();
+  }
+  for (let gy = room.cy - room.h / 2; gy <= room.cy + room.h / 2; gy += 40) {
+    ctx.beginPath(); ctx.moveTo(room.cx - room.w / 2, gy); ctx.lineTo(room.cx + room.w / 2, gy); ctx.stroke();
+  }
+  ctx.strokeStyle = 'rgba(180, 160, 220, 0.35)';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(room.cx - room.w / 2, room.cy - room.h / 2, room.w, room.h);
+
+  BOSS_MECH_V2.draw(ctx, boss, elapsed);
+
+  // 首领本体
+  const ph2 = hp <= 50;
+  ctx.fillStyle = ph2 ? '#b05ad0' : '#7a4fd0';
+  ctx.beginPath(); ctx.arc(boss.x, boss.y, boss.radius, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(230, 210, 255, 0.7)';
+  ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.font = '12px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('首领', boss.x, boss.y + 4);
+
+  // 玩家
+  ctx.fillStyle = hurt > 0 ? '#ff6b7a' : '#66e6b4';
+  ctx.beginPath(); ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+  // 波纹
+  sig.forEach((s) => {
+    ctx.globalAlpha = Math.max(0, 1 - s.t / s.life);
+    ctx.strokeStyle = s.color;
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(s.x, s.y, Math.max(1, s.r), 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  });
+
+  // HUD
+  ctx.fillStyle = 'rgba(0,0,0,0.45)';
+  ctx.fillRect(12, 12, 250, 58);
+  ctx.fillStyle = '#e8e2f0';
+  ctx.textAlign = 'left';
+  ctx.font = '13px system-ui, sans-serif';
+  ctx.fillText('F' + floor + ' · ' + boss.bossKind + ' · ' + (boss.v2.mech || '无机制'), 22, 32);
+  ctx.fillStyle = hp > 40 ? '#66e6b4' : '#ff6b7a';
+  ctx.fillRect(22, 42, Math.max(0, hp) * 2.2, 10);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.strokeRect(22, 42, 220, 10);
+
+  const C = BOSS_MECH_V2.CONFIG;
+  document.getElementById('state').textContent =
+    'HP ' + Math.round(hp) + ' / 100\n当前：' + (boss.v2.mech || '无') +
+    '\n开关：press=' + C.on.press + ' beam=' + C.on.beam + '\n      sigil=' + C.on.sigilOrder + ' tide=' + C.on.gravityTide;
+}
+
+let last = performance.now();
+/**
+ * 主循环
+ * @param {number} now 当前时间戳
+ * @returns {void}
+ */
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+// 给自动化截图用：可强制指定机制/层数
+window.__demo = { setFloor, getBoss: () => boss, setHp: (v) => { hp = v; } };
+</script>
+</body>
+</html>

@@ -1,0 +1,464 @@
+﻿{
+  "assertions": [
+    {
+      "name": "八方向 · 东 E",
+      "ok": true,
+      "detail": {
+        "expected": 0,
+        "got": 0,
+        "diff": 0
+      }
+    },
+    {
+      "name": "八方向 · 东南 SE",
+      "ok": true,
+      "detail": {
+        "expected": 45,
+        "got": 45,
+        "diff": 0
+      }
+    },
+    {
+      "name": "八方向 · 南 S",
+      "ok": true,
+      "detail": {
+        "expected": 90,
+        "got": 90,
+        "diff": 0
+      }
+    },
+    {
+      "name": "八方向 · 西南 SW",
+      "ok": true,
+      "detail": {
+        "expected": 135,
+        "got": 135,
+        "diff": 0
+      }
+    },
+    {
+      "name": "八方向 · 西 W",
+      "ok": true,
+      "detail": {
+        "expected": -180,
+        "got": -180,
+        "diff": 0
+      }
+    },
+    {
+      "name": "八方向 · 西北 NW",
+      "ok": true,
+      "detail": {
+        "expected": -135,
+        "got": -135,
+        "diff": 0
+      }
+    },
+    {
+      "name": "八方向 · 北 N",
+      "ok": true,
+      "detail": {
+        "expected": -90,
+        "got": -90,
+        "diff": 0
+      }
+    },
+    {
+      "name": "八方向 · 东北 NE",
+      "ok": true,
+      "detail": {
+        "expected": -45,
+        "got": -45,
+        "diff": 0
+      }
+    },
+    {
+      "name": "静止后保持最后朝向（不被鼠标拽回）",
+      "ok": true,
+      "detail": {
+        "before": 45,
+        "after": 45,
+        "source": "idle"
+      }
+    },
+    {
+      "name": "开火前：朝移动方向（北）",
+      "ok": true,
+      "detail": {
+        "enabled": true,
+        "angle": -1.5708,
+        "deg": -90,
+        "dir": 6,
+        "source": "move",
+        "hold": 0,
+        "attackAngle": 0,
+        "alwaysAim": false
+      }
+    },
+    {
+      "name": "开火成功（火球可用）",
+      "ok": true,
+      "detail": true
+    },
+    {
+      "name": "开火瞬间记录攻击方向并进入保持（hold ≈ 0.41s）",
+      "ok": true,
+      "detail": {
+        "enabled": true,
+        "angle": -0.9431,
+        "deg": -54,
+        "dir": 7,
+        "source": "attack",
+        "hold": 0.417,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      }
+    },
+    {
+      "name": "开火后 0.28s：身体停在攻击方向",
+      "ok": true,
+      "detail": {
+        "enabled": true,
+        "angle": 0.2681,
+        "deg": 15.4,
+        "dir": 0,
+        "source": "attack",
+        "hold": 0.186,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      }
+    },
+    {
+      "name": "0.45s 之后恢复朝移动方向（北）",
+      "ok": true,
+      "detail": {
+        "enabled": true,
+        "angle": -1.5708,
+        "deg": -90,
+        "dir": 6,
+        "source": "move",
+        "hold": 0,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      }
+    },
+    {
+      "name": "撞墙：朝向仍按输入（西 180°），不按实际位移",
+      "ok": true,
+      "detail": {
+        "deg": -180,
+        "vx": 0
+      }
+    },
+    {
+      "name": "受击不强行改朝向",
+      "ok": true,
+      "detail": {
+        "before": 0,
+        "after": 0
+      }
+    },
+    {
+      "name": "有锁定目标时：朝向目标（东），压过移动方向（北）",
+      "ok": true,
+      "detail": {
+        "locked": true,
+        "facing": {
+          "enabled": true,
+          "angle": 0,
+          "deg": 0,
+          "dir": 0,
+          "source": "lock",
+          "hold": 0,
+          "attackAngle": 0.2681,
+          "alwaysAim": false
+        },
+        "targetDeg": 0,
+        "diff": 0
+      }
+    },
+    {
+      "name": "设置页有「始终朝准心」开关且默认为关",
+      "ok": true,
+      "detail": {
+        "hasToggle": true,
+        "checked": "false",
+        "stateText": "跟随移动方向",
+        "mode": "settings"
+      }
+    },
+    {
+      "name": "开关点击后状态与文案同步",
+      "ok": true,
+      "detail": {
+        "on": true,
+        "aria": "true",
+        "text": "始终朝准心"
+      }
+    },
+    {
+      "name": "打开开关后：朝向准心，压过移动方向（东）",
+      "ok": true,
+      "detail": {
+        "aimFacing": {
+          "enabled": true,
+          "angle": -1.9823,
+          "deg": -113.6,
+          "dir": 5,
+          "source": "aim",
+          "hold": 0,
+          "attackAngle": 0.2681,
+          "alwaysAim": true
+        },
+        "aimDeg": -113.57742372878307,
+        "aimDiff": 0.022576271216962596,
+        "moveDiff": 113.60000000000002
+      }
+    },
+    {
+      "name": "打开面板时 elapsed 冻结（朝向不会在暂停中乱转）",
+      "ok": true,
+      "detail": {
+        "e0": 14.108727999999978,
+        "e1": 14.117027999999976
+      }
+    },
+    {
+      "name": "帧率 ≥ 60",
+      "ok": true,
+      "detail": {
+        "fps": 121,
+        "ms": 1005.4000000003725
+      }
+    },
+    {
+      "name": "无运行时报错",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "notes": {
+    "eightDirs": [
+      {
+        "方向": "东 E",
+        "期望角度": 0,
+        "实测角度": 0,
+        "差值": 0,
+        "dir": 0,
+        "来源": "move"
+      },
+      {
+        "方向": "东南 SE",
+        "期望角度": 45,
+        "实测角度": 45,
+        "差值": 0,
+        "dir": 1,
+        "来源": "move"
+      },
+      {
+        "方向": "南 S",
+        "期望角度": 90,
+        "实测角度": 90,
+        "差值": 0,
+        "dir": 2,
+        "来源": "move"
+      },
+      {
+        "方向": "西南 SW",
+        "期望角度": 135,
+        "实测角度": 135,
+        "差值": 0,
+        "dir": 3,
+        "来源": "move"
+      },
+      {
+        "方向": "西 W",
+        "期望角度": -180,
+        "实测角度": -180,
+        "差值": 0,
+        "dir": 4,
+        "来源": "move"
+      },
+      {
+        "方向": "西北 NW",
+        "期望角度": -135,
+        "实测角度": -135,
+        "差值": 0,
+        "dir": 5,
+        "来源": "move"
+      },
+      {
+        "方向": "北 N",
+        "期望角度": -90,
+        "实测角度": -90,
+        "差值": 0,
+        "dir": 6,
+        "来源": "move"
+      },
+      {
+        "方向": "东北 NE",
+        "期望角度": -45,
+        "实测角度": -45,
+        "差值": 0,
+        "dir": 7,
+        "来源": "move"
+      }
+    ],
+    "idle": {
+      "before": {
+        "enabled": true,
+        "angle": 0.7854,
+        "deg": 45,
+        "dir": 1,
+        "source": "move",
+        "hold": 0,
+        "attackAngle": 0,
+        "alwaysAim": false
+      },
+      "after": {
+        "enabled": true,
+        "angle": 0.7854,
+        "deg": 45,
+        "dir": 1,
+        "source": "idle",
+        "hold": 0,
+        "attackAngle": 0,
+        "alwaysAim": false
+      },
+      "spot": {
+        "x": 349.496244696922,
+        "y": 280.1830427391557
+      }
+    },
+    "attackHold": {
+      "beforeCast": {
+        "enabled": true,
+        "angle": -1.5708,
+        "deg": -90,
+        "dir": 6,
+        "source": "move",
+        "hold": 0,
+        "attackAngle": 0,
+        "alwaysAim": false
+      },
+      "justCast": {
+        "enabled": true,
+        "angle": -0.9431,
+        "deg": -54,
+        "dir": 7,
+        "source": "attack",
+        "hold": 0.417,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      },
+      "duringHold": {
+        "enabled": true,
+        "angle": 0.2681,
+        "deg": 15.4,
+        "dir": 0,
+        "source": "attack",
+        "hold": 0.186,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      },
+      "afterHold": {
+        "enabled": true,
+        "angle": -1.5708,
+        "deg": -90,
+        "dir": 6,
+        "source": "move",
+        "hold": 0,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      },
+      "attackDeg": 15.4
+    },
+    "wall": {
+      "facing": {
+        "enabled": true,
+        "angle": -3.1416,
+        "deg": -180,
+        "dir": 4,
+        "source": "move",
+        "hold": 0,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      },
+      "x": 171.50411310437167,
+      "vx": 0
+    },
+    "lock": {
+      "aim": {
+        "mode": "weak",
+        "targetRule": "nearest",
+        "locked": true,
+        "targetId": 8,
+        "angle": 0,
+        "rawAngle": 0,
+        "deflectDeg": 0,
+        "hitBonus": 0.2,
+        "fanDeg": 25,
+        "range": 440,
+        "bias": 0.6
+      },
+      "facing": {
+        "enabled": true,
+        "angle": 0,
+        "deg": 0,
+        "dir": 0,
+        "source": "lock",
+        "hold": 0,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      },
+      "targetDeg": 0,
+      "diff": 0
+    },
+    "alwaysAim": {
+      "followMove": {
+        "enabled": true,
+        "angle": 0,
+        "deg": 0,
+        "dir": 0,
+        "source": "move",
+        "hold": 0,
+        "attackAngle": 0.2681,
+        "alwaysAim": false
+      },
+      "settings": {
+        "hasToggle": true,
+        "checked": "false",
+        "stateText": "跟随移动方向",
+        "mode": "settings"
+      },
+      "toggled": {
+        "on": true,
+        "aria": "true",
+        "text": "始终朝准心"
+      },
+      "aimFacing": {
+        "enabled": true,
+        "angle": -1.9823,
+        "deg": -113.6,
+        "dir": 5,
+        "source": "aim",
+        "hold": 0,
+        "attackAngle": 0.2681,
+        "alwaysAim": true
+      },
+      "aimDeg": -113.57742372878307,
+      "aimDiff": 0.022576271216962596,
+      "moveDiff": 113.60000000000002
+    },
+    "fps": {
+      "fps": 121,
+      "ms": 1005.4000000003725
+    },
+    "errors": []
+  },
+  "summary": {
+    "passed": 23,
+    "total": 23,
+    "screenshots": "D:\\其他\\TRAE宝\\奥术工程师\\.screenshots\\facing"
+  }
+}

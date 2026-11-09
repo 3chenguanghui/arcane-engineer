@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "runs": 10000,
+    "difficulty": "normal",
+    "seed": 20261108
+  },
+  "scenarios": [
+    {
+      "name": "A 基线（按权重）",
+      "pass5Pct": 44.9,
+      "avgFloor": 8.65,
+      "eliteDeaths": {
+        "f2_5": 1432,
+        "f6_12": 228,
+        "f13_20": 52,
+        "total": 1712
+      }
+    },
+    {
+      "name": "A + W12 F2 起",
+      "pass5Pct": 49.5,
+      "avgFloor": 9.2,
+      "eliteDeaths": {
+        "f2_5": 955,
+        "f6_12": 198,
+        "f13_20": 24,
+        "total": 1177
+      }
+    },
+    {
+      "name": "A′ 基线",
+      "pass5Pct": 46,
+      "avgFloor": 8.78,
+      "eliteDeaths": {
+        "f2_5": 984,
+        "f6_12": 283,
+        "f13_20": 52,
+        "total": 1319
+      }
+    },
+    {
+      "name": "A′ + W12 F13 起",
+      "pass5Pct": 46,
+      "avgFloor": 8.78,
+      "eliteDeaths": {
+        "f2_5": 984,
+        "f6_12": 283,
+        "f13_20": 28,
+        "total": 1295
+      }
+    },
+    {
+      "name": "A′ + W12 F6 起",
+      "pass5Pct": 46,
+      "avgFloor": 8.82,
+      "eliteDeaths": {
+        "f2_5": 984,
+        "f6_12": 220,
+        "f13_20": 26,
+        "total": 1230
+      }
+    },
+    {
+      "name": "A′ + W12 F2 起",
+      "pass5Pct": 49.8,
+      "avgFloor": 9.21,
+      "eliteDeaths": {
+        "f2_5": 613,
+        "f6_12": 284,
+        "f13_20": 27,
+        "total": 924
+      }
+    },
+    {
+      "name": "A + E1 + W12 F2",
+      "pass5Pct": 56.5,
+      "avgFloor": 10.24,
+      "eliteDeaths": {
+        "f2_5": 859,
+        "f6_12": 246,
+        "f13_20": 31,
+        "total": 1136
+      }
+    },
+    {
+      "name": "A′ + E1 + W12 F2",
+      "pass5Pct": 56.9,
+      "avgFloor": 10.22,
+      "eliteDeaths": {
+        "f2_5": 524,
+        "f6_12": 312,
+        "f13_20": 32,
+        "total": 868
+      }
+    }
+  ]
+}

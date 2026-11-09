@@ -1,0 +1,1676 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>烬 · 标题页背景实验台（三方向）</title>
+<style>
+  :root{
+    --ink:#03070d;
+    --gold:#ffd166;
+    --gold-2:#ffc247;
+    --cyan:#3ee6ff;
+    --cyan-2:#8fe4ff;
+    --txt:#e6f2ff;
+    --muted:#9fb6d0;
+  }
+  html, body { height: 100%; }
+  body{
+    margin: 0;
+    background: #03070d;
+    color: var(--txt);
+    font-family: "PingFang SC", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  /* 背景画布：铺满、压在文字层之下、不接收指针事件 */
+  #bg{
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    display: block; z-index: 0;
+  }
+  /* 文字层：仅作"让位于文字"的判读参照，不可交互 */
+  .stage{
+    position: fixed; inset: 0; z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    padding: clamp(10px, 3vh, 30px) clamp(12px, 4vw, 48px) clamp(16px, 3vh, 34px);
+    box-sizing: border-box;
+    pointer-events: none;
+    transition: opacity .25s ease;
+  }
+  .stage.hidden{ opacity: 0; }
+
+  .kicker{
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; letter-spacing: .34em;
+    color: #9ff3ff;
+    text-shadow: 0 0 12px rgba(62, 230, 255, .38);
+    opacity: .92;
+    white-space: nowrap;
+  }
+  .kicker .hex{
+    width: 11px; height: 11px;
+    background: linear-gradient(140deg, #8fe4ff, #3ea8c9);
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+    flex: 0 0 auto;
+  }
+  h1.word{
+    margin: clamp(2px, 1vh, 10px) 0 0;
+    font-family: "STKaiti", "KaiTi", "Kaiti SC", "Songti SC", "SimSun", serif;
+    font-weight: 700;
+    font-size: clamp(62px, 10.6vh, 112px);
+    line-height: 1.02;
+    letter-spacing: .02em;
+    background: linear-gradient(180deg, #fff2cf 0%, #ffd166 46%, #ffab3d 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter:
+      drop-shadow(0 0 16px rgba(255, 168, 60, .42))
+      drop-shadow(0 0 44px rgba(255, 140, 40, .22));
+  }
+  .tagline{
+    margin: 6px 0 0;
+    font-size: 13px; letter-spacing: .06em;
+    color: var(--muted);
+    text-align: center;
+  }
+  .stats{
+    display: flex; gap: 10px; margin-top: clamp(8px, 2.2vh, 20px);
+    flex-wrap: wrap; justify-content: center;
+  }
+  .stat{
+    display: flex; align-items: baseline; gap: 8px;
+    min-width: 112px; padding: 7px 16px;
+    border-radius: 999px;
+    border: 1px solid rgba(143, 228, 255, .22);
+    background: linear-gradient(180deg, rgba(10, 22, 34, .74), rgba(5, 12, 20, .66));
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .38), inset 0 1px 0 rgba(255, 255, 255, .04);
+    justify-content: center;
+  }
+  .stat span{ font-size: 11px; letter-spacing: .08em; color: var(--muted); }
+  .stat b{ font-size: 17px; color: #dff6ff; font-variant-numeric: tabular-nums; }
+  .stat.is-gold b{ color: var(--gold); }
+
+  .primary{
+    margin-top: clamp(12px, 3vh, 26px);
+    width: min(560px, 64vw); height: 56px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, #0d3a4e, #061e2a 58%, #051620);
+    box-shadow:
+      inset 0 0 0 1px rgba(62, 230, 255, .48),
+      inset 0 0 34px rgba(62, 230, 255, .22),
+      0 10px 30px rgba(0, 0, 0, .46),
+      0 0 26px rgba(62, 230, 255, .12);
+    color: #eaf7ff; font-size: 20px; font-weight: 600; letter-spacing: .10em;
+  }
+  .secondary{
+    margin-top: 10px;
+    width: min(232px, 40vw); height: 38px;
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    border-radius: 999px;
+    border: 1px solid rgba(143, 228, 255, .24);
+    background: rgba(8, 18, 28, .62);
+    color: #cfe9ff; font-size: 14px; letter-spacing: .06em;
+  }
+  kbd{
+    font: 600 11px/1 ui-monospace, "Cascadia Mono", monospace;
+    padding: 3px 7px; border-radius: 5px;
+    border: 1px solid rgba(143, 228, 255, .30);
+    background: rgba(143, 228, 255, .10);
+    color: #bfe9ff;
+  }
+  .difficulty{
+    margin-top: clamp(12px, 2.6vh, 26px);
+    width: min(760px, 86vw);
+  }
+  .diff-head{
+    display: flex; align-items: baseline; justify-content: space-between;
+    font-size: 12px; color: var(--muted); margin-bottom: 8px;
+  }
+  .diff-head em{ font-style: normal; color: #bfe9ff; }
+  .diff-modes{ display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .mode{
+    padding: 9px 14px; border-radius: 12px;
+    border: 1px solid rgba(143, 228, 255, .18);
+    background: rgba(8, 17, 27, .62);
+  }
+  .mode b{ display: block; font-size: 15px; color: #dff6ff; }
+  .mode span{ display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .mode.on{
+    border-color: rgba(62, 230, 255, .68);
+    background: linear-gradient(180deg, rgba(16, 52, 70, .82), rgba(7, 24, 34, .74));
+    box-shadow: inset 0 0 22px rgba(62, 230, 255, .18), 0 0 18px rgba(62, 230, 255, .10);
+  }
+  .tools{ display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+  .tool{
+    padding: 8px 14px; border-radius: 12px; text-align: center;
+    border: 1px solid rgba(143, 228, 255, .16);
+    background: rgba(8, 17, 27, .55);
+    font-size: 12px; color: #cfe9ff;
+  }
+
+  /* 实验台指标面板：只用于读数，不属于游戏 UI */
+  .hud{
+    position: fixed; left: 14px; bottom: 14px; z-index: 9;
+    width: min(336px, 46vw);
+    padding: 11px 13px 10px;
+    border-radius: 12px;
+    border: 1px solid rgba(143, 228, 255, .22);
+    background: linear-gradient(180deg, rgba(8, 17, 26, .86), rgba(4, 9, 15, .82));
+    box-shadow: 0 12px 34px rgba(0, 0, 0, .52);
+    font-size: 12px; color: #cfe4ff;
+    backdrop-filter: blur(6px);
+  }
+  .hud.hidden{ display: none; }
+  .hud .dirs{ display: flex; gap: 6px; margin-bottom: 9px; }
+  .hud .dirs button{
+    flex: 1; padding: 6px 0; border-radius: 8px;
+    border: 1px solid rgba(143, 228, 255, .24);
+    background: rgba(62, 230, 255, .06);
+    color: #bfe9ff; font-size: 12px; cursor: pointer;
+    font-family: inherit;
+  }
+  .hud .dirs button[aria-pressed="true"]{
+    background: linear-gradient(180deg, rgba(62, 230, 255, .26), rgba(62, 230, 255, .10));
+    border-color: rgba(62, 230, 255, .62);
+    color: #eaffff;
+    box-shadow: 0 0 14px rgba(62, 230, 255, .26);
+  }
+  .hud .row{ display: flex; justify-content: space-between; gap: 10px; line-height: 1.72; }
+  .hud .row b{ font-variant-numeric: tabular-nums; color: #eaf6ff; font-weight: 600; }
+  .hud .hint{ margin-top: 7px; font-size: 11px; line-height: 1.6; color: #7f93aa; }
+  .hud .ok{ color: #47e8a7; }
+  .hud .warn{ color: #ffb84d; }
+</style>
+</head>
+<body>
+<canvas id="bg" aria-hidden="true"></canvas>
+
+<!-- 标题页文字层（复刻主文件的版式密度，用于判断"背景是否让位于文字"） -->
+<div class="stage" id="stage">
+  <div class="kicker"><span class="hex" aria-hidden="true"></span>EMBERFALL · ROGUE PROTOCOL</div>
+  <h1 class="word" id="heroTitle">烬</h1>
+  <p class="tagline">魔法 × 科技实时肉鸽 · 清空每一层，再往下一层</p>
+  <div class="stats">
+    <div class="stat"><span>最佳楼层</span><b>5</b></div>
+    <div class="stat is-gold"><span>奥术结晶</span><b>2</b></div>
+    <div class="stat"><span>已完成局数</span><b>23</b></div>
+  </div>
+  <div class="primary">开始探索 <kbd>Enter</kbd></div>
+  <div class="secondary">继续上次 <kbd>C</kbd></div>
+  <div class="difficulty">
+    <div class="diff-head"><span>难度</span><em>普通 · 设计基线</em></div>
+    <div class="diff-modes">
+      <div class="mode"><b>简单</b><span>更少更软</span></div>
+      <div class="mode on"><b>普通</b><span>设计基线</span></div>
+      <div class="mode"><b>困难</b><span>更硬更快</span></div>
+    </div>
+    <div class="tools"><span class="tool">背景动效 · 开</span><span class="tool">声音 · 开</span></div>
+  </div>
+</div>
+
+<!-- 指标面板：方向切换 + 实测读数 -->
+<aside class="hud" id="hud" aria-label="背景实验台指标">
+  <div class="dirs" role="group" aria-label="背景方向">
+    <button type="button" data-dir="1" aria-pressed="true">1 · 符阵</button>
+    <button type="button" data-dir="2" aria-pressed="false">2 · 余烬塔</button>
+    <button type="button" data-dir="3" aria-pressed="false">3 · 破碎的环</button>
+  </div>
+  <div class="row"><span>首帧耗时（脚本启动→首帧画完）</span><b id="mFirst">—</b></div>
+  <div class="row"><span>稳态每帧 均值 / p95</span><b id="mAvg">—</b></div>
+  <div class="row"><span>底图烘焙（一次性）</span><b id="mBase">—</b></div>
+  <div class="row"><span>帧率</span><b id="mFps">—</b></div>
+  <div class="row"><span>背景平均明度</span><b id="mAvgL">—</b></div>
+  <div class="row"><span>标题区背景明度</span><b id="mBoxL">—</b></div>
+  <div class="row"><span>标题字明度 / 对比度</span><b id="mRatio">—</b></div>
+  <div class="row"><span>比标题字更亮的格子</span><b id="mHot">—</b></div>
+  <div class="hint" id="mPeriod">—</div>
+  <div class="hint">1/2/3 切换方向 · P 暂停 · H 隐藏文字 · M 收起指标</div>
+</aside>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============================================================
+     0. 基础工具
+     ============================================================ */
+  var TAU = Math.PI * 2;
+  /** 数值夹取 */
+  function clamp(v, a, b) { return v < a ? a : (v > b ? b : v); }
+  /** 线性插值 */
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  /** 平滑阶跃（0..1） */
+  function smoothstep(e0, e1, x) { var t = clamp((x - e0) / (e1 - e0), 0, 1); return t * t * (3 - 2 * t); }
+  /** 确定性伪随机（同尺寸布局每次刷新一致，便于截图对照） */
+  function makeLcg(seed) {
+    var s = (seed >>> 0) || 1;
+    return function () { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; };
+  }
+  /** sRGB → 相对明度（WCAG 口径，用于对比度读数） */
+  function relLum(r, g, b) {
+    var f = function (c) { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b);
+  }
+
+  /* 与主文件一致的配色（青=科技、暖橙=余烬、紫=奥术、金只留给标题） */
+  var PAL = {
+    cyan: [62, 230, 255],
+    cyanSoft: [143, 228, 255],
+    ember: [255, 138, 61],
+    gold: [255, 203, 110],
+    purple: [176, 133, 255],
+    steel: [168, 191, 220],
+    white: [255, 255, 255]
+  };
+  /** 由颜色数组拼 rgba 字符串 */
+  function rgba(c, a) { return 'rgba(' + c[0] + ',' + c[1] + ',' + c[2] + ',' + a + ')'; }
+
+  /* ============================================================
+     1. 状态
+     ============================================================ */
+  var canvas = document.getElementById('bg');
+  var ctx = canvas.getContext('2d');
+  var base = document.createElement('canvas');
+  var bctx = base.getContext('2d');
+  var sampleCv = document.createElement('canvas');
+  var sctx = sampleCv.getContext('2d');
+
+  var LAB = {
+    bootT: performance.now(),
+    w: 0, h: 0, dpr: 1,
+    t: 0,                 // 逻辑时间（秒）
+    dir: 1,
+    motion: true,
+    raf: 0,
+    ts0: 0,               // 首帧时间戳（时钟零点）
+    lastTs: 0,            // 上一帧时间戳（算帧间隔）
+    frames: 0,
+    samples: [],          // 最近若干帧的绘制耗时（ms）
+    metricTick: 0,
+    geo: null,
+    metrics: {
+      firstFrameMs: null,
+      baseMs: 0,
+      tSprites: 0, tParticles: 0, tFirstDraw: 0, selfMs: 0,
+      avgMs: 0, p95Ms: 0, fps: 0,
+      avgSRGB: 0, avgRel: 0, boxRel: 0, glyphRel: 0,
+      ratio: 0, maxCellRel: 0, hotCells: 0
+    }
+  };
+
+  var CACHE = {
+    grain: null,
+    sprites: {},
+    glyphRel: 0.62,
+    curtain: null,
+    sigilEmbers: [],
+    embers: [],
+    shards: [],
+    motes: []
+  };
+
+  /* ============================================================
+     2. 程序化贴图（全部由 canvas 原语绘制，零 base64 图片）
+     ============================================================ */
+  /**
+   * 在图集的某一格位烘焙一格径向光斑：中心白热 → 主色 → 透明。
+   * 用途：粒子、光晕、热床等所有"软光"，避免逐帧 shadowBlur（极慢）。
+   * 注意：所有颜色共用同一张 canvas（图集），冷启动只付一次 canvas 首建成本。
+   * @param {CanvasRenderingContext2D} g 图集上下文
+   * @param {number} ox 该格位左边界（px）
+   * @param {number} size 格位边长（px）
+   * @param {number[]} c 颜色数组
+   */
+  function paintGlowTile(g, ox, size, c) {
+    var half = size / 2;
+    var grd = g.createRadialGradient(ox + half, half, 0, ox + half, half, half);
+    grd.addColorStop(0.00, 'rgba(255,255,255,0.92)');
+    grd.addColorStop(0.10, rgba(c, 0.92));
+    grd.addColorStop(0.34, rgba(c, 0.34));
+    grd.addColorStop(0.66, rgba(c, 0.08));
+    grd.addColorStop(1.00, rgba(c, 0));
+    g.fillStyle = grd;
+    g.fillRect(ox, 0, size, size);
+  }
+
+  /**
+   * 烘焙一张噪点平铺贴图，用于全屏颗粒（压住渐变的"数码感"）。
+   * @param {number} size 平铺边长
+   * @returns {HTMLCanvasElement}
+   */
+  function makeGrainTile(size) {
+    var cv = document.createElement('canvas');
+    cv.width = cv.height = size;
+    var g = cv.getContext('2d');
+    var img = g.createImageData(size, size);
+    var rnd = makeLcg(20261108);
+    for (var i = 0; i < img.data.length; i += 4) {
+      var v = 116 + Math.floor(rnd() * 84);
+      img.data[i] = v;         // R
+      img.data[i + 1] = v;     // G
+      img.data[i + 2] = v + 5; // B：极轻微的冷偏
+      img.data[i + 3] = Math.floor(rnd() * 118);
+    }
+    g.putImageData(img, 0, 0);
+    return cv;
+  }
+
+  /** 光斑图集的格位键（顺序即格子顺序） */
+  var SPRITE_KEYS = ['cyan', 'cyanSoft', 'ember', 'gold', 'purple', 'white'];
+
+  /**
+   * 生成全部光斑贴图（只做一次）：6 种颜色铺进同一张 384×64 图集
+   */
+  function buildSprites() {
+    var size = 64;
+    var atlas = document.createElement('canvas');
+    atlas.width = size * SPRITE_KEYS.length;
+    atlas.height = size;
+    var g = atlas.getContext('2d');
+    for (var i = 0; i < SPRITE_KEYS.length; i++) {
+      var ox = i * size;
+      paintGlowTile(g, ox, size, PAL[SPRITE_KEYS[i]]);
+      CACHE.sprites[SPRITE_KEYS[i]] = { cv: atlas, sx: ox, size: size };
+    }
+    CACHE.grain = makeGrainTile(112);
+  }
+
+  /**
+   * 画一枚加色光点
+   * @param {CanvasRenderingContext2D} g 上下文（调用方需已设 'lighter' 或自行处理）
+   * @param {string} key 贴图键
+   * @param {number} x 中心 x
+   * @param {number} y 中心 y
+   * @param {number} r 半径
+   * @param {number} a 透明度
+   */
+  function glow(g, key, x, y, r, a) {
+    if (a <= 0.004 || r <= 0.2) return;
+    var spr = CACHE.sprites[key];
+    g.globalAlpha = clamp(a, 0, 1);
+    g.drawImage(spr.cv, spr.sx, 0, spr.size, spr.size, x - r, y - r, r * 2, r * 2);
+    g.globalAlpha = 1;
+  }
+
+  /**
+   * 画一枚被拉伸的软光（椭圆），用于热床 / 光柱 / 环境光
+   */
+  function glowBox(g, key, cx, cy, rx, ry, a) {
+    if (a <= 0.004) return;
+    var spr = CACHE.sprites[key];
+    g.globalAlpha = clamp(a, 0, 1);
+    g.drawImage(spr.cv, spr.sx, 0, spr.size, spr.size, cx - rx, cy - ry, rx * 2, ry * 2);
+    g.globalAlpha = 1;
+  }
+
+  /* ============================================================
+     3. 几何（随视口计算）
+     ============================================================ */
+  /**
+   * 计算三个方向各自的几何参数。
+   * 方向一用"针孔投影"把地面圆环算成真实透视（近大远小），
+   * 不是简单压扁的椭圆——这是"地面透视"读感的关键。
+   * @param {number} w 视口宽
+   * @param {number} h 视口高
+   * @returns {object}
+   */
+  function computeGeo(w, h) {
+    // 外环半径：按纵横比换算，保证横向占屏约 7 成，窄屏允许出血
+    var rOut = clamp(0.378 * (w / h), 0.42, 0.62);
+    // 碎环半径：横向占屏约 5~7 成，竖直压在标题之下
+    var rx = Math.max(0.28 * w, 0.38 * Math.min(w, h));
+    return {
+      s1: {
+        rOut: rOut,
+        rMid: rOut * 0.702,
+        rArc: rOut * 0.446,
+        horizon: 0.38,     // 地平线（屏高比例）：0.30→0.38，符阵整体下移，让出难度/天赋面板（远弧顶须越过 425px 面板底）
+        camH: 0.30,        // 相机离地高度（屏高比例）
+        baseZ: 1.05        // 符阵中心到相机的深度（屏高倍数）
+      },
+      s3: {
+        cx: w * 0.5,
+        cy: h * 0.635,   // 整体下移：环的顶部退出标题/统计带
+        rx: rx,
+        ry: rx * 0.52,   // 压扁一点：更像"悬在中上部的环"，不压难度卡
+        tilt: -0.10
+      }
+    };
+  }
+
+  /**
+   * 地面坐标 (px, pz) → 屏幕坐标。
+   * px / pz 以"屏高"为单位；pz 为相对符阵中心的深度偏移。
+   * 返回 [屏幕x, 屏幕y, 该点处每世界单位对应的像素数]。
+   * @param {number} px 世界 x
+   * @param {number} pz 世界 z（相对符阵中心，正=更远）
+   * @param {number} w 视口宽
+   * @param {number} h 视口高
+   * @returns {number[]}
+   */
+  function projFloor(px, pz, w, h) {
+    var S = LAB.geo.s1;
+    var z = S.baseZ + pz;            // 深度（屏高倍数）
+    var k = 1 / z;                   // 焦距按 1 屏高计
+    return [
+      w * 0.5 + px * k * h,
+      h * (S.horizon + S.camH * k),
+      k * h
+    ];
+  }
+
+  /* ============================================================
+     4. 底图烘焙（方向相关的静态层）
+     ============================================================ */
+  /**
+   * 重建底图：底渐变 + 方向静态结构 + 暗角 + 颗粒。
+   * 底图每帧只做一次 drawImage，动态元素画在其上。
+   */
+  function buildBase() {
+    var w = LAB.w, h = LAB.h;
+    base.width = Math.round(w * LAB.dpr);
+    base.height = Math.round(h * LAB.dpr);
+    bctx.setTransform(LAB.dpr, 0, 0, LAB.dpr, 0, 0);
+    bctx.clearRect(0, 0, w, h);
+
+    // 4.1 纵深底：中心偏上略亮，四周沉黑
+    var bg = bctx.createRadialGradient(w * 0.5, h * 0.40, 0, w * 0.5, h * 0.56, Math.max(w, h) * 0.82);
+    if (LAB.dir === 1) {
+      bg.addColorStop(0, '#08131e');
+      bg.addColorStop(0.46, '#050b13');
+      bg.addColorStop(1, '#020509');
+    } else if (LAB.dir === 2) {
+      bg.addColorStop(0, '#0a1119');
+      bg.addColorStop(0.46, '#060b12');
+      bg.addColorStop(1, '#020509');
+    } else {
+      bg.addColorStop(0, '#07111c');
+      bg.addColorStop(0.46, '#040910');
+      bg.addColorStop(1, '#020509');
+    }
+    bctx.fillStyle = bg;
+    bctx.fillRect(0, 0, w, h);
+
+    // 4.2 方向专属静态结构
+    if (LAB.dir === 1) buildBaseSigil(w, h);
+    else if (LAB.dir === 2) buildBaseEmber(w, h);
+    else buildBaseShatter(w, h);
+
+    // 4.3 暗角：把边缘压下去，中心留给主视觉
+    var vg = bctx.createRadialGradient(w * 0.5, h * 0.48, Math.min(w, h) * 0.16, w * 0.5, h * 0.54, Math.max(w, h) * 0.80);
+    vg.addColorStop(0, 'rgba(0,0,0,0)');
+    vg.addColorStop(0.60, 'rgba(0,0,0,0.18)');
+    vg.addColorStop(1, 'rgba(0,0,0,0.62)');
+    bctx.fillStyle = vg;
+    bctx.fillRect(0, 0, w, h);
+
+    // 4.4 颗粒：用 tile 平铺，成本固定
+    var pat = bctx.createPattern(CACHE.grain, 'repeat');
+    if (pat) {
+      bctx.globalAlpha = 0.052;
+      bctx.globalCompositeOperation = 'overlay';
+      bctx.fillStyle = pat;
+      bctx.fillRect(0, 0, w, h);
+      bctx.globalAlpha = 1;
+      bctx.globalCompositeOperation = 'source-over';
+    }
+
+    // 4.5 文字安全罩：顶部整体压暗（每帧再叠一次，保证动态层也被压住）。
+    // 用多段 stop 做长渐变，避免出现一条可见的水平接缝。
+    if (!CACHE.curtain || CACHE.curtainH !== h) {
+      CACHE.curtain = ctx.createLinearGradient(0, 0, 0, h * 0.46);
+      CACHE.curtain.addColorStop(0.00, 'rgba(2, 5, 10, 0.82)');
+      CACHE.curtain.addColorStop(0.16, 'rgba(2, 5, 10, 0.68)');
+      CACHE.curtain.addColorStop(0.38, 'rgba(2, 5, 10, 0.44)');
+      CACHE.curtain.addColorStop(0.62, 'rgba(2, 5, 10, 0.22)');
+      CACHE.curtain.addColorStop(0.82, 'rgba(2, 5, 10, 0.06)');
+      CACHE.curtain.addColorStop(1.00, 'rgba(2, 5, 10, 0.00)');
+      CACHE.curtainH = h;
+    }
+  }
+
+  /**
+   * 方向一静态层：地平线薄雾 + 符阵中心的底光
+   */
+  function buildBaseSigil(w, h) {
+    var hy = h * 0.30;
+    var band = bctx.createLinearGradient(0, hy - h * 0.10, 0, hy + h * 0.12);
+    band.addColorStop(0, rgba(PAL.cyan, 0));
+    band.addColorStop(0.44, rgba(PAL.cyan, 0.022));
+    band.addColorStop(1, rgba(PAL.cyan, 0));
+    bctx.fillStyle = band;
+    bctx.fillRect(0, hy - h * 0.10, w, h * 0.22);
+
+    // 地面极弱环境光（动态呼吸光会叠在它上面）
+    bctx.globalCompositeOperation = 'lighter';
+    glowBox(bctx, 'cyan', w * 0.5, h * 0.60, Math.min(w, h) * 0.62, Math.min(w, h) * 0.22, 0.070);
+    bctx.globalCompositeOperation = 'source-over';
+  }
+
+  /**
+   * 方向二静态层：光柱底晕 + 塔架栅格 + 右侧刻度
+   */
+  function buildBaseEmber(w, h) {
+    var colX = w * 0.745;
+    var m = Math.min(w, h);
+
+    // 光柱的静态底晕（竖直拉长的软光，避免每帧建渐变）
+    bctx.globalCompositeOperation = 'lighter';
+    glowBox(bctx, 'ember', colX, h * 0.62, m * 0.20, h * 0.44, 0.085);
+    glowBox(bctx, 'ember', colX, h * 0.55, m * 0.048, h * 0.42, 0.060);   // 光柱核心
+    glowBox(bctx, 'gold', colX, h * 0.92, m * 0.30, h * 0.09, 0.075);
+    bctx.globalCompositeOperation = 'source-over';
+
+    // 塔架栅格：竖 5 根 + 横档，极低对比（秩序感来源）
+    bctx.strokeStyle = 'rgba(120, 190, 255, 0.052)';
+    bctx.lineWidth = 1;
+    var cols = [-0.085, -0.042, 0.042, 0.085];
+    bctx.beginPath();
+    for (var i = 0; i < cols.length; i++) {
+      var x = colX + cols[i] * w;
+      bctx.moveTo(x, h * 0.30);
+      bctx.lineTo(x, h * 0.94);
+    }
+    bctx.stroke();
+
+    bctx.strokeStyle = 'rgba(120, 190, 255, 0.032)';
+    bctx.beginPath();
+    for (var y = h * 0.34; y < h * 0.92; y += h * 0.045) {
+      bctx.moveTo(colX - 0.085 * w, y);
+      bctx.lineTo(colX + 0.085 * w, y);
+    }
+    bctx.stroke();
+
+    // 右侧细刻度（科技感：可测量的刻度，而不是装饰线）
+    var sx = w * 0.905;
+    bctx.strokeStyle = 'rgba(143, 228, 255, 0.10)';
+    bctx.beginPath();
+    for (var k = 0; k < 26; k++) {
+      var ty = h * (0.34 + k * 0.021);
+      var len = (k % 5 === 0) ? w * 0.016 : w * 0.008;
+      bctx.moveTo(sx, ty);
+      bctx.lineTo(sx + len, ty);
+    }
+    bctx.stroke();
+  }
+
+  /**
+   * 方向三静态层：环后冷光 + 极淡的星尘
+   */
+  function buildBaseShatter(w, h) {
+    var S = LAB.geo.s3;
+    bctx.globalCompositeOperation = 'lighter';
+    glowBox(bctx, 'cyan', S.cx, S.cy - S.ry * 0.15, S.rx * 1.9, S.ry * 2.2, 0.055);
+    glowBox(bctx, 'purple', S.cx, S.cy, S.rx * 1.2, S.ry * 1.5, 0.030);
+    bctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* ============================================================
+     5. 方向一 · 符阵
+     ============================================================ */
+  /**
+   * 画一条地面圆环（投影后的闭合折线）
+   * @param {number} radius 世界半径（屏高单位）
+   * @param {number} rot 起始角
+   * @param {number} segs 折线段数
+   * @param {string} color 描边色
+   * @param {number} width 线宽
+   */
+  function floorCircle(radius, rot, segs, color, width) {
+    var g = ctx, w = LAB.w, h = LAB.h;
+    g.beginPath();
+    for (var i = 0; i <= segs; i++) {
+      var a = rot + (i / segs) * TAU;
+      var p = projFloor(Math.cos(a) * radius, Math.sin(a) * radius, w, h);
+      if (i === 0) g.moveTo(p[0], p[1]); else g.lineTo(p[0], p[1]);
+    }
+    g.strokeStyle = color;
+    g.lineWidth = width;
+    g.stroke();
+  }
+
+  /**
+   * 画一条地面环形带（内径 → 外径填充），作为"刻度承载面"
+   * @param {number} radIn 内半径
+   * @param {number} radOut 外半径
+   * @param {string} color 填充色
+   */
+  function floorBand(radIn, radOut, color) {
+    var g = ctx, w = LAB.w, h = LAB.h, i, p;
+    var segs = 220;
+    g.beginPath();
+    for (i = 0; i <= segs; i++) {
+      var a = (i / segs) * TAU;
+      p = projFloor(Math.cos(a) * radOut, Math.sin(a) * radOut, w, h);
+      if (i === 0) g.moveTo(p[0], p[1]); else g.lineTo(p[0], p[1]);
+    }
+    for (i = segs; i >= 0; i--) {
+      var a2 = (i / segs) * TAU;
+      p = projFloor(Math.cos(a2) * radIn, Math.sin(a2) * radIn, w, h);
+      g.lineTo(p[0], p[1]);
+    }
+    g.closePath();
+    g.fillStyle = color;
+    g.fill();
+  }
+
+  /**
+   * 画一圈地面刻度（长刻度每 majorEvery 根一次，两条路径批量描边）
+   * @param {number} radius 刻度所在世界半径
+   * @param {number} rot 起始角
+   * @param {number} count 刻度总数
+   * @param {number} majorEvery 长刻度的周期
+   * @param {number} len 短刻度世界长度
+   */
+  function floorTicks(radius, rot, count, majorEvery, len) {
+    var g = ctx, w = LAB.w, h = LAB.h, i, a, p1, p2;
+    // 短刻度
+    g.beginPath();
+    for (i = 0; i < count; i++) {
+      if (i % majorEvery === 0) continue;
+      a = rot + (i / count) * TAU;
+      p1 = projFloor(Math.cos(a) * (radius - len), Math.sin(a) * (radius - len), w, h);
+      p2 = projFloor(Math.cos(a) * (radius + len), Math.sin(a) * (radius + len), w, h);
+      g.moveTo(p1[0], p1[1]);
+      g.lineTo(p2[0], p2[1]);
+    }
+    g.strokeStyle = rgba(PAL.cyanSoft, 0.30);
+    g.lineWidth = 1.2;
+    g.stroke();
+    // 长刻度
+    g.beginPath();
+    for (i = 0; i < count; i += majorEvery) {
+      a = rot + (i / count) * TAU;
+      p1 = projFloor(Math.cos(a) * (radius - len * 2.1), Math.sin(a) * (radius - len * 2.1), w, h);
+      p2 = projFloor(Math.cos(a) * (radius + len * 0.6), Math.sin(a) * (radius + len * 0.6), w, h);
+      g.moveTo(p1[0], p1[1]);
+      g.lineTo(p2[0], p2[1]);
+    }
+    g.strokeStyle = rgba(PAL.cyanSoft, 0.68);
+    g.lineWidth = 1.7;
+    g.stroke();
+  }
+
+  /* 符文字形：6 种笔画模板（归一化坐标，-0.5..0.5） */
+  var RUNES = [
+    [[[-0.30, -0.40], [0.30, -0.40]], [[0.00, -0.40], [0.00, 0.40]], [[-0.22, 0.34], [0.22, 0.34]]],
+    [[[-0.34, 0.34], [-0.12, -0.40]], [[0.06, -0.40], [0.28, 0.34]], [[-0.30, 0.02], [0.26, 0.02]]],
+    [[[-0.26, -0.36], [0.26, -0.06]], [[0.26, -0.06], [-0.26, 0.26]], [[-0.26, 0.26], [0.26, 0.40]]],
+    [[[0.00, -0.40], [0.00, 0.40]], [[-0.30, -0.14], [0.30, -0.14]], [[-0.20, 0.24], [0.20, 0.24]]],
+    [[[-0.30, -0.30], [-0.30, 0.30]], [[0.30, -0.30], [0.30, 0.30]], [[-0.30, 0.00], [0.30, 0.00]]],
+    [[[-0.28, -0.36], [0.28, 0.10]], [[0.28, -0.36], [-0.28, 0.10]], [[0.00, 0.10], [0.00, 0.42]]]
+  ];
+
+  /**
+   * 在屏幕空间画一枚符文刻痕
+   * @param {CanvasRenderingContext2D} g 上下文
+   * @param {number} x 中心 x
+   * @param {number} y 中心 y
+   * @param {number} ang 旋转（沿弧切线）
+   * @param {number} scale 尺寸（px）
+   * @param {number} alpha 透明度
+   * @param {number[]} color 颜色
+   * @param {number} seed 选哪个模板
+   */
+  function drawRune(g, x, y, ang, scale, alpha, color, seed) {
+    var tpl = RUNES[seed % RUNES.length];
+    g.save();
+    g.translate(x, y);
+    g.rotate(ang);
+    g.strokeStyle = rgba(color, alpha);
+    g.lineWidth = 1;
+    g.beginPath();
+    for (var i = 0; i < tpl.length; i++) {
+      var seg = tpl[i];
+      g.moveTo(seg[0][0] * scale, seg[0][1] * scale);
+      g.lineTo(seg[1][0] * scale, seg[1][1] * scale);
+    }
+    g.stroke();
+    g.restore();
+  }
+
+  /**
+   * 方向一主绘制：中心漏光 → 辐射骨线 → 双层刻度环 → 不闭合咒文弧 → 余烬
+   * @param {number} t 秒
+   */
+  function drawSigil(t) {
+    var g = ctx, w = LAB.w, h = LAB.h;
+    var S = LAB.geo.s1;
+    var breath = 0.5 + 0.5 * Math.sin(t * TAU / 22);
+    var c0 = projFloor(0, 0, w, h);
+
+    // 5.1 中心漏光（缓慢呼吸，亮度极低，绝不压过标题）
+    var gr = h * 0.50;
+    var grad = g.createRadialGradient(c0[0], c0[1], 0, c0[0], c0[1], gr);
+    grad.addColorStop(0.00, rgba(PAL.cyanSoft, 0.14 + 0.050 * breath));
+    grad.addColorStop(0.38, rgba(PAL.cyan, 0.055 + 0.020 * breath));
+    grad.addColorStop(1.00, rgba(PAL.cyan, 0));
+    g.globalCompositeOperation = 'lighter';
+    g.fillStyle = grad;
+    g.fillRect(c0[0] - gr, c0[1] - gr, gr * 2, gr * 2);
+    g.globalCompositeOperation = 'source-over';
+
+    // 5.2 辐射骨线（12 等分，极慢旋转）
+    var rotOut = t * TAU / 1500;
+    var rotArcOut = -t * TAU / 1800;
+    g.beginPath();
+    for (var i = 0; i < 12; i++) {
+      var a = i * TAU / 12 + rotOut * 0.5;
+      var pa = projFloor(Math.cos(a) * S.rOut * 0.13, Math.sin(a) * S.rOut * 0.13, w, h);
+      var pb = projFloor(Math.cos(a) * S.rOut * 0.985, Math.sin(a) * S.rOut * 0.985, w, h);
+      g.moveTo(pa[0], pa[1]);
+      g.lineTo(pb[0], pb[1]);
+    }
+    g.strokeStyle = 'rgba(120, 190, 255, 0.16)';
+    g.lineWidth = 1;
+    g.stroke();
+
+    // 5.2b 内圈稀疏同心环（三圈，极淡）：秩序感来自"等间距"，不是装饰
+    for (var rc = 1; rc <= 3; rc++) {
+      floorCircle(S.rOut * (0.18 + rc * 0.19), rc * 0.4, 180, rgba(PAL.cyan, 0.075), 1);
+    }
+
+    // 5.3 外层刻度环：120 格 / 每 10 格长刻度（先铺一层极淡环带作承载面）
+    floorBand(S.rOut * 0.966, S.rOut, rgba(PAL.cyan, 0.070));
+    floorCircle(S.rOut, 0, 220, rgba(PAL.cyanSoft, 0.28), 1.8);
+    floorCircle(S.rOut * 0.950, 0, 220, rgba(PAL.cyanSoft, 0.13), 1);
+    floorTicks(S.rOut * 0.975, rotOut, 120, 10, 0.011);
+
+    // 5.3b 环外一圈"不闭合"的咒文大弧（魔法侧的重量，与内圈刻度的秩序形成对照）
+    for (var ob = 0; ob < 2; ob++) {
+      var obA = rotArcOut + ob * Math.PI + 0.7;
+      var obSpan = Math.PI - 0.85;
+      for (var os = 0; os < 34; os++) {
+        var oa1 = obA + obSpan * os / 34;
+        var oa2 = obA + obSpan * (os + 1) / 34;
+        var owgt = Math.sin(Math.PI * (os + 0.5) / 34);
+        var op1 = projFloor(Math.cos(oa1) * S.rOut * 1.10, Math.sin(oa1) * S.rOut * 1.10, w, h);
+        var op2 = projFloor(Math.cos(oa2) * S.rOut * 1.10, Math.sin(oa2) * S.rOut * 1.10, w, h);
+        g.beginPath();
+        g.moveTo(op1[0], op1[1]);
+        g.lineTo(op2[0], op2[1]);
+        g.strokeStyle = rgba(ob === 0 ? PAL.purple : PAL.cyanSoft, 0.08 + 0.24 * owgt);
+        g.lineWidth = 1 + 2.4 * owgt;
+        g.stroke();
+      }
+    }
+
+    // 5.4 内层刻度环：72 格，反向旋转
+    var rotMid = -t * TAU / 1200;
+    floorCircle(S.rMid, 0, 200, rgba(PAL.cyan, 0.26), 1.2);
+    floorTicks(S.rMid, rotMid, 72, 6, 0.0085);
+
+    // 5.5 不闭合咒文弧：3 段，笔压两端细中间粗，反向最慢
+    var rotArc = -t * TAU / 1000;
+    for (var k = 0; k < 3; k++) {
+      var a0 = rotArc + k * TAU / 3 + 0.26;
+      var span = TAU / 3 - 0.52;
+      var segs = 40;
+      for (var s = 0; s < segs; s++) {
+        var aa = a0 + span * s / segs;
+        var ab = a0 + span * (s + 1) / segs;
+        var wgt = Math.sin(Math.PI * (s + 0.5) / segs);   // 0..1..0
+        var q1 = projFloor(Math.cos(aa) * S.rArc, Math.sin(aa) * S.rArc, w, h);
+        var q2 = projFloor(Math.cos(ab) * S.rArc, Math.sin(ab) * S.rArc, w, h);
+        g.beginPath();
+        g.moveTo(q1[0], q1[1]);
+        g.lineTo(q2[0], q2[1]);
+        g.strokeStyle = rgba(PAL.purple, 0.13 + 0.38 * wgt);
+        g.lineWidth = 1.2 + 2.4 * wgt;
+        g.stroke();
+      }
+      // 弧上的符文刻痕
+      for (var r2 = 0; r2 < 7; r2++) {
+        var ar = a0 + span * (r2 + 0.5) / 7;
+        var pr = projFloor(Math.cos(ar) * S.rArc, Math.sin(ar) * S.rArc, w, h);
+        var pr2 = projFloor(Math.cos(ar + 0.008) * S.rArc, Math.sin(ar + 0.008) * S.rArc, w, h);
+        var tang = Math.atan2(pr2[1] - pr[1], pr2[0] - pr[0]);
+        drawRune(g, pr[0], pr[1], tang, 11.0, 0.50, PAL.cyanSoft, k * 7 + r2);
+      }
+    }
+
+    // 5.6 中心核心（极小、呼吸）
+    g.globalCompositeOperation = 'lighter';
+    glow(g, 'cyan', c0[0], c0[1], h * 0.050, 0.18 + 0.08 * breath);
+    glow(g, 'gold', c0[0], c0[1], h * 0.016, 0.24 + 0.10 * breath);
+    g.globalCompositeOperation = 'source-over';
+
+    // 5.7 从环上上升的余烬（稀疏，读作"魔法"而非"粒子特效"）
+    g.globalCompositeOperation = 'lighter';
+    for (var e = 0; e < CACHE.sigilEmbers.length; e++) {
+      var pe = CACHE.sigilEmbers[e];
+      var u = ((t + pe.phase * pe.life) / pe.life) % 1;
+      var ae = pe.ang + rotOut;
+      var origin = projFloor(Math.cos(ae) * S.rOut * pe.rad, Math.sin(ae) * S.rOut * pe.rad, w, h);
+      var x = origin[0] + Math.sin(u * 3.0 + pe.phase * TAU) * w * 0.010 * u + u * u * w * 0.018;
+      var y = origin[1] - u * h * 0.34;
+      var alpha = Math.pow(Math.sin(Math.PI * u), 1.4) * 0.40;
+      glow(g, pe.kind, x, y, pe.size * (1 - 0.35 * u), alpha);
+    }
+    g.globalCompositeOperation = 'source-over';
+  }
+
+  /* ============================================================
+     6. 方向二 · 余烬塔
+     ============================================================ */
+  /**
+   * 方向二主绘制：热床 → 塔架刻度环 → 上升余烬 → 上升气流线
+   * @param {number} t 秒
+   */
+  function drawEmber(t) {
+    var g = ctx, w = LAB.w, h = LAB.h;
+    var colX = w * 0.745;
+    var breath = 0.5 + 0.5 * Math.sin(t * TAU / 18);
+
+    // 6.1 热床：横向压扁的软光 + 呼吸
+    g.globalCompositeOperation = 'lighter';
+    glowBox(g, 'ember', colX, h * 0.935, Math.min(w, h) * 0.32, h * 0.045, 0.155 + 0.035 * breath);
+    glowBox(g, 'gold', colX, h * 0.930, Math.min(w, h) * 0.13, h * 0.014, 0.13 + 0.03 * breath);
+    glowBox(g, 'cyanSoft', colX, h * 0.94, Math.min(w, h) * 0.20, h * 0.018, 0.05);
+    g.globalCompositeOperation = 'source-over';
+
+    // 6.2 热床刻度椭圆（非常慢的旋转，提供"秩序"）
+    var rotBed = t * TAU / 600;
+    var rx = Math.min(w, h) * 0.145, ry = h * 0.016;
+    g.beginPath();
+    for (var i = 0; i < 72; i++) {
+      var a = rotBed + i * TAU / 72;
+      var inner = i % 6 === 0 ? 0.90 : 0.955;
+      g.moveTo(colX + Math.cos(a) * rx * inner, h * 0.935 + Math.sin(a) * ry * inner);
+      g.lineTo(colX + Math.cos(a) * rx, h * 0.935 + Math.sin(a) * ry);
+    }
+    g.strokeStyle = rgba(PAL.ember, 0.16);
+    g.lineWidth = 1;
+    g.stroke();
+
+    // 6.2b 上升的"塔层环"：3 个椭圆环沿光柱缓慢上浮（等间距 = 秩序，上浮 = 生命）
+    for (var r3 = 0; r3 < 3; r3++) {
+      var u3 = ((t / 60) + r3 / 3) % 1;
+      var y3 = h * 0.930 - u3 * h * 0.80;
+      var x3 = Math.min(w, h) * (0.105 - 0.045 * u3);
+      var a3 = Math.sin(Math.PI * u3) * 0.17;
+      g.beginPath();
+      g.ellipse(colX, y3, x3, x3 * 0.13, 0, 0, TAU);
+      g.strokeStyle = rgba(PAL.ember, a3);
+      g.lineWidth = 1.2;
+      g.stroke();
+      g.beginPath();
+      for (var kk = 0; kk < 24; kk++) {
+        var ka = kk * TAU / 24;
+        g.moveTo(colX + Math.cos(ka) * x3, y3 + Math.sin(ka) * x3 * 0.13);
+        g.lineTo(colX + Math.cos(ka) * x3 * 0.93, y3 + Math.sin(ka) * x3 * 0.13 * 0.93);
+      }
+      g.strokeStyle = rgba(PAL.ember, a3 * 0.72);
+      g.lineWidth = 1;
+      g.stroke();
+    }
+
+    // 6.3 上升余烬：疏密有别、随风偏斜、亮度先增后灭
+    g.globalCompositeOperation = 'lighter';
+    for (var k = 0; k < CACHE.embers.length; k++) {
+      var p = CACHE.embers[k];
+      var u = ((t + p.birth) / p.life) % 1;      // 0..1 生命进度
+      var rise = Math.pow(u, 0.86);               // 越往上越慢（热气耗散）
+      var y = h * 0.945 - rise * (h * 0.86);
+      var spread = 0.55 + u * 1.75;
+      var x = colX
+        + p.off * w * spread * 0.34
+        + Math.sin(u * 2.6 + p.phase) * w * 0.016 * (0.15 + u)
+        + u * u * w * 0.085;                       // 风向偏斜（整体右倾）
+      var fadeIn = smoothstep(0, 0.13, u);
+      var fadeOut = 1 - smoothstep(0.56, 1, u);
+      var alpha = fadeIn * fadeOut * p.alpha;
+      var size = p.size * (1 - 0.42 * u) * (1 + Math.sin(t * 2.6 + p.phase) * 0.16);
+      glow(g, p.kind, x, y, size, alpha);
+    }
+    g.globalCompositeOperation = 'source-over';
+
+    // 6.4 上升气流线：3 条慢速正弦飘带，读作"流动"
+    for (var s = 0; s < 3; s++) {
+      var ph = s * 2.3;
+      g.beginPath();
+      for (var n = 0; n <= 42; n++) {
+        var uu = n / 42;
+        var yy = h * (0.93 - uu * 0.80);
+        var xx = colX
+          + Math.sin(uu * 2.8 + ph + t * TAU / 130) * w * 0.042 * (0.35 + uu)
+          + uu * uu * w * 0.050;
+        if (n === 0) g.moveTo(xx, yy); else g.lineTo(xx, yy);
+      }
+      g.strokeStyle = s === 2 ? rgba(PAL.cyanSoft, 0.045) : rgba(PAL.ember, 0.040);
+      g.lineWidth = 1;
+      g.stroke();
+    }
+
+    // 6.5 空气里的灰烬微尘（大而暗，制造纵深）
+    g.globalCompositeOperation = 'lighter';
+    for (var d = 0; d < CACHE.motes.length; d++) {
+      var m = CACHE.motes[d];
+      var ux = m.x + Math.sin(t * 0.11 + m.phase) * 0.02;
+      var uy = ((m.y - t * m.speed) % 1 + 1) % 1;
+      glow(g, m.kind, ux * w, uy * h, m.size, 0.05 + 0.03 * Math.sin(t * 0.5 + m.phase));
+    }
+    g.globalCompositeOperation = 'source-over';
+  }
+
+  /* ============================================================
+     7. 方向三 · 破碎的环
+     ============================================================ */
+  /**
+   * 金属环某角度的表面色（左上受光、右上补光）
+   * @param {number} a 角度
+   * @param {number} alpha 透明度
+   * @returns {string}
+   */
+  function metalColor(a, alpha) {
+    var key = Math.cos(a - 3.70);
+    var k1 = Math.pow(Math.max(0, key), 2.2);                         // 主受光（左上）
+    var rim = Math.pow(Math.max(0, Math.cos(a - 0.30)), 4.0) * 0.22;  // 副补光（右侧）
+    var tv = clamp(0.03 + k1 * 0.72 + rim * 1.4, 0, 0.80);
+    var r = Math.round(lerp(8, 150, tv));
+    var g2 = Math.round(lerp(14, 180, tv));
+    var b = Math.round(lerp(28, 214, tv));
+    return 'rgba(' + r + ',' + g2 + ',' + b + ',' + alpha + ')';
+  }
+
+  /**
+   * 判断角度是否落在缺口区间内（自动处理 2π 环绕）
+   */
+  function inGap(a, gapA, gapW) {
+    var d = Math.atan2(Math.sin(a - gapA), Math.cos(a - gapA));
+    return Math.abs(d) < gapW * 0.5;
+  }
+
+  /**
+   * 方向三主绘制：环后冷光 → 细刻度 → 金属环带（带缺口）→ 裂隙能量 → 碎片 → 流线
+   * @param {number} t 秒
+   */
+  function drawShatter(t) {
+    var g = ctx;
+    var S = LAB.geo.s3;
+    var rot = t * TAU / 1400;                // 主环极慢自转
+    var pulse = 0.5 + 0.5 * Math.sin(t * TAU / 12);
+
+    g.save();
+    g.translate(S.cx, S.cy);
+    g.rotate(S.tilt);
+    g.scale(1, S.ry / S.rx);                 // 之后以半径 S.rx 的圆为基准
+
+    var R = S.rx;
+    var gapA = 3.60 + rot;                   // 缺口中心（左上）
+    var gapW = 0.36;
+
+    // 7.1 外层细刻度（反向，极其克制）
+    var rotTick = -t * TAU / 1800;
+    g.beginPath();
+    for (var i = 0; i < 96; i++) {
+      var a = rotTick + i * TAU / 96;
+      var r1 = R * 1.072;
+      var r2 = R * (i % 8 === 0 ? 1.040 : 1.056);
+      g.moveTo(Math.cos(a) * r1, Math.sin(a) * r1);
+      g.lineTo(Math.cos(a) * r2, Math.sin(a) * r2);
+    }
+    g.strokeStyle = rgba(PAL.cyanSoft, 0.10);
+    g.lineWidth = 1.1;
+    g.stroke();
+
+    // 7.2 两条极细参考圆（把"精密"读出来）
+    g.strokeStyle = rgba(PAL.cyanSoft, 0.075);
+    g.lineWidth = 1;
+    g.beginPath();
+    g.arc(0, 0, R * 1.105, 0, TAU);
+    g.stroke();
+    g.strokeStyle = rgba(PAL.cyanSoft, 0.045);
+    g.beginPath();
+    g.arc(0, 0, R * 0.50, 0, TAU);
+    g.stroke();
+
+    // 7.3 金属环带：分段填充，角度决定明暗（模拟金属受光）
+    var bandIn = R * 0.870;
+    var N = 128;
+    for (var k = 0; k < N; k++) {
+      var a0 = rot + k * TAU / N;
+      var a1 = rot + (k + 1) * TAU / N;
+      if (inGap(a0, gapA, gapW) || inGap(a1, gapA, gapW)) continue;
+      g.beginPath();
+      g.arc(0, 0, R, a0, a1);
+      g.arc(0, 0, bandIn, a1, a0, true);
+      g.closePath();
+      g.fillStyle = metalColor((a0 + a1) * 0.5, 0.70);
+      g.fill();
+    }
+
+    // 7.3b 窄高光：只在受光弧段贴两条细亮弧（金属感来自"窄高光"，不是整块灰）
+    for (var sp = 0; sp < 48; sp++) {
+      var as0 = rot + sp * TAU / 48;
+      var as1 = as0 + TAU / 48;
+      if (inGap(as0, gapA, gapW)) continue;
+      var lit = Math.pow(Math.max(0, Math.cos((as0 + as1) * 0.5 - 3.70)), 5.0);
+      if (lit < 0.10) continue;
+      g.strokeStyle = 'rgba(210, 232, 255, ' + (0.10 + 0.78 * lit) + ')';
+      g.lineWidth = 1 + 1.8 * lit;
+      g.beginPath();
+      g.arc(0, 0, R * 0.990, as0, as1);
+      g.stroke();
+      if (lit > 0.35) {
+        g.strokeStyle = 'rgba(143, 228, 255, ' + (0.12 + 0.42 * lit) + ')';
+        g.lineWidth = 1;
+        g.beginPath();
+        g.arc(0, 0, bandIn * 1.012, as0, as1);
+        g.stroke();
+      }
+    }
+
+    // 7.4 内外沿高光（细线）
+    g.strokeStyle = rgba(PAL.steel, 0.20);
+    g.lineWidth = 1;
+    var tmpA = [];
+    for (var e = 0; e <= 128; e++) {
+      var ae = rot + e * TAU / 128;
+      if (inGap(ae, gapA, gapW)) continue;
+      tmpA.push(ae);
+    }
+    for (var s2 = 0; s2 < tmpA.length - 1; s2++) {
+      if (Math.abs(tmpA[s2 + 1] - tmpA[s2]) > 0.1) continue; // 跳过缺口两侧的断点
+      g.beginPath();
+      g.arc(0, 0, bandIn, tmpA[s2], tmpA[s2 + 1]);
+      g.stroke();
+    }
+    // 内沿压一道暗边：让环带读作"有厚度的金属"，而不是一张平带
+    g.strokeStyle = 'rgba(2, 6, 12, 0.55)';
+    g.lineWidth = 1.4;
+    for (var s3 = 0; s3 < tmpA.length - 1; s3++) {
+      if (Math.abs(tmpA[s3 + 1] - tmpA[s3]) > 0.1) continue;
+      g.beginPath();
+      g.arc(0, 0, bandIn * 0.995, tmpA[s3], tmpA[s3 + 1]);
+      g.stroke();
+    }
+    // 外沿一圈极细冷光（金属外缘的反光）
+    g.strokeStyle = rgba(PAL.cyanSoft, 0.16);
+    g.lineWidth = 1;
+    for (var s4 = 0; s4 < tmpA.length - 1; s4++) {
+      if (Math.abs(tmpA[s4 + 1] - tmpA[s4]) > 0.1) continue;
+      g.beginPath();
+      g.arc(0, 0, R * 0.997, tmpA[s4], tmpA[s4 + 1]);
+      g.stroke();
+    }
+
+    // 7.5 缺口断面：两条亮切线 + 切口的青色能量
+    var e1 = gapA - gapW * 0.5;
+    var e2 = gapA + gapW * 0.5;
+    g.strokeStyle = rgba(PAL.cyanSoft, 0.78);
+    g.lineWidth = 2.0;
+    g.beginPath();
+    g.moveTo(Math.cos(e1) * bandIn, Math.sin(e1) * bandIn);
+    g.lineTo(Math.cos(e1) * R, Math.sin(e1) * R);
+    g.moveTo(Math.cos(e2) * bandIn, Math.sin(e2) * bandIn);
+    g.lineTo(Math.cos(e2) * R, Math.sin(e2) * R);
+    g.stroke();
+
+    // 裂隙能量（加色，缓慢脉冲）
+    g.globalCompositeOperation = 'lighter';
+    var cx0 = Math.cos(gapA) * R * 0.95;
+    var cy0 = Math.sin(gapA) * R * 0.95;
+    var cg = g.createRadialGradient(cx0, cy0, 0, cx0, cy0, R * 0.60);
+    cg.addColorStop(0.00, rgba(PAL.cyan, 0.44 + 0.20 * pulse));
+    cg.addColorStop(0.30, rgba(PAL.cyan, 0.14 + 0.06 * pulse));
+    cg.addColorStop(1.00, rgba(PAL.cyan, 0));
+    g.fillStyle = cg;
+    g.beginPath();
+    g.arc(cx0, cy0, R * 0.66, 0, TAU);
+    g.fill();
+    // 缺口里的一点白热芯：让"能量从裂缝里透出来"这件事有焦点
+    glow(g, 'cyanSoft', cx0, cy0, R * 0.17, 0.20 + 0.10 * pulse);
+
+    // 能量沿环带向两侧渗出（让"裂"从环体内部亮起来，而不是贴一个光点）
+    for (var se = 0; se < 26; se++) {
+      var sa = gapA + (se < 13 ? -1 : 1) * (0.18 + Math.abs(se - 12.5) * 0.045);
+      var sspan = 0.045;
+      var sLit = Math.max(0, 1 - Math.abs(se - 12.5) / 13);
+      g.strokeStyle = rgba(PAL.cyan, (0.07 + 0.18 * pulse) * sLit);
+      g.lineWidth = 1.4;
+      g.beginPath();
+      g.arc(0, 0, bandIn * 0.985, sa, sa + sspan);
+      g.stroke();
+    }
+    g.globalCompositeOperation = 'source-over';
+
+    // 7.6 漂浮碎片
+    var shards = CACHE.shards;
+    for (var sh = 0; sh < shards.length; sh++) {
+      var q = shards[sh];
+      var drift = Math.sin(t * TAU / 70 + q.phase);
+      var aq = gapA + q.aOff;
+      var rq = R * (1 + q.rOff + 0.014 * drift);
+      var xq = Math.cos(aq) * rq;
+      var yq = Math.sin(aq) * rq;
+      g.save();
+      g.translate(xq, yq);
+      g.rotate(q.spin0 + t * TAU / q.period);
+      var size = R * q.size * (1 + 0.06 * drift);
+      g.beginPath();
+      g.moveTo(-size * 0.9, -size * 0.35);
+      g.lineTo(size * 0.95, -size * 0.60);
+      g.lineTo(size * 0.75, size * 0.45);
+      g.lineTo(-size * 0.55, size * 0.62);
+      g.closePath();
+      g.fillStyle = metalColor(aq, 0.42);
+      g.fill();
+      // 两个面：左上亮面 + 右下暗面（让碎片有"厚度"，不是一张纸片）
+      g.beginPath();
+      g.moveTo(-size * 0.55, size * 0.62);
+      g.lineTo(size * 0.95, -size * 0.60);
+      g.lineTo(size * 0.75, size * 0.45);
+      g.closePath();
+      g.fillStyle = 'rgba(6, 12, 22, 0.55)';
+      g.fill();
+      g.strokeStyle = rgba(PAL.cyanSoft, 0.26);
+      g.lineWidth = 1;
+      g.stroke();
+      g.restore();
+      // 碎片边缘的一点冷光（只在碎片附近，不抬高整片亮度）
+      g.globalCompositeOperation = 'lighter';
+      glow(g, 'cyanSoft', xq, yq, size * 2.6, 0.055);
+      g.globalCompositeOperation = 'source-over';
+    }
+
+    // 7.7 流线：一条长而不断开、笔压渐变的弧（"非秩序"的那一笔）
+    var flowPhase = t * TAU / 70;
+    var baseA = 0.62 + rot * 1.6;
+    var segN = 150;
+    for (var n = 0; n < segN; n++) {
+      var uu = n / segN;
+      var av = baseA + uu * TAU * 0.86;
+      var rr = R * (0.74 + 0.030 * Math.sin(uu * 5.0 + flowPhase * 0.5));
+      var wgt = Math.sin(Math.PI * uu);                 // 两端收笔
+      var b1 = Math.cos(av) * rr, c1 = Math.sin(av) * rr;
+      var av2 = av + TAU * 0.86 / segN;
+      var b2 = Math.cos(av2) * rr, c2 = Math.sin(av2) * rr;
+      g.beginPath();
+      g.moveTo(b1, c1);
+      g.lineTo(b2, c2);
+      g.strokeStyle = rgba(PAL.purple, (0.045 + 0.10 * Math.sin(uu * 3.1 + flowPhase * 0.8) * Math.sin(Math.PI * uu)) * (0.4 + 0.6 * wgt));
+      g.lineWidth = 0.8 + 2.2 * wgt;
+      g.stroke();
+    }
+    // 流线上的漂移光点
+    var dotA = baseA + Math.sin(flowPhase) * 0.4 + TAU * 0.43;
+    g.globalCompositeOperation = 'lighter';
+    glow(g, 'purple', Math.cos(dotA) * R * 0.74, Math.sin(dotA) * R * 0.74, R * 0.035, 0.16 + 0.10 * pulse);
+    g.globalCompositeOperation = 'source-over';
+
+    // 7.8 浮尘
+    g.globalCompositeOperation = 'lighter';
+    for (var mm = 0; mm < CACHE.motes.length; mm++) {
+      var mo = CACHE.motes[mm];
+      var mx = Math.cos(mo.x * TAU + t * 0.02) * R * mo.r;
+      var my = Math.sin(mo.y * TAU + t * 0.017) * R * mo.r;
+      glow(g, mo.kind, mx, my, mo.size, 0.05 + 0.03 * Math.sin(t * 0.4 + mo.phase));
+    }
+    g.globalCompositeOperation = 'source-over';
+
+    g.restore();
+  }
+
+  /* ============================================================
+     8. 方向注册与每帧调度
+     ============================================================ */
+  var DIRS = {
+    1: { name: '符阵', draw: drawSigil, period: '外环 1500s / 内环 1200s / 咒文弧 1000s / 外大弧 1800s / 呼吸 22s / 余烬 8–17s' },
+    2: { name: '余烬塔', draw: drawEmber, period: '单颗上升 8–20s / 塔层环 60s / 气流线 130s / 热床刻度 600s / 呼吸 18s' },
+    3: { name: '破碎的环', draw: drawShatter, period: '主环 1400s / 外刻度 1800s / 碎片漂移 70s / 自转 460–780s / 裂隙脉冲 12s / 流线 70s' }
+  };
+
+  /**
+   * 顶部分文字安全罩：每帧叠一次，确保任何动态元素都不会在标题带过亮
+   */
+  function drawCurtain() {
+    if (!CACHE.curtain) return;
+    ctx.fillStyle = CACHE.curtain;
+    ctx.fillRect(0, 0, LAB.w, LAB.h * 0.46);
+  }
+
+  /**
+   * 画一整帧
+   * @param {number} t 逻辑秒
+   */
+  function drawFrame(t) {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.drawImage(base, 0, 0);
+    ctx.setTransform(LAB.dpr, 0, 0, LAB.dpr, 0, 0);
+    DIRS[LAB.dir].draw(t);
+    drawCurtain();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  /* ============================================================
+     9. 自测量（明度 / 对比度 / 帧耗时）
+     ============================================================ */
+  /**
+   * 测量标题字自身的平均相对明度（离屏按同样字号与金色渐变重绘一次）
+   */
+  function measureGlyph() {
+    var el = document.getElementById('heroTitle');
+    if (!el) return;
+    var cs = getComputedStyle(el);
+    var fs = parseFloat(cs.fontSize) || 88;
+    var fam = cs.fontFamily || 'serif';
+    var cw = Math.round(fs * 1.3);
+    var chh = Math.round(fs * 1.6);
+    var cv = document.createElement('canvas');
+    cv.width = cw; cv.height = chh;
+    var g2 = cv.getContext('2d');
+    g2.font = '700 ' + fs + 'px ' + fam;
+    g2.textAlign = 'center';
+    g2.textBaseline = 'middle';
+    var grd = g2.createLinearGradient(0, 0, 0, chh);
+    grd.addColorStop(0, '#fff2cf');
+    grd.addColorStop(0.46, '#ffd166');
+    grd.addColorStop(1, '#ffab3d');
+    g2.fillStyle = grd;
+    g2.fillText((el.textContent || '烬').trim(), cw / 2, chh / 2);
+    var data = g2.getImageData(0, 0, cw, chh).data;
+    var sum = 0, cnt = 0;
+    for (var i = 0; i < data.length; i += 4) {
+      if (data[i + 3] < 120) continue;
+      sum += relLum(data[i], data[i + 1], data[i + 2]);
+      cnt++;
+    }
+    CACHE.glyphRel = cnt ? sum / cnt : 0.62;
+  }
+
+  /**
+   * 采样整屏（背景层，不含 DOM 文字）→ 平均明度 / 标题框明度 / 最亮格子
+   * 采样到 160 宽的小图上做，单次成本很低
+   */
+  function sampleLuminance() {
+    var w = LAB.w, h = LAB.h;
+    var sw = 160;
+    var sh = Math.max(48, Math.round(sw * h / w));
+    sampleCv.width = sw; sampleCv.height = sh;
+    sctx.setTransform(1, 0, 0, 1, 0, 0);
+    sctx.clearRect(0, 0, sw, sh);
+    sctx.drawImage(canvas, 0, 0, sw, sh);
+    var data = sctx.getImageData(0, 0, sw, sh).data;
+
+    var cols = 16, rows = 10;
+    var cells = new Float32Array(cols * rows);
+    var cellN = new Uint32Array(cols * rows);
+
+    var boxEl = document.getElementById('heroTitle');
+    var box = null;
+    if (boxEl) {
+      var rc = boxEl.getBoundingClientRect();
+      box = {
+        x0: clamp((rc.left - 26) / w, 0, 1) * sw,
+        x1: clamp((rc.right + 26) / w, 0, 1) * sw,
+        y0: clamp((rc.top - 22) / h, 0, 1) * sh,
+        y1: clamp((rc.bottom + 22) / h, 0, 1) * sh
+      };
+    }
+
+    var sumSRGB = 0, sumRel = 0, n = 0, boxRel = 0, boxN = 0;
+    for (var y = 0; y < sh; y++) {
+      for (var x = 0; x < sw; x++) {
+        var i = (y * sw + x) * 4;
+        var r = data[i], gg = data[i + 1], b = data[i + 2];
+        var rel = relLum(r, gg, b);
+        sumSRGB += (r + gg + b) / 3;
+        sumRel += rel;
+        n++;
+        var ci = Math.min(cols - 1, Math.floor(x / sw * cols));
+        var cj = Math.min(rows - 1, Math.floor(y / sh * rows));
+        cells[cj * cols + ci] += rel;
+        cellN[cj * cols + ci]++;
+        if (box && x >= box.x0 && x <= box.x1 && y >= box.y0 && y <= box.y1) {
+          boxRel += rel;
+          boxN++;
+        }
+      }
+    }
+
+    var maxCell = 0;
+    for (var c = 0; c < cells.length; c++) {
+      if (!cellN[c]) continue;
+      var avg = cells[c] / cellN[c];
+      if (avg > maxCell) maxCell = avg;
+    }
+    var hot = 0;
+    for (var c2 = 0; c2 < cells.length; c2++) {
+      if (!cellN[c2]) continue;
+      if (cells[c2] / cellN[c2] > CACHE.glyphRel * 0.85) hot++;
+    }
+
+    var m = LAB.metrics;
+    m.avgSRGB = sumSRGB / n;
+    m.avgRel = sumRel / n;
+    m.boxRel = boxN ? boxRel / boxN : m.avgRel;
+    m.glyphRel = CACHE.glyphRel;
+    m.ratio = (m.glyphRel + 0.05) / (m.boxRel + 0.05);
+    m.maxCellRel = maxCell;
+    m.hotCells = hot;
+  }
+
+  /**
+   * 计算最近帧耗时的均值与 p95（稳态口径，跳过前 30 帧）
+   */
+  function computePerf() {
+    var arr = LAB.samples.slice(30);
+    if (arr.length < 24) return;
+    var sorted = arr.slice().sort(function (a, b) { return a - b; });
+    var sum = 0;
+    for (var i = 0; i < arr.length; i++) sum += arr[i];
+    LAB.metrics.avgMs = sum / arr.length;
+    LAB.metrics.p95Ms = sorted[Math.min(sorted.length - 1, Math.floor(sorted.length * 0.95))];
+  }
+
+  /* ============================================================
+     10. HUD
+     ============================================================ */
+  var hud = {
+    first: document.getElementById('mFirst'),
+    avg: document.getElementById('mAvg'),
+    base: document.getElementById('mBase'),
+    fps: document.getElementById('mFps'),
+    avgL: document.getElementById('mAvgL'),
+    boxL: document.getElementById('mBoxL'),
+    ratio: document.getElementById('mRatio'),
+    hot: document.getElementById('mHot'),
+    period: document.getElementById('mPeriod')
+  };
+
+  /** 刷新指标面板文字 */
+  function updateHud() {
+    var m = LAB.metrics;
+    hud.first.textContent = m.firstFrameMs == null ? '—'
+      : (m.firstFrameMs.toFixed(1) + ' ms · 其中背景自身 ' + m.selfMs.toFixed(1) + ' ms'
+        + (m.selfMs <= 30 ? ' · 达标' : ' · 超预算'));
+    hud.avg.textContent = m.avgMs ? (m.avgMs.toFixed(2) + ' / ' + m.p95Ms.toFixed(2) + ' ms') : '采样中…';
+    hud.base.textContent = m.baseMs.toFixed(1) + ' ms';
+    hud.fps.textContent = m.fps ? m.fps.toFixed(0) + ' fps' : '—';
+    hud.avgL.textContent = m.avgSRGB.toFixed(1) + ' / 255 · ' + (m.avgRel * 100).toFixed(1) + '%';
+    hud.boxL.textContent = (m.boxRel * 100).toFixed(1) + '%';
+    hud.ratio.textContent = (m.glyphRel * 100).toFixed(1) + '% / ' + m.ratio.toFixed(1) + ':1';
+    hud.hot.textContent = String(m.hotCells);
+    hud.hot.className = m.hotCells === 0 ? 'ok' : 'warn';
+    hud.period.textContent = DIRS[LAB.dir].name + ' · ' + DIRS[LAB.dir].period;
+    var btns = document.querySelectorAll('.hud .dirs button');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].setAttribute('aria-pressed', btns[i].dataset.dir === String(LAB.dir) ? 'true' : 'false');
+    }
+  }
+
+  /* ============================================================
+     11. 粒子初始化（尺寸无关、种子固定）
+     ============================================================ */
+  /**
+   * 三个方向所需的粒子/碎片/微尘一次性生成
+   */
+  function initParticles() {
+    var rnd = makeLcg(20261108);
+    var gauss = function () { return (rnd() + rnd() + rnd() - 1.5) / 1.5; };
+
+    // 符阵：从环上升的余烬
+    CACHE.sigilEmbers = [];
+    for (var i = 0; i < 56; i++) {
+      CACHE.sigilEmbers.push({
+        ang: rnd() * TAU,
+        rad: 0.30 + rnd() * 0.68,
+        life: 8 + rnd() * 9,
+        phase: rnd(),
+        size: 1.4 + rnd() * 2.8,
+        kind: rnd() < 0.20 ? 'cyanSoft' : (rnd() < 0.5 ? 'ember' : 'gold')
+      });
+    }
+
+    // 余烬塔：上升粒子（疏密靠 off 的类高斯分布 + 生命错相）
+    CACHE.embers = [];
+    for (var e = 0; e < 320; e++) {
+      var kindRnd = rnd();
+      CACHE.embers.push({
+        off: gauss() * 0.36,
+        life: 8 + rnd() * 12,
+        birth: rnd() * 20,
+        size: 1.8 + Math.pow(rnd(), 2.0) * 5.2,
+        alpha: 0.26 + rnd() * 0.40,
+        phase: rnd() * TAU,
+        kind: kindRnd < 0.10 ? 'cyanSoft' : (kindRnd < 0.32 ? 'gold' : 'ember')
+      });
+    }
+
+    // 碎环：缺口周围的金属碎片
+    CACHE.shards = [];
+    for (var s = 0; s < 12; s++) {
+      CACHE.shards.push({
+        aOff: (rnd() - 0.5) * 0.62,
+        rOff: (rnd() - 0.5) * 0.10,
+        size: 0.019 + rnd() * 0.040,
+        spin0: rnd() * TAU,
+        period: 460 + rnd() * 320,
+        phase: rnd() * TAU
+      });
+    }
+
+    // 浮尘（两个方向共用池）
+    CACHE.motes = [];
+    for (var m = 0; m < 26; m++) {
+      CACHE.motes.push({
+        x: rnd(), y: rnd(),
+        r: 0.55 + rnd() * 0.55,
+        size: 1.6 + rnd() * 3.4,
+        speed: 0.002 + rnd() * 0.007,
+        phase: rnd() * TAU,
+        kind: rnd() < 0.3 ? 'purple' : 'cyanSoft'
+      });
+    }
+  }
+
+  /* ============================================================
+     12. 尺寸 / 方向 / 开关
+     ============================================================ */
+  /** 重建画布尺寸与底图（窗口变化或切方向时调用） */
+  function resizeAll() {
+    LAB.w = window.innerWidth;
+    LAB.h = window.innerHeight;
+    LAB.dpr = clamp(window.devicePixelRatio || 1, 1, 1.5);
+    canvas.width = Math.round(LAB.w * LAB.dpr);
+    canvas.height = Math.round(LAB.h * LAB.dpr);
+    LAB.geo = computeGeo(LAB.w, LAB.h);
+    var t0 = performance.now();
+    buildBase();
+    LAB.metrics.baseMs = performance.now() - t0;
+    var td0 = performance.now();
+    drawFrame(LAB.t);
+    LAB.metrics.tFirstDraw = performance.now() - td0;
+    // 首帧口径：脚本启动 → 首帧画完；不把实验台自身的明度回读算进去
+    if (LAB.metrics.firstFrameMs == null) {
+      LAB.metrics.firstFrameMs = performance.now() - LAB.bootT;
+      LAB.metrics.selfMs = LAB.metrics.tSprites + LAB.metrics.tParticles
+        + LAB.metrics.baseMs + LAB.metrics.tFirstDraw;
+    }
+    // 明度测量脚手架放在计时之后，避免把实验台的离屏回读算进背景成本
+    measureGlyph();
+    sampleLuminance();
+    updateHud();
+  }
+
+  /**
+   * 切换方向
+   * @param {number} n 1|2|3
+   */
+  function setDir(n) {
+    var d = clamp(Math.round(n), 1, 3);
+    if (!DIRS[d]) return;
+    LAB.dir = d;
+    LAB.samples.length = 0;
+    LAB.frames = 0;
+    var tb = performance.now();
+    buildBase();
+    LAB.metrics.baseMs = performance.now() - tb;
+    drawFrame(LAB.t);
+    sampleLuminance();
+    updateHud();
+    if (!LAB.motion) return;
+  }
+
+  /**
+   * 开/关动效（关 = 停在 t 时刻的单帧，不再占用 rAF）
+   * @param {boolean} on 是否开启
+   */
+  function setMotion(on) {
+    LAB.motion = !!on;
+    if (LAB.motion) {
+      LAB.lastTs = 0;
+      LAB.raf = requestAnimationFrame(frame);
+    } else {
+      if (LAB.raf) cancelAnimationFrame(LAB.raf);
+      LAB.raf = 0;
+      drawFrame(LAB.t);
+      sampleLuminance();
+      updateHud();
+    }
+  }
+
+  /* ============================================================
+     13. 主循环
+     ============================================================ */
+  /**
+   * 单帧：先画、再计耗时、再请求下一帧
+   * @param {number} ts rAF 时间戳
+   */
+  function frame(ts) {
+    if (!LAB.motion) return;
+    if (!LAB.ts0) LAB.ts0 = ts;
+    LAB.t = (ts - LAB.ts0) / 1000;
+
+    var t0 = performance.now();
+    drawFrame(LAB.t);
+    var cost = performance.now() - t0;
+    LAB.samples.push(cost);
+    if (LAB.samples.length > 320) LAB.samples.shift();
+
+    if (LAB.lastTs) {
+      var gap = ts - LAB.lastTs;
+      if (gap > 0 && gap < 200) {
+        LAB.metrics.fps = LAB.metrics.fps ? lerp(LAB.metrics.fps, 1000 / gap, 0.08) : 1000 / gap;
+      }
+    }
+    LAB.lastTs = ts;
+    LAB.frames++;
+
+    // 首帧口径：脚本启动 → 首帧画完
+    if (LAB.metrics.firstFrameMs == null) {
+      LAB.metrics.firstFrameMs = performance.now() - LAB.bootT;
+      updateHud();
+    }
+
+    LAB.raf = requestAnimationFrame(frame);
+  }
+
+  /**
+   * 低频指标刷新：每 500ms 更新一次面板，每 2s 采样一次明度
+   */
+  function tickMetrics() {
+    computePerf();
+    updateHud();
+    LAB.metricTick++;
+    if (LAB.metricTick % 4 === 0) {
+      if (!LAB.motion) drawFrame(LAB.t);   // 暂停时先刷新静帧，再读明度
+      sampleLuminance();
+      updateHud();
+    }
+  }
+
+  /* ============================================================
+     14. 交互与启动
+     ============================================================ */
+  /** 读取 URL 参数（?dir=1&motion=0&ui=0） */
+  function readParams() {
+    try {
+      var sp = new URLSearchParams(window.location.search);
+      var d = parseInt(sp.get('dir') || '1', 10);
+      if (d >= 1 && d <= 3) LAB.dir = d;
+      if (sp.get('motion') === '0') LAB.motion = false;
+      if (sp.get('ui') === '0') {
+        document.getElementById('stage').classList.add('hidden');
+        document.getElementById('hud').classList.add('hidden');
+      }
+    } catch (err) { /* 老浏览器忽略 */ }
+  }
+
+  /** 绑定按钮与键盘 */
+  function bindUI() {
+    var btns = document.querySelectorAll('.hud .dirs button');
+    for (var i = 0; i < btns.length; i++) {
+      btns[i].addEventListener('click', function (ev) {
+        setDir(parseInt(ev.currentTarget.dataset.dir, 10));
+      });
+    }
+    window.addEventListener('keydown', function (ev) {
+      var k = ev.key;
+      if (k === '1' || k === '2' || k === '3') setDir(parseInt(k, 10));
+      else if (k === 'p' || k === 'P') setMotion(!LAB.motion);
+      else if (k === 'h' || k === 'H') document.getElementById('stage').classList.toggle('hidden');
+      else if (k === 'm' || k === 'M') document.getElementById('hud').classList.toggle('hidden');
+    });
+    window.addEventListener('resize', function () {
+      clearTimeout(CACHE.resizeTimer);
+      CACHE.resizeTimer = setTimeout(resizeAll, 150);
+    });
+    // 尊重系统"减少动效"：默认停在静帧，但可手动 P 播放
+    try {
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) LAB.motion = false;
+    } catch (err) {}
+  }
+
+  /** 启动 */
+  function boot() {
+    readParams();
+    var tA = performance.now();
+    buildSprites();
+    var tB = performance.now();
+    initParticles();
+    var tC = performance.now();
+    LAB.metrics.tSprites = tB - tA;
+    LAB.metrics.tParticles = tC - tB;
+    bindUI();
+    resizeAll();
+    if (LAB.motion) {
+      LAB.raf = requestAnimationFrame(frame);
+    } else {
+      drawFrame(0);
+      if (LAB.metrics.firstFrameMs == null) LAB.metrics.firstFrameMs = performance.now() - LAB.bootT;
+      updateHud();
+    }
+    setInterval(tickMetrics, 500);
+
+    // 开放给无头验收脚本读取
+    window.__bgLab = {
+      setDir: setDir,
+      setMotion: setMotion,
+      getMetrics: function () {
+        var out = {};
+        for (var k in LAB.metrics) out[k] = LAB.metrics[k];
+        out.dir = LAB.dir;
+        out.dirName = DIRS[LAB.dir].name;
+        out.period = DIRS[LAB.dir].period;
+        out.avgMs = +LAB.metrics.avgMs.toFixed(2);
+        out.p95Ms = +LAB.metrics.p95Ms.toFixed(2);
+        out.samples = LAB.samples.length;
+        out.frames = LAB.frames;
+        return out;
+      }
+    };
+  }
+
+  boot();
+})();
+</script>
+</body>
+</html>

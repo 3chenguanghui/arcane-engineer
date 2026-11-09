@@ -1,0 +1,16 @@
+{
+  "hits": {
+    "runtime": 1,
+    "resize": 1,
+    "draw": 1,
+    "start": 1,
+    "stop": 1
+  },
+  "beforeBytes": 2833963,
+  "afterBytes": 2852390,
+  "deltaBytes": 18427,
+  "beforeMD5": "22D28003E947503101476C789FDBB0AC",
+  "afterMD5": "55A9AB991243CA88AD2C3E4FE05D255E",
+  "payloadBytes": 19079,
+  "preview": "D:/其他/TRAE宝/奥术工程师/ui-lab/title-bg-patch/index_arcane_titlebg_preview.html"
+}

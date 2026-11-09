@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>烬 v1.6.1 · 测试指引</title>
+<style>
+  /* 全部样式内联，纯本地、无外部字体与图片 */
+  :root {
+    --bg: #080c14;
+    --card: #0d1523;
+    --card2: #101b2d;
+    --line: #1f3350;
+    --text: #dbe9ff;
+    --dim: #8ba0bf;
+    --gold: #f0c36d;
+    --ok: #56e6a6;
+    --bad: #ff7a8a;
+    --cyan: #46d8ff;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background:
+      radial-gradient(1200px 600px at 12% -10%, #12263f 0%, transparent 60%),
+      radial-gradient(900px 500px at 92% 0%, #1a1330 0%, transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font: 15px/1.75 "Microsoft YaHei", "PingFang SC", "Segoe UI", sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 34px 20px 70px; }
+  header { padding: 26px 0 10px; }
+  .kicker { color: var(--cyan); letter-spacing: .22em; font-size: 12px; }
+  h1 { margin: 8px 0 6px; font-size: 34px; letter-spacing: .06em; }
+  .tagline { color: var(--dim); margin: 0 0 18px; }
+  .meta-box {
+    display: flex; flex-wrap: wrap; gap: 10px; margin: 0 0 26px;
+  }
+  .meta-box span {
+    border: 1px solid var(--line); background: rgba(17, 28, 46, .7);
+    border-radius: 999px; padding: 4px 12px; font-size: 13px; color: var(--dim);
+  }
+  .meta-box b { color: var(--text); }
+  .note {
+    border: 1px solid #2b4a63; background: rgba(20, 42, 60, .55);
+    border-radius: 10px; padding: 14px 16px; color: #cfe4ff; margin: 0 0 24px;
+  }
+  .note b { color: var(--gold); }
+  h2 {
+    font-size: 22px; margin: 40px 0 6px; padding-left: 12px;
+    border-left: 4px solid var(--cyan);
+  }
+  h2 small { color: var(--dim); font-size: 13px; font-weight: 400; margin-left: 10px; }
+  h3 { font-size: 16px; margin: 26px 0 8px; color: #bcd6f5; }
+  .step {
+    display: flex; gap: 14px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 12px; padding: 14px 16px; margin: 10px 0; align-items: flex-start;
+  }
+  .step .num {
+    flex: 0 0 auto; min-width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: #0f2436; border: 1px solid #2a5a74; color: var(--cyan);
+    font-size: 15px; font-weight: 700;
+  }
+  .step .txt { flex: 1 1 auto; min-width: 0; }
+  .do { margin: 0 0 6px; }
+  .do b { color: var(--gold); }
+  .expect { color: #b9e8cf; margin: 0 0 6px; }
+  .expect::before { content: "应看到："; color: var(--ok); font-weight: 700; }
+  .fail { color: #ffc3ca; font-size: 14px; }
+  .fail::before { content: "不对的表现："; color: var(--bad); font-weight: 700; }
+  .tick {
+    flex: 0 0 auto; width: 26px; height: 26px; margin-top: 4px;
+    accent-color: #56e6a6; cursor: pointer;
+  }
+  .optional {
+    border-left: 3px solid #6d5a2a; background: #14120c;
+  }
+  .optional .num { border-color: #6d5a2a; color: var(--gold); }
+  .badge {
+    display: inline-block; font-size: 12px; padding: 1px 8px; border-radius: 6px;
+    margin-left: 8px; vertical-align: 2px;
+    background: #2a2110; color: var(--gold); border: 1px solid #6d5a2a;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0 6px; font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: left; }
+  th { background: #101c2c; color: #bcd6f5; font-weight: 600; }
+  td kbd, .do kbd, .fail kbd, p kbd {
+    background: #16283c; border: 1px solid #2c4a68; border-bottom-width: 2px;
+    border-radius: 5px; padding: 1px 6px; font-size: 12px; color: #d6ecff;
+    font-family: Consolas, "Courier New", monospace;
+  }
+  .paths code {
+    display: block; margin: 6px 0; padding: 9px 12px; border-radius: 8px;
+    background: #0a111c; border: 1px solid var(--line); color: #9fe0ff;
+    font-family: Consolas, monospace; font-size: 13px; word-break: break-all;
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 760px) { .grid2 { grid-template-columns: 1fr; } }
+  .box {
+    border: 1px solid var(--line); background: var(--card2); border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .box h4 { margin: 0 0 8px; font-size: 15px; color: #bcd6f5; }
+  .box ul { margin: 0; padding-left: 20px; color: #c3d7ef; }
+  .links a { color: var(--cyan); }
+  footer { margin-top: 50px; color: var(--dim); font-size: 13px; border-top: 1px solid var(--line); padding-top: 18px; }
+  .mono { font-family: Consolas, monospace; color: #9fe0ff; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">EMBERFALL · TEST GUIDE</div>
+    <h1>《烬》v1.6.1 测试指引</h1>
+    <p class="tagline">照着点就行：每一步都写清「操作 → 应该看到 → 不对是什么现象」。全部在本机完成，不联网。</p>
+    <div class="meta-box">
+      <span>版本 <b>v1.6.1</b></span>
+      <span>发布包 <b>2,711,040 字节</b></span>
+      <span>发布包 MD5 <b class="mono">23194ECC5F7733054C4E511476B885C7</b></span>
+      <span>浏览器 <b>Edge / Chrome</b></span>
+      <span>预计用时 <b>快验 3 分 / 全验 15 分</b></span>
+    </div>
+  </header>
+
+  <div class="note">
+    <b>开始之前（30 秒）：</b><br />
+    1）本指引和游戏都在同一台电脑上，不需要联网、不需要安装任何东西。<br />
+    2）先双击 <b>自检.html</b> 跑一遍自动检查（约 3 秒），它会把「能不能开局、能不能下楼、存档能不能写、设置能不能生效、有没有报错」逐项打勾 / 打叉。<br />
+    3）自检全绿后，再双击 <b>烬_v1.6.1.html</b> 做人工试玩。自检结束会自动把存档还原，不会弄脏你的进度。
+  </div>
+
+  <h3>文件在哪</h3>
+  <div class="paths">
+    <code>D:\其他\TRAE宝\奥术工程师\测试包_v1.6.1\测试指引.html　（本文件）</code>
+    <code>D:\其他\TRAE宝\奥术工程师\测试包_v1.6.1\自检.html　（自动自检页）</code>
+    <code>D:\其他\TRAE宝\奥术工程师\dist\emberfall_v1.6.1\烬_v1.6.1.html　（正式游戏）</code>
+  </div>
+  <p style="color:var(--dim);font-size:13px;margin-top:6px">提示：每步左边有个小方框，测完点一下打勾，便于知道自己测到哪一步。</p>
+
+  <!-- ============================================================ -->
+  <h2>第一档 · 3 分钟快速验 <small>只要有一项不对，就先别继续往下测</small></h2>
+
+  <div class="step">
+    <div class="num">01</div>
+    <div class="txt">
+      <p class="do">双击 <b>自检.html</b>（就在本指引旁边）。</p>
+      <p class="expect">屏幕中间弹出一块深色面板，自动出现 10 行检查，每行前面是绿色 <b>✓</b>，每行右侧写着实测数字；约 2.4 秒后底部出现绿色总结「全部通过：10/10 项」。</p>
+      <p class="fail">面板没出现 / 一直停在「正在检查」：说明文件被改坏或浏览器太旧，先换 Edge 再试。某一行是红色 <b>✗</b>：把那一行的整句文字抄下来发给开发者，不要继续后面的步骤。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第1步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">02</div>
+    <div class="txt">
+      <p class="do">双击 <b>烬_v1.6.1.html</b>（正式游戏）。</p>
+      <p class="expect">出现标题页：正中间大字「<b>烬</b>」，下面一行小字副标题；再下面并排三个数字「最佳楼层 / 奥术结晶 / 已完成局数」；主按钮「<b>开始探索</b>」；底部有三档难度「简单 / 普通 / 困难」，默认高亮<b>普通</b>；角落有小字版本号 <b>v1.6.1</b>。</p>
+      <p class="fail">黑屏、白屏、只看到文字没有背景、按钮点不动：记下现象直接反馈。标题只有「烬」但没有任何按钮，也算失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第2步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">03</div>
+    <div class="txt">
+      <p class="do">点「<b>开始探索</b>」（或直接按 <kbd>Enter</kbd>）。</p>
+      <p class="expect">标题页淡出，进入第 1 层：画面中央是你的角色，左上角出现生命条（新手满血一般是 <b>100 / 100</b>），左下是奥能条，右侧有小地图；第一次玩会弹一条短教学提示。</p>
+      <p class="fail">标题页没消失 / 进去后全黑 / 角色和血条都没有：失败。若提示被弹窗挡住看不到，也算一个问题，记下来。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第3步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">04</div>
+    <div class="txt">
+      <p class="do">按 <kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd>（或方向键）走两步，再松手；试着撞一下墙。</p>
+      <p class="expect">角色按方向平滑移动，镜头跟着走；松手马上停；撞墙会被挡住，不会穿过去。</p>
+      <p class="fail">角色不动 / 一直滑不停 / 穿墙 / 镜头不跟：任意一条都算失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第4步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">05</div>
+    <div class="txt">
+      <p class="do">把鼠标移到敌人身上，点<b>鼠标左键</b>（也可以按 <kbd>J</kbd>）。</p>
+      <p class="expect">角色朝准星方向打出一发火球（有清晰弹道），左下奥能条肉眼可见地减少；打中的敌人掉血、身上闪白、被轻微击退。</p>
+      <p class="fail">点了没反应 / 有弹道但敌人不掉血 / 奥能条不减：失败。注意：奥能空了打不出弹道是正常设定，等一两秒回蓝再试。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第5步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">06</div>
+    <div class="txt">
+      <p class="do">把本层敌人全部清光（普通难度第 1 层大约 8–11 只，地图上红点都要消失）。</p>
+      <p class="expect">先弹「<b>楼层清空 · 技能四选一</b>」：四张卡，按 <kbd>1</kbd>~<kbd>4</kbd> 或点击选一张；接着弹「<b>楼层被动 · 三选一</b>」，按 <kbd>1</kbd>~<kbd>3</kbd>，或点「跳过被动」。选完后地图上的楼梯亮起。</p>
+      <p class="fail">清光了不弹选卡（卡在原地） / 选完卡后楼梯不亮 / 按键数字没反应：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第6步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">07</div>
+    <div class="txt">
+      <p class="do">走到亮起的楼梯上，按 <kbd>E</kbd>。</p>
+      <p class="expect">出现一次短促的转场，层数变成 <b>第 2 层</b>（顶部 / 右上角楼层数字变化），角色生命回满一小截、奥能回满，重新出现新地图和敌人。</p>
+      <p class="fail">按 <kbd>E</kbd> 没反应：先确认角色确实站在楼梯范围内（贴得太远会提示距离），再把角色踩到楼梯正中心按一次；还不行算失败。层数不变 / 黑屏卡住也算失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第7步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">08</div>
+    <div class="txt">
+      <p class="do">按 <kbd>O</kbd> 打开「设置」，找到「画面 · DISPLAY」里的「<b>性能模式</b>」，点一下开关，再点一下关掉，最后按 <kbd>Esc</kbd> 关闭面板。</p>
+      <p class="expect">开关从「关 · 全画质」变成「开 · 粒子 xx% / 迷雾 xx%」，画面粒子 / 雾气明显变少；再点回「关 · 全画质」又恢复；<kbd>Esc</kbd> 能正常关掉面板并继续玩。</p>
+      <p class="fail">开关点了没字变化 / 画面完全没变化 / 关不掉面板：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第8步完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">09</div>
+    <div class="txt">
+      <p class="do">直接关掉这个标签页，再双击一次 <b>烬_v1.6.1.html</b>。</p>
+      <p class="expect">标题页的「最佳楼层」至少是 <b>2</b>，「已完成局数」比刚才多；主按钮下方多出一个「<b>继续上次</b>」按钮，点它可以直接回到刚才那一层继续打。</p>
+      <p class="fail">数字归零 / 没有「继续上次」/ 点了继续提示已损坏：说明存档没写进去，失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="第9步完成" />
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>第二档 · 15 分钟完整验 <small>按 A→E 顺序做；标「可选」的不影响交付判定</small></h2>
+
+  <h3>A 组 · 战斗与按键（约 4 分钟）</h3>
+
+  <div class="step">
+    <div class="num">A1</div>
+    <div class="txt">
+      <p class="do">在局内依次按 <kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd>（能切几张取决于已解锁数量），再按 <kbd>4</kbd>~<kbd>6</kbd>。</p>
+      <p class="expect">底部卡组里对应卡牌高亮外框，准星 / 弹道颜色随之变化；按未解锁的数字键无反应是正常的。</p>
+      <p class="fail">按了完全没变化 / 高亮的不是同一个槽 / 弹道颜色没换：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="A1完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">A2</div>
+    <div class="txt">
+      <p class="do">贴近敌人，按 <kbd>Q</kbd> 挥近战；再按一次 <kbd>Q</kbd> 连挥。</p>
+      <p class="expect">角色身前出现扇形弧光，命中敌人掉血并击退；奥能条<b>不</b>下降（近战不耗蓝）。</p>
+      <p class="fail">没有弧光 / 奥能被扣 / 近距离也打不到：失败（除非设置里把「近战武器（Q）」关掉了，这种属正常，去设置里打开再测）。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="A2完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">A3</div>
+    <div class="txt">
+      <p class="do">按 <kbd>Shift</kbd> 影步冲刺；再用<b>鼠标右键</b>按一次装置。</p>
+      <p class="expect"><kbd>Shift</kbd> 有一次明显的前冲 / 位移；右键触发科技装置（如护盾 / 炮台，取决于已解锁内容），画面上出现对应特效。未解锁时无反应是正常的。</p>
+      <p class="fail">冲刺没有位移 / 右键没有任何特效且已解锁对应装置：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="A3完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">A4</div>
+    <div class="txt">
+      <p class="do">打掉一波敌人时留意屏幕右上 / 顶部的击杀数、连杀提示；按 <kbd>G</kbd> 打开图鉴，再按 <kbd>G</kbd> 关闭。</p>
+      <p class="expect">击杀后提示正常跳出；图鉴面板能打开，里面有怪物 / 魔法 / 装置条目，点击条目能看到说明；再按 <kbd>G</kbd> 或 <kbd>Esc</kbd> 能关闭并继续玩。</p>
+      <p class="fail">图鉴空白 / 打不开 / 关不掉后角色不能动：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="A4完成" />
+  </div>
+
+  <h3>B 组 · 关卡流程与交互（约 4 分钟）</h3>
+
+  <div class="step">
+    <div class="num">B1</div>
+    <div class="txt">
+      <p class="do">进入新的一层，先看右侧小地图：找到带「宝箱」图标的房间，走进去，靠近宝箱按 <kbd>E</kbd>。</p>
+      <p class="expect">宝箱打开动画 + 一次奖励（卡牌 / 结晶 / 治疗），顶部弹出获得提示。</p>
+      <p class="fail">按 <kbd>E</kbd> 没反应 / 宝箱开了但没提示：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="B1完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">B2</div>
+    <div class="txt">
+      <p class="do">找到带紫色裂纹的「裂隙」房间，靠近按 <kbd>E</kbd>；如果弹出确认，再按一次 <kbd>E</kbd>。</p>
+      <p class="expect">第一次按出现「是否穿越」类提示，第二次按执行穿越 / 或提示条件不满足；无论成功失败都有文字反馈，不会静默。</p>
+      <p class="fail">连按两次完全没有任何提示 / 按下后角色卡死：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="B2完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">B3</div>
+    <div class="txt">
+      <p class="do">找到「商店」房间（门牌上有商店标记），靠近按 <kbd>E</kbd>。</p>
+      <p class="expect">弹出商店面板，列出 3 件左右商品与价格（结晶）；买得起就买一件，结晶扣减、物品进背包 / 卡组。</p>
+      <p class="fail">商店打不开 / 买了不扣钱 / 扣了钱没给东西：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="B3完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">B4</div>
+    <div class="txt">
+      <p class="do">清空整层后按 <kbd>M</kbd> 看全屏地图，再按 <kbd>M</kbd> 关闭；然后去楼梯按 <kbd>E</kbd> 进入下一层。</p>
+      <p class="expect">全屏地图显示已探索房间、楼梯位置与你自己的位置标记；关闭后照常能走能打。</p>
+      <p class="fail">地图空白 / 关掉后角色不能动 / 楼梯位置标错：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="B4完成" />
+  </div>
+
+  <div class="step optional">
+    <div class="num">B5</div>
+    <div class="txt">
+      <p class="do"><b>可选（需先装开发者开关补丁）</b>：打开 <span class="mono">烬_v1.6.1.html?dev=1</span>，局内按两次 <kbd>]</kbd> 跳到第 6 层，清完小怪见首领。</p>
+      <p class="expect">第 6 层出现区域首领「<b>机械暴君</b>」（称号「熔铸核心 · 第一层守门者」）：血条明显比普通怪长、有专属技能、击杀后掉落高品质奖励并进入第 7 层。</p>
+      <p class="fail">第 6 层没有首领 / 首领血条和普通怪一样 / 击杀后卡住：失败。未装补丁时这一项记「未验」，不影响其它结论。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="B5完成" />
+  </div>
+
+  <h3>C 组 · 存档与长线（约 3 分钟）</h3>
+
+  <div class="step">
+    <div class="num">C1</div>
+    <div class="txt">
+      <p class="do">回到标题页，点「<b>存档槽</b>」。</p>
+      <p class="expect">展开 3 个槽位；每个槽显示层数 / 时间；有档的槽按钮是「继续 / 导出 / 删除」，空槽是「空槽 / 导出 / 删除」。点「继续」能回到该槽记录的层数。</p>
+      <p class="fail">没有 3 个槽 / 点继续没反应 / 导出的文本为空：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="C1完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">C2</div>
+    <div class="txt">
+      <p class="do">点「<b>今日挑战 · 2026xxxx</b>」按钮开局，玩到第 1 层以上后退出，回标题页看「种子成绩」区域。</p>
+      <p class="expect">开局后种子被固定（同一天所有人同一套布局）；标题页出现一条「今日 2026xxxx · 最高 N 层」的成绩条。</p>
+      <p class="fail">按钮文字没有日期 / 成绩不出现：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="C2完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">C3</div>
+    <div class="txt">
+      <p class="do">在标题页「种子」输入框里输入 8 位数字（例如 <span class="mono">12345678</span>），点「<b>用种子开始</b>」。</p>
+      <p class="expect">正常开局；退出后标题页种子成绩里出现 <span class="mono">12345678</span> 这一条。</p>
+      <p class="fail">提示种子不合法（1–24 个字符都合法，空才不合法）/ 成绩不记录：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="C3完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">C4</div>
+    <div class="txt">
+      <p class="do">标题页右侧「永久天赋」：结晶够就先点任一升级按钮（不够就先去打一局拿结晶），升完关掉游戏重新打开。</p>
+      <p class="expect">点升级后结晶减少、等级 +1、旁边数值说明变化；重开后等级仍在、结晶余额正确。</p>
+      <p class="fail">点了不扣结晶 / 等级不涨 / 重启后归零：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="C4完成" />
+  </div>
+
+  <div class="step optional">
+    <div class="num">C5</div>
+    <div class="txt">
+      <p class="do"><b>可选且不可恢复</b>：设置页（<kbd>O</kbd>）最下面点「<b>清空存档</b>」。只在你确认这台电脑上的进度可以丢时做。</p>
+      <p class="expect">弹出确认提示；确认后标题页「最佳楼层 / 结晶 / 局数」清零，天赋等级归零。</p>
+      <p class="fail">没有二次确认 / 清了数字还在：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="C5完成" />
+  </div>
+
+  <h3>D 组 · 设置与画面（约 2 分钟）</h3>
+
+  <div class="step">
+    <div class="num">D1</div>
+    <div class="txt">
+      <p class="do">按 <kbd>O</kbd> 打开设置，依次切换：色盲模式、后处理特效、泛光 / 色差 / 扫描线 / 暗角、辅助瞄准三档。</p>
+      <p class="expect">每个开关点一下都有文字状态变化，画面有对应变化（色盲模式会改描边 / 配色；关后处理画面变"平"；辅助瞄准切「关闭」后弹道完全跟手不吸附）。关面板后设置被记住。</p>
+      <p class="fail">某个开关点了没状态文字 / 画面完全不变 / 关掉面板再开又变回默认：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="D1完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">D2</div>
+    <div class="txt">
+      <p class="do">在设置里拖动「BGM 音量」「音效音量」滑块；按 <kbd>N</kbd> 静音再按一次恢复；回标题页点「声音 · 开」。</p>
+      <p class="expect">滑块数字实时变化；按 <kbd>N</kbd> 画面顶部出现静音提示、声音消失，再按恢复；标题页按钮文字在「声音 · 开 / 关」之间切换。</p>
+      <p class="fail">滑块拖了数字不变 / <kbd>N</kbd> 无提示：失败。注：BGM 默认是关闭的，只有环境层，听不到 BGM 不算 bug。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="D2完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">D3</div>
+    <div class="txt">
+      <p class="do">把游戏窗口从最大化拖成小窗口，再拖回来。</p>
+      <p class="expect">画面等比适配窗口，不出现黑边、拉伸、UI 叠在一起；小地图 / 血条位置仍在屏幕内。</p>
+      <p class="fail">画面被裁掉 / UI 跑到屏幕外 / 模糊拉伸：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="D3完成" />
+  </div>
+
+  <h3>E 组 · 稳定性（约 2 分钟）</h3>
+
+  <div class="step">
+    <div class="num">E1</div>
+    <div class="txt">
+      <p class="do">局内按 <kbd>F5</kbd> 刷新页面。</p>
+      <p class="expect">回到标题页；「继续上次」可点，并能回到刷新前最近一次自动保存的层数；标题页数字没有归零。</p>
+      <p class="fail">白屏 / 提示存档损坏 / 数字归零：失败。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="E1完成" />
+  </div>
+
+  <div class="step">
+    <div class="num">E2</div>
+    <div class="txt">
+      <p class="do">连续玩 2 层以上，期间反复开 / 关设置、图鉴、地图；观察帧率（目测是否卡顿）并看有没有红字弹窗。</p>
+      <p class="expect">全程流畅、没有红字报错弹窗、没有卡死；关面板后操作正常。</p>
+      <p class="fail">明显掉帧 / 弹红字错误 / 卡死需要刷新：失败（把弹窗文字记下来）。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="E2完成" />
+  </div>
+
+  <div class="step optional">
+    <div class="num">E3</div>
+    <div class="txt">
+      <p class="do"><b>可选（会看一点电脑）</b>：按 <kbd>F12</kbd> 打开开发者工具，点上方「Console / 控制台」，再玩 1 分钟。</p>
+      <p class="expect">控制台没有红色错误行（黄色提示、灰色日志可以忽略）。</p>
+      <p class="fail">出现红色报错：把红字整段抄下来反馈。</p>
+    </div>
+    <input class="tick" type="checkbox" aria-label="E3完成" />
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>失败怎么记 <small>按这个格式发给开发者，能最快定位</small></h2>
+  <div class="note" style="background:#160f14;border-color:#5b2a34;color:#ffd4da">
+    步骤编号（例如 <b>B1</b>）+ 你点了什么 + 应该看到什么 + 实际看到什么 + 截图（有的话）。<br />
+    例：<span class="mono">B1｜第 3 层宝箱房按 E｜应弹出奖励｜实际完全无反应，截图见附件</span>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2>附：按键速查（照着按即可）</h2>
+  <div class="grid2">
+    <div class="box">
+      <h4>移动与战斗</h4>
+      <table>
+        <tr><th>按键</th><th>作用</th></tr>
+        <tr><td><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> / 方向键</td><td>移动</td></tr>
+        <tr><td>鼠标左键 / <kbd>J</kbd></td><td>主技能（耗奥能）</td></tr>
+        <tr><td>鼠标右键</td><td>科技装置</td></tr>
+        <tr><td><kbd>Q</kbd></td><td>近战挥击（不耗奥能）</td></tr>
+        <tr><td><kbd>Shift</kbd></td><td>影步冲刺</td></tr>
+        <tr><td><kbd>K</kbd></td><td>装置技能（需解锁）</td></tr>
+        <tr><td><kbd>F</kbd></td><td>融合（需解锁；未解锁按了没反应是正常）</td></tr>
+        <tr><td><kbd>Tab</kbd></td><td>并联换相（需解锁）</td></tr>
+        <tr><td><kbd>1</kbd>–<kbd>6</kbd></td><td>切换魔法槽</td></tr>
+      </table>
+    </div>
+    <div class="box">
+      <h4>界面与流程</h4>
+      <table>
+        <tr><th>按键</th><th>作用</th></tr>
+        <tr><td><kbd>E</kbd></td><td>交互：楼梯 / 宝箱 / 裂隙 / 商店 / 祭坛</td></tr>
+        <tr><td><kbd>Enter</kbd> / 空格</td><td>标题页开始游戏</td></tr>
+        <tr><td><kbd>C</kbd>（点按钮）</td><td>继续上次</td></tr>
+        <tr><td><kbd>O</kbd></td><td>设置</td></tr>
+        <tr><td><kbd>G</kbd></td><td>图鉴</td></tr>
+        <tr><td><kbd>T</kbd></td><td>技能树（局内）</td></tr>
+        <tr><td><kbd>M</kbd></td><td>全屏地图</td></tr>
+        <tr><td><kbd>H</kbd></td><td>说明 / 帮助</td></tr>
+        <tr><td><kbd>N</kbd></td><td>静音 / 恢复</td></tr>
+        <tr><td><kbd>R</kbd></td><td>结算界面重开</td></tr>
+        <tr><td><kbd>Esc</kbd></td><td>关闭当前面板</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <h2>附：这些现象不是 bug <small>省得白记一条</small></h2>
+  <div class="box">
+    <ul>
+      <li>BGM 默认关闭，只有很轻的环境层；听不到"音乐"属正常，可在设置里打开。</li>
+      <li><kbd>F</kbd>（融合）、<kbd>K</kbd>（装置）、<kbd>Tab</kbd>（换相）在<b>未解锁</b>时按了完全没反应，是刻意设计。</li>
+      <li>第 1 层开局会有一条教学提示，跳过后不会再来。</li>
+      <li>每层清空会连续弹两次选择（技能四选一 → 被动三选一），第二次可以点「跳过被动」。</li>
+      <li>首领只在第 <b>6 / 12 / 18</b> 层出现，前 5 层没有首领是正常的。</li>
+      <li>「清空存档」会永久清掉本机进度，不可恢复。</li>
+      <li>自检页 <b>自检.html</b> 跑完会把存档自动还原，所以自检后标题页数字没变是正常的。</li>
+    </ul>
+  </div>
+
+  <h2>附：两个配套文件</h2>
+  <div class="box links">
+    <p><b>自检.html</b>：自动检查页（10 项，约 3 秒）。改完代码想确认"还能开机"，先双击它。</p>
+    <p><b>开发者开关_补丁.md</b>：给开发者用的 <span class="mono">?dev=1</span> 补丁说明。打上后可以用键盘快速跳层、回血、加结晶、切换天赋，方便复现问题；<b>默认不生效，不影响正式玩法</b>。</p>
+  </div>
+
+  <footer>
+    本指引为本地文件，无任何外部链接与联网请求。版本 v1.6.1 · 发布包 MD5 23194ECC5F7733054C4E511476B885C7。
+  </footer>
+</div>
+</body>
+</html>

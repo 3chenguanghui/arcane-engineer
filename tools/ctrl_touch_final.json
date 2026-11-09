@@ -1,0 +1,831 @@
+{
+  "time": "2026-11-08T15:21:11.149Z",
+  "target": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "targetMd5Before": "8C7DC978C5F671979F022746F5B67584",
+  "targetMd5After": "8C7DC978C5F671979F022746F5B67584",
+  "targetBytes": 2836186,
+  "asserts": [
+    {
+      "id": "A1",
+      "name": "左半屏按下：active=true、moveId=注入触点对应 pointerId、axis=0、摇杆 drawn（downs+1）",
+      "pass": true,
+      "detail": {
+        "active": true,
+        "moveId": 2,
+        "injectedId": 11,
+        "browserPointerId": 2,
+        "axis": {
+          "x": 0,
+          "y": 0
+        },
+        "downsBefore": 0,
+        "downsAfter": 1,
+        "note": "moveId 与浏览器分配的 pointerId 一致（Blink 可能把触点 id 重编号）"
+      }
+    },
+    {
+      "id": "A2",
+      "name": "左半屏拖动 60px：moves 增长、axis.x>0.2、600ms 内角色位移 >20px",
+      "pass": true,
+      "detail": {
+        "movesBefore": 0,
+        "movesAfter": 1,
+        "axis": {
+          "x": 0.961,
+          "y": 0
+        },
+        "speed": 213.3,
+        "displacement": 341.8,
+        "from": {
+          "x": 564.5,
+          "y": 1424
+        },
+        "to": {
+          "x": 906.3,
+          "y": 1424
+        }
+      }
+    },
+    {
+      "id": "A3",
+      "name": "满推（推程 >maxRadius）：axis 绝对值=1.000（容差 0.03）、fullPush=0.86 生效",
+      "pass": true,
+      "detail": {
+        "axis": {
+          "x": 1,
+          "y": 0
+        },
+        "absAxis": {
+          "x": 1,
+          "y": 0
+        },
+        "fullPush": 0.86,
+        "maxRadius": 72,
+        "stickRadius": 54,
+        "shotBytes": 853434
+      }
+    },
+    {
+      "id": "A4",
+      "name": "抬指：axis 归零、active=false、600ms 后角色位移 <20px（附摩擦减速证据）",
+      "pass": false,
+      "detail": {
+        "active": false,
+        "axis": {
+          "x": 0,
+          "y": 0
+        },
+        "moveId": null,
+        "vxAtRelease": 618.7,
+        "vxAfter600ms": 0,
+        "vxAfter1500ms": 0,
+        "driftAfterRelease600ms": 69.6,
+        "driftBetween600and1500ms": 0,
+        "playerFriction": 10,
+        "driftThreshold": 20,
+        "note": "抬指后仍按 playerFriction 指数衰减滑行（惯性刹车），不是输入残留（axis 已归零）"
+      }
+    },
+    {
+      "id": "A5",
+      "name": "合成 pointercancel：axis 归零、active=false（合成事件，CDP 无法直接派发）",
+      "pass": true,
+      "detail": {
+        "beforeAxis": {
+          "x": 0.961,
+          "y": 0
+        },
+        "pointerIdUsed": 6,
+        "afterAxis": {
+          "x": 0,
+          "y": 0
+        },
+        "afterActive": false,
+        "synthetic": true,
+        "note": "pointercancel 由页面内 new PointerEvent 合成（CDP 无对应指令）"
+      }
+    },
+    {
+      "id": "A6",
+      "name": "右半屏点按一次：__castCalls≥1，按下时 aiming=true，抬指后 aiming=false",
+      "pass": true,
+      "detail": {
+        "castCallsWhileDown": 1,
+        "aimingWhileDown": true,
+        "aimingAfterUp": false,
+        "statsCastsDelta": 1,
+        "aim": {
+          "x": 300,
+          "y": 300
+        },
+        "aimDragging": false
+      }
+    },
+    {
+      "id": "A7",
+      "name": "连点 5 次间隔 60ms：统计实际施法次数（castRepeat=0.10s，预期 ≤3），判定节流是否生效",
+      "pass": true,
+      "detail": {
+        "taps": 5,
+        "targetIntervalMs": 60,
+        "totalWallMs": 547,
+        "castRepeat": 0.1,
+        "castCalls": 4,
+        "castPerTap": [
+          1,
+          1,
+          2,
+          3,
+          3
+        ],
+        "statsCasts": 4,
+        "gaps": [
+          {
+            "wallMs": 75,
+            "gameMs": 75
+          },
+          {
+            "wallMs": 76,
+            "gameMs": 75
+          },
+          {
+            "wallMs": 82,
+            "gameMs": 83
+          },
+          {
+            "wallMs": 75,
+            "gameMs": 75
+          }
+        ],
+        "throttleEffective": true,
+        "note": null
+      }
+    },
+    {
+      "id": "A8",
+      "name": "长按右半屏 1.2s 不移动：期望 ≥2 次施法（源码注释“按住可连发”），实测 1 次即 FAIL",
+      "pass": true,
+      "detail": {
+        "holdMs": 1200,
+        "castCalls": 12,
+        "statsCastsDelta": 12,
+        "aiming": true,
+        "castRepeat": 0.1,
+        "verdict": "长按期间有重复施法"
+      }
+    },
+    {
+      "id": "A9",
+      "name": "双指同时：左手摇杆 + 右手点按，axis>0.5 且 __castCalls 同时增长",
+      "pass": true,
+      "detail": {
+        "moveId": 14,
+        "active": true,
+        "aiming": true,
+        "axis": {
+          "x": 1,
+          "y": 0
+        },
+        "castCallsOnSecondFingerDown": 1,
+        "castCallsAfterMove": 3,
+        "bothHandled": true
+      }
+    },
+    {
+      "id": "A10",
+      "name": "混合设备干扰：摇杆按住时注入 pointerType=mouse 的 pointermove，axis 不被改写、moveId 不被抢占",
+      "pass": true,
+      "detail": {
+        "beforeAxis": {
+          "x": 0.76,
+          "y": 0
+        },
+        "afterDocAxis": {
+          "x": 0.76,
+          "y": 0
+        },
+        "moveIdBefore": 16,
+        "moveIdAfter": 16,
+        "docDispatchIgnored": true,
+        "factCanvasSameIdMouse": {
+          "beforeAxis": {
+            "x": 0.7600571030904308,
+            "y": 0
+          },
+          "afterAxis": {
+            "x": 0.7600571030904308,
+            "y": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "A11",
+      "name": "旋转：844×390 时 x=430 判为右半屏施法、不生成摇杆；转回竖屏 x=200 应生成摇杆；记录 viewW/innerWidth/canvas.width",
+      "pass": false,
+      "detail": {
+        "landscape": {
+          "viewW": 844,
+          "innerWidth": 844,
+          "canvasWidth": 1688,
+          "canvasHeight": 780,
+          "dpr": 2,
+          "splitX": 422,
+          "at430": {
+            "aiming": false,
+            "moveId": null,
+            "active": false,
+            "castCalls": 0
+          }
+        },
+        "portrait": {
+          "viewW": 390,
+          "innerWidth": 390,
+          "canvasWidth": 780,
+          "splitX": 195,
+          "at200": {
+            "aiming": true,
+            "moveId": null,
+            "active": false
+          },
+          "controlAt190": {
+            "aiming": false,
+            "moveId": 19,
+            "active": true
+          }
+        },
+        "portraitRelation": {
+          "viewW": 390,
+          "innerWidth": 390,
+          "canvasWidth": 780,
+          "dpr": 2,
+          "canvasCssTimesDpr": 2
+        },
+        "note": "竖屏 x=200 超过 splitX=195，按代码属右半屏；x=190 作为对照可生成摇杆"
+      }
+    },
+    {
+      "id": "A12",
+      "name": "安全区：统计 CSS 中 env(safe-area-inset-*) 的 top/left/right/bottom 次数",
+      "pass": true,
+      "detail": {
+        "top": 1,
+        "left": 1,
+        "right": 1,
+        "bottom": 2,
+        "stylesheets": 2,
+        "rules": 1171,
+        "failedSheets": 0,
+        "cssTextLen": 156158,
+        "viewportFitCover": 0,
+        "metaViewport": "width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no",
+        "verdict": "四向均有避让",
+        "missing": []
+      }
+    },
+    {
+      "id": "A13",
+      "name": "触屏点击 #btnRules：mode→rules；再点 #rulesClose→playing；按钮边长须 ≥44px",
+      "pass": true,
+      "detail": {
+        "btnRules": {
+          "x": 89,
+          "y": 95,
+          "w": 67,
+          "h": 44,
+          "cx": 122,
+          "cy": 117,
+          "visible": true
+        },
+        "touchTargetOk": true,
+        "minSize": 44,
+        "modeAfterOpen": "rules",
+        "rulesPanelOpen": true,
+        "shotRulesBytes": 282188,
+        "rulesClose": {
+          "x": 286,
+          "y": 94,
+          "w": 55,
+          "h": 45,
+          "cx": 314,
+          "cy": 116,
+          "visible": true
+        },
+        "closeTap": "tapped",
+        "modeAfterClose": "playing",
+        "note": "命中区域达标"
+      }
+    },
+    {
+      "id": "A14",
+      "name": "触屏打开设置：找到文本含“设置”的顶部按钮（打印 id/rect），触摸点按→面板打开→关闭",
+      "pass": true,
+      "detail": {
+        "button": {
+          "id": "btnSettings",
+          "cls": "btn",
+          "text": "设置O",
+          "rect": {
+            "x": 234,
+            "y": 95,
+            "w": 67,
+            "h": 44
+          },
+          "cx": 268,
+          "cy": 117,
+          "inViewport": true,
+          "innerW": 390,
+          "innerH": 844
+        },
+        "tapped": true,
+        "modeBefore": "playing",
+        "modeAfterOpen": "settings",
+        "modeAfterClose": "playing",
+        "note": null
+      }
+    },
+    {
+      "id": "A15",
+      "name": "运行时文案扫描：<kbd> + WASD/左键/右键/滚轮/Shift/Tab/Enter/Esc/空格/“按 单字母” + canvas 绘制提示，输出清单与总数",
+      "pass": true,
+      "detail": {
+        "inventoryOnly": true,
+        "domTotalMatched": 55,
+        "kbdTotal": 40,
+        "textTotal": 15,
+        "listed": 30,
+        "cappedAt40": false,
+        "visibleListed": 0,
+        "items": [
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "N",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "H",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "T",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "O",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "R",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "Esc",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "WASD / 方向键",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "鼠标",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "左键 / J",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "右键 / K",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "1–6",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "Tab",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "F",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "Shift / 空格",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "E",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "G",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "M",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "Enter",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "kbd",
+            "id": null,
+            "cls": null,
+            "text": "C",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "集齐魔法 + 对应科技后按 F 融合",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "Esc",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "WASD / 方向键",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "左键 / J",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "右键 / K",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "Tab",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "Shift / 空格",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "Enter",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "：标题页开始（等同空格）",
+            "visible": false,
+            "rect": [
+              82,
+              643,
+              242,
+              21
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "血少就退，Shift 跑",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          },
+          {
+            "kind": "text",
+            "id": null,
+            "cls": null,
+            "text": "内会出现\"按 E 进入\"。",
+            "visible": false,
+            "rect": [
+              0,
+              0,
+              0,
+              0
+            ]
+          }
+        ],
+        "drawnCanvasTextTotal": 5,
+        "drawnCanvasKeyboardHints": [],
+        "canvasHintsInSource": [
+          {
+            "text": "按 E 进入",
+            "inSource": true
+          },
+          {
+            "text": "按 E 购买",
+            "inSource": true
+          },
+          {
+            "text": "按 E 开始挑战",
+            "inSource": true
+          },
+          {
+            "text": "站到祭坛旁按 E",
+            "inSource": true
+          },
+          {
+            "text": "按 F 融合",
+            "inSource": true
+          },
+          {
+            "text": "再按 F 过载",
+            "inSource": true
+          },
+          {
+            "text": "按 E 穿越",
+            "inSource": true
+          },
+          {
+            "text": "再按 E 确认",
+            "inSource": true
+          }
+        ],
+        "note": "canvas 提示文字在触屏会话里并非全部当前显示；inSource=true 表示源码存在、靠近目标时会绘制"
+      }
+    },
+    {
+      "id": "A16",
+      "name": "手势安全：canvas computed touch-action=none、页面 overscroll、viewport meta、body 无滚动（scrollY=0）",
+      "pass": true,
+      "detail": {
+        "touchAction": "none",
+        "userSelect": "none",
+        "viewportMeta": "width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no",
+        "userScalableNo": true,
+        "htmlOverscroll": "auto",
+        "bodyOverscroll": "none",
+        "htmlOverflow": "hidden",
+        "bodyOverflow": "hidden",
+        "scrollY": 0,
+        "innerH": 844,
+        "docScrollH": 844,
+        "bodyScrollH": 844,
+        "canvasRect": {
+          "x": 0,
+          "y": 0,
+          "w": 390,
+          "h": 844
+        },
+        "noScroll": true,
+        "note": null
+      }
+    },
+    {
+      "id": "A17",
+      "name": "全程 window.__errors 为空（导航前已装 error/rejection 收集器，含独立镜像）",
+      "pass": true,
+      "detail": {
+        "gameErrors": [],
+        "gameErrorsCount": 0,
+        "mirror": [],
+        "mirrorCount": 0
+      }
+    }
+  ],
+  "passCount": 15,
+  "total": 17
+}

@@ -1,0 +1,639 @@
+{
+  "meta": {
+    "runs": 10000,
+    "dmg": 1,
+    "seed": 20261108
+  },
+  "scenarios": {
+    "A": {
+      "floors": {
+        "1": {
+          "entries": 10000,
+          "deaths": 1,
+          "cleared": 9999,
+          "bossDeaths": 1,
+          "bossFights": 10000,
+          "sumBoss": 748912.0000000516,
+          "causes": {
+            "boss": 1
+          },
+          "avgBossSec": 74.9,
+          "deathRatePct": 0.01
+        },
+        "2": {
+          "entries": 9999,
+          "deaths": 1744,
+          "cleared": 8255,
+          "bossDeaths": 1594,
+          "bossFights": 9849,
+          "sumBoss": 669383.929999999,
+          "causes": {
+            "boss": 1594,
+            "elite": 150
+          },
+          "avgBossSec": 68,
+          "deathRatePct": 17.44
+        },
+        "3": {
+          "entries": 8255,
+          "deaths": 2004,
+          "cleared": 6251,
+          "bossDeaths": 1260,
+          "bossFights": 7511,
+          "sumBoss": 486129.10000000184,
+          "causes": {
+            "elite": 693,
+            "boss": 1260,
+            "battle": 51
+          },
+          "avgBossSec": 64.7,
+          "deathRatePct": 24.28
+        },
+        "4": {
+          "entries": 6251,
+          "deaths": 1040,
+          "cleared": 5211,
+          "bossDeaths": 701,
+          "bossFights": 5912,
+          "sumBoss": 390883.779999998,
+          "causes": {
+            "elite": 321,
+            "boss": 701,
+            "battle": 18
+          },
+          "avgBossSec": 66.1,
+          "deathRatePct": 16.64
+        },
+        "5": {
+          "entries": 5211,
+          "deaths": 721,
+          "cleared": 4490,
+          "bossDeaths": 447,
+          "bossFights": 4937,
+          "sumBoss": 335053.8599999997,
+          "causes": {
+            "boss": 447,
+            "elite": 268,
+            "battle": 6
+          },
+          "avgBossSec": 67.9,
+          "deathRatePct": 13.84
+        },
+        "6": {
+          "entries": 4490,
+          "deaths": 381,
+          "cleared": 4109,
+          "bossDeaths": 273,
+          "bossFights": 4382,
+          "sumBoss": 350176.3400000011,
+          "causes": {
+            "elite": 82,
+            "boss": 273,
+            "battle": 26
+          },
+          "avgBossSec": 79.9,
+          "deathRatePct": 8.49
+        },
+        "7": {
+          "entries": 4109,
+          "deaths": 212,
+          "cleared": 3897,
+          "bossDeaths": 136,
+          "bossFights": 4033,
+          "sumBoss": 288879.82000000036,
+          "causes": {
+            "boss": 136,
+            "battle": 25,
+            "elite": 51
+          },
+          "avgBossSec": 71.6,
+          "deathRatePct": 5.16
+        },
+        "8": {
+          "entries": 3897,
+          "deaths": 145,
+          "cleared": 3752,
+          "bossDeaths": 92,
+          "bossFights": 3844,
+          "sumBoss": 280458.24000000034,
+          "causes": {
+            "boss": 92,
+            "battle": 17,
+            "elite": 36
+          },
+          "avgBossSec": 73,
+          "deathRatePct": 3.72
+        },
+        "9": {
+          "entries": 3752,
+          "deaths": 105,
+          "cleared": 3647,
+          "bossDeaths": 61,
+          "bossFights": 3708,
+          "sumBoss": 276485.5099999992,
+          "causes": {
+            "boss": 61,
+            "battle": 14,
+            "elite": 30
+          },
+          "avgBossSec": 74.6,
+          "deathRatePct": 2.8
+        },
+        "10": {
+          "entries": 3647,
+          "deaths": 55,
+          "cleared": 3592,
+          "bossDeaths": 37,
+          "bossFights": 3629,
+          "sumBoss": 275436.2599999996,
+          "causes": {
+            "boss": 37,
+            "elite": 12,
+            "battle": 6
+          },
+          "avgBossSec": 75.9,
+          "deathRatePct": 1.51
+        },
+        "11": {
+          "entries": 3592,
+          "deaths": 38,
+          "cleared": 3554,
+          "bossDeaths": 25,
+          "bossFights": 3579,
+          "sumBoss": 277433.88999999996,
+          "causes": {
+            "elite": 11,
+            "boss": 25,
+            "battle": 2
+          },
+          "avgBossSec": 77.5,
+          "deathRatePct": 1.06
+        },
+        "12": {
+          "entries": 3554,
+          "deaths": 38,
+          "cleared": 3516,
+          "bossDeaths": 30,
+          "bossFights": 3546,
+          "sumBoss": 320257.67999999836,
+          "causes": {
+            "boss": 30,
+            "battle": 2,
+            "elite": 6
+          },
+          "avgBossSec": 90.3,
+          "deathRatePct": 1.07
+        },
+        "13": {
+          "entries": 3516,
+          "deaths": 52,
+          "cleared": 3464,
+          "bossDeaths": 33,
+          "bossFights": 3497,
+          "sumBoss": 281164.9999999981,
+          "causes": {
+            "boss": 33,
+            "elite": 15,
+            "battle": 4
+          },
+          "avgBossSec": 80.4,
+          "deathRatePct": 1.48
+        },
+        "14": {
+          "entries": 3464,
+          "deaths": 49,
+          "cleared": 3415,
+          "bossDeaths": 38,
+          "bossFights": 3453,
+          "sumBoss": 283147.2600000015,
+          "causes": {
+            "boss": 38,
+            "battle": 6,
+            "elite": 5
+          },
+          "avgBossSec": 82,
+          "deathRatePct": 1.41
+        },
+        "15": {
+          "entries": 3415,
+          "deaths": 71,
+          "cleared": 3344,
+          "bossDeaths": 62,
+          "bossFights": 3406,
+          "sumBoss": 282040.38999999955,
+          "causes": {
+            "boss": 62,
+            "elite": 7,
+            "battle": 2
+          },
+          "avgBossSec": 82.8,
+          "deathRatePct": 2.08
+        },
+        "16": {
+          "entries": 3344,
+          "deaths": 53,
+          "cleared": 3291,
+          "bossDeaths": 51,
+          "bossFights": 3342,
+          "sumBoss": 282360.92999999906,
+          "causes": {
+            "boss": 51,
+            "elite": 2
+          },
+          "avgBossSec": 84.5,
+          "deathRatePct": 1.58
+        },
+        "17": {
+          "entries": 3291,
+          "deaths": 52,
+          "cleared": 3239,
+          "bossDeaths": 49,
+          "bossFights": 3288,
+          "sumBoss": 283798.4099999993,
+          "causes": {
+            "boss": 49,
+            "elite": 3
+          },
+          "avgBossSec": 86.3,
+          "deathRatePct": 1.58
+        },
+        "18": {
+          "entries": 3239,
+          "deaths": 57,
+          "cleared": 3182,
+          "bossDeaths": 56,
+          "bossFights": 3238,
+          "sumBoss": 326160.2200000001,
+          "causes": {
+            "boss": 56,
+            "elite": 1
+          },
+          "avgBossSec": 100.7,
+          "deathRatePct": 1.76
+        },
+        "19": {
+          "entries": 3182,
+          "deaths": 12,
+          "cleared": 3170,
+          "bossDeaths": 7,
+          "bossFights": 3177,
+          "sumBoss": 310698.1599999991,
+          "causes": {
+            "elite": 5,
+            "boss": 7
+          },
+          "avgBossSec": 97.8,
+          "deathRatePct": 0.38
+        },
+        "20": {
+          "entries": 3170,
+          "deaths": 15,
+          "cleared": 3155,
+          "bossDeaths": 1,
+          "bossFights": 3156,
+          "sumBoss": 173833.79000000012,
+          "causes": {
+            "boss": 1,
+            "elite": 14
+          },
+          "avgBossSec": 55.1,
+          "deathRatePct": 0.47
+        }
+      },
+      "pass10Pct": 35.9,
+      "reach20Pct": 31.7,
+      "clear20Pct": 31.6,
+      "reach20N": 3170,
+      "clear20N": 3155,
+      "bossSec18": {
+        "n": 3238,
+        "avg": 100.7,
+        "p50": 99.72
+      },
+      "bossSec19": {
+        "n": 3177,
+        "avg": 97.8,
+        "p50": 97.27
+      },
+      "bossSec20": {
+        "n": 3156,
+        "avg": 55.1,
+        "p50": 54.79
+      }
+    },
+    "A′": {
+      "floors": {
+        "1": {
+          "entries": 10000,
+          "deaths": 1,
+          "cleared": 9999,
+          "bossDeaths": 1,
+          "bossFights": 10000,
+          "sumBoss": 748912.0000000516,
+          "causes": {
+            "boss": 1
+          },
+          "avgBossSec": 74.9,
+          "deathRatePct": 0.01
+        },
+        "2": {
+          "entries": 9999,
+          "deaths": 1751,
+          "cleared": 8248,
+          "bossDeaths": 1635,
+          "bossFights": 9883,
+          "sumBoss": 672706.3799999958,
+          "causes": {
+            "boss": 1635,
+            "elite": 116
+          },
+          "avgBossSec": 68.1,
+          "deathRatePct": 17.51
+        },
+        "3": {
+          "entries": 8248,
+          "deaths": 1652,
+          "cleared": 6596,
+          "bossDeaths": 1411,
+          "bossFights": 8007,
+          "sumBoss": 516553.6900000033,
+          "causes": {
+            "battle": 98,
+            "elite": 143,
+            "boss": 1411
+          },
+          "avgBossSec": 64.5,
+          "deathRatePct": 20.03
+        },
+        "4": {
+          "entries": 6596,
+          "deaths": 1200,
+          "cleared": 5396,
+          "bossDeaths": 757,
+          "bossFights": 6153,
+          "sumBoss": 407661.9399999989,
+          "causes": {
+            "boss": 757,
+            "elite": 416,
+            "battle": 27
+          },
+          "avgBossSec": 66.3,
+          "deathRatePct": 18.19
+        },
+        "5": {
+          "entries": 5396,
+          "deaths": 799,
+          "cleared": 4597,
+          "bossDeaths": 470,
+          "bossFights": 5067,
+          "sumBoss": 343132.70999999996,
+          "causes": {
+            "boss": 470,
+            "elite": 309,
+            "battle": 20
+          },
+          "avgBossSec": 67.7,
+          "deathRatePct": 14.81
+        },
+        "6": {
+          "entries": 4597,
+          "deaths": 438,
+          "cleared": 4159,
+          "bossDeaths": 274,
+          "bossFights": 4433,
+          "sumBoss": 354754.5400000005,
+          "causes": {
+            "boss": 274,
+            "battle": 43,
+            "elite": 121
+          },
+          "avgBossSec": 80,
+          "deathRatePct": 9.53
+        },
+        "7": {
+          "entries": 4159,
+          "deaths": 221,
+          "cleared": 3938,
+          "bossDeaths": 133,
+          "bossFights": 4071,
+          "sumBoss": 292238.8900000002,
+          "causes": {
+            "boss": 133,
+            "elite": 61,
+            "battle": 27
+          },
+          "avgBossSec": 71.8,
+          "deathRatePct": 5.31
+        },
+        "8": {
+          "entries": 3938,
+          "deaths": 142,
+          "cleared": 3796,
+          "bossDeaths": 82,
+          "bossFights": 3878,
+          "sumBoss": 283985.1700000004,
+          "causes": {
+            "boss": 82,
+            "battle": 15,
+            "elite": 45
+          },
+          "avgBossSec": 73.2,
+          "deathRatePct": 3.61
+        },
+        "9": {
+          "entries": 3796,
+          "deaths": 80,
+          "cleared": 3716,
+          "bossDeaths": 47,
+          "bossFights": 3763,
+          "sumBoss": 281422.87999999913,
+          "causes": {
+            "boss": 47,
+            "battle": 8,
+            "elite": 25
+          },
+          "avgBossSec": 74.8,
+          "deathRatePct": 2.11
+        },
+        "10": {
+          "entries": 3716,
+          "deaths": 72,
+          "cleared": 3644,
+          "bossDeaths": 52,
+          "bossFights": 3696,
+          "sumBoss": 281123.00000000006,
+          "causes": {
+            "boss": 52,
+            "elite": 12,
+            "battle": 8
+          },
+          "avgBossSec": 76.1,
+          "deathRatePct": 1.94
+        },
+        "11": {
+          "entries": 3644,
+          "deaths": 47,
+          "cleared": 3597,
+          "bossDeaths": 28,
+          "bossFights": 3625,
+          "sumBoss": 282051.8099999993,
+          "causes": {
+            "boss": 28,
+            "elite": 14,
+            "battle": 5
+          },
+          "avgBossSec": 77.8,
+          "deathRatePct": 1.29
+        },
+        "12": {
+          "entries": 3597,
+          "deaths": 31,
+          "cleared": 3566,
+          "bossDeaths": 26,
+          "bossFights": 3592,
+          "sumBoss": 325756.94999999995,
+          "causes": {
+            "elite": 5,
+            "boss": 26
+          },
+          "avgBossSec": 90.7,
+          "deathRatePct": 0.86
+        },
+        "13": {
+          "entries": 3566,
+          "deaths": 61,
+          "cleared": 3505,
+          "bossDeaths": 44,
+          "bossFights": 3549,
+          "sumBoss": 286146.19999999885,
+          "causes": {
+            "boss": 44,
+            "elite": 14,
+            "battle": 3
+          },
+          "avgBossSec": 80.6,
+          "deathRatePct": 1.71
+        },
+        "14": {
+          "entries": 3505,
+          "deaths": 47,
+          "cleared": 3458,
+          "bossDeaths": 34,
+          "bossFights": 3492,
+          "sumBoss": 287167.6800000011,
+          "causes": {
+            "elite": 8,
+            "boss": 34,
+            "battle": 5
+          },
+          "avgBossSec": 82.2,
+          "deathRatePct": 1.34
+        },
+        "15": {
+          "entries": 3458,
+          "deaths": 72,
+          "cleared": 3386,
+          "bossDeaths": 64,
+          "bossFights": 3450,
+          "sumBoss": 287011.12999999954,
+          "causes": {
+            "boss": 64,
+            "elite": 8
+          },
+          "avgBossSec": 83.2,
+          "deathRatePct": 2.08
+        },
+        "16": {
+          "entries": 3386,
+          "deaths": 67,
+          "cleared": 3319,
+          "bossDeaths": 61,
+          "bossFights": 3380,
+          "sumBoss": 286931.96999999974,
+          "causes": {
+            "boss": 61,
+            "elite": 4,
+            "battle": 2
+          },
+          "avgBossSec": 84.9,
+          "deathRatePct": 1.98
+        },
+        "17": {
+          "entries": 3319,
+          "deaths": 41,
+          "cleared": 3278,
+          "bossDeaths": 36,
+          "bossFights": 3314,
+          "sumBoss": 287784.6199999994,
+          "causes": {
+            "boss": 36,
+            "elite": 4,
+            "battle": 1
+          },
+          "avgBossSec": 86.8,
+          "deathRatePct": 1.24
+        },
+        "18": {
+          "entries": 3278,
+          "deaths": 59,
+          "cleared": 3219,
+          "bossDeaths": 59,
+          "bossFights": 3278,
+          "sumBoss": 331579.4799999995,
+          "causes": {
+            "boss": 59
+          },
+          "avgBossSec": 101.2,
+          "deathRatePct": 1.8
+        },
+        "19": {
+          "entries": 3219,
+          "deaths": 8,
+          "cleared": 3211,
+          "bossDeaths": 7,
+          "bossFights": 3218,
+          "sumBoss": 316657.74999999953,
+          "causes": {
+            "boss": 7,
+            "battle": 1
+          },
+          "avgBossSec": 98.4,
+          "deathRatePct": 0.25
+        },
+        "20": {
+          "entries": 3211,
+          "deaths": 14,
+          "cleared": 3197,
+          "bossDeaths": 0,
+          "bossFights": 3197,
+          "sumBoss": 177058.72000000064,
+          "causes": {
+            "elite": 14
+          },
+          "avgBossSec": 55.4,
+          "deathRatePct": 0.44
+        }
+      },
+      "pass10Pct": 36.4,
+      "reach20Pct": 32.1,
+      "clear20Pct": 32,
+      "reach20N": 3211,
+      "clear20N": 3197,
+      "bossSec18": {
+        "n": 3278,
+        "avg": 101.2,
+        "p50": 99.93
+      },
+      "bossSec19": {
+        "n": 3218,
+        "avg": 98.4,
+        "p50": 97.65
+      },
+      "bossSec20": {
+        "n": 3197,
+        "avg": 55.4,
+        "p50": 54.95
+      }
+    }
+  }
+}

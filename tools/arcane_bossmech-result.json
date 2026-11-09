@@ -1,0 +1,254 @@
+{
+  "port": 9582,
+  "asserts": [
+    {
+      "name": "B1 三区各 2 阶段、6 个机制 id 互不相同、tell 非空、窗口 ≥0.5s",
+      "pass": true,
+      "detail": {
+        "ok": true,
+        "detail": {
+          "mech": {
+            "p1": "armorCycle",
+            "p2": "moltenTrail",
+            "tell1": 36,
+            "tell2": 33,
+            "signal": "护甲板碎裂 · 核心永久暴露",
+            "window1": 1,
+            "window2": 0.9
+          },
+          "rune": {
+            "p1": "sigilWaltz",
+            "p2": "reverseSigils",
+            "tell1": 18,
+            "tell2": 24,
+            "signal": "刻印环反向旋转",
+            "window1": 0.55,
+            "window2": 0.55
+          },
+          "void": {
+            "p1": "gravityAnchor",
+            "p2": "twinWells",
+            "tell1": 10,
+            "tell2": 17,
+            "signal": "场域折叠 · 第二口井开启",
+            "window1": 1.6,
+            "window2": 1.4
+          }
+        },
+        "unique": 6,
+        "total": 6,
+        "regionBoss": {
+          "f6": "mech",
+          "f12": "rune",
+          "f18": "void"
+        },
+        "threshold": 0.5,
+        "guard": 1
+      }
+    },
+    {
+      "name": "B2 机械一阶段：核心过载预警为 ring，且预告 coreAfter > 0",
+      "pass": true,
+      "detail": {
+        "kind": "mech",
+        "mechPhase": 1,
+        "tg": {
+          "kind": "ring",
+          "coreAfter": 2.4,
+          "pull": 0
+        },
+        "hazards": []
+      }
+    },
+    {
+      "name": "B3 符文一阶段：3 枚刻印，正向（近先炸）递增",
+      "pass": true,
+      "detail": {
+        "kind": "rune",
+        "mechPhase": 1,
+        "tg": null,
+        "hazards": [
+          {
+            "reversed": false,
+            "total": 0.55,
+            "well": false,
+            "pull": 0,
+            "molten": false
+          },
+          {
+            "reversed": false,
+            "total": 1.05,
+            "well": false,
+            "pull": 0,
+            "molten": false
+          },
+          {
+            "reversed": false,
+            "total": 1.55,
+            "well": false,
+            "pull": 0,
+            "molten": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "B4 虚空一阶段：singularity 单井，牵引 150，无第二口井",
+      "pass": true,
+      "detail": {
+        "kind": "void",
+        "mechPhase": 1,
+        "tg": {
+          "kind": "singularity",
+          "coreAfter": 0,
+          "pull": 150
+        },
+        "hazards": []
+      }
+    },
+    {
+      "name": "B5 机械二阶段：自动切形态、无敌 ≥1.0s、护甲熔毁核心常开、震波留 3 处熔渣",
+      "pass": true,
+      "detail": {
+        "info": {
+          "kind": "mech",
+          "phase2": true,
+          "mechPhase": 2,
+          "name": "装甲熔毁 · 熔渣追猎",
+          "tell": "护甲永久熔毁（核心常开 ×1.5）· 每次震波留下 2s 熔渣地面",
+          "invuln": 1,
+          "signalLine": "护甲板碎裂 · 核心永久暴露",
+          "signalAt": 5,
+          "lineText": "“装甲熔毁完毕——核心，不再收回。”",
+          "armorBroken": true,
+          "coreOpen": 2.4
+        },
+        "molten": 3,
+        "hazards": [
+          {
+            "reversed": false,
+            "total": 2,
+            "well": false,
+            "pull": 0,
+            "molten": true
+          },
+          {
+            "reversed": false,
+            "total": 2,
+            "well": false,
+            "pull": 0,
+            "molten": true
+          },
+          {
+            "reversed": false,
+            "total": 2,
+            "well": false,
+            "pull": 0,
+            "molten": true
+          }
+        ]
+      }
+    },
+    {
+      "name": "B6 符文二阶段：4 枚刻印、全部逆序（远先炸）、转换信号含\"刻印\"",
+      "pass": true,
+      "detail": {
+        "info": {
+          "kind": "rune",
+          "phase2": true,
+          "mechPhase": 2,
+          "name": "刻印逆向",
+          "tell": "刻印改为向首领方向依次引爆（四枚）· 向首领侧闪",
+          "invuln": 1,
+          "signalLine": "刻印环反向旋转",
+          "signalAt": 5,
+          "lineText": "“刻印倒转——别往外跑，往我身上跑。”",
+          "armorBroken": false,
+          "coreOpen": 0
+        },
+        "hazards": [
+          {
+            "reversed": true,
+            "total": 2.05,
+            "well": false,
+            "pull": 0,
+            "molten": false
+          },
+          {
+            "reversed": true,
+            "total": 1.55,
+            "well": false,
+            "pull": 0,
+            "molten": false
+          },
+          {
+            "reversed": true,
+            "total": 1.05,
+            "well": false,
+            "pull": 0,
+            "molten": false
+          },
+          {
+            "reversed": true,
+            "total": 0.55,
+            "well": false,
+            "pull": 0,
+            "molten": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "B7 虚空二阶段：singularity 牵引 170 + 第二口 well 井（pull 170）",
+      "pass": true,
+      "detail": {
+        "info": {
+          "kind": "void",
+          "phase2": true,
+          "mechPhase": 2,
+          "name": "双生引力井",
+          "tell": "两口引力井同时牵引 · 沿切线脱出",
+          "invuln": 1,
+          "signalLine": "场域折叠 · 第二口井开启",
+          "signalAt": 5,
+          "lineText": "“场域折叠——现在，有两个中心。”",
+          "armorBroken": false,
+          "coreOpen": 0
+        },
+        "tg": {
+          "kind": "singularity",
+          "pull": 170
+        },
+        "hazards": [
+          {
+            "reversed": false,
+            "total": 1.6,
+            "well": true,
+            "pull": 170,
+            "molten": false
+          }
+        ]
+      }
+    },
+    {
+      "name": "B8 HUD 与调试快照能读到二阶段机制名（drawBossHud 不报错）",
+      "pass": true,
+      "detail": {
+        "errors": 0,
+        "mechName": "装甲熔毁 · 熔渣追猎",
+        "hudLabel": "P2 · 装甲熔毁 · 熔渣追猎",
+        "signalAt": 5
+      }
+    },
+    {
+      "name": "B9 全流程无页面异常",
+      "pass": true,
+      "detail": {
+        "errors": []
+      }
+    }
+  ],
+  "pageErrors": [],
+  "screenshotBytes": 1120521,
+  "verdict": "PASS"
+}

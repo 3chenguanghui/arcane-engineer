@@ -1,0 +1,306 @@
+{
+  "mode": "full",
+  "file": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "md5Before": "8C7DC978C5F671979F022746F5B67584",
+  "sizeBefore": 2836186,
+  "md5After": "8C7DC978C5F671979F022746F5B67584",
+  "sizeAfter": 2836186,
+  "consoleErrCount": 0,
+  "exceptionCount": 0,
+  "asserts": [
+    {
+      "id": "W1",
+      "name": "页面零错误且可开局进 playing",
+      "pass": true,
+      "detail": {
+        "errors": 0,
+        "mirror": 0,
+        "errorsAfterStart": 0,
+        "canvas": [
+          780,
+          1688
+        ],
+        "mode": "playing",
+        "consoleErrCount": 0,
+        "exceptionCount": 0
+      }
+    },
+    {
+      "id": "W2",
+      "name": "右半屏按住 1.2s 不动，施法次数 ≥2",
+      "pass": true,
+      "detail": {
+        "wrap": "ok",
+        "before": 0,
+        "after": 11,
+        "hold": {
+          "calls": 11,
+          "casts": 11,
+          "aiming": true,
+          "aimId": null,
+          "mode": "playing"
+        },
+        "callsDuringHold": 11,
+        "castsDelta": 11
+      }
+    },
+    {
+      "id": "W3",
+      "name": "触屏摇杆按住时同 pointerId 的 mouse pointermove/up 不劫持摇杆",
+      "pass": true,
+      "detail": {
+        "axisBefore": {
+          "x": 0.651,
+          "y": 0.759
+        },
+        "axisAfterMouseEvent": {
+          "x": 0.651,
+          "y": 0.759
+        },
+        "moveIdBefore": 3,
+        "moveIdAfter": 3,
+        "pointerIdUsed": 3,
+        "sameAxis": true,
+        "activeBefore": true
+      }
+    },
+    {
+      "id": "W4",
+      "name": "无刘海下 .hud-top padding 与改前一致（12/16/16）",
+      "pass": true,
+      "detail": {
+        "padBefore": "12px 16px 16px",
+        "padAfter": {
+          "top": "12px",
+          "left": "16px",
+          "right": "16px",
+          "bottom": "16px"
+        },
+        "env": {
+          "top": 0,
+          "left": 0
+        },
+        "modalPadBottom": "22px"
+      }
+    },
+    {
+      "id": "W5",
+      "name": "#btnSettings rect.right ≤ 390",
+      "pass": true,
+      "detail": {
+        "rect": {
+          "id": "btnSettings",
+          "left": 234.4,
+          "right": 301.2,
+          "top": 95,
+          "bottom": 139,
+          "width": 66.8,
+          "height": 44,
+          "display": "flex",
+          "vis": "visible"
+        },
+        "hudActions": {
+          "left": 16,
+          "right": 374,
+          "top": 95,
+          "bottom": 139,
+          "width": 358,
+          "height": 44,
+          "display": "flex",
+          "vis": "visible"
+        },
+        "scrollW": 390
+      }
+    },
+    {
+      "id": "W6",
+      "name": "顶部按钮全部 ≥44 且面板关闭键 ≥44",
+      "pass": true,
+      "detail": {
+        "top": [
+          {
+            "id": "btnMute",
+            "h": 44
+          },
+          {
+            "id": "btnRules",
+            "h": 44
+          },
+          {
+            "id": "btnSkillTree",
+            "h": 44
+          },
+          {
+            "id": "btnSettings",
+            "h": 44
+          },
+          {
+            "id": "btnRestart",
+            "h": 44
+          }
+        ],
+        "closes": [
+          {
+            "id": "rulesClose",
+            "h": 44.3
+          },
+          {
+            "id": "settingsClose",
+            "h": 44.3
+          },
+          {
+            "id": "mapClose",
+            "h": 44.3
+          },
+          {
+            "id": "codexClose",
+            "h": 44.3
+          },
+          {
+            "id": "skillTreeClose",
+            "h": 44.3
+          },
+          {
+            "id": "engraveClose",
+            "h": 44.3
+          },
+          {
+            "id": "btnTalentClose",
+            "h": 45
+          }
+        ],
+        "shortTop": [],
+        "shortClose": []
+      }
+    },
+    {
+      "id": "W9",
+      "name": "P1 文案生效（intro 无按 M）、P3/P4/P5 标记在、meta 无 weaponsEnabled",
+      "pass": true,
+      "detail": {
+        "runtime": {
+          "intro": "点地图键看全屏地图 · 点技能树键看技能树",
+          "hasM": false,
+          "hasT": false,
+          "touchUi": true,
+          "kbds": 40,
+          "kbdVisible": 0,
+          "weaponsEnabledDeleted": true
+        },
+        "fileMarkers": {
+          "KEY_BY_MODE": 2,
+          "padButtonDown": 3,
+          "syncGamepadLegend": 2,
+          "weaponsEnabledDeleted": 2,
+          "touchCast": 5
+        }
+      }
+    },
+    {
+      "id": "W7",
+      "name": "桌面 1280×800：顶栏单行、按钮布局正常、截图非空",
+      "pass": true,
+      "detail": {
+        "vw": 1280,
+        "vh": 800,
+        "singleRow": true,
+        "rowTops": {
+          "brand": 12,
+          "readouts": 92,
+          "actions": 12
+        },
+        "btnTopsSpread": 0,
+        "btnHeights": [
+          {
+            "id": "btnMute",
+            "h": 30
+          },
+          {
+            "id": "btnRules",
+            "h": 30
+          },
+          {
+            "id": "btnSkillTree",
+            "h": 30
+          },
+          {
+            "id": "btnSettings",
+            "h": 30
+          },
+          {
+            "id": "btnRestart",
+            "h": 30
+          }
+        ],
+        "hudHeight": 64,
+        "scrollW": 1280,
+        "shotBytes": 594892,
+        "mode": "playing",
+        "pad": {
+          "top": "12px",
+          "left": "16px",
+          "right": "16px",
+          "bottom": "16px"
+        },
+        "minimap": {
+          "left": 18,
+          "right": 222,
+          "top": 362,
+          "bottom": 592,
+          "width": 204,
+          "height": 230,
+          "display": "block",
+          "vis": "visible"
+        },
+        "readoutsCorner": {
+          "top": 92
+        },
+        "desktop": {
+          "touchUi": false,
+          "maxTouchPoints": 0,
+          "intro": "按 M 看全屏地图 · 按 T 看技能树",
+          "kbdVisible": 5
+        }
+      }
+    },
+    {
+      "id": "W8",
+      "name": "两张截图存在且非空",
+      "pass": true,
+      "detail": {
+        "touch_390_after": 873667,
+        "desktop_1280_after": 594892,
+        "dirCount": 12
+      }
+    }
+  ],
+  "w2": {
+    "wrap": "ok",
+    "before": 0,
+    "after": 11,
+    "hold": {
+      "calls": 11,
+      "casts": 11,
+      "aiming": true,
+      "aimId": null,
+      "mode": "playing"
+    },
+    "callsDuringHold": 11,
+    "castsDelta": 11
+  },
+  "w3": {
+    "axisBefore": {
+      "x": 0.651,
+      "y": 0.759
+    },
+    "axisAfterMouseEvent": {
+      "x": 0.651,
+      "y": 0.759
+    },
+    "moveIdBefore": 3,
+    "moveIdAfter": 3,
+    "pointerIdUsed": 3,
+    "sameAxis": true,
+    "activeBefore": true
+  }
+}

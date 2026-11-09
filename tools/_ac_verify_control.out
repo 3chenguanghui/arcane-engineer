@@ -1,0 +1,9 @@
+﻿CONTROL: 已强制隐藏 titleLayer，期望首屏断言变红
+FAIL  首屏可渲染（DOM complete + 标题可见）  "title"
+
+CONTROL-RESULT: 首屏断言已红（预期）· 失败数 1
+
+===== 断言分类汇总 =====
+FUNCTION(功能类·判红)      0/1 PASS  ← 1 条真失败
+PERF(负载敏感·只记录)      0/0 OK  （PENDING 0 条不判失败）
+VERDICT: FAIL

@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>原型 5 · 改写一条规则</title>
+<style>
+  /* ============================================================
+     基础排版：灰烬审判庭，左舞台右面板
+     ============================================================ */
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    background: radial-gradient(circle at 50% 10%, #1c1611 0%, #0b0807 60%, #050403 100%);
+    color: #e9dece;
+    font-family: "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    overflow: hidden;
+  }
+  #app { display: flex; gap: 18px; height: 100%; padding: 18px; justify-content: center; }
+  #stage { position: relative; display: flex; align-items: center; justify-content: center; }
+  canvas {
+    display: block; width: min(70vh, 620px); height: min(70vh, 620px);
+    border-radius: 12px; box-shadow: 0 0 0 1px #3b2a1e, 0 18px 50px rgba(0,0,0,0.7);
+  }
+  #panel { width: 360px; flex: 0 0 360px; display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 4px; }
+  .card {
+    background: linear-gradient(180deg, rgba(40,29,21,0.94), rgba(21,15,11,0.94));
+    border: 1px solid #3e2c1e; border-radius: 10px; padding: 12px 14px;
+  }
+  h1 { font-size: 17px; margin: 0 0 6px; letter-spacing: 1px; color: #ffb066; }
+  h2 { font-size: 13px; margin: 0 0 8px; color: #c9a47a; letter-spacing: 1px; font-weight: 600; }
+  .objective { font-size: 12.5px; line-height: 1.75; color: #d8c8b4; }
+  .objective b { color: #ffcf7a; }
+  .objective .danger { color: #ff7a5c; }
+  .row { display: flex; justify-content: space-between; align-items: center; font-size: 12.5px; margin-top: 6px; color: #bda78e; }
+  .bar { height: 9px; border-radius: 5px; background: #241a13; border: 1px solid #3c2a1c; overflow: hidden; margin-top: 5px; }
+  .bar > i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #ff8a3d, #ffcf6a); transition: width 0.16s; }
+  .bar.enemy > i { background: linear-gradient(90deg, #b23a2a, #ff6b4a); }
+  .actions { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .actions button { padding: 10px 6px; font-size: 13px; }
+  .actions .k { display: block; font-size: 10px; color: #9c8b78; margin-top: 2px; }
+  button {
+    font-family: inherit; cursor: pointer;
+    background: linear-gradient(180deg, #6a3a1f, #472413);
+    color: #ffd8b0; border: 1px solid #8a4d2a; border-radius: 7px;
+    font-size: 13px; letter-spacing: 0.5px; transition: filter 0.15s;
+  }
+  button:hover:not(:disabled) { filter: brightness(1.18); }
+  button:disabled { opacity: 0.38; cursor: not-allowed; }
+  #btnTest { width: 100%; padding: 9px 12px; background: linear-gradient(180deg, #2a4d5a, #16303a); border-color: #3f7a8c; color: #bfe9f5; }
+  #testOut {
+    margin: 0; font-size: 11.5px; line-height: 1.7; color: #b9d9c9;
+    white-space: pre-wrap; word-break: break-all; font-family: Consolas, "Microsoft YaHei", monospace;
+  }
+  #log {
+    height: 150px; overflow-y: auto; font-size: 11.5px; line-height: 1.7;
+    color: #b9a48d; padding-right: 4px;
+  }
+  #log div { border-bottom: 1px dashed rgba(120, 90, 60, 0.16); padding: 1px 0; }
+  #log .hit { color: #ff9d6b; }
+  #log .heal { color: #8fe3a8; }
+  #log .rule { color: #ffd27a; }
+  #ruleBadge {
+    display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px;
+    background: #3a2418; border: 1px solid #7a4a24; color: #ffd27a; margin-top: 6px;
+  }
+  .costLine { margin-top: 6px; font-size: 11.5px; color: #ff7a5c; line-height: 1.5; }
+  .sealedLine { margin-top: 3px; font-size: 11px; color: #8a6a52; line-height: 1.5; }
+  /* 规则选择覆盖层 */
+  #lawLayer {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    background: rgba(6, 4, 3, 0.9); border-radius: 12px; z-index: 10;
+  }
+  #lawLayer.hide { display: none; }
+  #lawBox { width: 94%; max-height: 94%; overflow-y: auto; padding: 10px 6px; }
+  #lawBox h3 { margin: 0 0 4px; font-size: 15px; color: #ffcf7a; text-align: center; }
+  #lawBox p.sub { margin: 0 0 12px; font-size: 11.5px; color: #a8876a; text-align: center; line-height: 1.6; }
+  .lawPair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+  .lawCard {
+    text-align: left; padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    background: linear-gradient(180deg, #2c2018, #1b1410);
+    border: 1px solid #4a3424; color: #d8c8b4;
+    font-size: 11.5px; line-height: 1.55; transition: all 0.15s;
+  }
+  .lawCard:hover { border-color: #c47a3a; background: linear-gradient(180deg, #3a2a1d, #241812); }
+  .lawCard b { display: block; color: #ffcf7a; font-size: 12.5px; margin-bottom: 3px; }
+  .lawCard i { font-style: normal; color: #ff9d6b; }
+  .lawCard em.cost {
+    display: block; margin-top: 5px; font-style: normal; font-size: 11px;
+    color: #ff7a5c; border-top: 1px dashed rgba(160, 90, 60, 0.35); padding-top: 4px;
+  }
+  #banner {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    padding: 18px 30px; border-radius: 12px; text-align: center;
+    background: rgba(10, 6, 4, 0.94); border: 1px solid #6a3a1f;
+    display: none; pointer-events: none; min-width: 260px;
+  }
+  #banner.show { display: block; }
+  #banner .big { font-size: 24px; font-weight: 800; margin-bottom: 6px; }
+  #banner .sub { font-size: 12.5px; color: #b9a48d; line-height: 1.7; }
+  .win .big { color: #8fe3a8; } .lose .big { color: #ff6b4a; }
+  #floaters { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .floater {
+    position: absolute; font-size: 15px; font-weight: 800;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.95); animation: floatUp 0.8s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -115%) scale(1.18); }
+  }
+  @media (max-width: 1080px) {
+    #app { flex-direction: column; align-items: center; overflow-y: auto; }
+    #panel { width: min(92vw, 620px); flex: 0 0 auto; }
+    canvas { width: min(78vh, 92vw); height: auto; aspect-ratio: 1; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="cv" width="620" height="620"></canvas>
+    <div id="banner"></div>
+    <div id="floaters"></div>
+    <div id="lawLayer">
+      <div id="lawBox">
+        <h3>改写一条规则</h3>
+        <p class="sub">本局只能改写 <b>一条</b>，选定后其余全部永久封存（互斥）。<br>它不会消失，会陪你走完 5 层。</p>
+        <div id="lawList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="panel">
+    <div class="card">
+      <h1>灰烬审判庭 · 规则改写</h1>
+      <div class="objective">
+        <b>目标：</b>带着你改写的那条规则，打穿 <b>5 层</b>审判庭。<br>
+        默认法条：<span class="danger">灰烬每回合灼伤你、敌人每 3 回合攻击 +1</span>。<br>
+        改写只能选一次，且与其余五条互斥。
+      </div>
+      <div id="ruleBadge">尚未改写</div>
+      <div id="ruleCost" class="costLine">代价：—</div>
+      <div id="ruleSealed" class="sealedLine">封存：—</div>
+    </div>
+
+    <div class="card">
+      <h2>当前战斗</h2>
+      <div class="row"><span id="floorText">第 1 层</span><span id="turnText">回合 1</span></div>
+      <div class="row"><span>你</span><span id="playerHpText">30 / 30</span></div>
+      <div class="bar"><i id="playerHpBar"></i></div>
+      <div class="row"><span id="enemyName">炉渣兽</span><span id="enemyHpText">20 / 20</span></div>
+      <div class="bar enemy"><i id="enemyHpBar"></i></div>
+      <div class="row"><span>灰烬</span><span id="ashText">0 层</span></div>
+      <div class="row"><span>敌人意图</span><span id="intentText">攻击 5</span></div>
+    </div>
+
+    <div class="card">
+      <div class="actions">
+        <button id="btnStrike">挥击<span class="k">1 键</span></button>
+        <button id="btnGuard">格挡<span class="k">2 键</span></button>
+        <button id="btnIgnite">引燃<span class="k">3 键</span></button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>战斗记录</h2>
+      <div id="log"></div>
+    </div>
+
+    <div class="card">
+      <button id="btnTest">跑 200 局自测（激进 / 保守 / 会改写）</button>
+      <pre id="testOut">尚未运行。点上面按钮。</pre>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     核心逻辑（无 DOM，可单独提取跑批）
+     ============================================================ -->
+<script id="core">
+const Core = (function () {
+  'use strict';
+
+  /* ---------- 默认法条（不可改写的那部分世界规则） ---------- */
+  const BASE = {
+    ASH_BONUS: 0.10,       // 每层灰烬：伤害 +10%
+    ASH_BURN: 1,           // 每层灰烬：每回合灼伤 1
+    ASH_DECAY: 1,          // 每回合自然消散 1 层
+    PRESSURE_EVERY: 3,     // 每 3 回合敌人攻击 +1
+    PRESSURE_STEP: 1,
+    PRESSURE_CAP: 6,       // 炉压最多叠 6 层（拖得越久越致命）
+    KILL_HEAL: 6,          // 击杀基础回血
+    FLOOR_HEAL_PCT: 0.10   // 清层后回复最大生命的 10%
+  };
+
+  /* ---------- 可改写的六条规则（三对互斥） ---------- */
+  const RULES = [
+    { id: 'coldAsh',   pair: 'ash',  name: '冷灰', desc: '灰烬不再灼伤你。',        cost: '灰烬也不再给你增伤；所有伤害 ×0.8' },
+    { id: 'fuelAsh',   pair: 'ash',  name: '燃料', desc: '灰烬增伤从 +10%/层 提到 +20%/层。', cost: '最大生命 −8' },
+    { id: 'firstFire', pair: 'turn', name: '抢火', desc: '每场第一击 ×1.5。',      cost: '敌人攻击 +1' },
+    { id: 'lateFire',  pair: 'turn', name: '后发', desc: '你每回合回复 5 血。',      cost: '敌人永远先手' },
+    { id: 'immortal',  pair: 'death',name: '不灭', desc: '每场免疫一次致死，回到 30% 生命。', cost: '最大生命 −6；每场只触发一次' },
+    { id: 'lastEmber', pair: 'death',name: '燃尽', desc: '击杀额外回复 6 血。',      cost: '每场开始先失去 3 血' }
+  ];
+
+  /* ---------- 敌人表：5 层 ---------- */
+  const FLOORS = [
+    { name: '炉渣兽',   hp: 26, atk: 5, pattern: ['attack', 'attack', 'charge'] },
+    { name: '灰烬祭司', hp: 34, atk: 6, pattern: ['attack', 'ash', 'attack', 'charge'] },
+    { name: '铁面守卫', hp: 42, atk: 7, pattern: ['charge', 'attack', 'attack'] },
+    { name: '炉心主教', hp: 50, atk: 8, pattern: ['charge', 'attack', 'ash', 'attack'] },
+    { name: '终末炉王', hp: 62, atk: 9, pattern: ['charge', 'attack', 'ash', 'attack', 'attack'] }
+  ];
+
+  const PLAYER_BASE = { hp: 58, atk: 12 };
+  const GUARD_BLOCK = 8;
+  const GUARD_COUNTER = 3;   // 格挡同时盾击，避免"一直挡 = 永远打不死"
+  const IGNITE_MUL = 2.2;
+  const IGNITE_SELF = 1;
+  const IGNITE_ASH = 2;
+  const ENEMY_VAR_MIN = 0.82;   // 敌人伤害随机下限
+  const ENEMY_VAR_SPAN = 0.36;  // 浮动幅度（0.82~1.18，即 ±18%）
+  const PLAYER_VAR_MIN = 0.92;  // 玩家伤害随机下限（±8%）
+  const PLAYER_VAR_SPAN = 0.16;
+
+  /**
+   * 可复现的伪随机数生成器（mulberry32）
+   * 为什么需要它：没有随机性时，同一个种子每局结果完全一样，
+   * 200 局自测的胜率只可能是 0% 或 100%，无法体现"打法差异"。
+   * @param {number} seed 种子
+   * @returns {Function} 每次调用返回 [0,1) 的随机数
+   */
+  function mulberry32(seed) {
+    let a = seed >>> 0;
+    return function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+  }
+
+  /**
+   * 取敌人第 idx 次行动的伤害浮动系数
+   * 用缓存保证"界面显示的攻击值"与"真正结算的伤害"完全一致
+   * @param {Object} st 局面
+   * @param {Object} e 敌人
+   * @param {number} idx 行动序号
+   * @returns {number} 0.82~1.18
+   */
+  function rollMul(st, e, idx) {
+    if (!e.rolls) e.rolls = {};
+    if (e.rolls[idx] === undefined) e.rolls[idx] = ENEMY_VAR_MIN + ENEMY_VAR_SPAN * st.rng();
+    return e.rolls[idx];
+  }
+
+  /**
+   * 玩家这一击的伤害浮动系数（±8%）
+   * 让"这回合正好能斩杀"变成概率事件，给最优打法留下真实失误空间
+   * @param {Object} st 局面
+   * @returns {number} 0.92~1.08
+   */
+  function playerRoll(st) {
+    return PLAYER_VAR_MIN + PLAYER_VAR_SPAN * st.rng();
+  }
+
+  /**
+   * 取某条规则的定义
+   * @param {string} id 规则 id
+   * @returns {Object|null} 规则
+   */
+  function ruleById(id) {
+    for (let i = 0; i < RULES.length; i += 1) if (RULES[i].id === id) return RULES[i];
+    return null;
+  }
+
+  /**
+   * 开一局（必须带一条已改写的规则）
+   * @param {string} ruleId 玩家改写的那条规则
+   * @param {number} seed 种子（预留）
+   * @returns {Object} 局面
+   */
+  function newRun(ruleId, seed) {
+    const rule = ruleById(ruleId) || RULES[0];
+    const maxHp = PLAYER_BASE.hp - (rule.id === 'immortal' ? 6 : 0)
+      - (rule.id === 'fuelAsh' ? 8 : 0);
+    const st = {
+      seed: (seed || 1) >>> 0,
+      rng: mulberry32((seed || 1) >>> 0),
+      ruleId: rule.id,
+      floor: 0,
+      turn: 1,
+      status: 'playing',         // playing | win | lose
+      player: { hp: maxHp, maxHp: maxHp, atk: PLAYER_BASE.atk, block: 0, ash: 0 },
+      enemy: null,
+      immortalUsed: false,       // 「不灭」每场一次
+      log: [],
+      logSeq: 0,
+      turnsTotal: 0,
+      floorStartHp: maxHp
+    };
+    spawnFloor(st, 0);
+    return st;
+  }
+
+  /**
+   * 生成某一层敌人
+   * @param {Object} st 局面
+   * @param {number} floor 层下标
+   * @returns {void}
+   */
+  function spawnFloor(st, floor) {
+    const def = FLOORS[floor];
+    st.enemy = {
+      name: def.name,
+      hp: def.hp,
+      maxHp: def.hp,
+      baseAtk: def.atk,
+      // 「抢火」的代价：敌人攻击 +1
+      atk: def.atk + (st.ruleId === 'firstFire' ? 1 : 0),
+      pattern: def.pattern,
+      // 每场随机一个起手偏移：同一套招式表，出场顺序不同
+      patOff: Math.floor(st.rng() * def.pattern.length),
+      rolls: {},
+      idx: 0,
+      charge: false,
+      turnInFloor: 0
+    };
+    st.turn = 1;
+    st.immortalUsed = false;
+    // 「燃尽」：每场开始先掉 3 血
+    if (st.ruleId === 'lastEmber') {
+      st.player.hp = Math.max(1, st.player.hp - 3);
+      pushLog(st, '燃尽：开战先失去 3 血', 'rule');
+    }
+  }
+
+  /**
+   * 写一条战斗日志
+   * @param {Object} st 局面
+   * @param {string} text 文本
+   * @param {string} cls 样式类
+   * @returns {void}
+   */
+  function pushLog(st, text, cls) {
+    st.logSeq += 1;
+    st.log.push({ seq: st.logSeq, text: text, cls: cls || '' });
+    if (st.log.length > 60) st.log.shift();
+  }
+
+  /**
+   * 当前有效攻击力（含灰烬增伤与规则修正）
+   * @param {Object} st 局面
+   * @returns {number} 攻击力
+   */
+  function effAtk(st) {
+    const bonus = st.ruleId === 'fuelAsh' ? 0.20 : BASE.ASH_BONUS;
+    let mul = 1 + bonus * st.player.ash;
+    // 「冷灰」：灰烬不再给你增伤，且伤害 ×0.85 —— 你换掉的是整个火焰引擎
+    if (st.ruleId === 'coldAsh') mul = 0.8;
+    return st.player.atk * mul;
+  }
+
+  /**
+   * 敌人本回合意图的可读文本
+   * @param {Object} st 局面
+   * @returns {{type:string, damage:number, text:string}}
+   */
+  function intentOf(st) {
+    const e = st.enemy;
+    const type = e.pattern[(e.idx + e.patOff) % e.pattern.length];
+    const mul = rollMul(st, e, e.idx);
+    if (type === 'charge') {
+      return { type: type, damage: 0, text: '蓄力（下一击 ×1.45）' };
+    }
+    if (type === 'ash') {
+      const ashDmg = Math.round(e.atk * 0.5 * mul);
+      return { type: type, damage: ashDmg, text: '撒灰 ' + ashDmg + ' + 2 层灰烬' };
+    }
+    const dmg = Math.round(e.atk * (e.charge ? 1.45 : 1) * mul);
+    return { type: type, damage: dmg, text: '攻击 ' + dmg };
+  }
+
+  /**
+   * 玩家受击：先扣格挡，再扣血；「不灭」可免疫一次致死
+   * @param {Object} st 局面
+   * @param {number} amount 伤害
+   * @returns {number} 实际掉血
+   */
+  function damagePlayer(st, amount) {
+    let dmg = Math.max(0, Math.round(amount));
+    if (st.player.block > 0) {
+      const absorbed = Math.min(st.player.block, dmg);
+      st.player.block -= absorbed;
+      dmg -= absorbed;
+      if (absorbed > 0) pushLog(st, '格挡吸收 ' + absorbed, '');
+    }
+    if (dmg <= 0) return 0;
+    st.player.hp -= dmg;
+    pushLog(st, '你受到 ' + dmg + ' 点伤害', 'hit');
+    // 「不灭」：每场一次，从灰里爬起来——回到 60% 生命并清空灰烬
+    guardDeath(st);
+    return dmg;
+  }
+
+  /**
+   * 致死拦截：统一入口
+   * 之前只写在 damagePlayer 里，结果"回合末灰烬灼伤"这条路径绕过它，
+   * 规则显示的免死等于没生效。所有掉血路径都必须过这里。
+   * @param {Object} st 局面
+   * @returns {void}
+   */
+  function guardDeath(st) {
+    if (st.player.hp <= 0 && st.ruleId === 'immortal' && !st.immortalUsed) {
+      st.immortalUsed = true;
+      st.player.hp = Math.max(1, Math.round(st.player.maxHp * 0.3));
+      pushLog(st, '不灭发动：回到 ' + st.player.hp + ' 点生命', 'rule');
+    }
+  }
+
+  /**
+   * 敌人行动（按意图结算）
+   * @param {Object} st 局面
+   * @returns {void}
+   */
+  function enemyAct(st) {
+    const e = st.enemy;
+    if (!e || e.hp <= 0) return;
+    const intent = intentOf(st);
+    if (intent.type === 'charge') {
+      e.charge = true;
+      pushLog(st, e.name + ' 正在蓄力', '');
+    } else if (intent.type === 'ash') {
+      damagePlayer(st, intent.damage);
+      st.player.ash += 2;
+      pushLog(st, e.name + ' 撒下灰烬（+2 层）', '');
+    } else {
+      damagePlayer(st, intent.damage);
+      e.charge = false;
+    }
+    e.idx += 1;
+    e.turnInFloor += 1;
+    // 炉压：每 3 回合攻击 +1，最多叠 6 层
+    if (e.turnInFloor % BASE.PRESSURE_EVERY === 0 && e.atk < e.baseAtk + BASE.PRESSURE_CAP) {
+      e.atk += BASE.PRESSURE_STEP;
+      pushLog(st, '炉压上升：' + e.name + ' 攻击 +1', '');
+    }
+  }
+
+  /**
+   * 回合末：灰烬灼伤与消散
+   * @param {Object} st 局面
+   * @returns {void}
+   */
+  function endOfRound(st) {
+    const burnPer = st.ruleId === 'coldAsh' ? 0 : BASE.ASH_BURN;
+    if (st.player.ash > 0 && burnPer > 0) {
+      const burn = st.player.ash * burnPer;
+      st.player.hp -= burn;
+      pushLog(st, '灰烬灼伤 ' + burn, 'hit');
+      guardDeath(st);
+    }
+    // 灰烬自然消散；灼伤量只看层数
+    const decay = BASE.ASH_DECAY;
+    if (st.player.ash > 0) st.player.ash = Math.max(0, st.player.ash - decay);
+    st.player.block = 0;
+    st.turn += 1;
+    st.turnsTotal += 1;
+  }
+
+  /**
+   * 玩家行动（挥击 / 格挡 / 引燃）
+   * @param {Object} st 局面
+   * @param {string} type strike | guard | ignite
+   * @returns {Object} 本回合记录
+   */
+  function act(st, type) {
+    if (!st || st.status !== 'playing') return null;
+    const rec = { type: type, dealt: 0, killed: false, heal: 0, enemyFirst: false };
+
+    // 「后发」：敌人先手
+    if (st.ruleId === 'lateFire') {
+      rec.enemyFirst = true;
+      enemyAct(st);
+      if (st.player.hp <= 0) { st.status = 'lose'; return rec; }
+    }
+
+    if (type === 'strike') {
+      const dmg = Math.round(effAtk(st) * playerRoll(st));
+      st.enemy.hp -= dmg;
+      rec.dealt = dmg;
+      pushLog(st, '挥击造成 ' + dmg + ' 点伤害', '');
+    } else if (type === 'guard') {
+      st.player.block += GUARD_BLOCK;
+      st.enemy.hp -= GUARD_COUNTER;
+      pushLog(st, '格挡 +' + GUARD_BLOCK + '，盾击 ' + GUARD_COUNTER, '');
+    } else if (type === 'ignite') {
+      let dmg = Math.round(effAtk(st) * IGNITE_MUL * playerRoll(st));
+      // 「抢火」：每场第一击 ×1.5
+      if (st.ruleId === 'firstFire' && st.enemy.turnInFloor === 0 && st.enemy.idx === 0) {
+        dmg = Math.round(dmg * 1.5);
+        pushLog(st, '抢火：首击额外 ×1.5', 'rule');
+      }
+      st.enemy.hp -= dmg;
+      // 引燃的自损随灰烬层数上涨：越贪越烫手
+      const selfBurn = IGNITE_SELF + Math.min(5, st.player.ash) * 2;
+      st.player.hp -= selfBurn;
+      st.player.ash += IGNITE_ASH;
+      rec.dealt = dmg;
+      pushLog(st, '引燃造成 ' + dmg + ' 点伤害（自损 ' + selfBurn + '，+2 灰）', '');
+    } else {
+      return null;
+    }
+
+    // 击杀判定：先结算本回合灰烬，再换层（灰烬会跟着你走）
+    if (st.enemy.hp <= 0) {
+      rec.killed = true;
+      if (st.ruleId === 'lateFire' && st.player.hp > 0) {
+        st.player.hp = Math.min(st.player.maxHp, st.player.hp + 5);
+        rec.heal += 5;
+      }
+      endOfRound(st);
+      pushLog(st, '击杀 ' + st.enemy.name, 'heal');
+      if (st.player.hp <= 0) { st.status = 'lose'; return rec; }   // 灰烬同回合烧死
+      // 基础回血：让长跑可持续（不是某条规则专属）
+      st.player.hp = Math.min(st.player.maxHp, st.player.hp + BASE.KILL_HEAL);
+      rec.heal += BASE.KILL_HEAL;
+      if (st.ruleId === 'lastEmber') {
+        st.player.hp = Math.min(st.player.maxHp, st.player.hp + 6);
+        rec.heal += 6;
+        pushLog(st, '燃尽：额外回复 6 血', 'heal');
+      }
+      // 进入下一层：清层回复（基础法条，不属于任何改写）
+      if (st.floor < FLOORS.length - 1) {
+        const heal = Math.round(st.player.maxHp * BASE.FLOOR_HEAL_PCT);
+        st.player.hp = Math.min(st.player.maxHp, st.player.hp + heal);
+        rec.heal += heal;
+        pushLog(st, '余烬重燃：回复 ' + heal + ' 血', 'heal');
+        st.floor += 1;
+        spawnFloor(st, st.floor);
+        return rec;
+      }
+      st.status = 'win';
+      return rec;
+    }
+
+    // 敌人行动（非「后发」时在这里）
+    if (st.ruleId !== 'lateFire') enemyAct(st);
+
+    // 「后发」的每回合回血
+    if (st.ruleId === 'lateFire' && st.player.hp > 0) {
+      st.player.hp = Math.min(st.player.maxHp, st.player.hp + 5);
+      rec.heal += 5;
+    }
+
+    endOfRound(st);
+
+    if (st.player.hp <= 0) st.status = 'lose';
+    return rec;
+  }
+
+  /* ---------- 自测机器人 ---------- */
+
+  /**
+   * 估算本回合敌人会打出的伤害
+   * @param {Object} st 局面
+   * @returns {number} 伤害
+   */
+  function incoming(st) {
+    return intentOf(st).damage;
+  }
+
+  /**
+   * 选择一条规则（三种策略各有偏好）
+   * @param {string} policy 策略
+   * @returns {string} 规则 id
+   */
+  function pickRule(policy) {
+    if (policy === 'aggressive') return 'fuelAsh';
+    if (policy === 'conservative') return 'coldAsh';
+    // adaptive：先判断"这层审判庭真正靠什么杀你"，再决定改写哪条
+    let ashMoves = 0;
+    let maxAtk = 0;
+    FLOORS.forEach(function (f) {
+      f.pattern.forEach(function (p) { if (p === 'ash') ashMoves += 1; });
+      maxAtk = Math.max(maxAtk, f.atk);
+    });
+    // 直伤高到 9 且带蓄力（×1.45 = 13）→ 快刀，改写「不灭」挡下那一次
+    if (maxAtk >= 9) return 'immortal';
+    // 否则如果审判庭会撒灰 → 慢刀才是真死因，改写「冷灰」掐掉灼伤
+    if (ashMoves >= 3) return 'coldAsh';
+    return 'fuelAsh';
+  }
+
+  /**
+   * 机器人这一回合的行动
+   * @param {Object} st 局面
+   * @param {string} policy 策略
+   * @returns {string} strike | guard | ignite
+   */
+  function chooseAction(st, policy) {
+    const e = st.enemy;
+    const atk = effAtk(st);
+    const killNow = e.hp <= Math.round(atk * IGNITE_MUL);
+    const inc = incoming(st);
+
+    if (policy === 'aggressive') {
+      if (st.player.hp <= 4) return 'strike';
+      return 'ignite';
+    }
+
+    if (policy === 'conservative') {
+      // 血少且这一下会掉超过 5 → 挡
+      if (inc >= 5 && st.player.hp <= st.player.maxHp * 0.6) return 'guard';
+      if (st.player.ash >= 2 && st.player.hp <= st.player.maxHp * 0.5) return 'guard';
+      return 'strike';
+    }
+
+    // adaptive
+    if (killNow && st.player.hp > 3) return 'ignite';
+    if (inc >= st.player.hp) return 'guard';                 // 不挡就死
+    if (inc >= 10) return 'guard';
+    if (st.player.ash >= 3) return 'strike';                 // 灰太多先别再点
+    if (st.player.hp <= 8) return 'strike';
+    // 血量安全且灰不多时，用引燃压血线
+    if (st.player.ash <= 2 && st.player.hp > st.player.maxHp * 0.5) return 'ignite';
+    return 'strike';
+  }
+
+  /**
+   * 自动跑一局
+   * @param {string} policy 策略
+   * @param {number} seed 种子
+   * @returns {{win:boolean,floor:number,turns:number,hp:number,rule:string}}
+   */
+  function autoplay(policy, seed) {
+    const rule = pickRule(policy);
+    const st = newRun(rule, seed);
+    let guard = 0;
+    while (st.status === 'playing' && guard < 400) {
+      act(st, chooseAction(st, policy));
+      guard += 1;
+    }
+    return { win: st.status === 'win', floor: st.floor + 1, turns: st.turnsTotal, hp: st.player.hp, rule: rule };
+  }
+
+  /**
+   * 批量跑并汇总
+   * @param {string} policy 策略
+   * @param {number} n 局数
+   * @returns {Object} 汇总
+   */
+  function runBatch(policy, n) {
+    let win = 0, floorSum = 0, turnsSum = 0;
+    const byRule = {};
+    for (let i = 0; i < n; i += 1) {
+      const r = autoplay(policy, 100 + i * 6151);
+      if (r.win) win += 1;
+      floorSum += r.floor;
+      turnsSum += r.turns;
+      if (!byRule[r.rule]) byRule[r.rule] = { n: 0, win: 0 };
+      byRule[r.rule].n += 1;
+      if (r.win) byRule[r.rule].win += 1;
+    }
+    return {
+      policy: policy,
+      n: n,
+      winRate: win / n,
+      avgFloor: floorSum / n,
+      avgTurns: turnsSum / n,
+      byRule: byRule
+    };
+  }
+
+  /* ---------- 对外 ---------- */
+  return {
+    BASE: BASE, RULES: RULES, FLOORS: FLOORS,
+    newRun: newRun,
+    act: act,
+    intentOf: intentOf,
+    effAtk: effAtk,
+    chooseAction: chooseAction,
+    pickRule: pickRule,
+    autoplay: autoplay,
+    runBatch: runBatch,
+    ruleById: ruleById
+  };
+})();
+</script>
+
+<!-- ============================================================
+     渲染 / 输入 / 规则选择 UI
+     ============================================================ -->
+<script>
+(function () {
+  'use strict';
+
+  const canvas = document.getElementById('cv');
+  const ctx = canvas.getContext('2d');
+
+  let st = null;
+  let pendingRule = null;
+  let lastLogSeq = 0;
+  let visual = { hitFlash: 0, healFlash: 0, floats: [] };
+
+  /* ---------- 规则选择层 ---------- */
+  /**
+   * 渲染六条规则的卡片（三对互斥）
+   * @returns {void}
+   */
+  function renderLawChoices() {
+    const list = document.getElementById('lawList');
+    list.innerHTML = '';
+    const pairs = ['ash', 'turn', 'death'];
+    pairs.forEach(function (pair) {
+      const wrap = document.createElement('div');
+      wrap.className = 'lawPair';
+      Core.RULES.filter(function (r) { return r.pair === pair; }).forEach(function (rule) {
+        const btn = document.createElement('button');
+        btn.className = 'lawCard';
+        btn.innerHTML = '<b>' + rule.name + '</b>' + rule.desc
+          + '<em class="cost">代价：' + rule.cost + '</em>';
+        btn.addEventListener('click', function () { chooseRule(rule.id); });
+        wrap.appendChild(btn);
+      });
+      list.appendChild(wrap);
+    });
+  }
+
+  /**
+   * 选定规则并开局
+   * @param {string} id 规则 id
+   * @returns {void}
+   */
+  function chooseRule(id) {
+    pendingRule = id;
+    st = Core.newRun(id, Date.now() % 99991);
+    document.getElementById('lawLayer').classList.add('hide');
+    const rule = Core.ruleById(id);
+    document.getElementById('ruleBadge').textContent = '已改写：' + rule.name + ' · 永久生效';
+    document.getElementById('ruleCost').textContent = '代价：' + rule.cost;
+    document.getElementById('ruleSealed').textContent = '封存：' + Core.RULES
+      .filter(function (r) { return r.id !== id; })
+      .map(function (r) { return r.name; })
+      .join(' / ');
+    visual = { hitFlash: 0, healFlash: 0, floats: [] };
+    document.getElementById('log').innerHTML = '';
+    lastLogSeq = 0;
+    addLog('你改写了规则：' + Core.ruleById(id).desc, 'rule');
+    flushLog();
+    syncPanel();
+    hideBanner();
+  }
+
+  /**
+   * 把 Core 日志里"还没画过"的条目增量渲染出来
+   * 用单调序号对齐，避免日志环缓冲截断后出现重复或漏行
+   * @returns {void}
+   */
+  function flushLog() {
+    if (!st) return;
+    st.log.forEach(function (l) {
+      if (l.seq > lastLogSeq) {
+        lastLogSeq = l.seq;
+        addLog(l.text, l.cls);
+      }
+    });
+  }
+
+  /* ---------- 面板 ---------- */
+  /**
+   * 追加一条战斗日志到 DOM
+   * @param {string} text 文本
+   * @param {string} cls 样式
+   * @returns {void}
+   */
+  function addLog(text, cls) {
+    const box = document.getElementById('log');
+    const div = document.createElement('div');
+    div.className = cls || '';
+    div.textContent = text;
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  /**
+   * 同步右侧面板
+   * @returns {void}
+   */
+  function syncPanel() {
+    if (!st) return;
+    document.getElementById('floorText').textContent = '第 ' + (st.floor + 1) + ' / ' + Core.FLOORS.length + ' 层';
+    document.getElementById('turnText').textContent = '回合 ' + st.turn;
+    document.getElementById('playerHpText').textContent = Math.max(0, st.player.hp) + ' / ' + st.player.maxHp;
+    document.getElementById('playerHpBar').style.width =
+      Math.max(0, Math.min(100, (st.player.hp / st.player.maxHp) * 100)) + '%';
+    document.getElementById('enemyName').textContent = st.enemy ? st.enemy.name : '—';
+    document.getElementById('enemyHpText').textContent = st.enemy ? Math.max(0, st.enemy.hp) + ' / ' + st.enemy.maxHp : '—';
+    document.getElementById('enemyHpBar').style.width = st.enemy
+      ? Math.max(0, Math.min(100, (st.enemy.hp / st.enemy.maxHp) * 100)) + '%' : '0%';
+    document.getElementById('ashText').textContent = st.player.ash + ' 层（+'
+      + Math.round((st.ruleId === 'fuelAsh' ? 0.20 : 0.10) * st.player.ash * 100) + '% 伤害）';
+    if (st.enemy && st.status === 'playing') {
+      const it = Core.intentOf(st);
+      document.getElementById('intentText').textContent = it.text;
+    } else {
+      document.getElementById('intentText').textContent = '—';
+    }
+    const buttons = [document.getElementById('btnStrike'), document.getElementById('btnGuard'), document.getElementById('btnIgnite')];
+    buttons.forEach(function (b) { b.disabled = (st.status !== 'playing'); });
+  }
+
+  /* ---------- 渲染 ---------- */
+  /**
+   * 画背景与地面
+   * @returns {void}
+   */
+  function drawArena() {
+    ctx.fillStyle = '#100b09';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // 地砖
+    const T = 62;
+    for (let y = 0; y < 10; y += 1) {
+      for (let x = 0; x < 10; x += 1) {
+        const shade = 0.42 + ((x * 5 + y * 11) % 7) * 0.022;
+        ctx.fillStyle = 'rgba(' + Math.round(42 * shade) + ',' + Math.round(30 * shade) + ',' + Math.round(22 * shade) + ',1)';
+        ctx.fillRect(x * T, y * T, T - 2, T - 2);
+      }
+    }
+    // 中央法阵
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    ctx.strokeStyle = 'rgba(255, 150, 80, 0.12)';
+    ctx.lineWidth = 2;
+    for (let r = 70; r <= 210; r += 70) {
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+
+    // 灰烬堆积（按层数画在地面）
+    if (st && st.player.ash > 0) {
+      for (let i = 0; i < st.player.ash * 6; i += 1) {
+        const ang = i * 2.399;
+        const rr = 30 + (i % 7) * 12;
+        const px = cx - 130 + Math.cos(ang) * rr;
+        const py = cy + 120 + Math.sin(ang) * rr * 0.45;
+        ctx.fillStyle = 'rgba(120, 110, 100, ' + (0.10 + (i % 3) * 0.05) + ')';
+        ctx.beginPath();
+        ctx.arc(px, py, 2 + (i % 3), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  /**
+   * 画一个角色（玩家 / 敌人）
+   * @param {number} x 像素 x
+   * @param {number} y 像素 y
+   * @param {boolean} isPlayer 是否玩家
+   * @param {Object} e 敌人（玩家时可为空）
+   * @returns {void}
+   */
+  function drawFighter(x, y, isPlayer, e) {
+    const t = performance.now() / 1000;
+    const pulse = 1 + Math.sin(t * 3.4) * 0.05;
+
+    // 光晕
+    const grad = ctx.createRadialGradient(x, y, 4, x, y, 78);
+    grad.addColorStop(0, isPlayer ? 'rgba(255, 190, 110, 0.38)' : 'rgba(255, 80, 50, 0.30)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, 78, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (isPlayer) {
+      // 玩家：燃烧的灯芯
+      ctx.fillStyle = '#ffb066';
+      ctx.beginPath();
+      ctx.arc(x, y, 30 * pulse, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff0d0';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      ctx.fillStyle = '#fff8ea';
+      ctx.beginPath();
+      ctx.arc(x, y, 13, 0, Math.PI * 2);
+      ctx.fill();
+      // 灰烬环
+      if (st && st.player.ash > 0) {
+        ctx.strokeStyle = 'rgba(220, 210, 200, 0.55)';
+        ctx.lineWidth = 2 + st.player.ash;
+        ctx.beginPath();
+        ctx.arc(x, y, 42 + st.player.ash * 2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    } else if (e) {
+      // 敌人：随层数变化外形的炉心
+      const hue = 8 + st.floor * 4;
+      ctx.fillStyle = 'hsl(' + hue + ', 42%, 24%)';
+      ctx.strokeStyle = 'hsl(' + (hue + 12) + ', 90%, 62%)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      const sides = 3 + (st.floor % 4);
+      for (let i = 0; i < sides; i += 1) {
+        const ang = (Math.PI * 2 * i) / sides - Math.PI / 2 + t * 0.15;
+        const rr = 46 + (i % 2 ? -7 : 0);
+        ctx.lineTo(x + Math.cos(ang) * rr, y + Math.sin(ang) * rr);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // 核心
+      const core = ctx.createRadialGradient(x, y, 2, x, y, 26);
+      core.addColorStop(0, 'rgba(255, 220, 150, 0.9)');
+      core.addColorStop(1, 'rgba(255, 90, 40, 0)');
+      ctx.fillStyle = core;
+      ctx.beginPath();
+      ctx.arc(x, y, 26, 0, Math.PI * 2);
+      ctx.fill();
+      // 蓄力环
+      if (e.charge) {
+        ctx.strokeStyle = 'rgba(255, 90, 60, ' + (0.4 + 0.4 * Math.sin(t * 10)) + ')';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(x, y, 58, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+    }
+  }
+
+  /**
+   * 主渲染
+   * @returns {void}
+   */
+  function render() {
+    drawArena();
+    if (!st) return;
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    drawFighter(cx - 150, cy + 20, true, null);
+    if (st.enemy && st.enemy.hp > 0) drawFighter(cx + 140, cy - 10, false, st.enemy);
+
+    // 受击红闪
+    if (visual.hitFlash > 0) {
+      ctx.fillStyle = 'rgba(255, 40, 20, ' + (visual.hitFlash * 0.15) + ')';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    if (visual.healFlash > 0) {
+      ctx.fillStyle = 'rgba(80, 255, 160, ' + (visual.healFlash * 0.08) + ')';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }
+
+  /* ---------- 飘字 ---------- */
+  /**
+   * 在画布坐标弹字
+   * @param {string} text 文本
+   * @param {number} x 画布 x
+   * @param {number} y 画布 y
+   * @param {string} color 颜色
+   * @returns {void}
+   */
+  function floatText(text, x, y, color) {
+    const rect = canvas.getBoundingClientRect();
+    const scale = rect.width / canvas.width;
+    const div = document.createElement('div');
+    div.className = 'floater';
+    div.textContent = text;
+    div.style.color = color;
+    div.style.left = (rect.left - 0) + x * scale + 'px';
+    div.style.top = y * scale + 'px';
+    div.style.position = 'fixed';
+    document.getElementById('floaters').appendChild(div);
+    setTimeout(function () { div.remove(); }, 850);
+  }
+
+  /* ---------- 动作 ---------- */
+  /**
+   * 执行一个玩家动作并同步界面
+   * @param {string} type strike | guard | ignite
+   * @returns {void}
+   */
+  function doAction(type) {
+    if (!st || st.status !== 'playing') return;
+    const beforeHp = st.player.hp;
+    const beforeEnemy = st.enemy ? st.enemy.hp : 0;
+    const rec = Core.act(st, type);
+    if (!rec) return;
+
+    // 日志增量
+    flushLog();
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    if (rec.dealt > 0) floatText('−' + rec.dealt, cx + 140, cy - 60, '#ffd27a');
+    if (st.player.hp < beforeHp) {
+      visual.hitFlash = 1;
+      floatText('−' + (beforeHp - st.player.hp), cx - 150, cy - 40, '#ff6b4a');
+    }
+    if (rec.heal > 0) {
+      visual.healFlash = 1;
+      floatText('+' + rec.heal, cx - 150, cy - 60, '#8fe3a8');
+    }
+    if (rec.killed) {
+      // 换层后重画画布内容
+      document.getElementById('enemyHpBar').style.width = '0%';
+    }
+
+    syncPanel();
+    if (st.status === 'win') showBanner(true);
+    if (st.status === 'lose') showBanner(false);
+  }
+
+  /* ---------- 横幅 ---------- */
+  /**
+   * 显示胜负
+   * @param {boolean} win 是否胜利
+   * @returns {void}
+   */
+  function showBanner(win) {
+    const b = document.getElementById('banner');
+    b.className = 'show ' + (win ? 'win' : 'lose');
+    b.innerHTML = win
+      ? '<div class="big">审判结束</div><div class="sub">你带着改写的「' +
+        Core.ruleById(st.ruleId).name + '」打穿了 5 层。<br>按 R 换一条规则再来</div>'
+      : '<div class="big">规则反噬</div><div class="sub">倒在：' + st.enemy.name +
+        '<br>你改写的那条规则，也保护不了你。<br>按 R 重开</div>';
+  }
+
+  /**
+   * 隐藏横幅
+   * @returns {void}
+   */
+  function hideBanner() {
+    document.getElementById('banner').className = '';
+  }
+
+  /* ---------- 输入 ---------- */
+  /**
+   * 键盘：1/2/3 出招，R 重开
+   * @param {KeyboardEvent} ev 事件
+   * @returns {void}
+   */
+  function onKey(ev) {
+    const k = ev.key.toLowerCase();
+    if (k === 'r') {
+      restart();
+      ev.preventDefault();
+      return;
+    }
+    if (!st || st.status !== 'playing') return;
+    if (k === '1') { doAction('strike'); ev.preventDefault(); }
+    else if (k === '2') { doAction('guard'); ev.preventDefault(); }
+    else if (k === '3') { doAction('ignite'); ev.preventDefault(); }
+  }
+
+  /**
+   * 重开：回到规则选择界面
+   * @returns {void}
+   */
+  function restart() {
+    st = null;
+    document.getElementById('lawLayer').classList.remove('hide');
+    document.getElementById('ruleBadge').textContent = '尚未改写';
+    document.getElementById('ruleCost').textContent = '代价：—';
+    document.getElementById('ruleSealed').textContent = '封存：—';
+    document.getElementById('log').innerHTML = '';
+    document.getElementById('floorText').textContent = '第 1 层';
+    document.getElementById('turnText').textContent = '回合 1';
+    document.getElementById('playerHpText').textContent = '—';
+    document.getElementById('enemyName').textContent = '—';
+    document.getElementById('enemyHpText').textContent = '—';
+    document.getElementById('ashText').textContent = '0 层';
+    document.getElementById('intentText').textContent = '—';
+    hideBanner();
+  }
+
+  /* ---------- 自测 ---------- */
+  /**
+   * 三种策略各 200 局
+   * @returns {void}
+   */
+  function runSelfTest() {
+    const out = document.getElementById('testOut');
+    out.textContent = '运行中……';
+    setTimeout(function () {
+      const t0 = performance.now();
+      const rows = ['aggressive', 'conservative', 'adaptive'].map(function (p) {
+        return Core.runBatch(p, 200);
+      });
+      const ms = Math.round(performance.now() - t0);
+      const name = { aggressive: '激进', conservative: '保守', adaptive: '会改写' };
+      const lines = rows.map(function (r) {
+        return name[r.policy].padEnd(4, ' ') +
+          ' 胜率 ' + (r.winRate * 100).toFixed(1) + '%' +
+          ' | 平均到第 ' + r.avgFloor.toFixed(1) + ' 层' +
+          ' | 平均 ' + r.avgTurns.toFixed(1) + ' 回合';
+      });
+      const adaptive = rows[2].byRule;
+      let picked = 0;
+      Object.keys(adaptive).forEach(function (id) { picked += adaptive[id].n; });
+      const ruleLine = '会改写选规则：' + Object.keys(adaptive).map(function (id) {
+        const b = adaptive[id];
+        return Core.ruleById(id).name + ' 选中 ' + (b.n / picked * 100).toFixed(0) + '%' +
+          '（该规则胜率 ' + (b.win / b.n * 100).toFixed(0) + '%）';
+      }).join(' / ');
+      out.textContent = lines.join('\n') + '\n' + ruleLine + '\n\n（200 局 × 3 策略，耗时 ' + ms + 'ms）';
+      window.__lastTest = { rows: rows, ms: ms };
+    }, 30);
+  }
+
+  /* ---------- 启动 ---------- */
+  renderLawChoices();
+  document.addEventListener('keydown', onKey);
+  document.getElementById('btnStrike').addEventListener('click', function () { doAction('strike'); });
+  document.getElementById('btnGuard').addEventListener('click', function () { doAction('guard'); });
+  document.getElementById('btnIgnite').addEventListener('click', function () { doAction('ignite'); });
+  document.getElementById('btnTest').addEventListener('click', runSelfTest);
+
+  (function loop() {
+    render();
+    visual.hitFlash = Math.max(0, visual.hitFlash - 0.06);
+    visual.healFlash = Math.max(0, visual.healFlash - 0.05);
+    requestAnimationFrame(loop);
+  })();
+
+  window.__proto5 = {
+    choose: chooseRule,
+    getState: function () { return st; },
+    restart: restart
+  };
+})();
+</script>
+</body>
+</html>

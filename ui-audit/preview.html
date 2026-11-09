@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>烬 · UI 一致性终审对照（现状 / 统一后）</title>
+<style>
+  /* 本页只是"尺子"，不引用游戏样式；所有数值直接来自 01-INVENTORY 的实测值 */
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05080e;color:#eaf5ff;font-family:"Microsoft YaHei UI","Microsoft YaHei",sans-serif;padding:28px 20px 60px}
+  .wrap{max-width:1180px;margin:0 auto}
+  h1{font-size:22px;letter-spacing:.06em;margin-bottom:6px}
+  .meta{font-size:12px;color:#a8bfdc;margin-bottom:26px;line-height:1.7}
+  .sec{margin-bottom:34px;scroll-margin-top:12px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin-bottom:10px}
+  .sec-head h2{font-size:16px;letter-spacing:.04em}
+  .sec-head span{font-size:12px;color:#a8bfdc}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .cell{border:1px solid rgba(126,164,214,.24);border-radius:12px;overflow:hidden;background:#070b14}
+  .cell > b{display:block;font-size:11px;letter-spacing:.18em;padding:6px 10px;color:#a8bfdc;background:rgba(255,255,255,.03);border-bottom:1px solid rgba(126,164,214,.18)}
+  .cell.is-new > b{color:#3ee6ff}
+  .stage{position:relative;min-height:246px;padding:14px 12px}
+  .note{font-size:12px;color:#a8bfdc;line-height:1.8;margin-top:8px}
+  .note b{color:#eaf5ff;font-weight:600}
+  .tag{font:11px/1.4 "Cascadia Mono",Consolas,monospace;color:#ffc247;border:1px solid rgba(255,194,71,.4);border-radius:4px;padding:1px 5px;margin-right:6px}
+
+  /* ---------- 标题页 ---------- */
+  .t-kicker{font:11px "Cascadia Mono",Consolas,monospace;letter-spacing:.28em;color:#3ee6ff}
+  .t-word-cur{font:104px/1.1 "Cascadia Mono",Consolas,monospace;letter-spacing:.22em;color:#eaf6ff}
+  .t-word-cur b,.t-word-new b{color:#b085ff}
+  .t-word-new{font:64px/1.15 "Microsoft YaHei UI",sans-serif;font-weight:400;letter-spacing:.18em;color:#eaf6ff}
+  .t-tag{font-size:14px;color:#c3d7ef;margin-top:4px}
+  .t-stats{display:flex;gap:10px;margin-top:10px}
+  .t-stat{background:rgba(8,14,26,.8);border:1px solid rgba(126,164,214,.24);padding:10px 13px;min-width:96px}
+  .t-stat .c{border-radius:8px}
+  .t-stat .n{border-radius:8px;padding:12px}
+  .t-stat span{display:block;font:11px "Cascadia Mono",Consolas,monospace;color:#a8bfdc;letter-spacing:.1em}
+  .t-stat b{display:block;font-family:"Cascadia Mono",Consolas,monospace;color:#eaf5ff}
+  .t-stat b.c{font-size:20px}.t-stat b.n{font-size:18px}
+  .t-btns{display:flex;gap:14px;margin-top:12px}
+  .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(120,190,255,.46);background:rgba(16,28,46,.8);color:#cfe6ff;cursor:pointer}
+  .btn.c{font-size:12px;border-radius:8px;padding:8px 13px}
+  .btn.n{font-size:14px;border-radius:8px;padding:8px 12px}
+  .btn-start.c{font-size:16px;padding:13px 30px;border-radius:8px;border-color:rgba(62,230,255,.65);background:linear-gradient(180deg,rgba(24,78,104,.95),rgba(10,34,54,.95));color:#e6fbff;font-weight:600;letter-spacing:.08em}
+  .btn-start.n{font-size:18px;padding:12px 28px;border-radius:8px;border-color:rgba(62,230,255,.65);background:linear-gradient(180deg,rgba(24,78,104,.95),rgba(10,34,54,.95));color:#e6fbff;font-weight:600;letter-spacing:.08em}
+  .kbd{font:11px "Cascadia Mono",Consolas,monospace;border-radius:4px;padding:1px 5px;border:1px solid rgba(120,170,230,.28);color:#93a6c4;background:rgba(6,12,22,.7)}
+
+  /* ---------- HUD ---------- */
+  .hud{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .hud-left{display:flex;flex-direction:column;gap:8px}
+  .read{border:1px solid rgba(126,164,214,.24);background:rgba(10,18,32,.55);border-radius:8px;padding:6px 12px}
+  .read span{font:11px "Cascadia Mono",Consolas,monospace;color:#a8bfdc;letter-spacing:.14em;display:block}
+  .read b{font-family:"Cascadia Mono",Consolas,monospace;color:#eaf5ff;display:block}
+  .read b.c{font-size:24px}.read b.n{font-size:24px}
+  .floor{border:1px solid rgba(126,164,214,.24);background:linear-gradient(180deg,#1b2942,#0d1424);width:160px;padding:11px 13px 12px}
+  .floor.c{border-radius:12px}.floor.n{border-radius:12px;padding:12px}
+  .floor em{font:11px "Cascadia Mono",Consolas,monospace;color:#a8bfdc;letter-spacing:.16em;font-style:normal}
+  .floor b{font-family:"Cascadia Mono",Consolas,monospace;color:#dbfcff;line-height:.95;display:block}
+  .floor b.c{font-size:42px}.floor b.n{font-size:40px}
+  .floor u{display:block;font:11px "Cascadia Mono",Consolas,monospace;color:rgba(168,191,220,.82);text-decoration:none;padding-top:5px;letter-spacing:.06em}
+  .floor u i{color:#d7e8fb;font-style:normal;font-size:11px}
+  .floor u i.n{font-size:12px;color:#c3d7ef}
+  .deck{margin-top:12px;border:1px solid rgba(126,164,214,.24);border-radius:12px;background:linear-gradient(180deg,#1b2942,#131e33);padding:12px 16px;display:flex;gap:8px}
+  .card{flex:1;border:1px solid rgba(120,160,220,.22);background:linear-gradient(180deg,#1b2942,#0d1424);min-height:68px;position:relative}
+  .card.c{border-radius:8px;padding:8px 9px 7px}
+  .card.n{border-radius:8px;padding:8px 12px}
+  .card .g{position:absolute;right:8px;top:8px;font:12px "Cascadia Mono",Consolas,monospace;border:1px solid #3ee6ff;color:#3ee6ff;width:21px;height:21px;display:flex;align-items:center;justify-content:center}
+  .card.c .g{border-radius:4px}
+  .card.n .g{border-radius:4px;font-size:14px}
+  .card .nm{color:#eaf5ff;font-weight:600;letter-spacing:.02em}
+  .card.c .nm{font-size:12.5px}.card.n .nm{font-size:12px}
+  .card .sb{font-family:"Cascadia Mono",Consolas,monospace;color:#a8bfdc}
+  .card.c .sb{font-size:11px}.card.n .sb{font-size:11px}
+  .card .mt{font-family:"Cascadia Mono",Consolas,monospace;color:#a8bfdc}
+  .card.c .mt{font-size:8.5px;margin-top:6px;letter-spacing:.04em}
+  .card.n .mt{font-size:11px;margin-top:6px;letter-spacing:.04em}
+  .card .k{font-family:"Cascadia Mono",Consolas,monospace;color:#a8bfdc;border:1px solid rgba(120,170,230,.24);display:inline-block;margin-top:4px}
+  .card.c .k{font-size:11px;border-radius:3px;padding:0 3px}
+  .card.n .k{font-size:11px;border-radius:4px;padding:0 4px}
+  .docks{display:flex;gap:8px;margin-top:10px}
+  .dock{width:54px;height:54px;border:1px solid rgba(96,190,235,.5);background:linear-gradient(180deg,rgba(20,40,58,.95),rgba(7,14,24,.95));display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .dock.c{border-radius:12px;color:#a9e6ff}.dock.n{border-radius:8px;color:#a9e6ff}
+  .dock span{color:#d5f2ff}
+  .dock.c span{font-size:10px}.dock.n span{font-size:12px}
+  .dock em{font-style:normal;font-family:"Cascadia Mono",Consolas,monospace;color:#8fe4ff;border:1px solid rgba(143,228,255,.5);background:rgba(6,16,26,.96)}
+  .dock.c em{font-size:9.5px;border-radius:5px;padding:0 3px}
+  .dock.n em{font-size:11px;border-radius:4px;padding:0 3px}
+
+  /* ---------- 设置 ---------- */
+  .box{border:1px solid rgba(62,230,255,.28);background:linear-gradient(180deg,rgba(13,26,42,.99),rgba(8,16,28,.995));padding:14px}
+  .box.c{border-radius:12px}.box.n{border-radius:12px;padding:16px;border-color:rgba(126,164,214,.24)}
+  .box h3{color:#c8f6ff;letter-spacing:.06em}
+  .box.c h3{font-size:13px}.box.n h3{font-size:14px;color:#eaf5ff}
+  .row{display:flex;align-items:center;gap:12px;border-top:1px solid rgba(126,164,214,.12);padding-top:7px;margin-top:7px}
+  .row label{color:#c3d7ef;width:96px}
+  .row.c label{font-size:12px}.row.n label{font-size:12px}
+  .row b{font-family:"Cascadia Mono",Consolas,monospace;color:#d9f6ff;margin-left:auto}
+  .row.c b{font-size:11px}.row.n b{font-size:12px;color:#eaf5ff}
+  .auth{margin-top:8px;font-family:"Cascadia Mono",Consolas,monospace;letter-spacing:.08em}
+  .auth.c{font-size:10.5px;color:#7f90a8}
+  .auth.n{font-size:11px;color:#a8bfdc}
+
+  /* ---------- 成就 ---------- */
+  .arow{display:flex;align-items:center;gap:7px;border:1px solid rgba(255,255,255,.06);background:rgba(8,14,24,.42);color:#e7eefc;padding:4px 8px;margin-bottom:4px}
+  .arow.c{font-size:11px;border-radius:7px}
+  .arow.n{font-size:12px;border-radius:8px;border-color:rgba(126,164,214,.24);padding:4px 12px;gap:8px}
+  .arow .an{color:#e7eefc;width:84px}
+  .arow .ad{color:#a8bfdc;flex:1}
+  .abar{width:60px;height:5px;border-radius:999px;background:rgba(255,255,255,.1)}
+  .abar i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,#5cc8ff,#9ff3ff)}
+  .abar.n i{background:#3ee6ff}
+  .arow .ap{color:#cfe9ff;width:44px;text-align:right}
+  .arow.n .ap{color:#c3d7ef}
+  .arow .aw{color:#ffd166;width:38px;text-align:right}
+
+  /* ---------- 存档 ---------- */
+  .srow{display:flex;align-items:center;gap:8px;border:1px solid rgba(120,190,255,.16);background:rgba(8,18,30,.55);color:#cfe9ff;padding:6px 8px;border-radius:8px;margin-bottom:6px}
+  .srow.n{padding:8px 12px;border-color:rgba(126,164,214,.24);font-size:12px}
+  .srow.c{font-size:12px}
+  .srow.is-cur{box-shadow:inset 0 0 0 1px rgba(62,230,255,.18)}
+  .srow.n.is-cur{box-shadow:inset 0 0 0 2px rgba(120,190,255,.46)}
+  .srow .ss{font-size:10.5px;color:rgba(175,210,240,.65)}
+  .srow.n .ss{font-size:11px;color:#a8bfdc}
+
+  /* ---------- 结算 ---------- */
+  .modal{width:100%;border:1px solid rgba(120,190,255,.46);background:linear-gradient(180deg,#131e33,#0d1424);padding:24px;border-radius:16px}
+  .modal h2{color:#ffe4e8}
+  .modal.c h2{font-size:26px}.modal.n h2{font-size:24px}
+  .rgrid{display:grid;grid-template-columns:repeat(3,1fr);margin-top:12px}
+  .rgrid.c{gap:10px}.rgrid.n{gap:8px}
+  .rstat{background:#0d1424;border:1px solid rgba(126,164,214,.24);text-align:center}
+  .rstat.c{border-radius:10px;padding:11px 12px 10px}
+  .rstat.n{border-radius:8px;padding:8px 12px}
+  .rstat span{display:block;font-size:11px;color:#93a6c4;letter-spacing:.08em}
+  .rstat b{font-family:"Cascadia Mono",Consolas,monospace;color:#eaf5ff;display:block;margin-top:3px}
+  .rstat.c b{font-size:18px;font-weight:700}.rstat.n b{font-size:18px}
+  .rhint{margin-top:10px;color:#93a6c4}
+  .rhint.c{font-size:11px}.rhint.n{font-size:12px;color:#a8bfdc}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>烬 · 界面视觉一致性终审 · 对照页</h1>
+  <p class="meta">
+    左列 = 主文件 <b>index_arcane_v2.html</b> 实测生效值（MD5 23194ECC…，1,137 条规则中取真值）<br>
+    右列 = 按《03-SPEC 一页纸》统一后的目标值。左右同机位、同底色、同文字内容，唯一变量是档位。
+  </p>
+
+  <!-- 1 标题页 -->
+  <section class="sec" id="title">
+    <div class="sec-head"><h2>1 · 标题页</h2><span>#titleLayer / .title-card</span></div>
+    <div class="cols">
+      <div class="cell"><b>现状</b>
+        <div class="stage">
+          <div class="t-kicker">EMBERFALL · ROGUE PROTOCOL</div>
+          <div class="t-word-cur"><b>烬</b></div>
+          <div class="t-tag">魔法 × 科技实时肉鸽 · 清空每一层，再往下一层</div>
+          <div class="t-stats">
+            <div class="t-stat c"><span>最佳楼层</span><b class="c">1</b></div>
+            <div class="t-stat c"><span>奥术结晶</span><b class="c" style="color:#ffc247">0</b></div>
+            <div class="t-stat c"><span>已完成局数</span><b class="c">0</b></div>
+          </div>
+          <div class="t-btns"><button class="btn-start c">开始游戏 <span class="kbd">Enter</span></button><button class="btn c">设置 <span class="kbd">O</span></button></div>
+        </div>
+      </div>
+      <div class="cell is-new"><b>统一后</b>
+        <div class="stage">
+          <div class="t-kicker" style="letter-spacing:.18em">EMBERFALL · ROGUE PROTOCOL</div>
+          <div class="t-word-new"><b>烬</b></div>
+          <div class="t-tag">魔法 × 科技实时肉鸽 · 清空每一层，再往下一层</div>
+          <div class="t-stats" style="gap:12px">
+            <div class="t-stat n"><span>最佳楼层</span><b class="n">1</b></div>
+            <div class="t-stat n"><span>奥术结晶</span><b class="n" style="color:#ffc247">0</b></div>
+            <div class="t-stat n"><span>已完成局数</span><b class="n">0</b></div>
+          </div>
+          <div class="t-btns"><button class="btn-start n">开始游戏 <span class="kbd">Enter</span></button><button class="btn n">设置 <span class="kbd">O</span></button></div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><span class="tag">B1</span>字标 104 → 64px（4 段 clamp 合 1 条）；<span class="tag">B3</span>统计数 20 → 18px；<span class="tag">B4</span>6 种灰蓝小字 → <b>--text-3</b>；<span class="tag">B2</span>中文标题由等宽改无衬线。</p>
+  </section>
+
+  <!-- 2 HUD -->
+  <section class="sec" id="hud">
+    <div class="sec-head"><h2>2 · 战斗 HUD</h2><span>.hud-top / .floor-panel / .hud-deck / .dock-btn</span></div>
+    <div class="cols">
+      <div class="cell"><b>现状</b>
+        <div class="stage">
+          <div class="hud">
+            <div class="hud-left">
+              <div class="read"><span>生命 HP</span><b class="c">100 / 100</b></div>
+              <div class="read"><span>奥能 AETHER</span><b class="c">100 / 100</b></div>
+            </div>
+            <div class="floor c"><em>当前层</em><b class="c">1</b><u>主题 <i>机械层</i></u><u>敌人 <i>0</i></u><u>连杀 <i>—</i></u></div>
+          </div>
+          <div class="deck">
+            <div class="card c"><span class="g">⟡</span><div class="nm">奥术飞弹</div><div class="sb">3 / 5</div><div class="mt">普通 · L1</div><span class="k">Q</span></div>
+            <div class="card c"><span class="g" style="color:#b085ff;border-color:#b085ff">✦</span><div class="nm">相位跃迁</div><div class="sb">0 / 3</div><div class="mt">稀有 · L2</div><span class="k">E</span></div>
+          </div>
+          <div class="docks"><div class="dock c">◇<span>地图</span><em>M</em></div><div class="dock c">⚙<span>设置</span><em>O</em></div></div>
+        </div>
+      </div>
+      <div class="cell is-new"><b>统一后</b>
+        <div class="stage">
+          <div class="hud">
+            <div class="hud-left">
+              <div class="read"><span>生命 HP</span><b class="n">100 / 100</b></div>
+              <div class="read"><span>奥能 AETHER</span><b class="n">100 / 100</b></div>
+            </div>
+            <div class="floor n"><em>当前层</em><b class="n">1</b><u>主题 <i class="n">机械层</i></u><u>敌人 <i class="n">0</i></u><u>连杀 <i class="n">—</i></u></div>
+          </div>
+          <div class="deck" style="gap:16px">
+            <div class="card n"><span class="g">⟡</span><div class="nm">奥术飞弹</div><div class="sb">3 / 5</div><div class="mt">普通 · L1</div><span class="k">Q</span></div>
+            <div class="card n"><span class="g" style="color:#b085ff;border-color:#b085ff">✦</span><div class="nm">相位跃迁</div><div class="sb">0 / 3</div><div class="mt">稀有 · L2</div><span class="k">E</span></div>
+          </div>
+          <div class="docks"><div class="dock n">◇<span>地图</span><em>M</em></div><div class="dock n">⚙<span>设置</span><em>O</em></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><span class="tag">C1</span>楼层 42 → 40px、副读 30 → 24px；<span class="tag">C3</span>按钮文字 10 → 12px、角标 9.5 → 11px；<span class="tag">C5</span>工具按钮圆角 12 → 8px；<span class="tag">C6</span>徽章 5/2/3 → 统一 4px。</p>
+  </section>
+
+  <!-- 3 技能卡 -->
+  <section class="sec" id="card">
+    <div class="sec-head"><h2>3 · 技能卡</h2><span>.mini-card / .card-row.is-dense</span></div>
+    <div class="cols">
+      <div class="cell"><b>现状（普通 / 密集 / 紧凑 / 锁定）</b>
+        <div class="stage" style="display:flex;gap:8px;align-items:flex-start">
+          <div class="card c" style="flex:1"><span class="g">⟡</span><div class="nm">奥术飞弹</div><div class="sb">3 / 5</div><div class="mt">普通 · L1</div><span class="k">Q</span></div>
+          <div class="card c" style="flex:1;padding:13px 5px 4px;min-height:68px"><span class="g" style="width:20px;height:20px">⟡</span><div class="nm" style="font-size:10.5px;line-height:1.25">奥术飞弹</div><div class="sb" style="font-size:11px">3 / 5</div><span class="k" style="font-size:8.5px">Q</span></div>
+          <div class="card c" style="flex:1;padding:5px 4px 3px;min-height:44px"><div class="nm" style="font-size:9.5px">奥术飞弹</div><div class="sb" style="font-size:9px">3/5</div></div>
+          <div class="card c" style="flex:1;background:rgba(9,16,28,.55);padding:6px 8px;min-height:56px"><div class="nm" style="font-size:11px;font-weight:400;color:rgba(150,180,214,.55)">未解锁</div><div class="sb" style="font-size:11px;color:rgba(150,180,214,.55)">—</div></div>
+        </div>
+      </div>
+      <div class="cell is-new"><b>统一后（同一组尺寸）</b>
+        <div class="stage" style="display:flex;gap:8px;align-items:flex-start">
+          <div class="card n" style="flex:1"><span class="g">⟡</span><div class="nm">奥术飞弹</div><div class="sb">3 / 5</div><div class="mt">普通 · L1</div><span class="k">Q</span></div>
+          <div class="card n" style="flex:1;padding:12px 6px 4px;min-height:68px"><span class="g" style="width:20px;height:20px">⟡</span><div class="nm" style="line-height:1.25">奥术飞弹</div><div class="sb" style="font-size:11px">3 / 5</div><span class="k" style="font-size:11px">Q</span></div>
+          <div class="card n" style="flex:1;padding:6px 4px 4px;min-height:44px"><div class="nm" style="font-size:11px">奥术飞弹</div><div class="sb" style="font-size:11px">3/5</div></div>
+          <div class="card n" style="flex:1;background:rgba(9,16,28,.55);padding:8px 12px;min-height:56px"><div class="nm" style="color:var(--text-3);color:#a8bfdc">未解锁</div><div class="sb" style="font-size:11px;color:#a8bfdc">—</div></div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><span class="tag">D1</span>卡名 12.5 / 10.5 / 9.5 / 11 → 12 / 12 / 11 / 12；<span class="tag">D2</span>属性行 8.5 → 11px；<span class="tag">D3</span>密集态键位 8.5 → 11px；<span class="tag">D4</span>卡内圆角 3/4/6 → 4px。</p>
+  </section>
+
+  <!-- 4 设置 -->
+  <section class="sec" id="settings">
+    <div class="sec-head"><h2>4 · 设置</h2><span>#settingsPanel / .settings-box</span></div>
+    <div class="cols">
+      <div class="cell"><b>现状</b>
+        <div class="stage">
+          <div class="box c" style="padding:13px 14px"><h3>画面</h3>
+            <div class="row c"><label>画质</label><b>高</b></div>
+            <div class="row c"><label>屏幕震动</label><b>开</b></div>
+            <div class="auth c">CREDITS · EMBERFALL</div>
+          </div>
+        </div>
+      </div>
+      <div class="cell is-new"><b>统一后</b>
+        <div class="stage">
+          <div class="box n"><h3>画面</h3>
+            <div class="row n"><label>画质</label><b>高</b></div>
+            <div class="row n"><label>屏幕震动</label><b>开</b></div>
+            <div class="auth n">CREDITS · EMBERFALL</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><span class="tag">E1</span>分区标题 13 → 14px；<span class="tag">E2</span>行数值 11 → 12px；<span class="tag">E3</span>署名 <b>var(--text-4) 变量不存在</b> → --text-3（原色值实际未生效）；<span class="tag">E5</span>分区描边青 → --line。</p>
+  </section>
+
+  <!-- 5 成就 -->
+  <section class="sec" id="ach">
+    <div class="sec-head"><h2>5 · 成就</h2><span>.archive-ach-row</span></div>
+    <div class="cols">
+      <div class="cell"><b>现状</b>
+        <div class="stage">
+          <div class="arow c"><span class="an">初入烬境</span><span class="ad">抵达第 5 层</span><span class="abar"><i style="width:100%"></i></span><span class="ap">5/5</span><span class="aw">+3</span></div>
+          <div class="arow c"><span class="an">十层行者</span><span class="ad">清空 10 层</span><span class="abar"><i style="width:40%"></i></span><span class="ap">4/10</span><span class="aw">+8</span></div>
+        </div>
+      </div>
+      <div class="cell is-new"><b>统一后</b>
+        <div class="stage">
+          <div class="arow n"><span class="an">初入烬境</span><span class="ad">抵达第 5 层</span><span class="abar n"><i style="width:100%"></i></span><span class="ap">5/5</span><span class="aw">+3</span></div>
+          <div class="arow n"><span class="an">十层行者</span><span class="ad">清空 10 层</span><span class="abar n"><i style="width:40%"></i></span><span class="ap">4/10</span><span class="aw">+8</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><span class="tag">F1</span>整行 11 → 12px（中文 11px 低于下限）；<span class="tag">F2</span>白色描边 rgba(255,255,255,.06) → --line；<span class="tag">F3</span>圆角 7 → 8px。</p>
+  </section>
+
+  <!-- 6 存档 -->
+  <section class="sec" id="save">
+    <div class="sec-head"><h2>6 · 存档</h2><span>.save-slot-row</span></div>
+    <div class="cols">
+      <div class="cell"><b>现状</b>
+        <div class="stage">
+          <div class="srow c is-cur"><span>槽位 1 · 第 6 层</span><span class="ss" style="margin-left:auto">2026-11-08 20:15</span></div>
+          <div class="srow c"><span>槽位 2 · 空</span><span class="ss" style="margin-left:auto">未使用</span></div>
+        </div>
+      </div>
+      <div class="cell is-new"><b>统一后</b>
+        <div class="stage">
+          <div class="srow n is-cur"><span>槽位 1 · 第 6 层</span><span class="ss" style="margin-left:auto">2026-11-08 20:15</span></div>
+          <div class="srow n"><span>槽位 2 · 空</span><span class="ss" style="margin-left:auto">未使用</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><span class="tag">G1</span>副行 10.5 → 11px；<span class="tag">G2</span>描边两值 → --line；<span class="tag">G4</span>当前槽 1px → 2px（选中档，不再靠色差暗示）。</p>
+  </section>
+
+  <!-- 7 结算 -->
+  <section class="sec" id="result">
+    <div class="sec-head"><h2>7 · 结算</h2><span>.result-modal / .result-stat</span></div>
+    <div class="cols">
+      <div class="cell"><b>现状</b>
+        <div class="stage">
+          <div class="modal c"><h2>本局结束</h2>
+            <div class="rgrid c">
+              <div class="rstat c"><span>到达楼层</span><b>6</b></div>
+              <div class="rstat c"><span>击杀</span><b>37</b></div>
+              <div class="rstat c"><span>本局结晶</span><b style="color:#ffc247">+12</b></div>
+            </div>
+            <div class="rhint c">按 R 重开 · H 帮助 · O 设置</div>
+          </div>
+        </div>
+      </div>
+      <div class="cell is-new"><b>统一后</b>
+        <div class="stage">
+          <div class="modal n"><h2>本局结束</h2>
+            <div class="rgrid n">
+              <div class="rstat n"><span>到达楼层</span><b>6</b></div>
+              <div class="rstat n"><span>击杀</span><b>37</b></div>
+              <div class="rstat n"><span>本局结晶</span><b style="color:#ffc247">+12</b></div>
+            </div>
+            <div class="rhint n">按 R 重开 · H 帮助 · O 设置</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="note"><span class="tag">H1</span>标题 26（覆盖 20）→ 24px；<span class="tag">H2</span>统计块圆角 10 → 8px；<span class="tag">H4</span>内边距 11/12/10 → 8px 12px；<span class="tag">H5</span>间距 10 → 8px；<span class="tag">H6</span>提示 11 → 12px。</p>
+  </section>
+
+  <p class="meta" style="margin-top:8px">
+    说明：本页是 HTML 原型（可看即证据），非游戏实机截图。实机截图需开无头浏览器，按约定须先报时段再占用。
+  </p>
+</div>
+</body>
+</html>

@@ -1,0 +1,222 @@
+{
+  "results": [
+    {
+      "name": "编队模板 ≥6 套且每套 ≥5 个不重复角色、含设计意图与破法",
+      "ok": true,
+      "detail": {
+        "count": 8,
+        "rolesOk": true,
+        "proseOk": true
+      }
+    },
+    {
+      "name": "三个区域都有编队模板（1/2/3 全覆盖）",
+      "ok": true,
+      "detail": {
+        "regions": [
+          1,
+          2,
+          3
+        ]
+      }
+    },
+    {
+      "name": "所有模板角色 id 都在 ENEMY_CONFIG 里",
+      "ok": true,
+      "detail": {
+        "roleCount": 40
+      }
+    },
+    {
+      "name": "新怪 1「熔铸师」属于符文主题且自带 terraform 行为参数",
+      "ok": true,
+      "detail": {
+        "id": "platewright",
+        "region": 2,
+        "sig": "terraform",
+        "exclusive": true
+      }
+    },
+    {
+      "name": "新怪 2「虚空导体」属于虚空主题且自带 overload 行为参数",
+      "ok": true,
+      "detail": {
+        "id": "voidconduit",
+        "region": 3,
+        "sig": "overload",
+        "exclusive": true
+      }
+    },
+    {
+      "name": "两只新怪进入对应区域名册（F6 虚空含导体 / F8 符文含熔铸师）",
+      "ok": true,
+      "detail": {
+        "f6": 9,
+        "f7": 8,
+        "f8": 9
+      }
+    },
+    {
+      "name": "F6/F7/F8 的战斗 / 精英房都套用了本区域编队模板",
+      "ok": true,
+      "detail": [
+        {
+          "floor": 6,
+          "region": 3,
+          "rooms": 3,
+          "formations": [
+            "voiddrain",
+            "warpambush",
+            "warpambush"
+          ],
+          "ok": true
+        },
+        {
+          "floor": 7,
+          "region": 1,
+          "rooms": 2,
+          "formations": [
+            "ironwall",
+            "gearrush"
+          ],
+          "ok": true
+        },
+        {
+          "floor": 8,
+          "region": 2,
+          "rooms": 2,
+          "formations": [
+            "mirrorlure",
+            "runecircle"
+          ],
+          "ok": true
+        }
+      ]
+    },
+    {
+      "name": "编队落位后同场混编仍 ≥5 种",
+      "ok": true,
+      "detail": [
+        {
+          "floor": 6,
+          "rows": [
+            {
+              "n": 5,
+              "distinct": 5,
+              "formation": "voiddrain"
+            },
+            {
+              "n": 3,
+              "distinct": 3,
+              "formation": "warpambush"
+            },
+            {
+              "n": 3,
+              "distinct": 3,
+              "formation": "warpambush"
+            }
+          ]
+        },
+        {
+          "floor": 7,
+          "rows": [
+            {
+              "n": 5,
+              "distinct": 5,
+              "formation": "ironwall"
+            },
+            {
+              "n": 4,
+              "distinct": 4,
+              "formation": "gearrush"
+            }
+          ]
+        },
+        {
+          "floor": 8,
+          "rows": [
+            {
+              "n": 5,
+              "distinct": 5,
+              "formation": "mirrorlure"
+            },
+            {
+              "n": 6,
+              "distinct": 5,
+              "formation": "runecircle"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "熔铸师：terraform 生成 1 根临时石柱，且石柱真的挡路",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "acted": true,
+        "signature": "terraform",
+        "detail": {
+          "terraformed": 1,
+          "blocks": 1,
+          "at": {
+            "x": 1577,
+            "y": 1745
+          }
+        },
+        "before": 0,
+        "after": 1,
+        "blockedAtCenter": true,
+        "distToPlayer": 64
+      }
+    },
+    {
+      "name": "熔铸师：石柱 5 秒后自行崩塌（回收后临时阻挡归零）",
+      "ok": true,
+      "detail": {
+        "before": 1,
+        "after": 0
+      }
+    },
+    {
+      "name": "虚空导体：overload 给玩家 +40% 增伤、同时召唤 2 只碎片，到期后倍率复原",
+      "ok": true,
+      "detail": {
+        "ok": true,
+        "acted": true,
+        "signature": "overload",
+        "detail": {
+          "overloads": 1,
+          "summoned": 2,
+          "buff": {
+            "granted": true,
+            "timer": 4,
+            "mul": 1.4
+          }
+        },
+        "base": 1,
+        "granted": 1.4,
+        "restored": 1,
+        "shards": 2,
+        "timer": 0
+      }
+    },
+    {
+      "name": "两只新怪走真实受伤通道可被击杀，且至少掉落一次",
+      "ok": true,
+      "detail": {
+        "spawned": 16,
+        "killed": 16,
+        "pickupGain": 13,
+        "left": 0
+      }
+    },
+    {
+      "name": "运行期无 JS 异常",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "runtimeErrors": [],
+  "shot": true
+}

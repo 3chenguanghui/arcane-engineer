@@ -1,0 +1,2533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>科技合成卡牌 · 量子芯片计划</title>
+<style>
+  /* ============================================================
+     样式区：科技感深色主题
+     ============================================================ */
+  :root {
+    --bg-0: #050810;
+    --bg-1: #0a1220;
+    --panel: rgba(11, 19, 33, 0.86);
+    --panel-2: rgba(15, 26, 45, 0.9);
+    --line: rgba(96, 160, 255, 0.18);
+    --line-strong: rgba(96, 190, 255, 0.42);
+    --text: #dcecff;
+    --muted: #7f95b8;
+    --accent: #3ee6ff;
+    --accent-2: #8b5cf6;
+    --good: #48f0a6;
+    --bad: #ff6b7f;
+    --t1: #4cc9ff;
+    --t2: #3ee6a0;
+    --t3: #ffc247;
+    --t4: #b085ff;
+    --t5: #ff6bc1;
+    --radius: 16px;
+    --mono: "Consolas", "Cascadia Mono", "Courier New", monospace;
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { min-height: 100%; }
+
+  body {
+    margin: 0;
+    color: var(--text);
+    font-family: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+    background:
+      radial-gradient(900px 520px at 18% -8%, rgba(62, 230, 255, 0.13), transparent 62%),
+      radial-gradient(760px 480px at 88% 4%, rgba(139, 92, 246, 0.16), transparent 60%),
+      radial-gradient(700px 600px at 50% 110%, rgba(32, 115, 180, 0.14), transparent 65%),
+      var(--bg-0);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 背景网格 + 缓慢漂移，营造“实验室全息台”的感觉 */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -40px;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.5;
+    background-image:
+      linear-gradient(rgba(80, 170, 255, 0.055) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(80, 170, 255, 0.055) 1px, transparent 1px);
+    background-size: 42px 42px;
+    animation: gridDrift 26s linear infinite;
+  }
+
+  /* 顶部与底部的暗角，让内容更聚焦 */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(circle at 50% 45%, transparent 45%, rgba(2, 5, 12, 0.65) 100%);
+  }
+
+  @keyframes gridDrift {
+    from { background-position: 0 0, 0 0; }
+    to { background-position: 42px 84px, 84px 42px; }
+  }
+
+  button { font-family: inherit; }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 20px 22px 34px;
+  }
+
+  /* ---------- 顶部状态栏 ---------- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px 22px;
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(15, 27, 47, 0.92), rgba(7, 13, 24, 0.86));
+    box-shadow: 0 18px 46px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+
+  .brand { min-width: 190px; }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 21px;
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: #e9f8ff;
+    text-shadow: 0 0 18px rgba(62, 230, 255, 0.5);
+  }
+  .logo span { color: var(--accent); }
+
+  .subtitle {
+    margin-top: 3px;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+  }
+
+  .stats {
+    display: flex;
+    align-items: stretch;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-left: auto;
+  }
+
+  .stat {
+    min-width: 88px;
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: rgba(6, 11, 21, 0.72);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .stat .label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+  }
+  .stat b {
+    font-family: var(--mono);
+    font-size: 19px;
+    font-weight: 700;
+    color: #d7f4ff;
+    line-height: 1.1;
+  }
+
+  /* 科技点变化时数字轻微弹跳 */
+  #techPoints { display: inline-block; }
+  #techPoints.is-bump { animation: pointBump 0.45s cubic-bezier(0.22, 1.4, 0.36, 1); }
+  @keyframes pointBump {
+    0% { transform: scale(1); }
+    35% { transform: scale(1.35); color: #ffffff; text-shadow: 0 0 18px rgba(72, 240, 166, 0.9); }
+    100% { transform: scale(1); }
+  }
+  .stat .unit {
+    font-style: normal;
+    font-size: 10px;
+    color: var(--muted);
+    margin-left: 4px;
+  }
+  .stat-row { display: flex; align-items: baseline; gap: 4px; }
+
+  .stat-tech { border-color: rgba(72, 240, 166, 0.25); }
+  .stat-tech b { color: #9dffd2; text-shadow: 0 0 14px rgba(72, 240, 166, 0.35); }
+
+  .stat-progress { min-width: 172px; justify-content: center; gap: 5px; }
+  .progress {
+    height: 7px;
+    border-radius: 6px;
+    overflow: hidden;
+    background: rgba(90, 150, 230, 0.14);
+    border: 1px solid rgba(90, 150, 230, 0.16);
+  }
+  .progress > div {
+    height: 100%;
+    width: 0%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    box-shadow: 0 0 12px rgba(62, 230, 255, 0.55);
+    transition: width 0.45s ease;
+  }
+  .progress-text {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--muted);
+  }
+  .progress-text b { font-family: var(--mono); color: #cfe9ff; font-size: 11px; }
+
+  .top-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn {
+    position: relative;
+    padding: 9px 14px;
+    border-radius: 9px;
+    border: 1px solid var(--line-strong);
+    background: rgba(20, 36, 60, 0.65);
+    color: #d9ecff;
+    font-size: 12.5px;
+    letter-spacing: 0.03em;
+    cursor: pointer;
+    transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    white-space: nowrap;
+  }
+  .btn:hover { transform: translateY(-1px); border-color: rgba(110, 230, 255, 0.8); box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { cursor: not-allowed; opacity: 0.45; transform: none; box-shadow: none; }
+
+  .btn-primary {
+    border-color: rgba(72, 240, 166, 0.45);
+    background: linear-gradient(180deg, rgba(19, 76, 66, 0.65), rgba(10, 38, 34, 0.7));
+    color: #b8ffe1;
+  }
+  .btn-primary.is-ready {
+    animation: readyPulse 1.7s ease-in-out infinite;
+  }
+  @keyframes readyPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(72, 240, 166, 0.24); }
+    50% { box-shadow: 0 0 0 6px rgba(72, 240, 166, 0.06), 0 0 22px rgba(72, 240, 166, 0.3); }
+  }
+  .btn-sub {
+    margin-left: 4px;
+    font-size: 10px;
+    color: rgba(180, 255, 225, 0.7);
+  }
+  .btn-ghost { color: #bcd6f4; }
+  .btn-danger {
+    border-color: rgba(255, 107, 127, 0.35);
+    background: rgba(54, 15, 26, 0.55);
+    color: #ffc4cc;
+  }
+  .chev { display: inline-block; transition: transform 0.25s ease; }
+
+  /* ---------- 主布局 ---------- */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 296px;
+    gap: 16px;
+    margin-top: 16px;
+    align-items: start;
+  }
+
+  .panel {
+    position: relative;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: linear-gradient(180deg, rgba(13, 23, 40, 0.9), rgba(7, 12, 23, 0.82));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04), 0 16px 40px rgba(0, 0, 0, 0.32);
+  }
+
+  /* 面板四角的“全息角标” */
+  .panel::before, .panel::after {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+    border-color: rgba(62, 230, 255, 0.4);
+    border-style: solid;
+  }
+  .panel::before { top: -1px; left: -1px; border-width: 1px 0 0 1px; border-top-left-radius: 8px; }
+  .panel::after { right: -1px; bottom: -1px; border-width: 0 1px 1px 0; border-bottom-right-radius: 8px; }
+
+  .board-panel { padding: 16px 18px 14px; }
+
+  .board-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: rgba(98, 168, 240, 0.7);
+  }
+  .board-head h2 {
+    margin: 2px 0 0;
+    font-size: 17px;
+    letter-spacing: 0.06em;
+    font-weight: 700;
+    color: #e8f5ff;
+  }
+
+  .board-meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+  .slot-count {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #9fc0e4;
+    padding: 4px 8px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: rgba(8, 16, 30, 0.7);
+  }
+
+  .spawn-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #93aacb;
+    padding: 4px 9px;
+    border: 1px solid rgba(72, 240, 166, 0.22);
+    border-radius: 20px;
+    background: rgba(10, 28, 24, 0.5);
+    font-family: var(--mono);
+  }
+  .spawn-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--good);
+    box-shadow: 0 0 8px var(--good);
+    animation: dotBlink 1.6s ease-in-out infinite;
+  }
+  .spawn-pill b { color: #a8ffd6; font-weight: 700; }
+  .spawn-pill.is-paused { border-color: rgba(255, 194, 71, 0.28); background: rgba(40, 30, 8, 0.4); }
+  .spawn-pill.is-paused .dot { background: var(--t3); box-shadow: 0 0 8px var(--t3); animation: none; }
+  .spawn-pill.is-full { border-color: rgba(255, 107, 127, 0.3); background: rgba(40, 10, 18, 0.4); }
+  .spawn-pill.is-full .dot { background: var(--bad); box-shadow: 0 0 8px var(--bad); animation: none; }
+
+  @keyframes dotBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+  .quick-steps {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+    padding: 7px 10px;
+    border-radius: 8px;
+    background: rgba(8, 18, 32, 0.6);
+    border: 1px dashed rgba(96, 160, 255, 0.16);
+    font-size: 11.5px;
+    color: #8fa8c9;
+  }
+  .quick-steps b { color: #cfe9ff; font-weight: 600; }
+  .quick-steps .arrow { color: rgba(62, 230, 255, 0.55); font-family: var(--mono); }
+
+  /* ---------- 卡槽网格 ---------- */
+  .board {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 12px;
+  }
+
+  .slot {
+    position: relative;
+    aspect-ratio: 4 / 4.9;
+    min-height: 108px;
+    border-radius: 14px;
+  }
+
+  .slot-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border: 1px dashed rgba(110, 170, 255, 0.24);
+    background: rgba(7, 15, 28, 0.36);
+    color: rgba(130, 160, 200, 0.45);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+  }
+  .slot-empty .empty-mark {
+    font-size: 20px;
+    line-height: 1;
+    color: rgba(110, 180, 255, 0.35);
+    font-family: var(--mono);
+  }
+  .slot-empty::after {
+    content: "";
+    position: absolute;
+    inset: 7px;
+    border-radius: 10px;
+    border: 1px solid rgba(80, 150, 240, 0.05);
+    pointer-events: none;
+  }
+
+  /* 等级色变量：卡牌、日志点、配方标签共用 */
+  .tier-1 { --tc: var(--t1); --tc-line: rgba(76, 201, 255, 0.55); --tc-soft: rgba(76, 201, 255, 0.14); --tc-glow: rgba(76, 201, 255, 0.4); }
+  .tier-2 { --tc: var(--t2); --tc-line: rgba(62, 230, 160, 0.55); --tc-soft: rgba(62, 230, 160, 0.14); --tc-glow: rgba(62, 230, 160, 0.4); }
+  .tier-3 { --tc: var(--t3); --tc-line: rgba(255, 194, 71, 0.6); --tc-soft: rgba(255, 194, 71, 0.15); --tc-glow: rgba(255, 194, 71, 0.4); }
+  .tier-4 { --tc: var(--t4); --tc-line: rgba(176, 133, 255, 0.6); --tc-soft: rgba(176, 133, 255, 0.16); --tc-glow: rgba(176, 133, 255, 0.42); }
+  .tier-5 { --tc: var(--t5); --tc-line: rgba(255, 107, 193, 0.65); --tc-soft: rgba(255, 107, 193, 0.18); --tc-glow: rgba(255, 107, 193, 0.46); }
+
+  .card {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    border-radius: 14px;
+    border: 1px solid var(--tc-line);
+    background: linear-gradient(165deg, rgba(22, 36, 59, 0.92), rgba(7, 13, 25, 0.96));
+    color: var(--text);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    overflow: hidden;
+    box-shadow: inset 0 0 26px var(--tc-soft), 0 6px 16px rgba(0, 0, 0, 0.42);
+    transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+  }
+
+  /* 等级色的柔光底纹 */
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(120% 85% at 50% 0%, var(--tc), transparent 62%);
+    opacity: 0.16;
+    pointer-events: none;
+  }
+  /* 右上角的科技切角装饰 */
+  .card::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 26px;
+    height: 26px;
+    background: linear-gradient(225deg, var(--tc-soft) 0 50%, transparent 50%);
+    border-bottom-left-radius: 3px;
+    pointer-events: none;
+  }
+
+  .card:hover {
+    transform: translateY(-3px);
+    border-color: var(--tc);
+    box-shadow: inset 0 0 30px var(--tc-soft), 0 10px 26px rgba(0, 0, 0, 0.5), 0 0 20px var(--tc-soft);
+    z-index: 2;
+  }
+  .card:focus-visible { outline: 2px solid var(--tc); outline-offset: 2px; }
+
+  .card.is-selected {
+    transform: translateY(-4px) scale(1.02);
+    border-color: var(--tc);
+    box-shadow: inset 0 0 34px var(--tc-soft), 0 0 0 2px var(--tc), 0 0 30px var(--tc-glow);
+    animation: selectedBreath 1.5s ease-in-out infinite;
+    z-index: 3;
+  }
+  @keyframes selectedBreath {
+    0%, 100% { box-shadow: inset 0 0 30px var(--tc-soft), 0 0 0 2px var(--tc), 0 0 24px var(--tc-glow); }
+    50% { box-shadow: inset 0 0 34px var(--tc-soft), 0 0 0 2px var(--tc), 0 0 36px var(--tc-glow); }
+  }
+
+  /* 选中一张后，可与之合成的卡牌亮起绿色提示 */
+  .card.is-partner {
+    border-color: rgba(110, 255, 200, 0.75);
+    box-shadow: inset 0 0 26px rgba(62, 230, 160, 0.16), 0 0 22px rgba(62, 230, 160, 0.26);
+  }
+
+  .tier-tag {
+    position: absolute;
+    top: 7px;
+    left: 7px;
+    z-index: 2;
+    padding: 2px 6px;
+    border-radius: 5px;
+    border: 1px solid var(--tc-line);
+    background: rgba(3, 8, 16, 0.55);
+    color: var(--tc);
+    font-family: var(--mono);
+    font-size: 9.5px;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+  }
+
+  .glyph {
+    position: relative;
+    z-index: 1;
+    font-family: var(--mono);
+    font-size: clamp(19px, 2.3vw, 30px);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    color: var(--tc);
+    text-shadow: 0 0 14px var(--tc-glow), 0 0 2px rgba(255, 255, 255, 0.3);
+    line-height: 1;
+  }
+
+  .card-name {
+    position: relative;
+    z-index: 1;
+    font-size: 12.5px;
+    letter-spacing: 0.06em;
+    color: #e5f2ff;
+    font-weight: 600;
+    text-align: center;
+    line-height: 1.2;
+  }
+
+  .merge-flag {
+    position: absolute;
+    right: 7px;
+    bottom: 7px;
+    z-index: 2;
+    padding: 2px 6px;
+    border-radius: 5px;
+    font-size: 9px;
+    letter-spacing: 0.04em;
+    color: #c4ffe8;
+    background: rgba(10, 54, 43, 0.8);
+    border: 1px solid rgba(90, 255, 190, 0.5);
+    animation: tagBlink 1.2s ease-in-out infinite;
+  }
+  @keyframes tagBlink { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+  /* 新产出卡牌：弹出 + 高亮 */
+  .card.is-pop { animation: cardPop 0.55s cubic-bezier(0.22, 1.2, 0.36, 1); }
+  @keyframes cardPop {
+    0% { transform: scale(0.5) rotate(-2deg); opacity: 0.2; filter: brightness(2.6); }
+    55% { transform: scale(1.1) rotate(0.5deg); opacity: 1; filter: brightness(1.7); }
+    100% { transform: scale(1); filter: brightness(1); }
+  }
+
+  /* 合成成功时卡槽外扩的能量环 */
+  .slot.is-bursting::after {
+    content: "";
+    position: absolute;
+    inset: -5px;
+    border-radius: 17px;
+    border: 2px solid rgba(130, 240, 255, 0.85);
+    box-shadow: 0 0 22px rgba(90, 220, 255, 0.45);
+    pointer-events: none;
+    animation: ringOut 0.65s ease-out forwards;
+    z-index: 4;
+  }
+  @keyframes ringOut {
+    0% { opacity: 0.95; transform: scale(0.94); }
+    100% { opacity: 0; transform: scale(1.25); }
+  }
+
+  .slot.is-spawning { animation: slotFlash 0.75s ease-out; }
+  @keyframes slotFlash {
+    0% { box-shadow: inset 0 0 0 2px rgba(90, 220, 255, 0.35); }
+    100% { box-shadow: inset 0 0 0 0 rgba(90, 220, 255, 0); }
+  }
+
+  .card.is-shake { animation: shakeCard 0.4s ease; }
+  @keyframes shakeCard {
+    0%, 100% { transform: translateX(0); }
+    18% { transform: translateX(-5px) rotate(-1deg); }
+    38% { transform: translateX(5px) rotate(1deg); }
+    58% { transform: translateX(-4px); }
+    78% { transform: translateX(4px); }
+  }
+
+  .float-num {
+    position: absolute;
+    left: 50%;
+    top: 24%;
+    z-index: 6;
+    transform: translate(-50%, 0);
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 800;
+    color: #a3ffd8;
+    text-shadow: 0 0 14px rgba(72, 240, 166, 0.8);
+    white-space: nowrap;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+  }
+  @keyframes floatUp {
+    0% { opacity: 0; transform: translate(-50%, 12px) scale(0.8); }
+    22% { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -38px) scale(1.05); }
+  }
+
+  .board-foot {
+    margin-top: 11px;
+    font-size: 11px;
+    color: #6f86a8;
+    line-height: 1.6;
+  }
+
+  /* ---------- 右侧信息区 ---------- */
+  .side { display: grid; gap: 16px; }
+
+  .side-panel { padding: 14px 16px; }
+  .side-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .side-title h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #d8ecff;
+  }
+  .side-title .mini {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+  }
+
+  .goal-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+  .goal {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    padding: 8px 9px;
+    border-radius: 9px;
+    border: 1px solid rgba(96, 160, 255, 0.1);
+    background: rgba(7, 15, 28, 0.45);
+    transition: border-color 0.25s ease, background 0.25s ease;
+  }
+  .goal-dot {
+    flex: 0 0 auto;
+    width: 20px;
+    height: 20px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    border: 1px solid rgba(110, 160, 220, 0.35);
+    color: #7f95b8;
+    font-family: var(--mono);
+    font-size: 10px;
+    margin-top: 1px;
+  }
+  .goal-body { display: flex; flex-direction: column; gap: 2px; }
+  .goal-body b { font-size: 12px; font-weight: 600; color: #c7ddf6; letter-spacing: 0.02em; }
+  .goal-body small { font-size: 10.5px; color: #7187a6; line-height: 1.5; }
+
+  .goal.is-done {
+    border-color: rgba(62, 230, 160, 0.3);
+    background: rgba(10, 33, 27, 0.55);
+  }
+  .goal.is-done .goal-dot {
+    color: #a3ffd8;
+    border-color: rgba(62, 230, 160, 0.6);
+    background: rgba(20, 74, 58, 0.6);
+    box-shadow: 0 0 10px rgba(62, 230, 160, 0.3);
+  }
+  .goal.is-done .goal-body b { color: #b9ffdf; }
+
+  .tier-scale {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px dashed rgba(96, 160, 255, 0.14);
+    font-family: var(--mono);
+    font-size: 9.5px;
+    color: var(--muted);
+  }
+  .tier-scale span { display: flex; align-items: center; gap: 4px; }
+  .tier-scale i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--tc);
+    box-shadow: 0 0 7px var(--tc);
+  }
+
+  .log-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 7px;
+    max-height: 176px;
+    overflow: hidden;
+  }
+  .log-list li {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: #96add0;
+    line-height: 1.45;
+  }
+  .log-time { font-family: var(--mono); font-size: 9.5px; color: #5d7392; flex: 0 0 auto; }
+  .log-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--tc, var(--accent));
+    box-shadow: 0 0 6px var(--tc, var(--accent));
+    flex: 0 0 auto;
+  }
+  .log-empty { color: #5d7392; font-style: italic; }
+
+  /* ---------- 规则说明 ---------- */
+  .rules-panel { margin-top: 16px; overflow: hidden; }
+  .rules-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 18px;
+    border: 0;
+    background: transparent;
+    color: #d8ecff;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    text-align: left;
+  }
+  .rules-toggle:hover { background: rgba(30, 60, 100, 0.14); }
+  .rules-toggle small { font-weight: 400; color: var(--muted); letter-spacing: 0.02em; margin-left: 8px; font-size: 11px; }
+  .rules-toggle .chev { font-size: 12px; color: var(--accent); }
+
+  .rules-body {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.42s ease, opacity 0.35s ease, padding 0.35s ease;
+    padding: 0 18px;
+  }
+  .rules-panel.is-open .rules-body {
+    max-height: 1800px;
+    opacity: 1;
+    padding: 0 18px 18px;
+  }
+  .rules-panel.is-open .chev { transform: rotate(180deg); }
+
+  .rule-section { margin-top: 14px; }
+  .rule-section:first-child { margin-top: 4px; }
+  .rule-section h4 {
+    margin: 0 0 7px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #8fdcff;
+  }
+  .rule-section h4 span {
+    font-family: var(--mono);
+    font-size: 9px;
+    color: #5f86b0;
+    margin-left: 6px;
+    letter-spacing: 0.12em;
+  }
+  .rule-section p {
+    margin: 0;
+    font-size: 11.5px;
+    color: #8fa6c7;
+    line-height: 1.8;
+  }
+  .rule-section b { color: #d7efff; font-weight: 600; }
+
+  .steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-top: 4px; }
+  .step {
+    padding: 9px 10px;
+    border: 1px solid rgba(96, 160, 255, 0.14);
+    border-radius: 9px;
+    background: rgba(7, 15, 28, 0.5);
+    font-size: 11px;
+    color: #8fa6c7;
+    line-height: 1.6;
+  }
+  .step b { display: block; color: #cfe9ff; font-size: 11.5px; margin-bottom: 2px; }
+  .step em { font-family: var(--mono); font-style: normal; color: var(--accent); margin-right: 3px; }
+
+  .recipe-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(226px, 1fr));
+    gap: 8px;
+  }
+  .recipe {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 7px 9px;
+    border: 1px solid rgba(96, 160, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(8, 16, 30, 0.5);
+    font-size: 11px;
+  }
+  .recipe .ing { color: var(--tc); font-weight: 600; }
+  .recipe .x, .recipe .plus, .recipe .arrow { color: #5d7392; font-family: var(--mono); font-size: 10px; }
+  .recipe .arrow { color: rgba(62, 230, 255, 0.7); margin: 0 1px; }
+  .recipe .result { color: var(--tc); font-weight: 700; }
+  .recipe .lock {
+    font-size: 9px;
+    color: #ffd88a;
+    border: 1px solid rgba(255, 194, 71, 0.35);
+    border-radius: 4px;
+    padding: 1px 4px;
+  }
+  .recipe.is-locked { opacity: 0.62; border-style: dashed; }
+
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 18px;
+    padding: 0 4px;
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: #566b8a;
+    font-family: var(--mono);
+  }
+
+  /* ---------- 浮动提示 / 闪屏 ---------- */
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 26px;
+    z-index: 70;
+    max-width: min(92vw, 560px);
+    padding: 10px 16px;
+    border-radius: 10px;
+    border: 1px solid rgba(140, 200, 255, 0.35);
+    background: rgba(9, 18, 33, 0.95);
+    color: #cfe4ff;
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: center;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    transform: translate(-50%, 14px);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+    pointer-events: none;
+    backdrop-filter: blur(8px);
+  }
+  .toast.is-show { opacity: 1; transform: translate(-50%, 0); }
+  .toast.is-success { border-color: rgba(72, 240, 166, 0.55); color: #b9ffe1; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 26px rgba(72, 240, 166, 0.14); }
+  .toast.is-error { border-color: rgba(255, 107, 127, 0.55); color: #ffc9d1; box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(255, 107, 127, 0.12); }
+  .toast.is-info { border-color: rgba(255, 194, 71, 0.4); color: #ffe9b8; }
+
+  .flash { position: fixed; inset: 0; z-index: 45; pointer-events: none; opacity: 0; }
+  .flash.is-cool { animation: flashCool 0.5s ease-out; }
+  .flash.is-hot { animation: flashHot 0.6s ease-out; }
+  @keyframes flashCool {
+    0% { opacity: 0.6; background: radial-gradient(circle at 50% 45%, rgba(90, 220, 255, 0.38), transparent 58%); }
+    100% { opacity: 0; background: radial-gradient(circle at 50% 45%, rgba(90, 220, 255, 0), transparent 60%); }
+  }
+  @keyframes flashHot {
+    0% { opacity: 0.7; background: radial-gradient(circle at 50% 45%, rgba(255, 120, 220, 0.42), transparent 58%); }
+    100% { opacity: 0; background: radial-gradient(circle at 50% 45%, rgba(139, 92, 246, 0), transparent 62%); }
+  }
+
+  /* ---------- 弹窗 ---------- */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(3, 6, 13, 0.78);
+    backdrop-filter: blur(9px);
+    animation: overlayIn 0.25s ease;
+  }
+  .overlay.hidden { display: none; }
+  @keyframes overlayIn { from { opacity: 0; } to { opacity: 1; } }
+
+  .modal {
+    width: min(880px, 100%);
+    max-height: 88vh;
+    overflow: auto;
+    padding: 24px;
+    border: 1px solid rgba(62, 230, 255, 0.32);
+    border-radius: 18px;
+    background:
+      radial-gradient(700px 300px at 50% -20%, rgba(62, 230, 255, 0.12), transparent 70%),
+      linear-gradient(180deg, #0d1829, #070d18);
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.65), 0 0 60px rgba(62, 230, 255, 0.08);
+    animation: modalIn 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+  }
+  @keyframes modalIn {
+    from { opacity: 0; transform: translateY(14px) scale(0.98); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-kicker {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.22em;
+    color: rgba(98, 200, 255, 0.8);
+  }
+  .modal h2 {
+    margin: 4px 0 4px;
+    font-size: 24px;
+    letter-spacing: 0.04em;
+    color: #ecf8ff;
+    text-shadow: 0 0 24px rgba(62, 230, 255, 0.25);
+  }
+  .modal-sub {
+    margin: 0 0 16px;
+    font-size: 12px;
+    color: #8ea6c8;
+    line-height: 1.7;
+  }
+
+  .modal-meta {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid rgba(96, 160, 255, 0.2);
+    background: rgba(9, 18, 33, 0.7);
+    color: #9fc0e4;
+  }
+  .chip b { color: #c9ffe6; }
+
+  .upgrade-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .upgrade-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    min-height: 178px;
+    padding: 15px;
+    border: 1px solid rgba(96, 160, 255, 0.24);
+    border-radius: 13px;
+    background: linear-gradient(165deg, rgba(20, 34, 58, 0.95), rgba(8, 14, 26, 0.96));
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+    overflow: hidden;
+    transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .upgrade-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: -40%;
+    width: 45%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(62, 230, 255, 0.9), transparent);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  .upgrade-card:hover {
+    transform: translateY(-5px);
+    border-color: rgba(62, 230, 255, 0.7);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.5), 0 0 26px rgba(62, 230, 255, 0.12);
+  }
+  .upgrade-card:hover::before { opacity: 1; animation: scanLine 1.2s ease-out; }
+  @keyframes scanLine { from { left: -40%; } to { left: 100%; } }
+  .upgrade-card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .upgrade-icon {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    border: 1px solid rgba(62, 230, 255, 0.28);
+    background: rgba(62, 230, 255, 0.08);
+    color: #7ce7ff;
+    font-family: var(--mono);
+    font-size: 22px;
+    text-shadow: 0 0 14px rgba(62, 230, 255, 0.6);
+  }
+  .upgrade-title { font-size: 16px; font-weight: 700; color: #e8f7ff; letter-spacing: 0.02em; }
+  .upgrade-tag {
+    align-self: flex-start;
+    font-family: var(--mono);
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: #8adfff;
+    border: 1px solid rgba(62, 230, 255, 0.25);
+    border-radius: 4px;
+    padding: 1px 5px;
+  }
+  .upgrade-desc { flex: 1; font-size: 11.5px; line-height: 1.75; color: #93aacb; }
+  .upgrade-stack { font-family: var(--mono); font-size: 10px; color: #647b9d; }
+
+  .modal-note {
+    margin-top: 14px;
+    padding: 9px 11px;
+    border-radius: 8px;
+    border: 1px dashed rgba(255, 194, 71, 0.3);
+    background: rgba(40, 30, 8, 0.35);
+    font-size: 11px;
+    color: #d7bd83;
+    line-height: 1.7;
+  }
+
+  /* ---------- 结算界面 ---------- */
+  .result-modal { text-align: center; max-width: 680px; }
+  .result-icon {
+    font-family: var(--mono);
+    font-size: 46px;
+    line-height: 1;
+    margin-bottom: 8px;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(62, 230, 255, 0.55);
+    animation: iconFloat 2.4s ease-in-out infinite;
+  }
+  @keyframes iconFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .result-modal.is-win { border-color: rgba(255, 194, 71, 0.45); box-shadow: 0 26px 80px rgba(0, 0, 0, 0.65), 0 0 70px rgba(255, 194, 71, 0.12); }
+  .result-modal.is-win .result-icon { color: var(--t3); text-shadow: 0 0 34px rgba(255, 194, 71, 0.6); }
+  .result-modal.is-win h2 { color: #fff2cc; text-shadow: 0 0 26px rgba(255, 194, 71, 0.3); }
+  .result-modal.is-lose { border-color: rgba(255, 107, 127, 0.4); }
+  .result-modal.is-lose .result-icon { color: var(--bad); text-shadow: 0 0 30px rgba(255, 107, 127, 0.45); }
+  .result-modal.is-lose h2 { color: #ffd3da; }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 9px;
+    margin: 18px 0 20px;
+  }
+  .result-stat {
+    padding: 11px 8px;
+    border: 1px solid rgba(96, 160, 255, 0.16);
+    border-radius: 9px;
+    background: rgba(8, 16, 30, 0.6);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .result-stat span { font-size: 10px; color: #7187a6; letter-spacing: 0.06em; }
+  .result-stat b { font-family: var(--mono); font-size: 18px; color: #d9f2ff; }
+  .result-stat.is-highlight b { color: #a3ffd8; }
+
+  .result-actions { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+  .btn-big { padding: 12px 24px; font-size: 13.5px; border-radius: 10px; }
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width: 1080px) {
+    .layout { grid-template-columns: minmax(0, 1fr); }
+    .side { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 760px) {
+    .app { padding: 12px 12px 26px; }
+    .topbar { padding: 12px; gap: 12px; }
+    .brand { min-width: 0; flex: 1 1 100%; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+      margin-left: 0;
+      width: 100%;
+    }
+    .stat { min-width: 0; padding: 7px 10px; }
+    .stat-progress { grid-column: 1 / -1; min-width: 0; }
+    .progress-text span { font-size: 9px; white-space: nowrap; }
+    .top-actions { width: 100%; gap: 6px; }
+    .top-actions .btn { flex: 1 1 auto; padding: 9px 7px; font-size: 11.5px; }
+    .btn-sub { font-size: 9px; }
+    .board { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+    .slot { aspect-ratio: 4 / 5; min-height: 92px; }
+    .side { grid-template-columns: minmax(0, 1fr); }
+    .steps { grid-template-columns: minmax(0, 1fr); }
+    .upgrade-grid { grid-template-columns: minmax(0, 1fr); }
+    .upgrade-card { min-height: 0; }
+    .result-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .modal { padding: 18px; }
+    .modal h2 { font-size: 20px; }
+  }
+
+  @media (max-width: 430px) {
+    .board { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .brand .subtitle { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ================= 顶部状态栏 ================= -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">合成<span>核心</span></div>
+      <div class="subtitle">科技合成卡牌 · 量子芯片计划</div>
+    </div>
+
+    <div class="stats">
+      <div class="stat stat-tech">
+        <span class="label">科技点</span>
+        <div class="stat-row"><b id="techPoints">0</b><i class="unit">点</i></div>
+      </div>
+      <div class="stat">
+        <span class="label">计时</span>
+        <div class="stat-row"><b id="timer">00:00</b></div>
+      </div>
+      <div class="stat stat-progress">
+        <span class="label">已合成进度 / 目标</span>
+        <div class="progress"><div id="progressFill"></div></div>
+        <div class="progress-text"><b id="progressText">0 / 4</b><span>终极目标：量子芯片</span></div>
+      </div>
+    </div>
+
+    <div class="top-actions">
+      <button id="btnUpgrade" class="btn btn-primary" type="button" disabled>
+        三选一升级 <span id="upgradeHint" class="btn-sub">需 3 点</span>
+      </button>
+      <button id="btnRules" class="btn btn-ghost" type="button" aria-expanded="false">
+        规则说明 <span class="chev">▾</span>
+      </button>
+      <button id="btnRestart" class="btn btn-danger" type="button">一键重开</button>
+    </div>
+  </header>
+
+  <!-- ================= 主区域 ================= -->
+  <main class="layout">
+
+    <!-- 合成面板 -->
+    <section class="panel board-panel">
+      <div class="board-head">
+        <div>
+          <div class="eyebrow">合成实验台</div>
+          <h2>合成面板</h2>
+        </div>
+        <div class="board-meta">
+          <div id="slotCount" class="slot-count">8 槽</div>
+          <div id="spawnPill" class="spawn-pill">
+            <span class="dot"></span>
+            下一张 <b id="spawnCountdown">2.5s</b>
+          </div>
+        </div>
+      </div>
+
+      <div class="quick-steps">
+        <span><b>①</b> 点一张卡</span><span class="arrow">→</span>
+        <span><b>②</b> 再点另一张</span><span class="arrow">→</span>
+        <span><b>③</b> 配方正确即合成升级</span>
+        <span style="margin-left:auto;color:#647b9d;">再次点击已选中的卡 = 取消</span>
+      </div>
+
+      <div id="board" class="board"></div>
+
+      <div class="board-foot">
+        空槽会被自动产出填满；当所有卡槽已满且没有任何可合成组合时，产线判定停摆。
+      </div>
+    </section>
+
+    <!-- 右侧：目标与记录 -->
+    <aside class="side">
+      <section class="panel side-panel">
+        <div class="side-title">
+          <h3>任务目标</h3>
+          <span class="mini">研发路线</span>
+        </div>
+        <ul id="goalList" class="goal-list"></ul>
+        <div class="tier-scale">
+          <span class="tier-1"><i></i>T1</span>
+          <span class="tier-2"><i></i>T2</span>
+          <span class="tier-3"><i></i>T3</span>
+          <span class="tier-4"><i></i>T4</span>
+          <span class="tier-5"><i></i>T5</span>
+        </div>
+      </section>
+
+      <section class="panel side-panel">
+        <div class="side-title">
+          <h3>实时记录</h3>
+          <span class="mini">动态记录</span>
+        </div>
+        <ul id="logList" class="log-list"></ul>
+      </section>
+    </aside>
+  </main>
+
+  <!-- ================= 规则说明 ================= -->
+  <section id="rulesPanel" class="panel rules-panel">
+    <button id="rulesToggle" class="rules-toggle" type="button" aria-expanded="false" aria-controls="rulesBody">
+      <span>规则说明 <small>30 秒看懂 · 配方由数据自动生成</small></span>
+      <span class="chev">▾</span>
+    </button>
+    <div id="rulesBody" class="rules-body"></div>
+  </section>
+
+  <footer class="footer">
+    <span>本地单文件 · 无外部依赖</span>
+    <span>数据驱动配方 · 试验版 v1.0</span>
+  </footer>
+</div>
+
+<!-- 浮动提示 -->
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+<!-- 合成闪光 -->
+<div id="flash" class="flash"></div>
+<!-- 升级 / 结算弹窗 -->
+<div id="overlay" class="overlay hidden" aria-hidden="true">
+  <div id="modal" class="modal"></div>
+</div>
+
+<script>
+/* ============================================================
+   一、配置区（卡牌与配方数据）
+   ------------------------------------------------------------
+   以后加卡、改配方、调数值，只改这一块即可；
+   下面的渲染与交互逻辑会自动跟上。
+   ============================================================ */
+
+/** 全局参数：开局槽位、产出速度、升级价格等 */
+const GAME_CONFIG = {
+  initialSlots: 8,        // 开局卡槽数量
+  maxSlots: 12,           // 通过升级最多能扩到几个槽
+  initialCards: 3,        // 开局随机赠送的 T1 卡数量
+  spawnInterval: 2500,    // 自动产出间隔（毫秒）
+  upgradeCost: 3,         // 每次三选一升级消耗的科技点
+  targetCardId: 'quantum' // 终极目标卡牌的 id
+};
+
+/**
+ * 卡牌配置
+ * id：唯一标识；tier：等级；glyph：卡面符号；name：中文名
+ * starter：是否是开局就能产出的基础 T1 卡
+ * techPoints：合成出这张卡时获得的科技点
+ * locked：是否需要通过升级解锁
+ */
+const CARD_CONFIG = [
+  { id: 'ore',      name: '矿石',   tier: 1, glyph: 'Fe',  starter: true,  techPoints: 0, desc: '基础矿物，金属产线的起点。' },
+  { id: 'silicon',  name: '硅砂',   tier: 1, glyph: 'Si',  starter: true,  techPoints: 0, desc: '提纯后可拉制成晶圆。' },
+  { id: 'water',    name: '水',     tier: 1, glyph: 'H₂O', starter: true,  techPoints: 0, desc: '合成高分子塑料的原料。' },
+  { id: 'metal',    name: '金属',   tier: 2, glyph: 'Me',  techPoints: 0, desc: '由两块矿石熔炼而成。' },
+  { id: 'wafer',    name: '晶圆',   tier: 2, glyph: 'Wa',  techPoints: 0, desc: '由两块硅砂提纯而成。' },
+  { id: 'plastic',  name: '塑料',   tier: 2, glyph: 'PL',  techPoints: 0, desc: '由两块水聚合而成。' },
+  { id: 'circuit',  name: '电路板', tier: 3, glyph: 'PCB', techPoints: 2, desc: '金属与晶圆结合的精密载体。' },
+  { id: 'battery',  name: '电池',   tier: 3, glyph: 'BAT', techPoints: 2, desc: '金属外壳与塑料隔膜组成的能源单元。' },
+  { id: 'chip',     name: '芯片',   tier: 4, glyph: 'IC',  techPoints: 4, desc: '两块电路板堆叠出的算力核心。' },
+  { id: 'quantum',  name: '量子芯片', tier: 5, glyph: 'Q∞', techPoints: 6, desc: '芯片与电池结合，点亮终极目标。' },
+  { id: 'graphene', name: '石墨烯', tier: 1, glyph: 'C',   techPoints: 0, locked: true, desc: '通过升级解锁的隐藏基础材料。' }
+];
+
+/** 方便按 id 快速查卡牌 */
+const CARD_BY_ID = CARD_CONFIG.reduce((map, card) => {
+  map[card.id] = card;
+  return map;
+}, {});
+
+/**
+ * 配方配置（数据驱动）
+ * ingredients：两张材料卡的 id（顺序无关，两张相同的卡写两次）
+ * result：合成结果卡的 id
+ */
+const RECIPE_CONFIG = [
+  { ingredients: ['ore', 'ore'],         result: 'metal' },    // 矿石×2 → 金属
+  { ingredients: ['silicon', 'silicon'], result: 'wafer' },    // 硅砂×2 → 晶圆
+  { ingredients: ['water', 'water'],     result: 'plastic' },  // 水×2 → 塑料
+  { ingredients: ['metal', 'wafer'],     result: 'circuit' },  // 金属 + 晶圆 → 电路板
+  { ingredients: ['metal', 'plastic'],   result: 'battery' },  // 金属 + 塑料 → 电池
+  { ingredients: ['circuit', 'circuit'], result: 'chip' },     // 电路板×2 → 芯片
+  { ingredients: ['chip', 'battery'],    result: 'quantum' },  // 芯片 + 电池 → 量子芯片
+  { ingredients: ['graphene', 'graphene'], result: 'battery' } // 石墨烯×2 → 电池（需解锁）
+];
+
+/**
+ * 升级配置（三选一）
+ * maxStacks：最多可叠加几次；-1 表示无限次
+ * apply(state)：升级被选中时立即执行的逻辑
+ */
+const UPGRADE_CONFIG = [
+  {
+    id: 'overclock', title: '超频产出', icon: '⌁', tag: '节奏', maxStacks: 4,
+    desc: '自动产出间隔缩短 15%，可叠加 4 次。',
+    /** 超频：把产出间隔乘以 0.85，最低不小于 700ms */
+    apply: (s) => { s.spawnInterval = Math.max(700, Math.round(s.spawnInterval * 0.85)); }
+  },
+  {
+    id: 'expandSlot', title: '扩容卡槽', icon: '▦', tag: '空间', maxStacks: 4,
+    desc: '卡槽 +1，最多扩展到 12 个槽位。',
+    /** 扩容：在槽位数组末尾追加一个空槽 */
+    apply: (s) => { if (s.slots.length < GAME_CONFIG.maxSlots) s.slots.push(null); }
+  },
+  {
+    id: 'graphene', title: '解锁石墨烯', icon: '⬡', tag: '新卡', maxStacks: 1,
+    desc: '解锁 T1 新卡「石墨烯」，可直接与石墨烯合成电池；并立即获得 1 张。',
+    /** 解锁石墨烯：加入产出池，并尽量立刻送一张到空槽 */
+    apply: (s) => {
+      if (!s.unlockedExtras.includes('graphene')) s.unlockedExtras.push('graphene');
+      const emptyIndex = s.slots.indexOf(null);
+      if (emptyIndex !== -1) s.slots[emptyIndex] = 'graphene';
+    }
+  },
+  {
+    id: 'salvage', title: '废料回收', icon: '♻', tag: '容错', maxStacks: 3,
+    desc: '合成失败时，25% 概率（可叠加）返还 1 张随机 T1 材料到空槽。',
+    /** 废料回收：叠加返还概率，最高 75% */
+    apply: (s) => { s.salvageChance = Math.min(0.75, s.salvageChance + 0.25); }
+  },
+  {
+    id: 'yield', title: '良品率提升', icon: '✦', tag: '产能', maxStacks: 3,
+    desc: '每次自动产出时，30% 概率（可叠加）额外再送 1 张 T1 卡。',
+    /** 良品率：叠加额外产出概率，最高 90% */
+    apply: (s) => { s.bonusSpawnChance = Math.min(0.9, s.bonusSpawnChance + 0.3); }
+  },
+  {
+    id: 'techBonus', title: '科技红利', icon: '◎', tag: '收益', maxStacks: 2,
+    desc: '每次合成 T3 及以上卡牌，额外获得 1 点科技点。',
+    /** 科技红利：提高每张高阶卡的额外科技点 */
+    apply: (s) => { s.techBonus += 1; }
+  },
+  {
+    id: 'smartSpawn', title: '智能选料', icon: '➤', tag: '策略', maxStacks: 1,
+    desc: '自动产出时，优先补充当前数量最少的 T1 材料，减少卡手。',
+    /** 智能选料：打开按数量最少优先补料的开关 */
+    apply: (s) => { s.smartSpawn = true; }
+  },
+  {
+    id: 'emergency', title: '应急物资', icon: '▣', tag: '补给', maxStacks: -1,
+    desc: '立即向空槽补充 2 张随机 T1 卡（空槽不足时按实际数量补给）。',
+    /** 应急物资：登记待发放数量，由 chooseUpgrade 统一补卡以便播放动画 */
+    apply: (s) => {
+      s.pendingEmergency = 2;
+    }
+  }
+];
+
+/** 按 id 快速查升级 */
+const UPGRADE_BY_ID = UPGRADE_CONFIG.reduce((map, up) => {
+  map[up.id] = up;
+  return map;
+}, {});
+
+/** 规则面板中每个等级分组的小标题 */
+const TIER_SECTION_TITLE = {
+  1: 'T1 基础材料',
+  2: 'T2 精炼材料',
+  3: 'T3 精密组件',
+  4: 'T4 核心部件',
+  5: 'T5 终极产物'
+};
+
+/* ============================================================
+   二、状态区
+   ------------------------------------------------------------
+   所有可变数据都放在 state 里；重开就是重新创建一份状态。
+   ============================================================ */
+
+/**
+ * 从数组中随机取一个元素
+ * @param {Array} list 候选数组
+ * @returns {*} 随机元素；空数组时返回 null
+ */
+function pickRandom(list) {
+  if (!list || list.length === 0) return null;
+  return list[Math.floor(Math.random() * list.length)];
+}
+
+/**
+ * 返回打乱后的新数组（不修改原数组）
+ * @param {Array} list 原数组
+ * @returns {Array} 打乱后的新数组
+ */
+function shuffleArray(list) {
+  const copy = list.slice();
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
+/**
+ * 把毫秒格式化成 mm:ss，用于顶部计时和记录时间
+ * @param {number} ms 毫秒数
+ * @returns {string} 形如 "01:23"
+ */
+function formatTime(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+  const seconds = String(totalSeconds % 60).padStart(2, '0');
+  return minutes + ':' + seconds;
+}
+
+/**
+ * 创建一局全新的游戏状态
+ * 开局会随机放入 3 张 T1 卡，并保证其中至少有一对相同材料，
+ * 让新手一上来就能体验一次成功合成。
+ * @returns {Object} 初始状态对象
+ */
+function createInitialState() {
+  const baseT1Ids = CARD_CONFIG
+    .filter((card) => card.tier === 1 && card.starter)
+    .map((card) => card.id);
+
+  const pairId = pickRandom(baseT1Ids);
+  const starterIds = [pairId, pairId]; // 保证开局至少有一对相同材料
+
+  // 按配置数量补齐剩余开局卡，其余卡优先抽不同的 T1 以增加变化
+  while (starterIds.length < GAME_CONFIG.initialCards) {
+    const otherId = pickRandom(baseT1Ids.filter((id) => id !== pairId)) || pairId;
+    starterIds.push(otherId);
+  }
+
+  const slots = new Array(GAME_CONFIG.initialSlots).fill(null);
+  const emptyIndices = shuffleArray(slots.map((_, index) => index));
+  starterIds.forEach((cardId, index) => {
+    slots[emptyIndices[index]] = cardId;
+  });
+
+  const pairRecipe = findRecipe(pairId, pairId);
+  const pairResultName = pairRecipe ? CARD_BY_ID[pairRecipe.result].name : '新卡';
+  const hint = `开局提示：点两张「${CARD_BY_ID[pairId].name}」，即可合成「${pairResultName}」。`;
+
+  return {
+    slots: slots,                          // 卡槽数组，null 表示空槽
+    selectedSlot: null,                    // 当前选中的槽位下标
+    techPoints: 0,                         // 当前可用科技点
+    totalTechEarned: 0,                    // 本局累计获得的科技点（结算用）
+    upgradeStacks: {},                     // 每个升级已选了几次
+    upgradesTaken: 0,                      // 本局升级总次数
+    spawnInterval: GAME_CONFIG.spawnInterval,
+    spawnAccum: 0,                         // 距下次自动产出已经累积的时间
+    elapsedMs: 0,                          // 本局有效游玩时间
+    lastTick: 0,                           // 上一帧时间戳，用于计算时间差
+    status: 'playing',                     // playing / won / lost
+    upgradeOpen: false,                    // 升级弹窗是否打开（打开时暂停产出）
+    rulesOpen: false,                      // 规则面板是否打开（打开时暂停产出，避免新手看规则时被塞满）
+    craftedEver: { 1: false, 2: false, 3: false, 4: false, 5: false },
+    craftCount: 0,                         // 累计合成次数
+    log: [],                               // 实时记录
+    unlockedExtras: [],                    // 通过升级解锁的额外基础卡
+    salvageChance: 0,                      // 合成失败返还材料的概率
+    bonusSpawnChance: 0,                   // 额外产出概率
+    techBonus: 0,                          // 每次 T3+ 额外科技点
+    smartSpawn: false,                     // 是否启用智能选料
+    pendingEmergency: 0,                   // 应急物资待发放数量
+    starterHint: hint,                     // 开局提示文案
+    runId: Date.now()                      // 本局标识，防止延迟回调串局
+  };
+}
+
+/** 当前局面的状态；重开时会整体替换 */
+let state = createInitialState();
+
+/* ============================================================
+   三、渲染区
+   ------------------------------------------------------------
+   负责把 state 画到页面上。渲染函数只读状态，不改玩法数据。
+   ============================================================ */
+
+/** 缓存常用 DOM 节点，避免每次都重新查询 */
+const ui = {
+  techPoints: document.getElementById('techPoints'),
+  timer: document.getElementById('timer'),
+  progressFill: document.getElementById('progressFill'),
+  progressText: document.getElementById('progressText'),
+  upgradeBtn: document.getElementById('btnUpgrade'),
+  upgradeHint: document.getElementById('upgradeHint'),
+  slotCount: document.getElementById('slotCount'),
+  spawnPill: document.getElementById('spawnPill'),
+  spawnCountdown: document.getElementById('spawnCountdown'),
+  board: document.getElementById('board'),
+  goalList: document.getElementById('goalList'),
+  logList: document.getElementById('logList'),
+  rulesPanel: document.getElementById('rulesPanel'),
+  rulesToggle: document.getElementById('rulesToggle'),
+  rulesBody: document.getElementById('rulesBody'),
+  toast: document.getElementById('toast'),
+  flash: document.getElementById('flash'),
+  overlay: document.getElementById('overlay'),
+  modal: document.getElementById('modal')
+};
+
+/**
+ * 获取当前已解锁的 T1 卡 id 列表（基础卡 + 升级解锁卡）
+ * @returns {string[]} T1 卡 id 数组
+ */
+function getUnlockedT1Ids() {
+  return CARD_CONFIG
+    .filter((card) => card.tier === 1 && (card.starter || state.unlockedExtras.includes(card.id)))
+    .map((card) => card.id);
+}
+
+/**
+ * 查找两张卡是否符合配方（顺序无关）
+ * @param {string} cardIdA 第一张卡 id
+ * @param {string} cardIdB 第二张卡 id
+ * @returns {Object|null} 命中的配方对象，未命中返回 null
+ */
+function findRecipe(cardIdA, cardIdB) {
+  if (!cardIdA || !cardIdB) return null;
+  return RECIPE_CONFIG.find((recipe) => {
+    const [x, y] = recipe.ingredients;
+    return (x === cardIdA && y === cardIdB) || (x === cardIdB && y === cardIdA);
+  }) || null;
+}
+
+/**
+ * 判断牌面上是否还存在任意一对可合成的卡
+ * 用于“槽位满且无配方 → 失败”的判定。
+ * @returns {boolean} 存在可合成组合返回 true
+ */
+function hasAnyValidPair() {
+  const filled = state.slots.filter((cardId) => cardId !== null);
+  for (let i = 0; i < filled.length; i++) {
+    for (let j = i + 1; j < filled.length; j++) {
+      if (findRecipe(filled[i], filled[j])) return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * 计算顶部“已合成进度 / 目标”
+ * 4 个里程碑：首次 T2、首次 T3、首次 T4、最终 T5。
+ * @returns {{achieved:number, total:number}} 已达成数与总数
+ */
+function getGoalProgress() {
+  const milestones = [2, 3, 4, 5];
+  const achieved = milestones.filter((tier) => state.craftedEver[tier]).length;
+  return { achieved, total: milestones.length };
+}
+
+/**
+ * 更新顶部状态栏（科技点、进度、升级按钮）
+ * 只改文字和宽度，不重建卡牌，避免打断动画。
+ */
+function renderHeaderStats() {
+  ui.techPoints.textContent = state.techPoints;
+
+  const progress = getGoalProgress();
+  ui.progressFill.style.width = `${(progress.achieved / progress.total) * 100}%`;
+  ui.progressText.textContent = `${progress.achieved} / ${progress.total}`;
+
+  const enoughPoints = state.techPoints >= GAME_CONFIG.upgradeCost;
+  const canUpgrade = enoughPoints && state.status === 'playing' && !state.upgradeOpen;
+  ui.upgradeBtn.disabled = !canUpgrade;
+  ui.upgradeBtn.classList.toggle('is-ready', canUpgrade);
+  ui.upgradeHint.textContent = enoughPoints
+    ? '可用'
+    : `还差 ${GAME_CONFIG.upgradeCost - state.techPoints} 点`;
+
+  ui.slotCount.textContent = `${state.slots.length} / ${GAME_CONFIG.maxSlots} 槽`;
+}
+
+/**
+ * 更新计时器、产出倒计时、产出状态提示
+ * 每 100ms 调用一次，所以这里只改文本，不重建 DOM。
+ */
+function updateTimerLabels() {
+  ui.timer.textContent = formatTime(state.elapsedMs);
+
+  const isFull = state.slots.every((cardId) => cardId !== null);
+  const isPaused = state.upgradeOpen || state.rulesOpen || state.status !== 'playing';
+  const fullButPlayable = isFull && !isPaused && hasAnyValidPair();
+
+  ui.spawnPill.classList.toggle('is-paused', isPaused || fullButPlayable);
+  ui.spawnPill.classList.toggle('is-full', !isPaused && isFull && !fullButPlayable);
+
+  if (isPaused) {
+    ui.spawnCountdown.textContent = state.status === 'playing' ? '暂停' : '停止';
+  } else if (fullButPlayable) {
+    ui.spawnCountdown.textContent = '已满 · 可合成';
+  } else if (isFull) {
+    ui.spawnCountdown.textContent = '槽位已满';
+  } else {
+    const remaining = Math.max(0, state.spawnInterval - state.spawnAccum);
+    ui.spawnCountdown.textContent = (remaining / 1000).toFixed(1) + 's';
+  }
+}
+
+/**
+ * 生成单张卡牌的鼠标悬停说明（会显示合成方式）
+ * @param {Object} card 卡牌配置对象
+ * @returns {string} 原生 title 文本
+ */
+function buildCardTooltip(card) {
+  const ways = RECIPE_CONFIG
+    .filter((recipe) => recipe.result === card.id)
+    .map((recipe) => {
+      const [a, b] = recipe.ingredients;
+      if (a === b) return `${CARD_BY_ID[a].name} ×2`;
+      return `${CARD_BY_ID[a].name} + ${CARD_BY_ID[b].name}`;
+    });
+
+  const base = `${card.name} · T${card.tier}${card.desc ? '\n' + card.desc : ''}`;
+  return ways.length ? `${base}\n合成方式：${ways.join(' 或 ')}` : base;
+}
+
+/**
+ * 重建整个卡槽面板
+ * 选中态、可合成高亮都在这里一并画出。
+ */
+function renderBoard() {
+  const selectedId = state.selectedSlot !== null ? state.slots[state.selectedSlot] : null;
+
+  ui.board.innerHTML = state.slots.map((cardId, index) => {
+    if (!cardId) {
+      return `<div class="slot slot-empty" data-slot="${index}">
+        <span class="empty-mark">＋</span>
+        <span>空槽</span>
+      </div>`;
+    }
+
+    const card = CARD_BY_ID[cardId];
+    const isSelected = state.selectedSlot === index;
+    const isPartner = state.selectedSlot !== null
+      && state.selectedSlot !== index
+      && findRecipe(selectedId, cardId) !== null;
+
+    return `<div class="slot" data-slot="${index}">
+      <button type="button"
+        class="card tier-${card.tier} ${isSelected ? 'is-selected' : ''} ${isPartner ? 'is-partner' : ''}"
+        data-slot="${index}"
+        aria-pressed="${isSelected}"
+        title="${buildCardTooltip(card).replace(/"/g, '&quot;')}">
+        <span class="tier-tag">T${card.tier}</span>
+        <span class="glyph">${card.glyph}</span>
+        <span class="card-name">${card.name}</span>
+        ${isPartner ? '<span class="merge-flag">可合成</span>' : ''}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+/**
+ * 渲染右侧任务目标清单
+ * 已完成的目标会变成绿色对勾。
+ */
+function renderGoals() {
+  const goals = [
+    { tier: 2, title: '启动产线', desc: '合成任意 T2：金属 / 晶圆 / 塑料' },
+    { tier: 3, title: '精密制造', desc: '合成首个 T3：电路板 / 电池' },
+    { tier: 4, title: '核心算力', desc: '合成 T4 芯片' },
+    { tier: 5, title: '终极目标', desc: '芯片 + 电池 → 量子芯片' }
+  ];
+
+  ui.goalList.innerHTML = goals.map((goal, index) => {
+    const done = Boolean(state.craftedEver[goal.tier]);
+    return `<li class="goal ${done ? 'is-done' : ''}">
+      <span class="goal-dot">${done ? '✓' : index + 1}</span>
+      <span class="goal-body">
+        <b>${goal.title}</b>
+        <small>${goal.desc}</small>
+      </span>
+    </li>`;
+  }).join('');
+}
+
+/**
+ * 渲染右侧实时记录（最近 7 条）
+ */
+function renderLog() {
+  if (state.log.length === 0) {
+    ui.logList.innerHTML = '<li class="log-empty">等待第一次合成…</li>';
+    return;
+  }
+
+  ui.logList.innerHTML = state.log.map((entry) => `
+    <li>
+      <span class="log-time">${formatTime(entry.at)}</span>
+      <span class="log-dot tier-${entry.tier}"></span>
+      <span>${entry.text}</span>
+    </li>
+  `).join('');
+}
+
+/**
+ * 整体重绘：状态变了就调用它
+ */
+function renderAll() {
+  renderHeaderStats();
+  renderBoard();
+  renderGoals();
+  renderLog();
+  updateTimerLabels();
+}
+
+/**
+ * 科技点数字跳动反馈
+ */
+function pulseTechPoints() {
+  ui.techPoints.classList.remove('is-bump');
+  void ui.techPoints.offsetWidth; // 强制重排，保证动画能重新播放
+  ui.techPoints.classList.add('is-bump');
+}
+
+/* ============================================================
+   四、交互区
+   ------------------------------------------------------------
+   点击合成、自动产出、失败/胜利判定、升级、重开都写在这里。
+   ============================================================ */
+
+/** 浮动提示的定时器句柄 */
+let toastTimer = null;
+
+/**
+ * 底部浮动提示
+ * @param {string} message 提示文案
+ * @param {'info'|'success'|'error'} type 提示类型
+ */
+function showToast(message, type = 'info') {
+  ui.toast.textContent = message;
+  ui.toast.className = `toast is-show is-${type}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    ui.toast.classList.remove('is-show');
+  }, 2400);
+}
+
+/**
+ * 屏幕合成闪光：T1/T2 用冷色，T3 以上用更强的暖紫色
+ * @param {'cool'|'hot'} tone 闪光色调
+ */
+function triggerFlash(tone) {
+  ui.flash.classList.remove('is-cool', 'is-hot');
+  void ui.flash.offsetWidth; // 强制重绘，让同一种闪光可以连续播放
+  ui.flash.classList.add(tone === 'hot' ? 'is-hot' : 'is-cool');
+}
+
+/**
+ * 写入一条实时记录（只改数据，渲染交给 renderAll）
+ * @param {string} text 记录内容
+ * @param {number} tier 关联卡牌等级，用于左侧小圆点颜色
+ */
+function logEvent(text, tier) {
+  state.log.unshift({ text, tier, at: state.elapsedMs });
+  if (state.log.length > 7) state.log.pop();
+}
+
+/**
+ * 点击卡牌的总入口
+ * - 点已选中的卡：取消选中
+ * - 还没选中卡：选中它
+ * - 已选中另一张：尝试合成
+ * @param {number} index 槽位下标
+ */
+function handleCardClick(index) {
+  if (state.status !== 'playing' || state.upgradeOpen) return;
+
+  const cardId = state.slots[index];
+  if (!cardId) return;
+
+  // 再点一次同一张卡 = 取消选择
+  if (state.selectedSlot === index) {
+    state.selectedSlot = null;
+    renderBoard();
+    return;
+  }
+
+  // 首次点击：只选中，同时高亮可合成的搭档
+  if (state.selectedSlot === null) {
+    state.selectedSlot = index;
+    renderBoard();
+    return;
+  }
+
+  const firstId = state.slots[state.selectedSlot];
+  const secondId = cardId;
+  const recipe = findRecipe(firstId, secondId);
+
+  if (recipe) {
+    performCraft(state.selectedSlot, index, recipe);
+  } else {
+    handleCraftFailure(state.selectedSlot, index, firstId, secondId);
+  }
+}
+
+/**
+ * 执行一次成功合成
+ * 两张材料消耗，产出一张新卡，并计算科技点。
+ * @param {number} indexA 第一张卡所在槽位
+ * @param {number} indexB 第二张卡所在槽位
+ * @param {Object} recipe 命中的配方
+ */
+function performCraft(indexA, indexB, recipe) {
+  const result = CARD_BY_ID[recipe.result];
+
+  // 结果放在第一次选中的槽位，另一个槽位清空
+  state.slots[indexA] = result.id;
+  state.slots[indexB] = null;
+  state.selectedSlot = null;
+  state.craftCount += 1;
+  state.craftedEver[result.tier] = true;
+
+  // 科技点 = 卡牌配置里的基础值 + 升级加成（只对 T3 及以上生效）
+  const gained = result.techPoints + (result.tier >= 3 ? state.techBonus : 0);
+  state.techPoints += gained;
+  state.totalTechEarned += gained;
+
+  const pointText = gained > 0 ? `，+${gained} 科技点` : '';
+  logEvent(`合成 ${result.name}（T${result.tier}）${pointText}`, result.tier);
+
+  renderAll();
+  animateCraft(indexA, indexB, result, gained);
+
+  if (gained > 0) pulseTechPoints();
+
+  // 达成终极目标：停止游戏并稍后弹出结算
+  if (result.id === GAME_CONFIG.targetCardId) {
+    const runIdAtWin = state.runId; // 记住本局标识，防止重开后误弹旧结算
+    state.status = 'won';
+    state.selectedSlot = null;
+    renderAll();
+    setTimeout(() => {
+      if (state.status === 'won' && state.runId === runIdAtWin) showResultOverlay(true);
+    }, 950);
+    return;
+  }
+
+  if (gained > 0) {
+    // 留出一点时间让玩家看清合成结果，再弹升级
+    setTimeout(maybePromptUpgrade, 800);
+  }
+}
+
+/**
+ * 合成成功后的动画与文字反馈
+ * @param {number} keepIndex 保留结果的槽位
+ * @param {number} clearIndex 被清空的槽位
+ * @param {Object} resultCard 产出的卡牌
+ * @param {number} gained 获得科技点
+ */
+function animateCraft(keepIndex, clearIndex, resultCard, gained) {
+  const keepSlot = ui.board.querySelector(`.slot[data-slot="${keepIndex}"]`);
+  const clearSlot = ui.board.querySelector(`.slot[data-slot="${clearIndex}"]`);
+
+  if (keepSlot) {
+    keepSlot.classList.add('is-bursting');
+    const cardEl = keepSlot.querySelector('.card');
+    if (cardEl) cardEl.classList.add('is-pop');
+
+    if (gained > 0) {
+      const floatEl = document.createElement('div');
+      floatEl.className = 'float-num';
+      floatEl.textContent = `+${gained} 科技点`;
+      keepSlot.appendChild(floatEl);
+    }
+  }
+
+  if (clearSlot) clearSlot.classList.add('is-bursting');
+
+  triggerFlash(resultCard.tier >= 4 ? 'hot' : 'cool');
+
+  if (resultCard.tier >= 3) {
+    showToast(`合成成功：${resultCard.name} · T${resultCard.tier}`, 'success');
+  }
+}
+
+/**
+ * 合成失败：清空选中、抖动两张卡、给轻提示
+ * 不消耗任何卡牌，并可能触发“废料回收”返还材料。
+ * @param {number} indexA 第一张槽位
+ * @param {number} indexB 第二张槽位
+ * @param {string} firstId 第一张卡 id
+ * @param {string} secondId 第二张卡 id
+ */
+function handleCraftFailure(indexA, indexB, firstId, secondId) {
+  const first = CARD_BY_ID[firstId];
+  const second = CARD_BY_ID[secondId];
+
+  state.selectedSlot = null;
+  renderAll();
+
+  [indexA, indexB].forEach((index) => {
+    const cardEl = ui.board.querySelector(`.slot[data-slot="${index}"] .card`);
+    if (cardEl) cardEl.classList.add('is-shake');
+  });
+
+  showToast(`配方不匹配：${first.name} + ${second.name}，材料已保留`, 'error');
+
+  // 有“废料回收”升级时，失败也可能返还一张 T1
+  setTimeout(() => {
+    const salvage = trySalvage();
+    if (salvage) {
+      showToast(`废料回收触发：返还「${salvage.name}」`, 'info');
+    }
+  }, 420);
+}
+
+/**
+ * 尝试触发废料回收
+ * @returns {Object|null} 返还的卡牌对象，没触发返回 null
+ */
+function trySalvage() {
+  if (state.status !== 'playing' || state.upgradeOpen) return null;
+  if (Math.random() >= state.salvageChance) return null;
+
+  const spawned = spawnT1Cards(1);
+  if (spawned.length === 0) return null;
+
+  const cardId = state.slots[spawned[0]];
+  renderAll();
+  animateSpawn(spawned);
+  logEvent(`废料回收，返还 ${CARD_BY_ID[cardId].name}`, CARD_BY_ID[cardId].tier);
+  renderLog();
+
+  // 返还的卡可能刚好填满最后一个槽位，因此这里要补一次失败判定
+  checkDeadState();
+  return CARD_BY_ID[cardId];
+}
+
+/**
+ * 往空槽里放入若干张随机 T1 卡
+ * @param {number} count 尝试放入的数量
+ * @returns {number[]} 实际放入的槽位下标数组
+ */
+function spawnT1Cards(count) {
+  const spawnedIndices = [];
+
+  for (let i = 0; i < count; i++) {
+    const emptyIndex = state.slots.indexOf(null);
+    if (emptyIndex === -1) break;
+    state.slots[emptyIndex] = pickT1CardId();
+    spawnedIndices.push(emptyIndex);
+  }
+
+  return spawnedIndices;
+}
+
+/**
+ * 决定这一张自动产出是什么 T1 卡
+ * 开启“智能选料”后，优先补充当前数量最少的 T1。
+ * @returns {string} T1 卡 id
+ */
+function pickT1CardId() {
+  const ids = getUnlockedT1Ids();
+
+  if (!state.smartSpawn) return pickRandom(ids);
+
+  const counts = ids.map((id) => ({
+    id,
+    count: state.slots.filter((cardId) => cardId === id).length
+  }));
+  const minCount = Math.min(...counts.map((item) => item.count));
+  const candidates = counts.filter((item) => item.count === minCount).map((item) => item.id);
+  return pickRandom(candidates) || pickRandom(ids);
+}
+
+/**
+ * 新卡生成时的高亮动画
+ * @param {number[]} indices 新卡所在槽位
+ */
+function animateSpawn(indices) {
+  indices.forEach((index) => {
+    const slotEl = ui.board.querySelector(`.slot[data-slot="${index}"]`);
+    if (!slotEl) return;
+    slotEl.classList.add('is-spawning');
+    const cardEl = slotEl.querySelector('.card');
+    if (cardEl) cardEl.classList.add('is-pop');
+  });
+}
+
+/**
+ * 执行一次自动产出：先产 1 张，再根据良品率升级决定是否多送 1 张
+ * 若槽位已满，则本次不产出，并检查是否已经失败。
+ */
+function runSpawnCycle() {
+  if (state.status !== 'playing' || state.upgradeOpen) return;
+
+  const spawned = spawnT1Cards(1);
+
+  if (state.bonusSpawnChance > 0 && Math.random() < state.bonusSpawnChance) {
+    spawned.push(...spawnT1Cards(1));
+  }
+
+  if (spawned.length > 0) {
+    renderAll();
+    animateSpawn(spawned);
+  } else {
+    updateTimerLabels();
+  }
+
+  checkDeadState();
+}
+
+/**
+ * 失败判定：
+ * 所有卡槽都满 + 没有任何可合成组合 → 停摆。
+ * 如果此时恰好攒够科技点，会先给一次升级破局的机会。
+ */
+function checkDeadState() {
+  if (state.status !== 'playing' || state.upgradeOpen || state.rulesOpen) return;
+
+  const isFull = state.slots.every((cardId) => cardId !== null);
+  if (!isFull) return;
+  if (hasAnyValidPair()) return;
+
+  // 只有在“扩容卡槽”还能选时，升级才真正有机会破局
+  if (state.techPoints >= GAME_CONFIG.upgradeCost && isUpgradeAvailable(UPGRADE_BY_ID['expandSlot'])) {
+    openUpgrade('dead');
+    return;
+  }
+
+  loseGame();
+}
+
+/**
+ * 失败结算
+ */
+function loseGame() {
+  if (state.status !== 'playing') return;
+
+  state.status = 'lost';
+  state.selectedSlot = null;
+  renderAll();
+  updateTimerLabels();
+  logEvent('产线停摆：卡槽已满且没有可合成组合', 4);
+  renderLog();
+
+  setTimeout(() => {
+    if (state.status === 'lost') showResultOverlay(false);
+  }, 450);
+}
+
+/**
+ * 打开三选一升级弹窗
+ * @param {'earned'|'manual'|'dead'} reason 打开原因，dead 时会优先给出能破局的选项
+ */
+function openUpgrade(reason) {
+  if (state.status !== 'playing' || state.upgradeOpen) return;
+  if (state.techPoints < GAME_CONFIG.upgradeCost) {
+    showToast(`科技点不足：还差 ${GAME_CONFIG.upgradeCost - state.techPoints} 点`, 'error');
+    return;
+  }
+
+  const options = pickUpgradeOptions(reason);
+  if (options.length === 0) return;
+
+  // 如果规则面板正打开着，先收起它，避免两层内容叠在一起
+  if (state.rulesOpen) {
+    ui.rulesPanel.classList.remove('is-open');
+    ui.rulesToggle.setAttribute('aria-expanded', 'false');
+    state.rulesOpen = false;
+  }
+
+  state.upgradeOpen = true;
+  state.selectedSlot = null;
+  renderAll();
+
+  const reasonText = reason === 'dead'
+    ? '卡槽已满且找不到配方。选一项升级，尝试打破僵局。'
+    : '每合成一张 T3 及以上卡牌都会产出科技点。现在可以选一项升级，立刻生效。';
+
+  ui.modal.className = 'modal';
+  ui.modal.innerHTML = `
+    <div class="modal-kicker">科技升级 · 三选一</div>
+    <h2>科技升级</h2>
+    <p class="modal-sub">${reasonText}</p>
+    <div class="modal-meta">
+      <span class="chip">科技点 <b>${state.techPoints}</b></span>
+      <span class="chip">本次消耗 <b>${GAME_CONFIG.upgradeCost}</b></span>
+      <span class="chip">卡槽 <b>${state.slots.length} / ${GAME_CONFIG.maxSlots}</b></span>
+    </div>
+    <div class="upgrade-grid">
+      ${options.map((up) => {
+        const taken = state.upgradeStacks[up.id] || 0;
+        const stackText = up.maxStacks === -1
+          ? `已选 ${taken} 次 · 可重复`
+          : `已选 ${taken} / ${up.maxStacks} 次`;
+        return `<button type="button" class="upgrade-card" data-upgrade-id="${up.id}">
+          <span class="upgrade-icon">${up.icon}</span>
+          <span class="upgrade-tag">${up.tag}</span>
+          <span class="upgrade-title">${up.title}</span>
+          <span class="upgrade-desc">${up.desc}</span>
+          <span class="upgrade-stack">${stackText}</span>
+        </button>`;
+      }).join('')}
+    </div>
+    <div class="modal-note">升级会消耗 ${GAME_CONFIG.upgradeCost} 点科技点，选择后立即生效，产出计时在弹窗期间暂停。</div>
+  `;
+
+  ui.overlay.classList.remove('hidden');
+  ui.overlay.setAttribute('aria-hidden', 'false');
+  ui.overlay.dataset.mode = 'upgrade';
+
+  setTimeout(() => {
+    const firstOption = ui.modal.querySelector('.upgrade-card');
+    if (firstOption) firstOption.focus();
+  }, 60);
+}
+
+/**
+ * 生成三选一升级选项
+ * 过滤掉已经叠满的升级；在“卡槽满”的破局场景下，
+ * 优先保证出现扩容卡槽（或应急物资）。
+ * @param {'earned'|'manual'|'dead'} reason 打开原因
+ * @returns {Object[]} 3 个升级配置对象
+ */
+function pickUpgradeOptions(reason) {
+  let pool = UPGRADE_CONFIG.filter((up) => isUpgradeAvailable(up));
+  pool = shuffleArray(pool);
+
+  if (reason === 'dead') {
+    const helper = pool.find((up) => up.id === 'expandSlot')
+      || pool.find((up) => up.id === 'emergency');
+    if (helper) {
+      pool = [helper, ...pool.filter((up) => up.id !== helper.id)];
+    }
+  }
+
+  const options = [];
+  const usedIds = new Set();
+
+  for (const up of pool) {
+    if (options.length >= 3) break;
+    if (usedIds.has(up.id)) continue;
+    usedIds.add(up.id);
+    options.push(up);
+  }
+
+  // 兜底：万一所有升级都满了，至少还能反复选“应急物资”
+  while (options.length < 3) {
+    options.push(UPGRADE_BY_ID['emergency']);
+  }
+
+  return options;
+}
+
+/**
+ * 判断某个升级现在是否还能选
+ * @param {Object} upgrade 升级配置对象
+ * @returns {boolean} 可选取返回 true
+ */
+function isUpgradeAvailable(upgrade) {
+  const taken = state.upgradeStacks[upgrade.id] || 0;
+  if (upgrade.maxStacks === -1) return true;
+  if (upgrade.id === 'expandSlot' && state.slots.length >= GAME_CONFIG.maxSlots) return false;
+  return taken < upgrade.maxStacks;
+}
+
+/**
+ * 当前还有哪些升级可选（用于“能否破局”的判断）
+ * @returns {Object[]} 可用升级数组
+ */
+function getAvailableUpgrades() {
+  return UPGRADE_CONFIG.filter((up) => isUpgradeAvailable(up));
+}
+
+/**
+ * 玩家点击某张升级卡后执行
+ * 扣科技点、记录层数、立即应用效果、关闭弹窗。
+ * @param {string} upgradeId 升级 id
+ */
+function chooseUpgrade(upgradeId) {
+  const upgrade = UPGRADE_BY_ID[upgradeId];
+
+  if (!upgrade || state.status !== 'playing' || !state.upgradeOpen) return;
+  if (state.techPoints < GAME_CONFIG.upgradeCost) return;
+  if (!isUpgradeAvailable(upgrade)) {
+    showToast('该升级已达上限，请选择其他项', 'error');
+    return;
+  }
+
+  state.techPoints -= GAME_CONFIG.upgradeCost;
+  state.upgradeStacks[upgradeId] = (state.upgradeStacks[upgradeId] || 0) + 1;
+  state.upgradesTaken += 1;
+
+  // 应用效果
+  upgrade.apply(state);
+
+  // 应急物资：升级配置里只登记待发放数量，这里统一补卡，方便播放生成动画
+  let emergencySpawned = [];
+  if (state.pendingEmergency > 0) {
+    const amount = state.pendingEmergency;
+    state.pendingEmergency = 0;
+    emergencySpawned = spawnT1Cards(amount);
+  }
+
+  state.upgradeOpen = false;
+  hideOverlay();
+  closeUpgradeVisuals();
+
+  logEvent(`科技升级：${upgrade.title}`, 4);
+  renderAll();
+
+  if (emergencySpawned.length > 0) {
+    animateSpawn(emergencySpawned);
+  }
+
+  const remainingTip = state.techPoints >= GAME_CONFIG.upgradeCost ? ' · 仍有科技点可继续升级' : '';
+  showToast(`升级生效：${upgrade.title}${remainingTip}`, 'success');
+
+  // 破局场景下，升级后可能仍有完整卡槽，需要再检查一次
+  setTimeout(checkDeadState, 250);
+}
+
+/**
+ * 自动弹出升级：只在获得科技点并达到门槛时调用
+ */
+function maybePromptUpgrade() {
+  if (state.status !== 'playing' || state.upgradeOpen) return;
+  if (state.techPoints < GAME_CONFIG.upgradeCost) return;
+  if (getAvailableUpgrades().length === 0) return;
+  openUpgrade('earned');
+}
+
+/**
+ * 隐藏弹窗并暂停状态复位
+ */
+function hideOverlay() {
+  ui.overlay.classList.add('hidden');
+  ui.overlay.setAttribute('aria-hidden', 'true');
+  ui.overlay.dataset.mode = '';
+  ui.modal.className = 'modal';
+  ui.modal.innerHTML = '';
+}
+
+/**
+ * 关闭升级相关视觉状态，并重置计时基准
+ */
+function closeUpgradeVisuals() {
+  state.upgradeOpen = false;
+  state.lastTick = performance.now();
+}
+
+/**
+ * 显示通关 / 失败结算
+ * @param {boolean} isWin true 显示通关，false 显示失败
+ */
+function showResultOverlay(isWin) {
+  state.upgradeOpen = false;
+
+  const title = isWin ? '量子芯片已点亮' : '产线停摆';
+  const icon = isWin ? '◈' : '⚠';
+  const desc = isWin
+    ? '芯片与电池完成封装，量子芯片启动成功。本局产线闭环，终极目标达成。'
+    : '所有卡槽都已占满，且没有任何两张卡符合配方，产线无法继续运转。';
+
+  const tips = isWin
+    ? '再开一局，试试更快的产出节奏或更少的升级次数。'
+    : '下次可以尽早把基础材料合成掉，给自动产出留出空槽。';
+
+  ui.modal.className = `modal result-modal ${isWin ? 'is-win' : 'is-lose'}`;
+  ui.modal.innerHTML = `
+    <div class="result-icon">${icon}</div>
+    <div class="modal-kicker">${isWin ? '任务完成' : '系统停摆'}</div>
+    <h2>${title}</h2>
+    <p class="modal-sub">${desc}</p>
+    <div class="result-stats">
+      <div class="result-stat"><span>本局用时</span><b>${formatTime(state.elapsedMs)}</b></div>
+      <div class="result-stat"><span>合成次数</span><b>${state.craftCount}</b></div>
+      <div class="result-stat"><span>科技升级</span><b>${state.upgradesTaken}</b></div>
+      <div class="result-stat is-highlight"><span>累计科技点</span><b>${state.totalTechEarned}</b></div>
+    </div>
+    <p class="modal-sub" style="margin-bottom:18px;">${tips}</p>
+    <div class="result-actions">
+      <button type="button" class="btn btn-primary btn-big" data-action="restart">${isWin ? '再来一局' : '重新点亮产线'}</button>
+    </div>
+  `;
+
+  ui.overlay.classList.remove('hidden');
+  ui.overlay.setAttribute('aria-hidden', 'false');
+  ui.overlay.dataset.mode = 'result';
+
+  setTimeout(() => {
+    const restartBtn = ui.modal.querySelector('[data-action="restart"]');
+    if (restartBtn) restartBtn.focus();
+  }, 60);
+}
+
+/**
+ * 一键重开：重建状态、关闭弹窗、重绘全部界面
+ */
+function restartGame() {
+  state = createInitialState();
+  state.lastTick = performance.now();
+  hideOverlay();
+
+  // 重开时一并收起规则面板，确保新一局从干净状态开始
+  ui.rulesPanel.classList.remove('is-open');
+  ui.rulesToggle.setAttribute('aria-expanded', 'false');
+
+  renderAll();
+  updateTimerLabels();
+  showToast(state.starterHint, 'success');
+}
+
+/* ============================================================
+   五、主循环与初始化
+   ------------------------------------------------------------
+   每 100ms 走一次 tick：累计计时、到点产出、刷新倒计时。
+   ============================================================ */
+
+/**
+ * 游戏主循环（每 100ms 一次）
+ * 弹窗打开或游戏结束时暂停产出，但保证计时基准被刷新，
+ * 避免关闭弹窗后一次性补出很多张卡。
+ */
+function tick() {
+  const now = performance.now();
+  let delta = now - state.lastTick;
+  state.lastTick = now;
+
+  // 切到后台再回来时，限制单次时间差，避免瞬间刷出一堆卡
+  if (delta > 200) delta = 200;
+
+  if (state.status !== 'playing' || state.upgradeOpen || state.rulesOpen) {
+    updateTimerLabels();
+    return;
+  }
+
+  state.elapsedMs += delta;
+  state.spawnAccum += delta;
+
+  if (state.spawnAccum >= state.spawnInterval) {
+    state.spawnAccum = 0;
+    runSpawnCycle();
+  } else {
+    updateTimerLabels();
+  }
+}
+
+/**
+ * 生成规则说明的内容
+ * 配方部分完全根据 RECIPE_CONFIG 自动生成，改配方不用改文案。
+ */
+function buildRulesContent() {
+  const groups = [2, 3, 4, 5];
+
+  const recipeHtml = groups.map((tier) => {
+    const rows = RECIPE_CONFIG
+      .filter((recipe) => CARD_BY_ID[recipe.result].tier === tier)
+      .map((recipe) => {
+        const [aId, bId] = recipe.ingredients;
+        const a = CARD_BY_ID[aId];
+        const b = CARD_BY_ID[bId];
+        const result = CARD_BY_ID[recipe.result];
+
+        const isLocked = (a.locked && !state.unlockedExtras.includes(a.id))
+          || (b.locked && !state.unlockedExtras.includes(b.id));
+        const lockBadge = isLocked ? '<span class="lock">需升级解锁</span>' : '';
+
+        const ingredientsHtml = aId === bId
+          ? `<span class="ing tier-${a.tier}">${a.name}</span><span class="x">×2</span>`
+          : `<span class="ing tier-${a.tier}">${a.name}</span><span class="plus">+</span>
+             <span class="ing tier-${b.tier}">${b.name}</span>`;
+
+        return `<div class="recipe ${isLocked ? 'is-locked' : ''}">
+          ${ingredientsHtml}
+          <span class="arrow">→</span>
+          <span class="result tier-${result.tier}">${result.name}</span>
+          <span class="x">T${result.tier}</span>
+          ${lockBadge}
+        </div>`;
+      }).join('');
+
+    return `<div class="rule-section">
+      <h4>${TIER_SECTION_TITLE[tier]}<span>等级 ${tier}</span></h4>
+      <div class="recipe-grid">${rows}</div>
+    </div>`;
+  }).join('');
+
+  const techRows = groups.slice(1).map((tier) => {
+    const card = CARD_CONFIG.find((item) => item.tier === tier && item.techPoints > 0);
+    return card ? `T${tier} ${card.name} +${card.techPoints}` : '';
+  }).filter(Boolean).join(' / ');
+
+  ui.rulesBody.innerHTML = `
+    <div class="rule-section">
+      <h4>怎么玩<span>操作步骤</span></h4>
+      <div class="steps">
+        <div class="step"><b><em>01</em> 选中材料</b>点一张卡，它会被高亮；可与之合成的卡会亮起绿色「可合成」标签。</div>
+        <div class="step"><b><em>02</em> 完成合成</b>再点另一张卡。配方正确时两张卡消耗，产出一张更高等级的卡。</div>
+        <div class="step"><b><em>03</em> 滚动产线</b>每 2.5 秒自动补一张 T1 到空槽；用科技点升级，直到造出量子芯片。</div>
+      </div>
+    </div>
+
+    <div class="rule-section">
+      <h4>合成配方<span>配方数据</span></h4>
+      <p>顺序无关，两张材料相同即写“×2”。配方不匹配只会轻提示，不会消耗卡牌。</p>
+      ${recipeHtml}
+    </div>
+
+    <div class="rule-section">
+      <h4>科技点与三选一升级<span>科技点</span></h4>
+      <p>合成 T3 及以上卡牌会获得科技点（${techRows}）。攒够 <b>${GAME_CONFIG.upgradeCost} 点</b>会弹出三选一升级，选中后立即生效；弹窗期间产出暂停。升级可能加卡槽、加快产出、解锁新卡或提高容错。</p>
+    </div>
+
+    <div class="rule-section">
+      <h4>胜负条件<span>目标与失败</span></h4>
+      <p><b>胜利：</b>合成出「量子芯片」（芯片 + 电池）。<br>
+      <b>失败：</b>所有卡槽已满，且找不到任意一对可合成的卡。若此时科技点足够、卡槽也还能扩容，会先给你一次“破局升级”的机会。<br>
+      <b>重开：</b>右上角「一键重开」随时重置整局。</p>
+    </div>
+  `;
+}
+
+/**
+ * 展开 / 收起规则说明
+ */
+function toggleRules() {
+  const willOpen = !ui.rulesPanel.classList.contains('is-open');
+
+  if (willOpen) buildRulesContent(); // 每次打开都按最新解锁状态重建
+
+  ui.rulesPanel.classList.toggle('is-open', willOpen);
+  ui.rulesToggle.setAttribute('aria-expanded', String(willOpen));
+  state.rulesOpen = willOpen;
+  state.lastTick = performance.now();
+  updateTimerLabels();
+
+  if (willOpen) {
+    setTimeout(() => {
+      ui.rulesPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }, 120);
+  } else {
+    // 关闭规则后补一次失败判定，防止满槽僵局被规则面板一直“暂停”住
+    checkDeadState();
+  }
+}
+
+/**
+ * 绑定所有事件监听（只在初始化时执行一次）
+ */
+function bindEvents() {
+  // 卡牌点击：用事件委托，重绘后依然有效
+  ui.board.addEventListener('click', (event) => {
+    const cardEl = event.target.closest('.card');
+    if (!cardEl) return;
+    handleCardClick(Number(cardEl.dataset.slot));
+  });
+
+  ui.upgradeBtn.addEventListener('click', () => openUpgrade('manual'));
+  ui.rulesToggle.addEventListener('click', toggleRules);
+  document.getElementById('btnRestart').addEventListener('click', restartGame);
+
+  // 弹窗按钮：升级选项与结算重开
+  ui.modal.addEventListener('click', (event) => {
+    const upgradeBtn = event.target.closest('[data-upgrade-id]');
+    if (upgradeBtn) {
+      chooseUpgrade(upgradeBtn.dataset.upgradeId);
+      return;
+    }
+
+    const actionBtn = event.target.closest('[data-action]');
+    if (actionBtn && actionBtn.dataset.action === 'restart') {
+      restartGame();
+    }
+  });
+
+  // 切回前台时重置计时基准，避免积压产出
+  document.addEventListener('visibilitychange', () => {
+    state.lastTick = performance.now();
+  });
+}
+
+/**
+ * 初始化游戏：绑定事件、首次渲染、启动主循环
+ */
+function init() {
+  bindEvents();
+  state.lastTick = performance.now();
+  renderAll();
+  buildRulesContent();
+
+  // 主循环：100ms 一次，足够顺滑，也不会太耗性能
+  setInterval(tick, 100);
+
+  // 开局提示，帮助第一次玩的人立刻理解核心操作
+  setTimeout(() => {
+    if (state.status === 'playing' && state.craftCount === 0) {
+      showToast(state.starterHint, 'success');
+    }
+  }, 700);
+}
+
+init();
+
+/* ============================================================
+   六、自动化自检接口（正常游玩不需要）
+   ------------------------------------------------------------
+   仅为浏览器自动化测试预留：可快速布置牌面、加点、触发判定。
+   不会影响正常点击操作。
+   ============================================================ */
+window.__gameDebug = {
+  /**
+   * 读取当前完整状态（测试断言用）
+   * @returns {Object} state 对象
+   */
+  getState: () => state,
+
+  /**
+   * 直接布置牌面（仅测试用）
+   * @param {Array<string|null>} ids 卡牌 id 数组
+   */
+  setBoard(ids) {
+    state.slots = ids.map((id) => id || null);
+    state.selectedSlot = null;
+    renderAll();
+    updateTimerLabels();
+  },
+
+  /**
+   * 增加科技点（测试用）
+   * @param {number} amount 增加数量
+   */
+  addPoints(amount) {
+    state.techPoints += amount;
+    state.totalTechEarned += amount;
+    renderAll();
+  },
+
+  /** 立即执行一次失败判定（测试用） */
+  checkDead() { checkDeadState(); },
+
+  /** 立即执行一次自动产出（测试用） */
+  spawnNow() { runSpawnCycle(); }
+};
+</script>
+</body>
+</html>

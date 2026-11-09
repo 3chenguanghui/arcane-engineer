@@ -1,0 +1,1841 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>烬 · 角色形象实验室</title>
+<style>
+/* ============================================================
+   烬 · 角色形象实验室 (hero-lab)
+   设计令牌沿用主文件：深蓝面板 / 科技青 / 魔法紫 / 岩金
+   零外部资源、零网络请求，双击即开。
+   ============================================================ */
+:root{
+  --bg:#05080f;
+  --surface-1:#0d1424;
+  --surface-2:#131e33;
+  --line:rgba(126,164,214,.24);
+  --line-strong:rgba(120,190,255,.46);
+  --text-1:#eaf5ff;
+  --text-2:#c3d6ec;
+  --text-3:#a8bfdc;
+  --tech:#3ee6ff;
+  --magic:#b085ff;
+  --gold:#ffc247;
+  --good:#47e8a7;
+  --bad:#ff6b7f;
+  --ease:cubic-bezier(.2,.9,.25,1);
+  --mono:"Cascadia Mono","Consolas","Courier New",monospace;
+  --sans:"Microsoft YaHei","PingFang SC","Noto Sans SC",system-ui,sans-serif;
+  --r-sm:4px; --r-md:8px; --r-lg:12px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  min-height:100vh;
+  background:
+    radial-gradient(900px 520px at 50% -12%, rgba(62,230,255,.10), transparent 64%),
+    radial-gradient(760px 460px at 88% 20%, rgba(176,133,255,.10), transparent 66%),
+    linear-gradient(180deg,#050810,#070d18 42%,#05080f);
+  color:var(--text-1);
+  font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;
+  display:flex; flex-direction:column; align-items:center;
+  gap:14px;
+  padding:20px 14px 46px;
+}
+
+/* ---------- 顶栏 ---------- */
+.bar{
+  width:min(1320px,97vw);
+  display:flex; align-items:flex-end; justify-content:space-between; gap:16px; flex-wrap:wrap;
+}
+.brand h1{
+  margin:0;
+  font-size:20px; letter-spacing:.16em; color:#ffe6ae;
+  text-shadow:0 0 18px rgba(255,194,71,.22);
+}
+.brand p{
+  margin:5px 0 0;
+  font-family:var(--mono); font-size:11px; letter-spacing:.20em;
+  color:var(--text-3); opacity:.85;
+}
+.controls{display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+.seg{
+  display:flex; border:1px solid var(--line); border-radius:var(--r-md);
+  overflow:hidden; background:rgba(7,11,20,.7);
+}
+.seg button{
+  padding:7px 12px;
+  font-family:var(--sans); font-size:12px; letter-spacing:.06em;
+  color:var(--text-3); background:transparent; border:0; cursor:pointer;
+  transition:color 120ms var(--ease), background 120ms var(--ease);
+}
+.seg button:hover{color:var(--text-1);}
+.seg button.on{color:#06121d; background:linear-gradient(180deg,#7ff2ff,#3ee6ff);}
+.pill{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:6px 10px;
+  font-family:var(--mono); font-size:11px; letter-spacing:.06em;
+  color:var(--text-3);
+  border:1px solid var(--line); border-radius:var(--r-sm);
+  background:rgba(13,20,36,.7);
+}
+.pill b{color:var(--text-1); font-weight:400;}
+.pill .dot{width:7px;height:7px;border-radius:50%;background:var(--tech);box-shadow:0 0 8px var(--tech);}
+
+/* ---------- 舞台 ---------- */
+.stage{
+  position:relative;
+  width:min(1320px,97vw);
+  min-height:660px;
+  border-radius:16px;
+  border:1px solid var(--line);
+  overflow:hidden;
+  background:
+    radial-gradient(680px 420px at 50% 8%, rgba(62,230,255,.09), transparent 66%),
+    radial-gradient(520px 380px at 84% 76%, rgba(176,133,255,.09), transparent 68%),
+    linear-gradient(180deg,#0a1120,#070c16 58%,#05080f);
+  box-shadow:0 26px 78px rgba(0,0,0,.62), inset 0 0 0 1px rgba(255,255,255,.02);
+}
+#bg{position:absolute; inset:0; width:100%; height:100%; display:block; pointer-events:none;}
+.views{position:relative; padding:18px 20px 20px; min-height:660px; display:flex; flex-direction:column;}
+.view{display:none; flex:1; flex-direction:column; gap:12px; animation:viewIn .26s var(--ease) both;}
+.view.on{display:flex;}
+@keyframes viewIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+.view-head{display:flex; align-items:baseline; justify-content:space-between; gap:14px; flex-wrap:wrap;}
+.view-head h2{margin:0; font-size:16px; letter-spacing:.10em; color:#ffe6ae;}
+.view-head .sub{margin:0; font-size:12px; color:var(--text-3); letter-spacing:.04em;}
+.view-head .sub b{color:var(--tech); font-weight:400;}
+
+/* ---------- A 剪影视图 ---------- */
+.sil-panel{
+  flex:1;
+  border-radius:var(--r-lg);
+  border:1px solid rgba(120,190,255,.18);
+  background:linear-gradient(180deg,#e7edf4,#d5dee9 62%,#c8d3e0);
+  padding:14px 16px 12px;
+  display:flex; flex-direction:column; gap:10px;
+}
+.sil-row{
+  display:grid; grid-template-columns:repeat(3,1fr); gap:12px;
+}
+.sil-col{
+  display:flex; flex-direction:column; align-items:center; gap:6px;
+  padding:8px 6px 10px;
+  border-radius:var(--r-md);
+  border:1px solid rgba(20,40,60,.10);
+  background:linear-gradient(180deg,rgba(255,255,255,.55),rgba(255,255,255,.16));
+}
+.sil-col h3{margin:0; font-size:13px; letter-spacing:.08em; color:#16233a;}
+.sil-col .role{font-family:var(--mono); font-size:10px; letter-spacing:.10em; color:#5a6b80;}
+.sil-canvas-box{
+  display:flex; align-items:center; justify-content:center;
+  width:100%; height:86px;
+  overflow:hidden;
+  border-radius:var(--r-sm);
+  background:repeating-linear-gradient(90deg,rgba(20,40,60,.045) 0 1px,transparent 1px 8px);
+}
+.sil-canvas-box.zoom{height:158px;background:repeating-linear-gradient(90deg,rgba(20,40,60,.045) 0 1px,transparent 1px 12px);}
+.sil-canvas-box canvas{display:block; width:100%; height:100%;}
+.sil-tag{font-family:var(--mono); font-size:10px; letter-spacing:.08em; color:#4d5d73;}
+.sil-tag b{color:#16233a; font-weight:400;}
+.sil-metrics{
+  display:flex; gap:10px; flex-wrap:wrap; justify-content:center;
+  font-family:var(--mono); font-size:10px; color:#3f5065;
+}
+.sil-metrics span b{color:#16233a; font-weight:400;}
+.sil-foot{
+  display:flex; gap:16px; align-items:flex-start; flex-wrap:wrap;
+  padding-top:8px; border-top:1px solid rgba(20,40,60,.12);
+}
+.mat-table{border-collapse:collapse; font-family:var(--mono); font-size:10px; color:#28384f;}
+.mat-table th,.mat-table td{padding:3px 9px; border:1px solid rgba(20,40,60,.14); text-align:center;}
+.mat-table th{color:#5a6b80; font-weight:400;}
+.mat-note{margin:0; font-size:10px; line-height:1.6; color:#456; max-width:520px;}
+.mat-note b{color:#16233a; font-weight:400;}
+.diff-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; flex:1; min-height:120px;}
+.diff-item{
+  display:flex; flex-direction:column; gap:4px; min-height:0;
+  padding:8px; border-radius:var(--r-md);
+  border:1px solid rgba(20,40,60,.12); background:rgba(255,255,255,.34);
+}
+.diff-item .cap{font-family:var(--mono); font-size:10px; color:#3f5065; display:flex; justify-content:space-between;}
+.diff-item .cap b{color:#16233a; font-weight:400;}
+.diff-item canvas{display:block; width:100%; flex:1; min-height:0;}
+.diff-legend{display:flex; gap:14px; flex-wrap:wrap; font-family:var(--mono); font-size:10px; color:#3f5065;}
+.diff-legend i{display:inline-block; width:10px; height:10px; margin-right:5px; border-radius:2px; vertical-align:-1px;}
+.cb-badge{
+  display:inline-flex; align-items:center; gap:6px;
+  padding:3px 8px; border-radius:var(--r-sm);
+  border:1px solid rgba(20,40,60,.18); background:rgba(255,255,255,.4);
+  font-family:var(--mono); font-size:10px; color:#28384f;
+}
+
+/* ---------- B 选角卡片 ---------- */
+.cards{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; flex:1; align-content:center;}
+.card{
+  --tone:#3ee6ff;
+  position:relative;
+  display:flex; flex-direction:column; gap:0;
+  padding:14px 14px 12px;
+  border-radius:var(--r-lg);
+  border:1px solid rgba(160,190,220,.20);
+  background:linear-gradient(180deg,rgba(19,30,51,.94),rgba(8,13,23,.97));
+  box-shadow:0 16px 38px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,.05);
+  cursor:pointer;
+  overflow:hidden;
+  transition:transform 140ms var(--ease), border-color 140ms var(--ease), box-shadow 140ms var(--ease);
+}
+.card::before{
+  content:""; position:absolute; left:10px; right:10px; top:0; height:2px;
+  border-radius:2px;
+  background:linear-gradient(90deg,transparent,var(--tone),transparent);
+  opacity:.7;
+}
+.card::after{
+  content:""; position:absolute; inset:auto 0 0 0; height:58px;
+  background:linear-gradient(180deg,transparent,rgba(0,0,0,.34));
+  pointer-events:none;
+}
+.card:hover{transform:translateY(-3px); border-color:color-mix(in srgb,var(--tone) 54%,transparent);}
+.card.is-on{
+  border-color:var(--gold);
+  box-shadow:0 0 0 1px rgba(255,194,71,.18), 0 16px 40px rgba(0,0,0,.5), 0 0 30px rgba(255,194,71,.16);
+}
+.card-head{display:flex; align-items:flex-end; justify-content:space-between; gap:8px;}
+.card-head .idx{font-family:var(--mono); font-size:11px; color:var(--text-3); letter-spacing:.14em;}
+.card-head h3{margin:0; font-size:22px; letter-spacing:.14em; color:#fff; text-shadow:0 0 18px color-mix(in srgb,var(--tone) 40%,transparent);}
+.card-head .tag{
+  padding:2px 7px; border-radius:var(--r-sm); border:1px solid color-mix(in srgb,var(--tone) 46%,transparent);
+  font-family:var(--mono); font-size:10px; letter-spacing:.10em;
+  color:color-mix(in srgb,var(--tone) 80%,#fff);
+}
+.portrait{
+  position:relative; width:100%; height:258px; margin:6px 0 4px;
+}
+.portrait canvas{position:absolute; inset:0; width:100%; height:100%;}
+.stats{position:relative; display:flex; flex-direction:column; gap:7px; z-index:1;}
+.stat-row{display:grid; grid-template-columns:44px 1fr auto; align-items:center; gap:9px;}
+.stat-row .k{font-size:11px; letter-spacing:.10em; color:var(--text-3);}
+.stat-row .statbar{position:relative; height:5px; border-radius:3px; background:rgba(255,255,255,.07); overflow:hidden;}
+.stat-row .statbar b{
+  position:absolute; left:0; top:0; bottom:0; border-radius:3px;
+  background:linear-gradient(90deg,color-mix(in srgb,var(--tone) 42%,transparent),var(--tone));
+  box-shadow:0 0 10px color-mix(in srgb,var(--tone) 45%,transparent);
+}
+.stat-row .v{font-family:var(--mono); font-size:12px; color:var(--text-1); white-space:nowrap;}
+.stat-row .v small{color:var(--text-3); font-size:10px;}
+.skill-row{display:flex; align-items:center; justify-content:space-between; gap:8px; padding-top:8px; border-top:1px solid var(--line);}
+.skill-row .k{font-size:11px; letter-spacing:.10em; color:var(--text-3);}
+.skill-row .v{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--text-1);}
+.skill-chip{
+  display:inline-flex; align-items:center; gap:5px;
+  padding:2px 8px; border-radius:var(--r-sm);
+  border:1px solid color-mix(in srgb,var(--tone) 40%,transparent);
+  background:rgba(13,20,36,.6);
+  font-size:11px; letter-spacing:.04em;
+}
+.skill-chip i{width:7px;height:7px;border-radius:50%;background:var(--tone);box-shadow:0 0 8px var(--tone);}
+.palette{display:flex; align-items:center; gap:5px; margin-top:8px;}
+.palette .lbl{font-family:var(--mono); font-size:10px; color:var(--text-3); letter-spacing:.08em; margin-right:2px;}
+.sw{width:20px; height:14px; border-radius:2px; border:1px solid rgba(255,255,255,.16);}
+.card-foot{
+  position:relative; z-index:1;
+  margin-top:8px; padding-top:7px; border-top:1px dashed rgba(126,164,214,.18);
+  font-family:var(--mono); font-size:10px; color:rgba(168,191,220,.66); letter-spacing:.02em;
+}
+.note-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:2px;}
+.note{display:flex; gap:8px; align-items:flex-start; padding:9px 11px; border-radius:var(--r-md);
+  border:1px solid rgba(126,164,214,.14); background:rgba(13,20,36,.55);}
+.note b{font-family:var(--mono); font-size:10px; color:var(--tech); font-weight:400; letter-spacing:.08em;}
+.note span{font-size:11px; line-height:1.55; color:var(--text-3);}
+
+/* ---------- C 施法姿态 ---------- */
+.cast-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; flex:0; align-content:start;}
+.cast-col{
+  --tone:#3ee6ff;
+  display:flex; flex-direction:column; gap:8px;
+  padding:12px 12px 10px;
+  border-radius:var(--r-lg);
+  border:1px solid var(--line);
+  background:linear-gradient(180deg,rgba(15,24,41,.92),rgba(7,11,20,.96));
+}
+.cast-col .top{display:flex; align-items:baseline; justify-content:space-between; gap:8px;}
+.cast-col h3{margin:0; font-size:15px; letter-spacing:.12em; color:var(--text-1);}
+.cast-col .phase{font-family:var(--mono); font-size:10px; color:color-mix(in srgb,var(--tone) 82%,#fff);}
+.cast-body{display:flex; gap:8px; align-items:flex-end;}
+.cast-stage{position:relative; flex:1; height:340px; border-radius:var(--r-md); overflow:hidden;
+  background:
+    radial-gradient(180px 150px at 50% 52%, color-mix(in srgb,var(--tone) 12%,transparent), transparent 70%),
+    linear-gradient(180deg,rgba(6,10,18,.9),rgba(9,14,24,.9));
+  border:1px solid rgba(126,164,214,.14);
+  box-shadow:inset 0 -30px 40px rgba(0,0,0,.4);
+}
+.cast-stage canvas{position:absolute; inset:0; width:100%; height:100%;}
+.idle-thumb{
+  width:88px; height:340px; border-radius:var(--r-md);
+  border:1px solid rgba(126,164,214,.14); background:rgba(6,10,18,.7);
+  display:flex; flex-direction:column; align-items:center; justify-content:flex-end;
+  overflow:hidden;
+}
+.idle-thumb canvas{width:100%; height:260px;}
+.idle-thumb span{font-family:var(--mono); font-size:9px; color:var(--text-3); padding:4px 0 6px; letter-spacing:.1em;}
+.kf-table{display:flex; flex-direction:column; gap:4px; padding-top:6px; border-top:1px solid var(--line);}
+.kf-line{display:grid; grid-template-columns:38px 1fr; gap:7px; font-size:10px; line-height:1.5;}
+.kf-line b{font-family:var(--mono); font-weight:400; font-size:9px; color:var(--tech); letter-spacing:.06em;}
+.kf-line span{color:var(--text-3);}
+.kf-line span em{font-style:normal; color:var(--text-2); margin-right:6px;}
+.timeline{display:flex; align-items:center; gap:4px;}
+.timeline .kf{
+  flex:1; text-align:center; font-family:var(--mono); font-size:9px;
+  color:rgba(168,191,220,.56); padding:4px 0 3px;
+  border-top:1px solid var(--line); position:relative;
+}
+.timeline .kf.on{color:#fff; border-top-color:var(--tone);}
+.timeline .kf.on::before{
+  content:""; position:absolute; left:50%; top:-4px; width:6px; height:6px; margin-left:-3px;
+  border-radius:50%; background:var(--tone); box-shadow:0 0 8px var(--tone);
+}
+
+/* ---------- D 单体放大 ---------- */
+.focus-wrap{display:grid; grid-template-columns:minmax(0,1.25fr) minmax(0,1fr); gap:14px; flex:1;}
+.focus-stage{
+  position:relative; border-radius:var(--r-lg); overflow:hidden;
+  border:1px solid var(--line);
+  background:
+    radial-gradient(300px 220px at 50% 46%, rgba(62,230,255,.10), transparent 70%),
+    linear-gradient(180deg,#081020,#05080f);
+  min-height:560px;
+}
+.focus-stage canvas{position:absolute; inset:0; width:100%; height:100%;}
+.focus-hud{
+  position:absolute; left:14px; top:12px; display:flex; flex-direction:column; gap:4px;
+  font-family:var(--mono); font-size:10px; color:var(--text-3); letter-spacing:.08em;
+}
+.focus-hud b{color:var(--text-1); font-weight:400; font-size:13px; letter-spacing:.14em;}
+.focus-keys{
+  position:absolute; right:14px; top:12px; display:flex; gap:6px;
+}
+.focus-keys button{
+  padding:5px 10px; font-size:11px; font-family:var(--sans); letter-spacing:.06em;
+  color:var(--text-3); border:1px solid var(--line); border-radius:var(--r-sm);
+  background:rgba(7,11,20,.7); cursor:pointer;
+}
+.focus-keys button.on{color:#06121d; background:linear-gradient(180deg,#7ff2ff,#3ee6ff); border-color:transparent;}
+.info-panel{
+  display:flex; flex-direction:column; gap:10px;
+  padding:14px; border-radius:var(--r-lg);
+  border:1px solid var(--line); background:linear-gradient(180deg,rgba(15,24,41,.9),rgba(7,11,20,.95));
+  max-height:520px; overflow:auto;
+}
+.info-panel h3{margin:0; font-size:14px; letter-spacing:.10em; color:#ffe6ae;}
+.info-block{border-top:1px solid var(--line); padding-top:8px;}
+.info-block .t{font-family:var(--mono); font-size:10px; letter-spacing:.10em; color:var(--text-3); margin:0 0 6px;}
+.kf-list{display:flex; flex-direction:column; gap:4px; margin:0; padding:0; list-style:none;}
+.kf-list li{display:grid; grid-template-columns:34px 1fr; gap:8px; font-size:11px; line-height:1.5; color:var(--text-2);}
+.kf-list li b{font-family:var(--mono); font-size:10px; color:var(--tech); font-weight:400;}
+.kf-list li span{color:var(--text-3);}
+.pal-rows{display:flex; flex-direction:column; gap:5px;}
+.pal-row{display:grid; grid-template-columns:38px 22px 1fr; gap:8px; align-items:center; font-family:var(--mono); font-size:10px; color:var(--text-3);}
+.pal-row .hex{color:var(--text-1);}
+.pal-row .sim{color:var(--gold);}
+.hintbar{
+  width:min(1320px,97vw);
+  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  font-family:var(--mono); font-size:10px; color:rgba(168,191,220,.62); letter-spacing:.06em;
+}
+.hintbar kbd{
+  display:inline-block; min-width:16px; padding:1px 4px; margin:0 2px;
+  font-family:var(--mono); font-size:10px; color:var(--text-1);
+  border:1px solid var(--line-strong); border-radius:var(--r-sm); background:rgba(13,20,36,.9);
+}
+.hintbar .author{color:rgba(255,194,71,.72);}
+@media (max-width:1080px){
+  .cards,.cast-grid{grid-template-columns:1fr;}
+  .focus-wrap{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="brand">
+    <h1>烬 · 角色形象实验室</h1>
+    <p>HERO SILHOUETTE LAB · 48px 辨识度 / 视觉语言 / 选角卡 / 施法姿态</p>
+  </div>
+  <div class="controls">
+    <div class="seg" id="viewSeg">
+      <button data-view="sil" class="on">剪影并排</button>
+      <button data-view="cards">选角卡片</button>
+      <button data-view="cast">施法姿态</button>
+      <button data-view="focus">单体放大</button>
+    </div>
+    <div class="seg" id="silSeg">
+      <button data-sil="1" class="on">剪影 ON</button>
+      <button data-sil="0">彩显</button>
+    </div>
+    <div class="seg" id="cbSeg">
+      <button data-cb="none" class="on">正常</button>
+      <button data-cb="deut">红绿</button>
+      <button data-cb="trit">蓝黄</button>
+    </div>
+    <div class="pill"><span class="dot"></span>当前 <b id="pillHero">守拙</b></div>
+  </div>
+</div>
+
+<div class="stage">
+  <canvas id="bg" width="1320" height="726" aria-hidden="true"></canvas>
+  <div class="views">
+
+    <!-- A 剪影并排 -->
+    <section class="view on" id="view-sil">
+      <div class="view-head">
+        <h2>A · 黑白剪影辨识度（判定尺寸 48px 高）</h2>
+        <p class="sub">纯黑填充 · 不看颜色 · <b>1× 判定 / 3× 仅供查看</b></p>
+      </div>
+      <div class="sil-panel">
+        <div class="sil-row" id="silRow"></div>
+        <div class="sil-foot">
+          <table class="mat-table" id="matTable"></table>
+          <p class="mat-note" id="matNote"></p>
+        </div>
+        <div class="diff-row" id="diffRow"></div>
+        <div class="diff-legend">
+          <span><i style="background:#0d1626"></i>仅 守拙/疾火 的墨</span>
+          <span><i style="background:#37536f"></i>仅另一方的墨</span>
+          <span><i style="background:#ff5a33"></i>不重叠（XOR）</span>
+          <span><i style="background:#cfd9e4"></i>两者重叠</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- B 选角卡片 -->
+    <section class="view" id="view-cards">
+      <div class="view-head">
+        <h2>B · 开场选角卡片</h2>
+        <p class="sub">三行信息：生命 / 移速 / 起手技能 · 卡片底纹与标题页符阵同源</p>
+      </div>
+      <div class="cards" id="cardGrid"></div>
+      <div class="note-row">
+        <div class="note"><b>符阵同源</b><span>底纹沿用标题页的透视地线、等分刻度、断弧与余烬，只做低透明度处理，不换风格。</span></div>
+        <div class="note"><b>三行必填</b><span>生命 / 移速 / 起手技能；其余信息一律下沉到 HERO_DESIGN.md，卡面不写说明书。</span></div>
+        <div class="note"><b>选中态</b><span>悬停上浮 3px；选中为岩金描边 + 外发光，键盘 1/2/3 与点击同一套状态。</span></div>
+      </div>
+    </section>
+
+    <!-- C 施法姿态 -->
+    <section class="view" id="view-cast">
+      <div class="view-head">
+        <h2>C · 待机循环 + 施法关键帧</h2>
+        <p class="sub">大图为施法「出手」帧 · 右侧窄条为待机循环 · 底部为相位刻度</p>
+      </div>
+      <div class="cast-grid" id="castGrid"></div>
+      <div class="note-row">
+        <div class="note"><b>时序</b><span>施法整段 0.9s；出手帧落在 40%–55%，余波在 55%–80%，回位不早于 80%。</span></div>
+        <div class="note"><b>姿态读点</b><span>每一帧只用三件事表达意图：重心在哪、出手朝哪、剪影的锐角指向哪。</span></div>
+        <div class="note"><b>重量差</b><span>待机周期 4.2 / 2.2 / 3.0 秒，振幅随体重递减：守拙几乎不晃，疾火高频弹跳，观星匀速浮沉。</span></div>
+      </div>
+    </section>
+
+    <!-- D 单体放大 -->
+    <section class="view" id="view-focus">
+      <div class="view-head">
+        <h2>D · 单体放大（键盘切换角色）</h2>
+        <p class="sub">按 <b>1 / 2 / 3</b> 换人 · <b>X</b> 待机/施法 · <b>S</b> 剪影 · <b>C</b> 色盲模拟</p>
+      </div>
+      <div class="focus-wrap">
+        <div class="focus-stage" id="focusStage">
+          <canvas id="focusCanvas"></canvas>
+          <div class="focus-hud">
+            <b id="focusName">守拙</b>
+            <span id="focusRole">岩盾 · 守势</span>
+            <span id="focusState">IDLE 待机</span>
+          </div>
+          <div class="focus-keys">
+            <button id="btnIdle" class="on">待机</button>
+            <button id="btnCast">施法</button>
+          </div>
+        </div>
+        <aside class="info-panel" id="infoPanel"></aside>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<div class="hintbar">
+  <span>
+    <kbd>1</kbd><kbd>2</kbd><kbd>3</kbd> 选角色 ·
+    <kbd>S</kbd> 剪影 ·
+    <kbd>C</kbd> 正常/红绿/蓝黄 ·
+    <kbd>V</kbd> 切视图 ·
+    <kbd>X</kbd> 待机/施法
+  </span>
+  <span class="author">陈光辉制作 · hero-lab v1 · 零外链</span>
+</div>
+
+<script>
+/* ============================================================
+   0) 数据与工具
+   ============================================================ */
+/* 三角色数值口径：直接抄自主文件 CHARACTER_CONFIG（只读，未改） */
+const HEROES = {
+  warden: {
+    id:'warden', name:'守拙', role:'岩盾 · 守势', glyph:'石',
+    hp:104, hpNote:'+4% 上限',
+    speed:0.90, speedLabel:'0.90×', speedNote:'设计目标',
+    skill:'火球', skillNote:'起手主槽',
+    palette:{ main:'#C6A868', aux1:'#3E5A6E', aux2:'#5C3B25', accent:'#3EE6FF' },
+    silhouetteKey:'宽体 · 岩板右伸 · 平顶盔',
+    idleKeys:['沉肩收颈','岩盾前压','呼吸落座'],
+    castKeys:['蓄力后拉','岩盾前推','冲击环外扩']
+  },
+  ember: {
+    id:'ember', name:'疾火', role:'余烬 · 游猎', glyph:'焰',
+    hp:95, hpNote:'−5 血',
+    speed:1.06, speedLabel:'1.06×', speedNote:'设计目标',
+    skill:'火球', skillNote:'伤害 +8%',
+    palette:{ main:'#E8402A', aux1:'#FFC24D', aux2:'#6E2E8F', accent:'#FFF3D0' },
+    silhouetteKey:'窄体前倾 · 背焰拖尾 · 上掠冠',
+    idleKeys:['低伏弹跳','前倾压步','拖尾甩动'],
+    castKeys:['屈身蓄势','前扑出手','拖尾过冲']
+  },
+  gazer: {
+    id:'gazer', name:'观星', role:'星轨 · 悬浮', glyph:'星',
+    hp:100, hpNote:'基准',
+    speed:1.00, speedLabel:'1.00×', speedNote:'设计目标',
+    skill:'冰环 / 火球', skillNote:'主 / 副槽',
+    palette:{ main:'#7A5CFF', aux1:'#3EE6FF', aux2:'#1B2547', accent:'#EAF5FF' },
+    silhouetteKey:'悬空无腿 · 环轨横穿 · 尖顶兜帽',
+    idleKeys:['环轨反旋','悬浮起伏','袖摆下垂'],
+    castKeys:['环收聚能','星珠前推','环爆回摆']
+  }
+};
+const HERO_IDS = ['warden','ember','gazer'];
+
+/* 状态：当前角色 / 视图 / 剪影 / 色盲 / 待机施法 */
+const LAB = {
+  hero:'warden',
+  view:'sil',
+  silhouette:true,
+  cb:'none',
+  cast:false,
+  t:0,
+  metrics:null
+};
+
+/* 十六进制转 RGB */
+function hexToRgb(hex){
+  const h = hex.replace('#','');
+  return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)];
+}
+/* RGB 转十六进制 */
+function rgbToHex(r,g,b){
+  const c = (v)=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0');
+  return '#' + c(r) + c(g) + c(b);
+}
+/* sRGB ↔ 线性光 */
+function srgbToLin(v){
+  const x = v/255;
+  return x <= 0.04045 ? x/12.92 : Math.pow((x+0.055)/1.055, 2.4);
+}
+function linToSrgb(v){
+  const x = v <= 0.0031308 ? v*12.92 : 1.055*Math.pow(v,1/2.4)-0.055;
+  return x*255;
+}
+/* 色盲模拟矩阵（Machado 2009，severity=1.0） */
+const CB_MATRICES = {
+  none:null,
+  deut:[[0.367322,0.860646,-0.227968],[0.280085,0.672501,0.047413],[-0.011820,0.042940,0.968881]],
+  prot:[[0.152286,1.052583,-0.204868],[0.114503,0.786281,0.099216],[-0.003882,-0.048116,1.051998]],
+  trit:[[1.255528,-0.076749,-0.178779],[-0.078411,0.930809,0.147602],[0.004733,0.691367,0.303900]]
+};
+/* 单色 → 模拟后的颜色（用于色板数值展示） */
+function simulateHex(hex, mode){
+  const m = CB_MATRICES[mode];
+  if (!m) return hex;
+  const [r,g,b] = hexToRgb(hex).map(srgbToLin);
+  const out = [0,1,2].map((i)=> m[i][0]*r + m[i][1]*g + m[i][2]*b);
+  return rgbToHex(linToSrgb(out[0]), linToSrgb(out[1]), linToSrgb(out[2]));
+}
+/* RGBA 字符串（调色板取透明度用） */
+function rgba(hex, a){
+  const [r,g,b] = hexToRgb(hex);
+  return `rgba(${r},${g},${b},${a})`;
+}
+/* 相对亮度（WCAG） */
+function luminance(hex){
+  const [r,g,b] = hexToRgb(hex).map(srgbToLin);
+  return 0.2126*r + 0.7152*g + 0.0722*b;
+}
+/* 绘制用：圆角矩形路径 */
+function rr(ctx,x,y,w,h,r){
+  const rad = Math.min(r, Math.abs(w)/2, Math.abs(h)/2);
+  ctx.beginPath();
+  ctx.moveTo(x+rad,y);
+  ctx.lineTo(x+w-rad,y);
+  ctx.quadraticCurveTo(x+w,y,x+w,y+rad);
+  ctx.lineTo(x+w,y+h-rad);
+  ctx.quadraticCurveTo(x+w,y+h,x+w-rad,y+h);
+  ctx.lineTo(x+rad,y+h);
+  ctx.quadraticCurveTo(x,y+h,x,y+h-rad);
+  ctx.lineTo(x,y+rad);
+  ctx.quadraticCurveTo(x,y,x+rad,y);
+  ctx.closePath();
+}
+/* 绘制用：多边形路径 */
+function poly(ctx, pts){
+  ctx.beginPath();
+  pts.forEach((p,i)=>{ if(i===0) ctx.moveTo(p[0],p[1]); else ctx.lineTo(p[0],p[1]); });
+  ctx.closePath();
+}
+/* 绘制用：胶囊（两点之间粗线），用于四肢 */
+/* 颜色混合：k=0 取 a，k=1 取 b */
+function mixHex(a,b,k){
+  const A = hexToRgb(a), B = hexToRgb(b);
+  return rgbToHex(A[0]+(B[0]-A[0])*k, A[1]+(B[1]-A[1])*k, A[2]+(B[2]-A[2])*k);
+}
+/* 明度推移：k>0 提亮，k<0 压暗 */
+function shade(hex,k){
+  return k >= 0 ? mixHex(hex, '#ffffff', k) : mixHex(hex, '#05070c', -k);
+}
+/* 缓动：出场（减速） */
+function easeOut(u){ return 1 - Math.pow(1-u, 3); }
+/* 缓动：入场（加速） */
+function easeIn(u){ return u*u*u; }
+/* 缓动：两端平滑 */
+function easeInOut(u){ return u<0.5 ? 4*u*u*u : 1 - Math.pow(-2*u+2,3)/2; }
+/* 数值夹取 */
+function clamp(v,a,b){ return v<a?a:(v>b?b:v); }
+
+/* 身体填充：上亮下暗的竖向渐变 + 强调描边；剪影模式下只用纯黑 */
+function bodyFill(ctx, buildPath, pal, opts){
+  const o = opts || {};
+  if (o.silhouette){
+    buildPath();
+    ctx.fillStyle = '#05070C';
+    ctx.fill();
+    return;
+  }
+  const g = ctx.createLinearGradient(0,-50,0,50);
+  g.addColorStop(0, rgba(shade(pal.main, 0.24), 0.98));
+  g.addColorStop(0.45, rgba(pal.main, 0.98));
+  g.addColorStop(1, rgba(pal.aux2, 0.99));
+  buildPath();
+  ctx.fillStyle = g;
+  if (o.glow) { ctx.shadowColor = rgba(pal.accent, 0.45); ctx.shadowBlur = 10; }
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  if (o.stroke !== false){
+    buildPath();
+    ctx.strokeStyle = rgba(o.strokeColor || pal.accent, o.strokeAlpha == null ? 0.55 : o.strokeAlpha);
+    ctx.lineWidth = 1.15;
+    ctx.stroke();
+  }
+}
+/* 强调件填充：纯色块（符文/眼缝/光珠） */
+function accentFill(ctx, buildPath, color, alpha, glow){
+  buildPath();
+  ctx.fillStyle = rgba(color, alpha);
+  if (glow){ ctx.shadowColor = rgba(color, 0.75); ctx.shadowBlur = glow; }
+  ctx.fill();
+  ctx.shadowBlur = 0;
+}
+/* 胶囊：两点之间的圆头粗线（四肢/拖尾主梁） */
+function capsule(ctx,x1,y1,x2,y2,w,style){
+  ctx.beginPath();
+  ctx.lineCap = 'round';
+  ctx.lineWidth = w;
+  ctx.strokeStyle = style;
+  ctx.moveTo(x1,y1);
+  ctx.lineTo(x2,y2);
+  ctx.stroke();
+}
+/* 收尾的锥形火焰/布条：从 (x1,y1) 到 (x2,y2)，起宽 w1 收窄到 w2，带一定弧度 */
+function taper(ctx,x1,y1,x2,y2,w1,w2,bend){
+  const dx = x2-x1, dy = y2-y1;
+  const len = Math.hypot(dx,dy) || 1;
+  const nx = -dy/len, ny = dx/len;
+  const mx = (x1+x2)/2 + nx*bend, my = (y1+y2)/2 + ny*bend;
+  const ax = x1 + nx*w1, ay = y1 + ny*w1;
+  const bx = x1 - nx*w1, by = y1 - ny*w1;
+  const ex = x2 + nx*w2, ey = y2 + ny*w2;
+  const fx = x2 - nx*w2, fy = y2 - ny*w2;
+  ctx.beginPath();
+  ctx.moveTo(ax,ay);
+  ctx.quadraticCurveTo(mx+nx*w1*0.5, my+ny*w1*0.5, ex,ey);
+  ctx.lineTo(fx,fy);
+  ctx.quadraticCurveTo(mx-nx*w1*0.5, my-ny*w1*0.5, bx,by);
+  ctx.closePath();
+}
+/* 施法进度：把一个 0–1 的连续值切成几段，返回该段局部进度 */
+function seg(k, a, b){ return clamp((k-a)/(b-a), 0, 1); }
+
+/* ============================================================
+   1) 守拙：厚重 / 防御 / 岩板
+   形体语言：宽底梯形 + 方肩 + 平顶盔 + 右前方一整块岩板
+   （岩板是剪影里唯一的"大件", 也是 48px 下最快的识别锚点）
+   ============================================================ */
+function drawWarden(ctx, t, mode, k, pal, sil){
+  const p = (t / 4.2) % 1;
+  const idleBob = Math.sin(p * Math.PI * 2) * 1.6;
+  const idleShift = Math.sin(p * Math.PI * 2) * 1.8;
+  let crouch = 0, push = 0, tilt = -0.10, ring = 0, brace = 0;
+  if (mode === 'cast'){
+    if (k < 0.28){
+      const u = seg(k,0,0.28);
+      crouch = 3.2 * easeIn(u); push = -8 * easeIn(u); tilt = -0.10 + 0.22 * easeIn(u); brace = u;
+    } else if (k < 0.55){
+      const u = seg(k,0.28,0.55);
+      crouch = 3.2 * (1-u); push = -8 + 20 * easeOut(u); tilt = 0.12 - 0.46 * easeOut(u); ring = u; brace = 1-u;
+    } else {
+      const u = seg(k,0.55,1);
+      crouch = 0; push = 12 * (1-u); tilt = -0.34 * (1-u) - 0.10 * u; ring = 1-u; brace = 0;
+    }
+  } else {
+    tilt = -0.10 + Math.sin(p*Math.PI*2 + 0.8) * 0.05;
+    brace = 0.45 + Math.sin(p*Math.PI*2) * 0.12;
+  }
+
+  ctx.save();
+  ctx.translate(idleShift * (mode==='idle'?1:0), idleBob + crouch);
+
+  /* 影子（只在彩显） */
+  if (!sil){
+    ctx.beginPath();
+    ctx.ellipse(0, 52 - crouch*0.6, 36, 6.5, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(2,6,14,0.5)';
+    ctx.fill();
+  }
+
+  /* 腿：两段宽靴，低重心 */
+  const legPath = () => { rr(ctx,-25,32,18,19,5); rr(ctx,6,32,18,19,5); };
+  bodyFill(ctx, legPath, pal, {silhouette:sil, stroke:false});
+  if (!sil){
+    ctx.fillStyle = rgba(pal.aux2, 0.9);
+    rr(ctx,-25,44,18,7,3); ctx.fill();
+    rr(ctx,6,44,18,7,3); ctx.fill();
+  }
+
+  /* 基座裙甲：上窄下宽梯形（厚重感的地基） */
+  bodyFill(ctx, ()=>{ poly(ctx, [[-29,12],[24,12],[19,36],[-23,36]]); }, pal, {silhouette:sil});
+  if (!sil){
+    ctx.strokeStyle = rgba(pal.accent, 0.32);
+    ctx.lineWidth = 1;
+    for (let i=0;i<3;i++){
+      ctx.beginPath();
+      ctx.moveTo(-20 + i*13, 18);
+      ctx.lineTo(-18 + i*13, 32);
+      ctx.stroke();
+    }
+  }
+
+  /* 躯干：一整块方桶，肩比胯宽 */
+  bodyFill(ctx, ()=>{ rr(ctx,-21,-26,42,42,9); }, pal, {silhouette:sil, glow:!sil});
+  if (!sil){
+    /* 胸口岩纹 */
+    ctx.strokeStyle = rgba(pal.aux1, 0.8);
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-12,-20); ctx.lineTo(-4,-10); ctx.lineTo(-9,-2); ctx.lineTo(-3,6);
+    ctx.moveTo(4,-18); ctx.lineTo(10,-8); ctx.lineTo(5,0);
+    ctx.stroke();
+    /* 腰带：一条横向亮线，强调"实体" */
+    ctx.strokeStyle = rgba(pal.accent, 0.45);
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(-18,10); ctx.lineTo(17,10); ctx.stroke();
+  }
+
+  /* 肩甲：两块横向大方肩（剪影里负责"宽"） */
+  bodyFill(ctx, ()=>{ rr(ctx,-30,-32,16,17,5); }, pal, {silhouette:sil, stroke:false});
+  bodyFill(ctx, ()=>{ rr(ctx,15,-32,17,17,5); }, pal, {silhouette:sil, stroke:false});
+
+  /* 头：平顶盔，脖子完全收进肩里（不露颈 = 不显瘦） */
+  bodyFill(ctx, ()=>{ rr(ctx,-13,-47,26,21,5); }, pal, {silhouette:sil});
+  if (!sil){
+    ctx.fillStyle = rgba(pal.aux2, 0.95);
+    rr(ctx,-15,-49,30,6,2); ctx.fill();
+    /* 面甲缝：一条横向冷光，不看颜色也能读出"朝右" */
+    ctx.fillStyle = rgba(pal.accent, 0.85);
+    rr(ctx,-2,-39,12,2.6,1.3); ctx.fill();
+  } else {
+    rr(ctx,-15,-49,30,6,2); ctx.fillStyle = '#05070C'; ctx.fill();
+  }
+
+  /* 前臂 + 岩板：剪影的左右不对称来源 */
+  ctx.save();
+  ctx.translate(24 + push, 0);
+  ctx.rotate(tilt);
+  const shieldPath = () => {
+    poly(ctx, [[-15,-28],[2,-23],[16,-9],[14,14],[-1,25],[-16,14],[-16,-11]]);
+  };
+  bodyFill(ctx, shieldPath, pal, {silhouette:sil, glow:!sil});
+  if (!sil){
+    ctx.strokeStyle = rgba(pal.accent, 0.70);
+    ctx.lineWidth = 1.6;
+    shieldPath(); ctx.stroke();
+    /* 岩板上的三道横刻 + 中心护盾核心 */
+    ctx.strokeStyle = rgba(pal.aux1, 0.9);
+    ctx.lineWidth = 1.2;
+    for (let i=0;i<3;i++){
+      ctx.beginPath(); ctx.moveTo(-7, -18 + i*2.2); ctx.lineTo(5, -16 + i*2.2); ctx.stroke();
+    }
+    ctx.beginPath(); ctx.arc(0,-2,4.2,0,Math.PI*2);
+    ctx.fillStyle = rgba(pal.accent, 0.9); ctx.fill();
+    ctx.strokeStyle = rgba('#ffffff', 0.7); ctx.lineWidth = 1; ctx.stroke();
+  } else {
+    accentFill(ctx, ()=>ctx.arc(0,-2,4.2,0,Math.PI*2), '#05070C', 1, 0);
+  }
+  ctx.restore();
+
+  /* 持盾前臂：从右肩连到盾柄 */
+  bodyFill(ctx, ()=>{ rr(ctx,14,-12 + 0,16,4,2); }, pal, {silhouette:sil, stroke:false});
+
+  /* 冲击环：蓄力/出手时外扩的一道断弧（彩显才画，避免污染剪影判定） */
+  if (!sil && mode === 'cast' && ring > 0.05){
+    ctx.strokeStyle = rgba(pal.accent, 0.55 * ring);
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(16, 6, 20 + 22 * ring, -1.05, 0.6);
+    ctx.stroke();
+    ctx.strokeStyle = rgba(pal.accent, 0.24 * ring);
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.arc(16, 6, 24 + 30 * ring, -1.2, 0.9);
+    ctx.stroke();
+  }
+  /* 蓄力时脚下光尘 */
+  if (!sil && brace > 0 && mode === 'cast'){
+    for (let i=0;i<5;i++){
+      const a = t*1.4 + i*1.257;
+      ctx.fillStyle = rgba(pal.accent, 0.30 * brace);
+      ctx.fillRect(Math.cos(a)*22, 44 + Math.sin(a)*4, 2, 2);
+    }
+  }
+  ctx.restore();
+}
+
+/* ============================================================
+   2) 疾火：轻盈 / 锐利 / 拖尾
+   形体语言：窄体前倾 + 上掠焰冠 + 三条背焰 + 三条尾焰
+   （所有锐角都朝右上方，剪影读作"在跑"）
+   ============================================================ */
+function drawEmber(ctx, t, mode, k, pal, sil){
+  const p = (t / 2.2) % 1;
+  const bob = Math.sin(p * Math.PI * 2) * 1.5;
+  let lean = 0.11 + Math.sin(p * Math.PI * 2 + 1.1) * 0.035;
+  let crouch = 0, reach = 0, trail = 0, burst = 0;
+  if (mode === 'cast'){
+    if (k < 0.18){
+      const u = seg(k,0,0.18);
+      lean = 0.11 - 0.30 * easeOut(u); crouch = 4.5 * easeOut(u); trail = -0.7 * u;
+    } else if (k < 0.36){
+      const u = seg(k,0.18,0.36);
+      lean = -0.19 + 0.50 * easeOut(u); crouch = 4.5 * (1-u); reach = easeOut(u); trail = 0.55; burst = u;
+    } else if (k < 0.52){
+      const u = seg(k,0.36,0.52);
+      lean = 0.31; reach = 1; burst = 1; trail = 0.55 - 0.4*u;
+    } else {
+      const u = seg(k,0.52,1);
+      lean = 0.31 - 0.20 * u; reach = 1-u; burst = 1-u; trail = 0.15*(1-u);
+    }
+  }
+
+  ctx.save();
+  ctx.translate(0, bob + crouch);
+  ctx.rotate(lean);
+
+  if (!sil){
+    ctx.beginPath();
+    ctx.ellipse(-4, 50, 24, 5, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(2,6,14,0.45)';
+    ctx.fill();
+  }
+
+  /* 后腿：屈膝、脚尖朝后，读作"弹簧" */
+  ctx.lineCap = 'round';
+  if (sil){
+    capsule(ctx,-3,10,-14,30,8,'#05070C');
+    capsule(ctx,-14,30,-22,48,7,'#05070C');
+    capsule(ctx,5,10,15,31,8,'#05070C');
+    capsule(ctx,15,31,22,48,7,'#05070C');
+  } else {
+    capsule(ctx,-3,10,-14,30,8, rgba(pal.aux2,0.95));
+    capsule(ctx,-14,30,-22,48,7, rgba(pal.aux2,0.95));
+    capsule(ctx,5,10,15,31,8, rgba(shade(pal.aux2,0.12),0.98));
+    capsule(ctx,15,31,22,48,7, rgba(shade(pal.aux2,0.12),0.98));
+    ctx.strokeStyle = rgba(pal.accent, 0.30);
+    ctx.lineWidth = 1;
+    capsule(ctx,-3,10,-14,30,8, rgba(pal.primary||pal.main, 0.0));
+  }
+
+  /* 拖尾三条：向后下方散开（速度感来源 1） */
+  const tw1 = Math.sin(t*3.4)*3 + trail*10;
+  const tw2 = Math.sin(t*3.4+1.2)*3 + trail*14;
+  const tw3 = Math.sin(t*3.4+2.4)*3 + trail*8;
+  if (sil){
+    taper(ctx,-6,6,-34-tw1*0.3,26,7,1.4,-tw1); ctx.fillStyle='#05070C'; ctx.fill();
+    taper(ctx,-4,12,-26-tw2*0.3,37,6,1.2,-tw2*0.8); ctx.fill();
+    taper(ctx,-7,2,-19,43,5,1,0); ctx.fill();
+  } else {
+    taper(ctx,-6,6,-34-tw1*0.3,26,7,1.4,-tw1); ctx.fillStyle=rgba(pal.main,0.72); ctx.fill();
+    taper(ctx,-4,12,-26-tw2*0.3,37,6,1.2,-tw2*0.8); ctx.fillStyle=rgba(pal.aux1,0.60); ctx.fill();
+    taper(ctx,-7,2,-19,43,5,1,0); ctx.fillStyle=rgba(pal.main,0.50); ctx.fill();
+  }
+
+  /* 躯干：窄、上宽下窄 */
+  bodyFill(ctx, ()=>{
+    ctx.beginPath();
+    ctx.moveTo(-11,-28);
+    ctx.quadraticCurveTo(12,-27, 10,-10);
+    ctx.quadraticCurveTo(8,4, 6,10);
+    ctx.lineTo(-8,10);
+    ctx.quadraticCurveTo(-10,0, -12,-14);
+    ctx.closePath();
+  }, pal, {silhouette:sil, glow:!sil});
+
+  if (!sil){
+    /* 胸口一道斜向亮痕，指向出手方向 */
+    ctx.strokeStyle = rgba(pal.accent, 0.75);
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(-7,-20); ctx.lineTo(7,-10); ctx.stroke();
+    ctx.strokeStyle = rgba(pal.aux1, 0.65);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-5,-4); ctx.lineTo(3,2); ctx.stroke();
+  }
+
+  /* 背焰三条：向后上方掠起（速度感来源 2，也是剪影的"刺"） */
+  for (let i=0;i<3;i++){
+    const off = Math.sin(t*4.6 + i*1.6) * 3 + trail * (12 - i*2);
+    const ex = -30 - i*3 - off;
+    const ey = -38 + i*8 - off*0.4;
+    if (sil){
+      taper(ctx,-8,-20, ex,ey, 5.5-i*0.6, 1, -4-i*2);
+      ctx.fillStyle='#05070C'; ctx.fill();
+    } else {
+      taper(ctx,-8,-20, ex,ey, 5.5-i*0.6, 1, -4-i*2);
+      ctx.fillStyle = rgba(i===0?pal.aux1:pal.main, 0.78 - i*0.14);
+      ctx.fill();
+    }
+  }
+
+  /* 头 + 焰冠：冠是向上后方横扫的尖，48px 下也读作"尖顶" */
+  bodyFill(ctx, ()=>ctx.arc(5,-35,8,0,Math.PI*2), pal, {silhouette:sil, glow:!sil});
+  if (sil){
+    poly(ctx, [[9,-40],[2,-44],[-8,-50],[-1,-42],[5,-38]]);
+    ctx.fillStyle='#05070C'; ctx.fill();
+    poly(ctx, [[10,-38],[16,-44],[13,-34]]);
+    ctx.fill();
+  } else {
+    poly(ctx, [[9,-40],[2,-44],[-8,-50],[-1,-42],[5,-38]]);
+    ctx.fillStyle = rgba(pal.aux1, 0.95); ctx.fill();
+    ctx.strokeStyle = rgba(pal.accent, 0.5); ctx.lineWidth = 1; ctx.stroke();
+    poly(ctx, [[10,-38],[16,-44],[13,-34]]);
+    ctx.fillStyle = rgba(pal.main, 0.85); ctx.fill();
+    /* 眼缝（朝右） */
+    ctx.fillStyle = rgba(pal.accent, 0.9);
+    rr(ctx,8,-37,7,2.2,1.1); ctx.fill();
+  }
+
+  /* 前臂 + 火珠：出手时整条手臂前伸（速度感来源 3） */
+  const handX = 21 + reach * 10;
+  const handY = -1 - reach * 6;
+  if (sil){
+    capsule(ctx,7,-22, handX,handY, 5.5, '#05070C');
+    accentFill(ctx, ()=>ctx.arc(handX+2,handY,5.5,0,Math.PI*2), '#05070C', 1, 0);
+  } else {
+    capsule(ctx,7,-22, handX,handY, 5.5, rgba(shade(pal.main, 0.1), 0.95));
+    const orbR = 5 + burst * 3 + Math.sin(t*7)*0.6;
+    const og = ctx.createRadialGradient(handX+2,handY,1, handX+2,handY,orbR*2.2);
+    og.addColorStop(0,'rgba(255,255,245,0.95)');
+    og.addColorStop(0.35, rgba(pal.aux1, 0.9));
+    og.addColorStop(1, rgba(pal.main, 0));
+    ctx.fillStyle = og;
+    ctx.beginPath(); ctx.arc(handX+2, handY, orbR*2.2, 0, Math.PI*2); ctx.fill();
+    ctx.fillStyle = rgba('#ffffff', 0.92);
+    ctx.beginPath(); ctx.arc(handX+2, handY, orbR*0.62, 0, Math.PI*2); ctx.fill();
+    /* 出手后的速度线 */
+    if (burst > 0.1){
+      ctx.strokeStyle = rgba(pal.aux1, 0.55*burst);
+      ctx.lineWidth = 1.6;
+      for (let i=0;i<3;i++){
+        ctx.beginPath();
+        ctx.moveTo(handX - 30 - i*8, handY - 8 + i*9);
+        ctx.lineTo(handX - 6 - i*4, handY - 4 + i*6);
+        ctx.stroke();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+/* ============================================================
+   3) 观星：悬浮 / 天象 / 环轨
+   形体语言：无腿悬浮 + 环轨横穿躯干 + 尖顶兜帽 + 星珠
+   （环轨是剪影里唯一的"圆", 与另外两个的"块/刺"形成三角对立）
+   ============================================================ */
+function drawGazer(ctx, t, mode, k, pal, sil){
+  const p = (t / 3.0) % 1;
+  const bob = Math.sin(p * Math.PI * 2) * 2.8;
+  let ringRx = 36, ringRy = 12.5, ringRot = -0.24, orbX = 23, orbY = -38, burst = 0, flare = 0, gather = 0;
+  if (mode === 'cast'){
+    if (k < 0.30){
+      const u = seg(k,0,0.30);
+      ringRx = 36 - 15 * easeInOut(u);
+      ringRy = 12.5 - 3.5 * easeInOut(u);
+      ringRot = -0.24 + 0.22 * u;
+      orbX = 23 - 14 * easeOut(u); orbY = -38 - 6 * easeOut(u);
+      gather = u;
+    } else if (k < 0.48){
+      const u = seg(k,0.30,0.48);
+      ringRx = 21 + 20 * easeOut(u);
+      ringRy = 9 + 4.5 * easeOut(u);
+      ringRot = -0.02 - 0.22 * easeOut(u);
+      orbX = 9 + 19 * easeOut(u); orbY = -44 + 18 * easeOut(u);
+      burst = u;
+    } else {
+      const u = seg(k,0.48,1);
+      ringRx = 41 - 5 * u; ringRy = 13.5 - 1 * u;
+      ringRot = -0.24; orbX = 28 - 5 * u; orbY = -26 + 8 * u*0.2;
+      burst = 1-u; flare = 1-u;
+    }
+  } else {
+    ringRot = -0.24 + Math.sin(t*0.7) * 0.10;
+    orbY = -38 + Math.sin(t*1.8)*2.4;
+  }
+
+  ctx.save();
+  ctx.translate(0, bob);
+
+  if (!sil){
+    ctx.beginPath();
+    ctx.ellipse(0, 44, 20, 4.2, 0, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(90,120,255,0.16)';
+    ctx.fill();
+  }
+
+  /* 环轨：先画后半（在身体后），再画身体，再叠前半，形成"穿过"的空间感 */
+  const drawRingArc = (from,to,front) => {
+    ctx.save();
+    ctx.translate(0, 2);
+    ctx.rotate(ringRot);
+    ctx.beginPath();
+    ctx.ellipse(0, 0, ringRx, ringRy, 0, from, to);
+    if (sil){
+      ctx.strokeStyle = '#05070C';
+      ctx.lineWidth = 4.6;
+    } else {
+      ctx.strokeStyle = rgba(front ? pal.aux1 : pal.main, front ? 0.85 : 0.5);
+      ctx.lineWidth = 4.2;
+      if (front){ ctx.shadowColor = rgba(pal.aux1, 0.55); ctx.shadowBlur = 12; }
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    /* 环上的三个刻度珠 */
+    if (!sil){
+      for (let i=0;i<3;i++){
+        const a = from + (to-from) * (i/3) + (front?0.12:0);
+        const px = Math.cos(a)*ringRx, py = Math.sin(a)*ringRy;
+        ctx.fillStyle = rgba(pal.accent, front?0.85:0.5);
+        ctx.beginPath(); ctx.arc(px,py,1.8,0,Math.PI*2); ctx.fill();
+      }
+    }
+    ctx.restore();
+  };
+  drawRingArc(Math.PI*0.02, Math.PI*0.98, false);
+
+  /* 长袍：上宽下收，底部悬空（没有腿） */
+  bodyFill(ctx, ()=>{
+    ctx.beginPath();
+    ctx.moveTo(-11,-26);
+    ctx.quadraticCurveTo(-13,0, -8,24);
+    ctx.quadraticCurveTo(-4,34, 0,40);
+    ctx.quadraticCurveTo(4,34, 8,24);
+    ctx.quadraticCurveTo(13,0, 11,-26);
+    ctx.closePath();
+  }, pal, {silhouette:sil, glow:!sil});
+  /* 两条垂带：让"悬浮"的下缘不像一根尖 */
+  if (sil){
+    taper(ctx,-2,35,-8,48,3.4,1,3); ctx.fillStyle='#05070C'; ctx.fill();
+    taper(ctx,3,37,6,48,3.0,1,-2); ctx.fill();
+  } else {
+    taper(ctx,-2,35,-8,48,3.4,1,3); ctx.fillStyle=rgba(pal.aux2,0.95); ctx.fill();
+    taper(ctx,3,37,6,48,3.0,1,-2); ctx.fillStyle=rgba(pal.aux2,0.9); ctx.fill();
+    ctx.strokeStyle = rgba(pal.accent, 0.30); ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(-4,20); ctx.lineTo(-2,38); ctx.stroke();
+  }
+
+  /* 袍面星纹（彩显） */
+  if (!sil){
+    ctx.fillStyle = rgba(pal.accent, 0.55);
+    for (let i=0;i<3;i++){
+      const yy = -12 + i*12;
+      ctx.fillRect(-7 + i*3, yy, 2, 2);
+    }
+    ctx.strokeStyle = rgba(pal.aux1, 0.30);
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(0,4, 26, 0.5, 2.2); ctx.stroke();
+  }
+
+  /* 宽袖：左袖垂、右袖抬（抬起的右臂是"施法"的主要读点） */
+  bodyFill(ctx, ()=>{
+    poly(ctx, [[-10,-24],[-14,-8],[-20,2],[-14,7],[-7,-2],[-5,-15]]);
+  }, pal, {silhouette:sil, stroke:false});
+  /* 右臂：从肩斜向星珠，剪影里是一条清楚的斜线 */
+  if (sil){
+    capsule(ctx, 11,-27, 19,-34, 5, '#05070C');
+  } else {
+    capsule(ctx, 11,-27, 19,-34, 5, rgba(pal.main, 0.95));
+  }
+
+  /* 头：尖顶兜帽 */
+  bodyFill(ctx, ()=>{ ctx.arc(0,-35,8.6,0,Math.PI*2); }, pal, {silhouette:sil});
+  if (sil){
+    poly(ctx, [[-7,-41],[0,-50],[7,-41],[3,-44],[-3,-44]]); ctx.fillStyle='#05070C'; ctx.fill();
+  } else {
+    poly(ctx, [[-7,-41],[0,-50],[7,-41],[3,-44],[-3,-44]]);
+    ctx.fillStyle = rgba(pal.aux2,0.98); ctx.fill();
+    ctx.strokeStyle = rgba(pal.aux1, 0.45); ctx.lineWidth = 1; ctx.stroke();
+    /* 面：一片星空色，无五官 */
+    ctx.fillStyle = rgba(pal.aux2, 0.9);
+    rr(ctx,2,-38,7,8,3); ctx.fill();
+    ctx.fillStyle = rgba(pal.accent, 0.9);
+    ctx.fillRect(5,-35,2,2); ctx.fillRect(7,-32,1.6,1.6);
+  }
+
+  /* 前臂环轨（覆盖身体，制造穿插） */
+  drawRingArc(Math.PI*1.02, Math.PI*1.98, true);
+
+  /* 星珠：施法时前推并爆闪 */
+  const orbR = 4.5 + burst * 4.5;
+  if (sil){
+    accentFill(ctx, ()=>ctx.arc(orbX,orbY, orbR, 0, Math.PI*2), '#05070C', 1, 0);
+    /* 星珠周围两枚小卫星，剪影里也保留（合规的"星象"符号） */
+    accentFill(ctx, ()=>ctx.arc(orbX-9, orbY-4, 1.6, 0, Math.PI*2), '#05070C', 1, 0);
+    accentFill(ctx, ()=>ctx.arc(orbX+4, orbY-9, 1.3, 0, Math.PI*2), '#05070C', 1, 0);
+  } else {
+    const og = ctx.createRadialGradient(orbX,orbY,1, orbX,orbY,orbR*2.6);
+    og.addColorStop(0, 'rgba(255,255,255,0.95)');
+    og.addColorStop(0.3, rgba(pal.aux1, 0.92));
+    og.addColorStop(0.65, rgba(pal.main, 0.55));
+    og.addColorStop(1, rgba(pal.main, 0));
+    ctx.fillStyle = og;
+    ctx.beginPath(); ctx.arc(orbX,orbY,orbR*2.6,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.beginPath(); ctx.arc(orbX,orbY,orbR*0.55,0,Math.PI*2); ctx.fill();
+    /* 两条星轨细线 */
+    if (burst > 0.1){
+      ctx.strokeStyle = rgba(pal.accent, 0.45*burst);
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.ellipse(orbX, orbY, 16*burst, 6*burst, -0.5, 0, Math.PI*2);
+      ctx.stroke();
+    }
+  }
+
+  /* 聚能时环内吸的细尘 */
+  if (!sil && gather > 0.1){
+    for (let i=0;i<7;i++){
+      const a = -t*2.2 - i*0.9;
+      const rr2 = 18 + (1-gather)*16;
+      ctx.fillStyle = rgba(pal.accent, 0.42*gather);
+      ctx.fillRect(Math.cos(a)*rr2, 2 + Math.sin(a)*rr2*0.36, 1.8, 1.8);
+    }
+  }
+  ctx.restore();
+}
+
+/* 总入口：按角色分发（opt = {mode,k,t,silhouette,scale}） */
+function drawHeroArt(ctx, id, opt){
+  const hero = HEROES[id];
+  const pal = hero.palette;
+  const sil = !!opt.silhouette;
+  const mode = opt.mode || 'idle';
+  const k = opt.k || 0;
+  const t = opt.t || 0;
+  if (id === 'warden') drawWarden(ctx, t, mode, k, pal, sil);
+  else if (id === 'ember') drawEmber(ctx, t, mode, k, pal, sil);
+  else drawGazer(ctx, t, mode, k, pal, sil);
+}
+/* ============================================================
+   2) 画布工具：尺寸 / 适配 / 色盲后处理
+   ============================================================ */
+const DPR = 2;                       // 固定 2 倍，保证截图锐利且不受系统缩放影响
+/* 按 CSS 尺寸同步画布像素，并返回 2D 上下文 */
+function fitCanvas(canvas){
+  const w = Math.max(1, Math.round(canvas.clientWidth));
+  const h = Math.max(1, Math.round(canvas.clientHeight));
+  if (canvas.width !== w*DPR || canvas.height !== h*DPR){
+    canvas.width = w*DPR;
+    canvas.height = h*DPR;
+  }
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  return { ctx, w, h };
+}
+/* 对离屏画布做色盲矩阵变换（Machado 2009，保留 alpha） */
+function cbTransform(offscreen, mode){
+  const m = CB_MATRICES[mode];
+  if (!m) return;
+  const ctx = offscreen.getContext('2d');
+  const img = ctx.getImageData(0,0,offscreen.width,offscreen.height);
+  const d = img.data;
+  for (let i=0;i<d.length;i+=4){
+    if (d[i+3] === 0) continue;
+    const r = srgbToLin(d[i]), g = srgbToLin(d[i+1]), b = srgbToLin(d[i+2]);
+    const nr = m[0][0]*r + m[0][1]*g + m[0][2]*b;
+    const ng = m[1][0]*r + m[1][1]*g + m[1][2]*b;
+    const nb = m[2][0]*r + m[2][1]*g + m[2][2]*b;
+    d[i] = linToSrgb(nr); d[i+1] = linToSrgb(ng); d[i+2] = linToSrgb(nb);
+  }
+  ctx.putImageData(img,0,0);
+}
+/* 把角色画进任意画布：opt={height, mode, k, t, silhouette, yRatio, post} */
+function paintHero(canvas, id, opt){
+  const o = opt || {};
+  const { ctx, w, h } = fitCanvas(canvas);
+  const off = document.createElement('canvas');
+  off.width = canvas.width; off.height = canvas.height;
+  const octx = off.getContext('2d');
+  octx.setTransform(DPR,0,0,DPR,0,0);
+  const scale = (o.height || 140) / 100;
+  const cx = o.x == null ? w/2 : o.x;
+  const cy = o.y == null ? h * (o.yRatio == null ? 0.54 : o.yRatio) : o.y;
+  if (o.sigil) drawSigil(octx, w, h, o.sigilTone || HEROES[id].palette.accent, o.sigilT || 0);
+  octx.save();
+  octx.translate(cx, cy);
+  octx.scale(scale, scale);
+  drawHeroArt(octx, id, { mode:o.mode||'idle', k:o.k||0, t:o.t||0, silhouette:!!o.silhouette });
+  octx.restore();
+  if (LAB.cb !== 'none' && !o.skipCb) cbTransform(off, LAB.cb);
+  ctx.clearRect(0,0,w,h);
+  ctx.save();
+  ctx.setTransform(1,0,0,1,0,0);
+  ctx.drawImage(off,0,0);
+  ctx.restore();
+  if (o.post) o.post(ctx,w,h);
+}
+
+/* 标题页符阵的"同源"底纹：透视地线 + 断弧 + 等分刻度 + 余烬 */
+function drawSigil(ctx, w, h, tone, t){
+  const cx = w/2, horizon = h*0.66;
+  ctx.save();
+  /* 透视地线：向消失点收敛的放射线 */
+  ctx.strokeStyle = rgba(tone, 0.14);
+  ctx.lineWidth = 1;
+  for (let i=-8;i<=8;i++){
+    const bx = cx + i*(w*0.12);
+    ctx.beginPath();
+    ctx.moveTo(bx, h+2);
+    ctx.lineTo(cx + i*10, horizon);
+    ctx.stroke();
+  }
+  /* 地平线上的等分刻度 */
+  ctx.strokeStyle = rgba(tone, 0.20);
+  for (let i=-10;i<=10;i++){
+    const x = cx + i*(w*0.045);
+    ctx.beginPath();
+    ctx.moveTo(x, horizon - 3);
+    ctx.lineTo(x, horizon + 3);
+    ctx.stroke();
+  }
+  ctx.beginPath();
+  ctx.moveTo(w*0.06, horizon); ctx.lineTo(w*0.94, horizon);
+  ctx.strokeStyle = rgba(tone, 0.16); ctx.stroke();
+  /* 底部断弧：两层，每层切成四段，转速不一 */
+  const drawBroken = (radius, rot, alpha, segCount) => {
+    ctx.save();
+    ctx.translate(cx, h*0.94);
+    ctx.rotate(rot);
+    const gap = Math.PI*2/segCount;
+    for (let i=0;i<segCount;i++){
+      ctx.beginPath();
+      ctx.arc(0,0,radius, i*gap + 0.10, i*gap + gap*0.62);
+      ctx.strokeStyle = rgba(tone, alpha);
+      ctx.lineWidth = i===0 ? 1.6 : 1;
+      ctx.stroke();
+    }
+    /* 刻度珠 */
+    for (let i=0;i<16;i++){
+      const a = i*Math.PI*2/16;
+      ctx.fillStyle = rgba(tone, alpha*0.8);
+      ctx.fillRect(Math.cos(a)*radius-1, Math.sin(a)*radius-1, 2, 2);
+    }
+    ctx.restore();
+  };
+  drawBroken(Math.min(w,h)*0.42, t*0.06, 0.13, 3);
+  drawBroken(Math.min(w,h)*0.58, -t*0.04, 0.09, 4);
+  /* 余烬 */
+  ctx.fillStyle = rgba(tone, 0.5);
+  for (let i=0;i<9;i++){
+    const a = i*0.7 + t*0.2;
+    const x = cx + Math.cos(a)*(w*0.30);
+    const y = h*0.82 - ((t*18 + i*23) % (h*0.5));
+    ctx.globalAlpha = 0.18 + (i%3)*0.08;
+    ctx.fillRect(x, y, 1.8, 1.8);
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+}
+
+/* ============================================================
+   3) 剪影测量与区分度
+   ============================================================ */
+/* 在离屏画布上画纯黑剪影，返回包围盒与像素数据（单位坐标系 220×180, 原点 110/90） */
+function measureSilhouette(id){
+  const S = 220, O = { x:110, y:96 };
+  const c = document.createElement('canvas');
+  c.width = S; c.height = S;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,S,S);
+  ctx.save();
+  ctx.translate(O.x, O.y);
+  drawHeroArt(ctx, id, { mode:'idle', k:0, t:0, silhouette:true });
+  ctx.restore();
+  const data = ctx.getImageData(0,0,S,S).data;
+  let x0=S, y0=S, x1=0, y1=0, ink=0;
+  for (let y=0;y<S;y++){
+    for (let x=0;x<S;x++){
+      const a = data[(y*S+x)*4+3];
+      if (a > 110){
+        ink++;
+        if (x<x0) x0=x; if (x>x1) x1=x;
+        if (y<y0) y0=y; if (y>y1) y1=y;
+      }
+    }
+  }
+  return { src:c, x0, y0, w:(x1-x0+1), h:(y1-y0+1), ink, ox:O.x, oy:O.y };
+}
+/* 生成 48px 高的归一化剪影遮罩（用于两两对比） */
+function silhouetteMask(id, targetH){
+  const m = measureSilhouette(id);
+  const scale = targetH / m.h;
+  const w = Math.round(m.w * scale);
+  const c = document.createElement('canvas');
+  c.width = w; c.height = targetH;
+  const ctx = c.getContext('2d');
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(m.src, m.x0, m.y0, m.w, m.h, 0, 0, w, targetH);
+  const data = ctx.getImageData(0,0,w,targetH).data;
+  const arr = new Uint8Array(w*targetH);
+  for (let i=0;i<w*targetH;i++) arr[i] = data[i*4+3] > 110 ? 1 : 0;
+  return { w, h:targetH, arr };
+}
+/* 两个剪影的 XOR 占比（并集为分母）：同一 48px 高度、底边与水平中心对齐 */
+function maskDiff(a, b){
+  const W = Math.max(a.w, b.w) + 8;
+  const H = Math.max(a.h, b.h) + 4;
+  const read = (m) => {
+    const ox = Math.round((W - m.w)/2);
+    const oy = H - m.h - 2;
+    return (x,y) => {
+      const mx = x-ox, my = y-oy;
+      if (mx<0 || my<0 || mx>=m.w || my>=m.h) return 0;
+      return m.arr[my*m.w+mx];
+    };
+  };
+  const fa = read(a), fb = read(b);
+  let uni = 0, xor = 0;
+  for (let y=0;y<H;y++){
+    for (let x=0;x<W;x++){
+      const u = fa(x,y), v = fb(x,y);
+      if (u||v) uni++;
+      if (u!==v) xor++;
+    }
+  }
+  return { xor, uni, pct: uni ? (xor/uni*100) : 0 };
+}
+
+/* ============================================================
+   4) 视图构建
+   ============================================================ */
+/* A · 三张剪影并排（1× 判定 + 3× 参考 + 数据） */
+function buildSilView(){
+  const row = document.getElementById('silRow');
+  row.innerHTML = HERO_IDS.map((id) => {
+    const h = HEROES[id];
+    return `
+      <div class="sil-col" data-hero="${id}">
+        <h3>${h.name}</h3>
+        <span class="role">${h.glyph} · ${h.role}</span>
+        <div class="sil-canvas-box"><canvas class="silCv" data-id="${id}" data-scale="1"></canvas></div>
+        <div class="sil-tag">1× 实尺寸 · 高 <b>48px</b></div>
+        <div class="sil-canvas-box zoom"><canvas class="silCv" data-id="${id}" data-scale="3"></canvas></div>
+        <div class="sil-tag">3× 参考（判定仍按 1×）</div>
+        <div class="sil-metrics" id="met-${id}">—</div>
+      </div>`;
+  }).join('');
+
+  /* 逐张画：把测量结果按目标高度精确缩放（48px / 144px） */
+  LAB.metrics = {};
+  HERO_IDS.forEach((id) => {
+    const m = measureSilhouette(id);
+    LAB.metrics[id] = { w: m.w, h: m.h, ink: m.ink };
+    const scaleToPx = (px, targetH) => {
+      const cv = row.querySelector(`canvas[data-id="${id}"][data-scale="${px===48?1:3}"]`);
+      const { ctx, w, h } = fitCanvas(cv);
+      ctx.clearRect(0,0,w,h);
+      const k = targetH / m.h;
+      const dw = m.w * k, dh = targetH;
+      const dx = (w - dw)/2;
+      const dy = h - 8 - dh;
+      ctx.imageSmoothingEnabled = true;
+      ctx.drawImage(m.src, m.x0, m.y0, m.w, m.h, dx, dy, dw, dh);
+      return { dw, dh };
+    };
+    scaleToPx(48, 48);
+    scaleToPx(144, 144);
+  });
+
+  /* 两两 XOR 矩阵 */
+  const masks = {};
+  HERO_IDS.forEach((id)=> masks[id] = silhouetteMask(id, 48));
+  const pairs = [['warden','ember'],['warden','gazer'],['ember','gazer']];
+  const diff = {};
+  pairs.forEach(([a,b]) => { diff[a+'-'+b] = maskDiff(masks[a], masks[b]); });
+  LAB.metrics.diff = diff;
+
+  /* 每张卡的宽 / 墨量 / 最小对差 */
+  HERO_IDS.forEach((id)=>{
+    const own = pairs.filter(p=>p.includes(id));
+    const minPct = Math.min(...own.map(([a,b])=>diff[a+'-'+b].pct));
+    const el = document.getElementById('met-'+id);
+    el.innerHTML = `<span>宽 <b>${(LAB.metrics[id].w*48/LAB.metrics[id].h).toFixed(1)}px</b></span>
+      <span>墨量 <b>${Math.round(LAB.metrics[id].ink*(48/LAB.metrics[id].h)**2)}px²</b></span>
+      <span>最小差异 <b>${minPct.toFixed(1)}%</b></span>`;
+  });
+
+  /* 矩阵表 */
+  const mt = document.getElementById('matTable');
+  mt.innerHTML = `<tr><th>XOR / 并集</th>${HERO_IDS.map(id=>`<th>${HEROES[id].name}</th>`).join('')}</tr>` +
+    HERO_IDS.map((r)=>{
+      const cells = HERO_IDS.map((c)=>{
+        if (r===c) return `<td>—</td>`;
+        const key = HERO_IDS.indexOf(r) < HERO_IDS.indexOf(c) ? r+'-'+c : c+'-'+r;
+        return `<td>${diff[key].pct.toFixed(1)}%</td>`;
+      }).join('');
+      return `<tr><th>${HEROES[r].name}</th>${cells}</tr>`;
+    }).join('');
+  document.getElementById('matNote').innerHTML =
+    `<b>判据：</b>48px 高、纯黑、同底边对齐；两两 XOR 占并集 ≥ 15% 视为“不看颜色可分”。` +
+    `当前最小对差 <b>${Math.min(...pairs.map(([a,b])=>diff[a+'-'+b].pct)).toFixed(1)}%</b>。` +
+    `三者的差异来源分别是：<b>大块岩板</b>（守拙）/ <b>斜向刺尾</b>（疾火）/ <b>环轨圆</b>（观星）——三种几何原型互不重叠。`;
+  paintDiffRow(masks, diff);
+}
+
+/* 叠差图：把两个 48px 剪影按同底边对齐后逐像素着色 */
+function paintDiffRow(masks, diff){
+  const row = document.getElementById('diffRow');
+  const pairs = [['warden','ember'],['warden','gazer'],['ember','gazer']];
+  row.innerHTML = pairs.map(([a,b])=>{
+    return `<div class="diff-item">
+      <div class="cap"><span>${HEROES[a].name} × ${HEROES[b].name}</span><b>${diff[a+'-'+b].pct.toFixed(1)}%</b></div>
+      <canvas class="diffCv" data-a="${a}" data-b="${b}"></canvas>
+    </div>`;
+  }).join('');
+  row.querySelectorAll('.diffCv').forEach((cv)=>{
+    const a = masks[cv.dataset.a], b = masks[cv.dataset.b];
+    const W = Math.max(a.w, b.w) + 10, H = 52;
+    const off = document.createElement('canvas');
+    off.width = W*2; off.height = H*2;
+    const oc = off.getContext('2d');
+    const img = oc.createImageData(W*2, H*2);
+    const oxa = Math.round((W - a.w)/2), oya = H - a.h - 2;
+    const oxb = Math.round((W - b.w)/2), oyb = H - b.h - 2;
+    const at = (m,ox,oy,x,y)=>{
+      const mx = x-ox, my = y-oy;
+      return (mx>=0 && my>=0 && mx<m.w && my<m.h) ? m.arr[my*m.w+mx] : 0;
+    };
+    for (let y=0;y<H*2;y++){
+      for (let x=0;x<W*2;x++){
+        const u = at(a,oxa,oya, Math.floor(x/2), Math.floor(y/2));
+        const v = at(b,oxb,oyb, Math.floor(x/2), Math.floor(y/2));
+        let rgb = null;
+        if (u && v) rgb = [207,217,228];
+        else if (u) rgb = [13,22,38];
+        else if (v) rgb = [55,83,111];
+        else continue;
+        const i = (y*W*2+x)*4;
+        img.data[i]=rgb[0]; img.data[i+1]=rgb[1]; img.data[i+2]=rgb[2]; img.data[i+3]=255;
+      }
+    }
+    oc.putImageData(img,0,0);
+    const { ctx, w, h } = fitCanvas(cv);
+    ctx.clearRect(0,0,w,h);
+    ctx.imageSmoothingEnabled = false;
+    /* 保持剪影的宽高比，居中放置，避免被拉扁 */
+    const ratio = (W*2)/(H*2);
+    let dh = h, dw = dh*ratio;
+    if (dw > w){ dw = w; dh = w/ratio; }
+    ctx.drawImage(off, 0,0, W*2, H*2, (w-dw)/2, (h-dh)/2, dw, dh);
+  });
+}
+
+/* B · 选角卡片 */
+function buildCards(){
+  const grid = document.getElementById('cardGrid');
+  grid.innerHTML = HERO_IDS.map((id, i) => {
+    const h = HEROES[id];
+    const tone = simulateHex(h.palette.main, LAB.cb);
+    const hpPct = Math.round((h.hp - 60) / 60 * 100);
+    const spPct = Math.round(h.speed / 1.1 * 100);
+    return `
+      <article class="card ${LAB.hero===id?'is-on':''}" data-hero="${id}" style="--tone:${tone}">
+        <div class="card-head">
+          <div>
+            <div class="idx">0${i+1} · ${h.glyph}</div>
+            <h3>${h.name}</h3>
+          </div>
+          <span class="tag">${h.role.split(' · ')[0]}</span>
+        </div>
+        <div class="portrait"><canvas class="cardArt" data-id="${id}"></canvas></div>
+        <div class="stats">
+          <div class="stat-row">
+            <span class="k">生命</span>
+            <span class="statbar"><b style="width:${clamp(hpPct,10,100)}%"></b></span>
+            <span class="v">${h.hp} <small>${h.hpNote}</small></span>
+          </div>
+          <div class="stat-row">
+            <span class="k">移速</span>
+            <span class="statbar"><b style="width:${clamp(spPct,10,100)}%"></b></span>
+            <span class="v">${h.speedLabel} <small>设计</small></span>
+          </div>
+          <div class="stat-row">
+            <span class="k">起手</span>
+            <span class="v" style="grid-column:2/4; display:flex; justify-content:flex-end; gap:6px">
+              ${h.skill.split(' / ').map((s)=>`<span class="skill-chip"><i></i>${s}</span>`).join('')}
+            </span>
+          </div>
+        </div>
+        <div class="palette">
+          <span class="lbl">PAL</span>
+          ${['main','aux1','aux2','accent'].map(k=>`<i class="sw" style="background:${simulateHex(h.palette[k], LAB.cb)}" title="${k} ${h.palette[k]}"></i>`).join('')}
+        </div>
+        <div class="card-foot">※ 移速为设计目标；主文件当前三名同速（1.00×）。</div>
+      </article>`;
+  }).join('');
+  grid.querySelectorAll('.card').forEach((el)=>{
+    el.addEventListener('click', ()=> setHero(el.dataset.hero));
+  });
+}
+/* 画一张卡的头像（含符阵底纹） */
+function paintCardArt(){
+  document.querySelectorAll('.cardArt').forEach((cv)=>{
+    const id = cv.dataset.id;
+    paintHero(cv, id, {
+      height: 150,
+      yRatio: 0.52,
+      t: LAB.t,
+      silhouette: LAB.silhouette,
+      sigil: true,
+      sigilTone: HEROES[id].palette.main,
+      sigilT: LAB.t
+    });
+  });
+}
+
+/* C · 施法姿态三连 */
+function buildCast(){
+  const grid = document.getElementById('castGrid');
+  grid.innerHTML = HERO_IDS.map((id) => {
+    const h = HEROES[id];
+    const kf = { warden:{k:0.52, label:'岩盾前推'}, ember:{k:0.40, label:'前扑出手'}, gazer:{k:0.44, label:'星珠前推'} }[id];
+    return `
+      <article class="cast-col" data-hero="${id}" style="--tone:${simulateHex(h.palette.main, LAB.cb)}">
+        <div class="top">
+          <h3>${h.name}</h3>
+          <span class="phase">CAST k=${kf.k.toFixed(2)} · ${kf.label}</span>
+        </div>
+        <div class="cast-body">
+          <div class="cast-stage"><canvas class="castArt" data-id="${id}" data-k="${kf.k}"></canvas></div>
+          <div class="idle-thumb">
+            <canvas class="idleArt" data-id="${id}"></canvas>
+            <span>IDLE 待机</span>
+          </div>
+        </div>
+        <div class="timeline">
+          ${['起手','蓄力','出手','余波','回位'].map((s,i)=>`<span class="kf ${i===2?'on':''}">${s}</span>`).join('')}
+        </div>
+        <div class="kf-table">
+          <div class="kf-line"><b>IDLE</b><span>${h.idleKeys.map((s,i)=>`<em>${Math.round(i*100/3)}%</em>${s}`).join(' ')}</span></div>
+          <div class="kf-line"><b>CAST</b><span>${h.castKeys.map((s,i)=>`<em>${Math.round(i*100/3)}%</em>${s}`).join(' ')}</span></div>
+        </div>
+        <div class="card-foot" style="margin-top:0">剪影锚点：${h.silhouetteKey}</div>
+      </article>`;
+  }).join('');
+}
+/* 画施法大图与待机小条 */
+function paintCast(){
+  document.querySelectorAll('.castArt').forEach((cv)=>{
+    const id = cv.dataset.id;
+    paintHero(cv, id, {
+      height: 244, yRatio: 0.55, mode:'cast', k: parseFloat(cv.dataset.k),
+      t: LAB.t, silhouette: LAB.silhouette, sigil:true, sigilTone: HEROES[id].palette.main, sigilT: LAB.t*0.5
+    });
+  });
+  document.querySelectorAll('.idleArt').forEach((cv)=>{
+    const id = cv.dataset.id;
+    paintHero(cv, id, {
+      height: 130, yRatio: 0.56, mode:'idle',
+      t: LAB.t, silhouette: LAB.silhouette
+    });
+  });
+}
+
+/* D · 单体放大 */
+function paintFocus(){
+  const cv = document.getElementById('focusCanvas');
+  const id = LAB.hero;
+  const isCast = LAB.cast;
+  const k = isCast ? (LAB.castOverride != null ? LAB.castOverride : ((LAB.t % 1.2) / 1.2)) : 0;
+  paintHero(cv, id, {
+    height: 330, yRatio: 0.55, mode: isCast?'cast':'idle', k,
+    t: LAB.t, silhouette: LAB.silhouette,
+    sigil:true, sigilTone: HEROES[id].palette.main, sigilT: LAB.t*0.6
+  });
+  document.getElementById('focusName').textContent = HEROES[id].name;
+  document.getElementById('focusRole').textContent = HEROES[id].role;
+  document.getElementById('focusState').textContent = isCast ? 'CAST 施法 · k=' + k.toFixed(2) : 'IDLE 待机';
+  document.getElementById('btnIdle').classList.toggle('on', !isCast);
+  document.getElementById('btnCast').classList.toggle('on', isCast);
+}
+/* 右侧信息面板：色板（含色盲模拟值）/ 关键帧 / 剪影锚点 */
+function buildInfo(){
+  const h = HEROES[LAB.hero];
+  const pal = h.palette;
+  const labels = {main:'主色', aux1:'辅色 1', aux2:'辅色 2', accent:'强调'};
+  const rows = ['main','aux1','aux2','accent'].map((k)=>{
+    const sim = simulateHex(pal[k], LAB.cb);
+    return `<div class="pal-row">
+      <span>${labels[k]}</span>
+      <i class="sw" style="background:${sim}"></i>
+      <span class="hex">${pal[k]}${LAB.cb!=='none'?` <span class="sim">→ ${sim}</span>`:''} · L ${(luminance(pal[k])*100).toFixed(1)}%</span>
+    </div>`;
+  }).join('');
+  const idle = h.idleKeys.map((s,i)=>`<li><b>${Math.round(i*100/3)}%</b><span>${s}</span></li>`).join('');
+  const cast = h.castKeys.map((s,i)=>`<li><b>${Math.round(i*100/3)}%</b><span>${s}</span></li>`).join('');
+  const m = LAB.metrics && LAB.metrics[LAB.hero];
+  const silW = m ? (m.w*48/m.h).toFixed(1) : '—';
+  document.getElementById('infoPanel').innerHTML = `
+    <h3>${h.name} · 形象说明</h3>
+    <div class="info-block">
+      <p class="t">剪影锚点</p>
+      <div style="font-size:11px; line-height:1.6; color:var(--text-2)">${h.silhouetteKey}</div>
+      <div style="font-family:var(--mono); font-size:10px; color:var(--text-3); margin-top:4px">48px 高 · 宽 ${silW}px · 墨量 ${m?Math.round(m.ink*(48/m.h)**2):'—'}px²</div>
+    </div>
+    <div class="info-block">
+      <p class="t">色板（主 / 两辅 / 强调）${LAB.cb!=='none'?'· 右侧为模拟值':''}</p>
+      <div class="pal-rows">${rows}</div>
+    </div>
+    <div class="info-block">
+      <p class="t">待机循环 · 4.2s / 2.2s / 3.0s</p>
+      <ul class="kf-list">${idle}</ul>
+    </div>
+    <div class="info-block">
+      <p class="t">施法关键帧 · 0 → 1</p>
+      <ul class="kf-list">${cast}</ul>
+    </div>
+    <div class="info-block">
+      <p class="t">接入提示</p>
+      <div style="font-size:11px; line-height:1.6; color:var(--text-3)">
+        绘制入口 <code style="color:var(--tech)">drawPlayer()</code>，角色表 <code style="color:var(--tech)">CHARACTER_CONFIG.list</code>。
+        详见 HERO_DESIGN.md 的“接入点”一节。
+      </div>
+    </div>`;
+}
+
+/* ============================================================
+   5) 背景符阵
+   ============================================================ */
+function paintBg(){
+  const cv = document.getElementById('bg');
+  const { ctx, w, h } = fitCanvas(cv);
+  ctx.clearRect(0,0,w,h);
+  const t = LAB.t;
+  const cx = w/2, horizon = h*0.34;
+  /* 放射透视地线 */
+  ctx.strokeStyle = 'rgba(62,230,255,0.055)';
+  ctx.lineWidth = 1;
+  for (let i=-8;i<=8;i++){
+    ctx.beginPath();
+    ctx.moveTo(cx + i*(w*0.13), h+2);
+    ctx.lineTo(cx + i*11, horizon);
+    ctx.stroke();
+  }
+  /* 地平线 */
+  ctx.strokeStyle = 'rgba(120,190,255,0.10)';
+  ctx.beginPath(); ctx.moveTo(w*0.05, horizon); ctx.lineTo(w*0.95, horizon); ctx.stroke();
+  /* 底部断弧：两层慢转 */
+  const arcs = (radius, rot, alpha, segCount) => {
+    ctx.save(); ctx.translate(cx, h*1.02); ctx.rotate(rot);
+    const gap = Math.PI*2/segCount;
+    for (let i=0;i<segCount;i++){
+      ctx.beginPath();
+      ctx.arc(0,0,radius, i*gap+0.08, i*gap+gap*0.64);
+      ctx.strokeStyle = `rgba(62,230,255,${alpha})`;
+      ctx.lineWidth = i===0 ? 1.6 : 1;
+      ctx.stroke();
+    }
+    for (let i=0;i<24;i++){
+      const a = i*Math.PI*2/24;
+      ctx.fillStyle = `rgba(255,194,71,${alpha*0.55})`;
+      ctx.fillRect(Math.cos(a)*radius-1, Math.sin(a)*radius-1, 2, 2);
+    }
+    ctx.restore();
+  };
+  arcs(Math.min(w,h)*0.44, t*0.05, 0.10, 3);
+  arcs(Math.min(w,h)*0.62, -t*0.035, 0.07, 4);
+  /* 上升余烬 */
+  for (let i=0;i<16;i++){
+    const seed = i*37.3;
+    const x = (seed*97 % w);
+    const y = h*0.94 - ((t*22 + i*41) % (h*0.72));
+    ctx.fillStyle = i%3===0 ? 'rgba(176,133,255,0.30)' : 'rgba(255,194,71,0.26)';
+    ctx.fillRect(x, y, 1.6, 1.6);
+  }
+}
+
+/* ============================================================
+   6) 状态切换 / 事件 / 主循环
+   ============================================================ */
+const VIEW_ORDER = ['sil','cards','cast','focus'];
+/* 切视图 */
+function setView(v){
+  if (!VIEW_ORDER.includes(v)) return;
+  LAB.view = v;
+  document.querySelectorAll('.view').forEach((el)=>{
+    el.classList.toggle('on', el.id === 'view-'+v);
+  });
+  document.querySelectorAll('#viewSeg button').forEach((b)=>{
+    b.classList.toggle('on', b.dataset.view === v);
+  });
+  refreshAll();
+}
+/* 切角色 */
+function setHero(id){
+  if (!HEROES[id]) return;
+  LAB.hero = id;
+  document.getElementById('pillHero').textContent = HEROES[id].name;
+  document.querySelectorAll('.card').forEach((el)=>{ el.classList.toggle('is-on', el.dataset.hero===id); });
+  buildInfo();
+  refreshAll();
+}
+/* 切剪影 */
+function setSil(on){
+  LAB.silhouette = !!on;
+  document.querySelectorAll('#silSeg button').forEach((b)=>{ b.classList.toggle('on', (b.dataset.sil==='1')===LAB.silhouette); });
+  refreshAll();
+}
+/* 切色盲模拟 */
+function setCb(mode){
+  LAB.cb = mode;
+  document.querySelectorAll('#cbSeg button').forEach((b)=>{ b.classList.toggle('on', b.dataset.cb===mode); });
+  buildCards();
+  buildInfo();
+  refreshAll();
+}
+/* 重画当前可见视图（以及依赖数据的卡片/信息面板） */
+function refreshAll(){
+  if (LAB.metrics) {
+    // 剪影视图只在参数变化时重画：清空后按最新状态画
+    HERO_IDS.forEach((id)=>{
+      document.querySelectorAll(`canvas.silCv[data-id="${id}"]`).forEach((cv)=>{
+        const m = measureSilhouette(id);
+        const { ctx, w, h } = fitCanvas(cv);
+        const targetH = cv.dataset.scale === '3' ? 144 : 48;
+        const k = targetH / m.h;
+        const dw = m.w*k, dh = targetH;
+        const dx = (w-dw)/2, dy = h-8-dh;
+        ctx.clearRect(0,0,w,h);
+        ctx.drawImage(m.src, m.x0, m.y0, m.w, m.h, dx, dy, dw, dh);
+      });
+    });
+  }
+  if (LAB.view === 'cards') paintCardArt();
+  if (LAB.view === 'cast') paintCast();
+  if (LAB.view === 'focus') { buildInfo(); paintFocus(); }
+}
+/* 主循环：30fps 节流（省电、避免电脑发烫），只画当前可见视图 */
+let lastFrame = 0;
+function loop(ts){
+  requestAnimationFrame(loop);
+  if (ts - lastFrame < 33) return;
+  lastFrame = ts;
+  LAB.t = ts / 1000;
+  paintBg();
+  if (LAB.view === 'cards') paintCardArt();
+  else if (LAB.view === 'cast') paintCast();
+  else if (LAB.view === 'focus') paintFocus();
+}
+
+/* 键盘：1/2/3 选人 · S 剪影 · C 色盲 · V 视图 · X 施法 */
+document.addEventListener('keydown', (e)=>{
+  if (e.key === '1' || e.key === '2' || e.key === '3'){
+    setHero(HERO_IDS[parseInt(e.key,10)-1]);
+  } else if (e.key.toLowerCase() === 's'){
+    setSil(!LAB.silhouette);
+  } else if (e.key.toLowerCase() === 'c'){
+    const modes = ['none','deut','trit'];
+    setCb(modes[(modes.indexOf(LAB.cb)+1) % modes.length]);
+  } else if (e.key.toLowerCase() === 'v'){
+    setView(VIEW_ORDER[(VIEW_ORDER.indexOf(LAB.view)+1) % VIEW_ORDER.length]);
+  } else if (e.key.toLowerCase() === 'x'){
+    LAB.cast = !LAB.cast; paintFocus();
+  }
+});
+
+/* 按钮事件与初始化 */
+function init(){
+  buildSilView();
+  buildCards();
+  buildCast();
+  buildInfo();
+  document.querySelectorAll('#viewSeg button').forEach((b)=> b.addEventListener('click', ()=> setView(b.dataset.view)));
+  document.querySelectorAll('#silSeg button').forEach((b)=> b.addEventListener('click', ()=> setSil(b.dataset.sil==='1')));
+  document.querySelectorAll('#cbSeg button').forEach((b)=> b.addEventListener('click', ()=> setCb(b.dataset.cb)));
+  document.getElementById('btnIdle').addEventListener('click', ()=>{ LAB.cast=false; paintFocus(); });
+  document.getElementById('btnCast').addEventListener('click', ()=>{ LAB.cast=true; paintFocus(); });
+  document.querySelectorAll('.card').forEach((el)=> el.addEventListener('click', ()=> setHero(el.dataset.hero)));
+
+  /* 截图/自动化用的 URL 参数：?view=cards&sil=0&cb=deut&hero=ember&k=0.4 */
+  const q = new URLSearchParams(location.search);
+  if (q.get('hero') && HEROES[q.get('hero')]) LAB.hero = q.get('hero');
+  if (q.get('sil') != null) LAB.silhouette = q.get('sil') !== '0';
+  if (q.get('cb') && CB_MATRICES[q.get('cb')] !== undefined) LAB.cb = q.get('cb');
+  if (q.get('k') != null) LAB.castOverride = parseFloat(q.get('k'));
+  if (q.get('cast') === '1') LAB.cast = true;
+  document.getElementById('pillHero').textContent = HEROES[LAB.hero].name;
+  document.querySelectorAll('#silSeg button').forEach((b)=>{ b.classList.toggle('on', (b.dataset.sil==='1')===LAB.silhouette); });
+  document.querySelectorAll('#cbSeg button').forEach((b)=>{ b.classList.toggle('on', b.dataset.cb===LAB.cb); });
+  document.querySelectorAll('.card').forEach((el)=>{ el.classList.toggle('is-on', el.dataset.hero===LAB.hero); });
+  if (q.get('view')) setView(q.get('view')); else setView('sil');
+  refreshAll();
+
+  /* 暴露给自动化脚本读取的只读快照 */
+  window.__HERO_LAB = {
+    LAB,
+    metrics: LAB.metrics,
+    setView, setHero, setSil, setCb,
+    /* 供截图脚本读取：返回当前两两差异与尺寸 */
+    report: () => ({
+      heroes: HERO_IDS.map((id)=>({
+        id, name: HEROES[id].name,
+        silhouetteWidthPx: +(LAB.metrics[id].w*48/LAB.metrics[id].h).toFixed(2),
+        silhouetteHeightPx: 48,
+        inkPx: Math.round(LAB.metrics[id].ink*(48/LAB.metrics[id].h)**2),
+        palette: HEROES[id].palette,
+        sim: LAB.cb === 'none' ? null : Object.fromEntries(Object.entries(HEROES[id].palette).map(([k,v])=>[k, simulateHex(v, LAB.cb)])),
+        lum: Object.fromEntries(Object.entries(HEROES[id].palette).map(([k,v])=>[k, +(luminance(v)*100).toFixed(1)]))
+      })),
+      diffs: Object.fromEntries(Object.entries(LAB.metrics.diff).map(([k,v])=>[k, +v.pct.toFixed(2)]))
+    })
+  };
+  requestAnimationFrame(loop);
+}
+init();
+
+</script>
+</body>
+</html>

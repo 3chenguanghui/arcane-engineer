@@ -1,0 +1,2367 @@
+{
+  "file": "D:\\其他\\TRAE宝\\奥术工程师\\tools\\_a11y_snap_BA68478F.html",
+  "bytes": 2740252,
+  "chars": 2290127,
+  "lines": 63930,
+  "md5": "BA68478FE49A6DFA25C8B3F4CD368FAC",
+  "cssRules": 1180,
+  "textRules": 437,
+  "textFails": [
+    {
+      "selector": "#titleLayer .title-corner",
+      "line": 4617,
+      "colorRaw": "#6b7c91",
+      "color": "#4D5C73",
+      "alpha": 0.62,
+      "fontSize": 9,
+      "weight": 400,
+      "ratio": 2.15,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".mini-card.is-locked .m-name",
+      "line": 1021,
+      "colorRaw": "rgba(150, 180, 214, 0.55)",
+      "color": "#5F7593",
+      "alpha": 0.55,
+      "fontSize": 11,
+      "weight": 400,
+      "ratio": 3.1,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-floor",
+      "line": 979,
+      "colorRaw": "rgba(168, 191, 220, 0.55)",
+      "color": "#697C97",
+      "alpha": 0.55,
+      "fontSize": null,
+      "weight": 400,
+      "ratio": 3.4,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-tool[aria-pressed=\"false\"]",
+      "line": 4593,
+      "colorRaw": "#6d7d92",
+      "color": "#6D7D92",
+      "alpha": 1,
+      "fontSize": null,
+      "weight": 400,
+      "ratio": 3.47,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".spirit-line .spirit-tag",
+      "line": 1409,
+      "colorRaw": "rgba(143, 228, 255, 0.5)",
+      "color": "#5587A1",
+      "alpha": 0.5,
+      "fontSize": 10.5,
+      "weight": 400,
+      "ratio": 3.7,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".card-tip .ct-foot",
+      "line": 1153,
+      "colorRaw": "rgba(168, 191, 220, 0.62)",
+      "color": "#7286A1",
+      "alpha": 0.62,
+      "fontSize": 10,
+      "weight": 400,
+      "ratio": 3.92,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".fusion-bar.is-empty",
+      "line": 1199,
+      "colorRaw": "rgba(168, 191, 220, 0.62)",
+      "color": "#7286A1",
+      "alpha": 0.62,
+      "fontSize": null,
+      "weight": 400,
+      "ratio": 3.92,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".engrave-empty",
+      "line": 4277,
+      "colorRaw": "#7c869c",
+      "color": "#7C869C",
+      "alpha": 1,
+      "fontSize": 12,
+      "weight": 400,
+      "ratio": 3.98,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".tal-locked",
+      "line": 1974,
+      "colorRaw": "rgba(255, 231, 184, 0.50)",
+      "color": "#8D887D",
+      "alpha": 0.5,
+      "fontSize": 11.5,
+      "weight": 400,
+      "ratio": 4.13,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".floor-mod-row b.mod-avoid",
+      "line": 445,
+      "colorRaw": "#ff3d6e",
+      "color": "#FF3D6E",
+      "alpha": 1,
+      "fontSize": null,
+      "weight": 400,
+      "ratio": 4.26,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": ".map-bar .map-mod.mod-avoid",
+      "line": 804,
+      "colorRaw": "#ff3d6e",
+      "color": "#FF3D6E",
+      "alpha": 1,
+      "fontSize": null,
+      "weight": 400,
+      "ratio": 4.26,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-stat span",
+      "line": 4457,
+      "colorRaw": "#7f90a8",
+      "color": "#7F90A8",
+      "alpha": 1,
+      "fontSize": 9,
+      "weight": 400,
+      "ratio": 4.48,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-difficulty-head",
+      "line": 4542,
+      "colorRaw": "#7f90a8",
+      "color": "#7F90A8",
+      "alpha": 1,
+      "fontSize": 10,
+      "weight": 400,
+      "ratio": 4.48,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-talents .talent-head h3",
+      "line": 4601,
+      "colorRaw": "#7f90a8",
+      "color": "#7F90A8",
+      "alpha": 1,
+      "fontSize": 10,
+      "weight": 500,
+      "ratio": 4.48,
+      "need": 4.5,
+      "backdrop": "surface-3",
+      "pass": false
+    }
+  ],
+  "fontCssFails": [
+    {
+      "selector": ".card-row.is-dense .m-key",
+      "line": 863,
+      "px": 8.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-meta",
+      "line": 965,
+      "px": 8.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-fuse-badge",
+      "line": 1474,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-kicker",
+      "line": 4381,
+      "px": 9,
+      "sample": "BOSS ENCOUNTER",
+      "chinese": false,
+      "need": 11,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-stat span",
+      "line": 4457,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .difficulty-mode span",
+      "line": 4570,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-talents .t-info span",
+      "line": 4612,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-corner",
+      "line": 4617,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".talent-page-head h2 em",
+      "line": 4792,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-cat",
+      "line": 4880,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-state",
+      "line": 4881,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-group-tag",
+      "line": 4891,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".t-cat",
+      "line": 4994,
+      "px": 9,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "body.hud-compact .card-row.is-dense .m-name",
+      "line": 664,
+      "px": 9.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".dock-btn em",
+      "line": 719,
+      "px": 9.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "body.hud-compact .fusion-note",
+      "line": 667,
+      "px": 10,
+      "sample": "集齐魔法与对应科技模块后按",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "body.hud-compact .minimap-legend",
+      "line": 671,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".dock-btn span",
+      "line": 718,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".card-tip .ct-rarity",
+      "line": 1122,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".card-tip .ct-foot",
+      "line": 1153,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".enemy-group > b em",
+      "line": 1724,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fusion-table tr.is-owned td.f-name::after",
+      "line": 2088,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-node .n-state",
+      "line": 2303,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".wb-weapon",
+      "line": 2379,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-inspector .i-tag",
+      "line": 2457,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".r-fuse-badge",
+      "line": 3038,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".p1-bar-empty",
+      "line": 3211,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".title-kicker .title-ver",
+      "line": 3628,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".hud-readouts .hud-record > span",
+      "line": 4219,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-slot",
+      "line": 4303,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-difficulty-head",
+      "line": 4542,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-difficulty-head em",
+      "line": 4553,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-tool",
+      "line": 4580,
+      "px": 10,
+      "sample": "背景动效 · 开",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-talents .talent-head h3",
+      "line": 4601,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-talents .crystal-count",
+      "line": 4609,
+      "px": 10,
+      "sample": "结晶",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-talents .t-buy",
+      "line": 4613,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-cap-label",
+      "line": 4803,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-cap-text",
+      "line": 4807,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-col-head span",
+      "line": 4850,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-detail",
+      "line": 4890,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-lv",
+      "line": 4903,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-buy",
+      "line": 4904,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-tip",
+      "line": 4930,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-lg",
+      "line": 4974,
+      "px": 10,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".card-row.is-dense .m-name",
+      "line": 854,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".card-tip .ct-fuse .fx",
+      "line": 1139,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fusion-bar .fb-chip",
+      "line": 1180,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".spirit-line .spirit-tag",
+      "line": 1409,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".onboard-hint .ob-verb",
+      "line": 1443,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".settings-author, .setting-author",
+      "line": 1953,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".p1-fd-head",
+      "line": 1994,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".p1-fd-tag",
+      "line": 2002,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".wb-tag",
+      "line": 2367,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".wb-note",
+      "line": 2374,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".wb-tag-name",
+      "line": 2378,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".wb-recipe",
+      "line": 2380,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card.reward-relic-v2 .r-fam",
+      "line": 2928,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".owned-strip .own-label",
+      "line": 2994,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card .r-rarity",
+      "line": 3074,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".run-epilogue .epi-head",
+      "line": 3315,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".save-slot-row .slot-sub",
+      "line": 3563,
+      "px": 10.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".brand .sub",
+      "line": 248,
+      "px": 11,
+      "sample": "Emberfall · 魔法 × 科技",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".readout > span",
+      "line": 272,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".readout > b em",
+      "line": 291,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".readout > i.readout-enemy",
+      "line": 298,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".hud-record > span",
+      "line": 320,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".floor-head",
+      "line": 364,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".floor-num span",
+      "line": 387,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".floor-theme",
+      "line": 393,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".floor-row",
+      "line": 415,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".floor-row b",
+      "line": 428,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tag-pips b",
+      "line": 451,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tag-pip",
+      "line": 452,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tag-pip b",
+      "line": 462,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fusion-pips b",
+      "line": 495,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".bar-group .bar-label",
+      "line": 516,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".bar-warn",
+      "line": 527,
+      "px": 11,
+      "sample": "低血",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".btn kbd",
+      "line": 601,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".intro-hint span",
+      "line": 765,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".map-bar",
+      "line": 782,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".map-legend",
+      "line": 805,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".deck-title",
+      "line": 819,
+      "px": 11,
+      "sample": "魔法卡",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".deck-title i",
+      "line": 828,
+      "px": 11,
+      "sample": "魔法卡",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".card-row.is-dense .m-glyph",
+      "line": 847,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-sub",
+      "line": 933,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card.is-locked .m-name",
+      "line": 1021,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-key",
+      "line": 1024,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-ring i",
+      "line": 1049,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-fused",
+      "line": 1073,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".card-tip .ct-line",
+      "line": 1130,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fusion-bar",
+      "line": 1162,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fslot",
+      "line": 1214,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fusion-note",
+      "line": 1253,
+      "px": 11,
+      "sample": "集齐魔法与对应科技模块后按",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fusion-hint kbd, .deck-keys kbd",
+      "line": 1260,
+      "px": 11,
+      "sample": "左键 /",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".deck-keys",
+      "line": 1268,
+      "px": 11,
+      "sample": "左键 /",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".skill-chip span",
+      "line": 1288,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".minimap-head",
+      "line": 1326,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".minimap-legend",
+      "line": 1337,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".rule-block h3 em",
+      "line": 1761,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".rule-block kbd",
+      "line": 1773,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".talent-box .crystal-count",
+      "line": 1809,
+      "px": 11,
+      "sample": "结晶",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".talent-row .t-info span",
+      "line": 1837,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".talent-row .t-level",
+      "line": 1838,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".talent-row .t-buy",
+      "line": 1844,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".talent-note",
+      "line": 1856,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".setting-row > b",
+      "line": 1912,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".setting-note",
+      "line": 1950,
+      "px": 11,
+      "sample": "BGM 为低频氛围层，默认关闭，宁简不吵。按",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".aim-mode",
+      "line": 2017,
+      "px": 11,
+      "sample": "强辅助",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".fusion-table th",
+      "line": 2083,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".help-card h3 em",
+      "line": 2106,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".quickref li span",
+      "line": 2129,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".help-card kbd, .help-note kbd",
+      "line": 2130,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".help-note",
+      "line": 2143,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-progress",
+      "line": 2153,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-ready",
+      "line": 2181,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-ready .ready-chip",
+      "line": 2199,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-col-head",
+      "line": 2240,
+      "px": 11,
+      "sample": "魔法 MAGIC",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-node .n-meta",
+      "line": 2295,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-inspector .i-stats",
+      "line": 2469,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-inspector .i-empty",
+      "line": 2476,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-legend",
+      "line": 2477,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".setting-row .setting-hint",
+      "line": 2524,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".settings-save p",
+      "line": 2538,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".archive-cell span",
+      "line": 2556,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".archive-ach-row",
+      "line": 2559,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".modal-kicker",
+      "line": 2711,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".modal-layer.is-reward .modal-sub",
+      "line": 2758,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card .r-tag",
+      "line": 2824,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card .r-key",
+      "line": 2833,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card .r-result",
+      "line": 2863,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card.reward-relic-v2 .r-result",
+      "line": 2977,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".modal-note",
+      "line": 3102,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".result-stat span",
+      "line": 3142,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".result-hint",
+      "line": 3162,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".p1-evidence-head",
+      "line": 3195,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".p1-legend",
+      "line": 3221,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".p1-detail",
+      "line": 3252,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tower-tag",
+      "line": 3298,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tower-meta",
+      "line": 3300,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".bio-head",
+      "line": 3326,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".victory-badge",
+      "line": 3348,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".boss-title-sub",
+      "line": 3392,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".title-lr-label",
+      "line": 3507,
+      "px": 11,
+      "sample": "挑战",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".title-lr-note",
+      "line": 3513,
+      "px": 11,
+      "sample": "首次通关解锁挑战 1（上限 10）",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".title-seed-records",
+      "line": 3535,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".title-stat span",
+      "line": 3670,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".title-guide-title",
+      "line": 3686,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".guide-item kbd",
+      "line": 3712,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".title-difficulty-head",
+      "line": 3745,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".difficulty-mode span",
+      "line": 3771,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".btn-start kbd",
+      "line": 3806,
+      "px": 11,
+      "sample": "开始探索",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".theme-chip span",
+      "line": 3858,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".floor-wipe .wipe-text span",
+      "line": 3894,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "body.ui-v2 .floor-head span",
+      "line": 4065,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".context-hint span",
+      "line": 4179,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".hud-readouts .hud-record > b",
+      "line": 4220,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".engrave-col-head",
+      "line": 4258,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".engrave-item span",
+      "line": 4267,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".engrave-item em",
+      "line": 4268,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".od-label",
+      "line": 4293,
+      "px": 11,
+      "sample": "再按 F 过载",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-tagline",
+      "line": 4431,
+      "px": 11,
+      "sample": "魔法 × 科技实时肉鸽 · 清空每一层，再往下一层",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-talents .t-info b",
+      "line": 4611,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-wallet",
+      "line": 4809,
+      "px": 11,
+      "sample": "结晶",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-respec-btn",
+      "line": 4962,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".talent-open-btn",
+      "line": 4982,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card .r-tag, .reward-card .r-rarity",
+      "line": 5108,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".btn kbd, .btn-start kbd",
+      "line": 5209,
+      "px": 11,
+      "sample": "开始探索",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-kicker .title-ver",
+      "line": 5218,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "#titleLayer .title-stat span",
+      "line": 5224,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".readout > b em, .readout > i.readout-enemy",
+      "line": 5242,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".dock-btn em",
+      "line": 5261,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": "body.hud-compact .card-row.is-dense .m-name",
+      "line": 5270,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-key, .card-row.is-dense .m-key",
+      "line": 5273,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-meta",
+      "line": 5274,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-fuse-badge",
+      "line": 5275,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".mini-card .m-slot",
+      "line": 5276,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".setting-state, .setting-note, .setting-row .setting-hint",
+      "line": 5288,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".settings-author, .setting-author",
+      "line": 5289,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".save-slot-row .slot-sub",
+      "line": 5305,
+      "px": 11,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tal-locked",
+      "line": 1974,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tree-weapon-bridge",
+      "line": 2351,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".modal-layer.is-reward .reward-card .r-desc",
+      "line": 2761,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card.reward-relic-v2 .r-syn",
+      "line": 2961,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".owned-strip .own-chip",
+      "line": 3000,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".reward-card .r-fuse",
+      "line": 3023,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".tower-context",
+      "line": 3302,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    },
+    {
+      "selector": ".run-epilogue .epi-last",
+      "line": 3317,
+      "px": 11.5,
+      "sample": "",
+      "chinese": true,
+      "need": 12,
+      "pass": false
+    }
+  ],
+  "fontCanvas": [
+    {
+      "line": 7080,
+      "px": 11,
+      "font": "700 11px \"Segoe UI\", system-ui, sans-serif"
+    },
+    {
+      "line": 13310,
+      "px": 10,
+      "font": "bold 10px \"Microsoft YaHei UI\", sans-serif"
+    },
+    {
+      "line": 13396,
+      "px": 8,
+      "font": "bold 8px \"Microsoft YaHei UI\", sans-serif"
+    },
+    {
+      "line": 13399,
+      "px": 6,
+      "font": "6px \"Microsoft YaHei UI\", sans-serif"
+    },
+    {
+      "line": 18947,
+      "px": 11,
+      "font": "bold 11px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 19000,
+      "px": 9,
+      "font": "bold 9px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 19031,
+      "px": 11,
+      "font": "bold 11px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 19181,
+      "px": 11,
+      "font": "bold 11px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 19186,
+      "px": 11,
+      "font": "bold 11px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 19189,
+      "px": 10,
+      "font": "10px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 19197,
+      "px": 10,
+      "font": "bold 10px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 19203,
+      "px": 10,
+      "font": "10px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 25688,
+      "px": 10,
+      "font": "600 10px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 26787,
+      "px": 11,
+      "font": "11px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace"
+    },
+    {
+      "line": 28572,
+      "px": 10,
+      "font": "10px \"Cascadia Mono\", Consolas, monospace"
+    },
+    {
+      "line": 30264,
+      "px": 11,
+      "font": "bold 11px \"Cascadia Mono\", Consolas, monospace"
+    },
+    {
+      "line": 32302,
+      "px": 11,
+      "font": "11px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 32419,
+      "px": 11,
+      "font": "11px \"JetBrains Mono\", Consolas, monospace"
+    },
+    {
+      "line": 34488,
+      "px": 10,
+      "font": "10px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 35186,
+      "px": 10,
+      "font": "700 10px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 35214,
+      "px": 11,
+      "font": "700 11px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 35222,
+      "px": 11,
+      "font": "600 11px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 43771,
+      "px": 9,
+      "font": "bold 9px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 43774,
+      "px": 8,
+      "font": "8px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 47099,
+      "px": 9,
+      "font": "600 9px \"Microsoft YaHei\", sans-serif"
+    },
+    {
+      "line": 47186,
+      "px": 10,
+      "font": "10px \"JetBrains Mono\", Consolas, monospace"
+    },
+    {
+      "line": 52248,
+      "px": 11,
+      "font": "11px \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 52430,
+      "px": 11,
+      "font": "bold 11px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 52791,
+      "px": 11,
+      "font": "bold 11px \"Microsoft YaHei UI\", \"Segoe UI\", sans-serif"
+    },
+    {
+      "line": 63613,
+      "px": 11,
+      "font": "11px sans-serif"
+    },
+    {
+      "line": 63719,
+      "px": 10,
+      "font": "10px sans-serif"
+    }
+  ],
+  "fontCssCount": 203,
+  "cvd": [
+    {
+      "a": "敌人血条",
+      "b": "玩家血条起",
+      "normal": 14.7,
+      "protan": 11.7,
+      "deutan": 6.9,
+      "tritan": 5.4
+    },
+    {
+      "a": "敌人血条",
+      "b": "玩家血条终(拾取金)",
+      "normal": 43.6,
+      "protan": 25.2,
+      "deutan": 16.6,
+      "tritan": 17.1
+    },
+    {
+      "a": "敌人血条",
+      "b": "奥能球(青)",
+      "normal": 74.7,
+      "protan": 34.4,
+      "deutan": 43.7,
+      "tritan": 62.5
+    },
+    {
+      "a": "危险预警环",
+      "b": "玩家血条终(拾取金)",
+      "normal": 44.2,
+      "protan": 25.5,
+      "deutan": 15.8,
+      "tritan": 20.4
+    },
+    {
+      "a": "危险预警环",
+      "b": "奥能球(青)",
+      "normal": 77.2,
+      "protan": 39,
+      "deutan": 46.9,
+      "tritan": 64.5
+    },
+    {
+      "a": "危险预警环",
+      "b": "治疗(绿)",
+      "normal": 76.9,
+      "protan": 21.9,
+      "deutan": 13.4,
+      "tritan": 60.6
+    },
+    {
+      "a": "精英环(暖金)",
+      "b": "敌人血条",
+      "normal": 38.5,
+      "protan": 23,
+      "deutan": 13.9,
+      "tritan": 22.9
+    },
+    {
+      "a": "精英环(暖金)",
+      "b": "危险预警环",
+      "normal": 39.8,
+      "protan": 24.5,
+      "deutan": 15,
+      "tritan": 26
+    },
+    {
+      "a": "精英环(暖金)",
+      "b": "玩家血条终(拾取金)",
+      "normal": 9.8,
+      "protan": 10,
+      "deutan": 9.7,
+      "tritan": 6.5
+    },
+    {
+      "a": "玩家血条起",
+      "b": "玩家血条终(拾取金)",
+      "normal": 28.4,
+      "protan": 14.8,
+      "deutan": 10.1,
+      "tritan": 11.9
+    },
+    {
+      "a": "警告橙",
+      "b": "玩家血条终(拾取金)",
+      "normal": 4.4,
+      "protan": 2.3,
+      "deutan": 1.6,
+      "tritan": 2.3
+    },
+    {
+      "a": "稀有蓝",
+      "b": "史诗紫",
+      "normal": 27.6,
+      "protan": 6.3,
+      "deutan": 0.1,
+      "tritan": 31.2
+    },
+    {
+      "a": "普通灰",
+      "b": "稀有蓝",
+      "normal": 14.5,
+      "protan": 15,
+      "deutan": 16.1,
+      "tritan": 16
+    },
+    {
+      "a": "冰霜",
+      "b": "雷电",
+      "normal": 4.4,
+      "protan": 4.1,
+      "deutan": 4,
+      "tritan": 2.8
+    },
+    {
+      "a": "冰霜",
+      "b": "奥能球(青)",
+      "normal": 9,
+      "protan": 2.9,
+      "deutan": 0.8,
+      "tritan": 5.1
+    },
+    {
+      "a": "连锁绿",
+      "b": "治疗(绿)",
+      "normal": 17.1,
+      "protan": 15.6,
+      "deutan": 19,
+      "tritan": 9
+    },
+    {
+      "a": "控制紫",
+      "b": "史诗紫",
+      "normal": 6.9,
+      "protan": 2.7,
+      "deutan": 4.7,
+      "tritan": 20.2
+    },
+    {
+      "a": "灼烧橙",
+      "b": "玩家血条终(拾取金)",
+      "normal": 18.5,
+      "protan": 9.4,
+      "deutan": 6.4,
+      "tritan": 8.9
+    },
+    {
+      "a": "淬毒绿",
+      "b": "治疗(绿)",
+      "normal": 18.2,
+      "protan": 15,
+      "deutan": 19,
+      "tritan": 12.7
+    }
+  ],
+  "graphics": [
+    {
+      "name": "敌人血条",
+      "color": "#FF6B7F",
+      "onFloor": 5.77,
+      "onDark": 6.69
+    },
+    {
+      "name": "危险预警环",
+      "color": "#FF5A6E",
+      "onFloor": 5.23,
+      "onDark": 6.06
+    },
+    {
+      "name": "玩家血条起",
+      "color": "#FF8A6B",
+      "onFloor": 6.86,
+      "onDark": 7.94
+    },
+    {
+      "name": "玩家血条终(拾取金)",
+      "color": "#FFC247",
+      "onFloor": 9.84,
+      "onDark": 11.4
+    },
+    {
+      "name": "奥能球(青)",
+      "color": "#3EE6FF",
+      "onFloor": 10.52,
+      "onDark": 12.19
+    },
+    {
+      "name": "治疗(绿)",
+      "color": "#47E8A7",
+      "onFloor": 10.07,
+      "onDark": 11.67
+    },
+    {
+      "name": "警告橙",
+      "color": "#FFB84D",
+      "onFloor": 9.2,
+      "onDark": 10.66
+    },
+    {
+      "name": "精英环(暖金)",
+      "color": "#FFD696",
+      "onFloor": 11.54,
+      "onDark": 13.36
+    },
+    {
+      "name": "精英环外(橙红)",
+      "color": "#FF785A",
+      "onFloor": 6.09,
+      "onDark": 7.06
+    },
+    {
+      "name": "魔法紫",
+      "color": "#B085FF",
+      "onFloor": 5.76,
+      "onDark": 6.67
+    },
+    {
+      "name": "稀有蓝",
+      "color": "#4AA8FF",
+      "onFloor": 6.28,
+      "onDark": 7.28
+    },
+    {
+      "name": "史诗紫",
+      "color": "#B47CFF",
+      "onFloor": 5.48,
+      "onDark": 6.34
+    },
+    {
+      "name": "普通灰",
+      "color": "#9FB0C8",
+      "onFloor": 7.17,
+      "onDark": 8.31
+    },
+    {
+      "name": "冰霜",
+      "color": "#7FD8FF",
+      "onFloor": 9.92,
+      "onDark": 11.49
+    },
+    {
+      "name": "雷电",
+      "color": "#8FE4FF",
+      "onFloor": 11.08,
+      "onDark": 12.84
+    },
+    {
+      "name": "连锁绿",
+      "color": "#9CFF5E",
+      "onFloor": 12.72,
+      "onDark": 14.73
+    },
+    {
+      "name": "控制紫",
+      "color": "#8F7BFF",
+      "onFloor": 4.86,
+      "onDark": 5.63
+    },
+    {
+      "name": "灼烧橙",
+      "color": "#FF9A5A",
+      "onFloor": 7.55,
+      "onDark": 8.75
+    },
+    {
+      "name": "淬毒绿",
+      "color": "#B6FF6B",
+      "onFloor": 13.19,
+      "onDark": 15.28
+    }
+  ],
+  "anims": [
+    {
+      "selector": ".bar.is-low > i",
+      "line": 574,
+      "duration": 0.9,
+      "hz": 1.11,
+      "decl": "lowPulse 0.9s ease-in-out infinite"
+    },
+    {
+      "selector": ".mini-card.is-partner",
+      "line": 983,
+      "duration": 1.1,
+      "hz": 0.91,
+      "decl": "partnerPulse 1.1s ease-in-out infinite"
+    },
+    {
+      "selector": ".danger-layer.is-on",
+      "line": 220,
+      "duration": 1.5,
+      "hz": 0.67,
+      "decl": "dangerPulse 1.5s ease-in-out infinite"
+    },
+    {
+      "selector": ".fusion-hint.is-ready",
+      "line": 1255,
+      "duration": 1.6,
+      "hz": 0.63,
+      "decl": "readyGlow 1.6s ease-in-out infinite"
+    },
+    {
+      "selector": ".tree-node.is-ready",
+      "line": 2330,
+      "duration": 2.2,
+      "hz": 0.45,
+      "decl": "treeReadyPulse 2.2s ease-in-out infinite"
+    },
+    {
+      "selector": ".tower-orb",
+      "line": 3279,
+      "duration": 2.8,
+      "hz": 0.36,
+      "decl": "towerPulse 2.8s ease-in-out infinite"
+    }
+  ],
+  "jsHighFreq": [
+    {
+      "line": 34150,
+      "hz": 4.14,
+      "expr": "Math.sin(t * 26"
+    },
+    {
+      "line": 35833,
+      "hz": 3.02,
+      "expr": "Math.sin(t * 19"
+    },
+    {
+      "line": 35834,
+      "hz": 3.66,
+      "expr": "Math.cos(t * 23"
+    }
+  ]
+}

@@ -1,0 +1,232 @@
+{
+  "port": 9583,
+  "asserts": [
+    {
+      "name": "F1 池 8 条、分布 2 good / 2 bad / 3 gamble / 1 avoid、权重和 = 1",
+      "pass": true,
+      "detail": {
+        "total": 8,
+        "byKind": {
+          "good": {
+            "count": 2,
+            "weight": 0.3
+          },
+          "bad": {
+            "count": 2,
+            "weight": 0.28
+          },
+          "gamble": {
+            "count": 3,
+            "weight": 0.32
+          },
+          "avoid": {
+            "count": 1,
+            "weight": 0.1
+          }
+        },
+        "weightSum": 1,
+        "enabled": true,
+        "firstModFloor": 2,
+        "weights": {
+          "good": 0.3,
+          "bad": 0.28,
+          "gamble": 0.32,
+          "avoid": 0.1
+        }
+      }
+    },
+    {
+      "name": "F2 每条字段完整、颜色为 #RRGGBB、id 唯一",
+      "pass": true,
+      "detail": {
+        "bad": [],
+        "unique": 8,
+        "total": 8
+      }
+    },
+    {
+      "name": "F3 赌注 3 条全部\"有正有负\"、回避 1 条纯负面且治疗归零、好坏两类无掺假补偿",
+      "pass": true,
+      "detail": {
+        "out": [
+          {
+            "id": "richVein",
+            "kind": "good",
+            "harmful": false,
+            "beneficial": true,
+            "mul": {
+              "crystal": 1.4
+            }
+          },
+          {
+            "id": "calmField",
+            "kind": "good",
+            "harmful": false,
+            "beneficial": true,
+            "mul": {
+              "enemySpeed": 0.88
+            }
+          },
+          {
+            "id": "overpressure",
+            "kind": "bad",
+            "harmful": true,
+            "beneficial": false,
+            "mul": {
+              "enemyDamage": 1.18
+            }
+          },
+          {
+            "id": "chillWave",
+            "kind": "bad",
+            "harmful": true,
+            "beneficial": false,
+            "mul": {
+              "heal": 0.5
+            }
+          },
+          {
+            "id": "goldRush",
+            "kind": "gamble",
+            "harmful": true,
+            "beneficial": true,
+            "mul": {
+              "enemySpeed": 1.18,
+              "crystal": 1.5
+            }
+          },
+          {
+            "id": "frenzy",
+            "kind": "gamble",
+            "harmful": true,
+            "beneficial": true,
+            "mul": {
+              "enemyDamage": 1.25,
+              "crystal": 1.5
+            }
+          },
+          {
+            "id": "overclock",
+            "kind": "gamble",
+            "harmful": true,
+            "beneficial": true,
+            "mul": {
+              "enemySpeed": 1.12,
+              "enemyDamage": 1.12,
+              "aether": 1.35
+            }
+          },
+          {
+            "id": "deathZone",
+            "kind": "avoid",
+            "harmful": true,
+            "beneficial": false,
+            "mul": {
+              "heal": 0,
+              "enemyDamage": 1.15
+            }
+          }
+        ],
+        "bad": [],
+        "avoidHealZero": true,
+        "gambleAllTwoSided": true
+      }
+    },
+    {
+      "name": "F4 同一随机序列抽到同一条词缀",
+      "pass": true,
+      "detail": {
+        "a1": "richVein",
+        "a2": "richVein",
+        "b1": "overclock",
+        "b2": "overclock"
+      }
+    },
+    {
+      "name": "F5 2000 次抽样四类都出现，占比与配置权重相差 ≤6 个百分点",
+      "pass": true,
+      "detail": {
+        "counts": {
+          "good": 605,
+          "bad": 544,
+          "gamble": 650,
+          "avoid": 201
+        },
+        "shares": {
+          "good": 0.303,
+          "bad": 0.272,
+          "gamble": 0.325,
+          "avoid": 0.101
+        },
+        "weights": {
+          "good": 0.3,
+          "bad": 0.28,
+          "gamble": 0.32,
+          "avoid": 0.1
+        },
+        "N": 2000
+      }
+    },
+    {
+      "name": "F6 第 1 层无词缀、第 2 层起有词缀、同种子同层重生成一致",
+      "pass": true,
+      "detail": {
+        "floor1": null,
+        "a": "calmField",
+        "b": "calmField"
+      }
+    },
+    {
+      "name": "F7 HUD / 全屏地图 / 小地图同源同文本，且 HUD 芯片在视口内",
+      "pass": true,
+      "detail": {
+        "hud": "⌛ 静滞层",
+        "className": "mod-good",
+        "title": "静滞层：本层敌人移速 −12%；路线：精英房更常见，且每房 +1 精英（清空额外 +2 结晶）",
+        "modId": "calmField",
+        "kind": "good",
+        "desc": "本层敌人移速 −12%",
+        "inViewport": true,
+        "mapText": "⌛ 静滞层",
+        "mapClass": "map-mod mod-good",
+        "mapTitle": "静滞层：本层敌人移速 −12%",
+        "minimap": "⌛ 静滞层"
+      }
+    },
+    {
+      "name": "F8 效果实测：结晶 1.4×、移速 1.18×、敌人伤害 1.25×、死域治疗归零",
+      "pass": true,
+      "detail": {
+        "crystalMul": 1.4,
+        "speedMul": 1.18,
+        "dmgMul": 1.25,
+        "aetherMul": 1.35,
+        "heal100": 0,
+        "none": [
+          1,
+          100
+        ],
+        "crystalGain": {
+          "with": 14,
+          "base": 10
+        },
+        "speedRatio": 1.18,
+        "dmgLoss": {
+          "base": 40,
+          "with": 50,
+          "ratio": 1.25
+        }
+      }
+    },
+    {
+      "name": "F9 全流程无页面异常",
+      "pass": true,
+      "detail": {
+        "errors": []
+      }
+    }
+  ],
+  "pageErrors": [],
+  "screenshotBytes": 1117553,
+  "verdict": "PASS"
+}

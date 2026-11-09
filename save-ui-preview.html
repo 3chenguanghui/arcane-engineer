@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>烬 · 存档界面预览</title>
+<!-- 真实集成时只需引入这两行；预览页同样零外部请求 -->
+<link rel="stylesheet" href="save-ui.css">
+<style>
+  /* 预览页专用样式：只负责假游戏场景与演示开关，不属于存档模块 */
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: #05070d;
+    color: #c3d7ef;
+    font-family: "Microsoft YaHei UI", "PingFang SC", "Segoe UI", system-ui, sans-serif;
+  }
+  .demo-scene { position: fixed; inset: 0; overflow: hidden; }
+  .demo-scene__bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 78% 52% at 50% 4%, rgba(92, 230, 255, .16), transparent 62%),
+      radial-gradient(ellipse 62% 44% at 50% 102%, rgba(176, 133, 255, .14), transparent 70%),
+      linear-gradient(180deg, #05070d 0%, #0b1220 48%, #080b12 100%);
+  }
+  .demo-scene__grid {
+    position: absolute; left: -22%; right: -22%; bottom: -12%; height: 58%;
+    background:
+      linear-gradient(rgba(92, 230, 255, .13) 1px, transparent 1px) 0 0 / 64px 40px,
+      linear-gradient(90deg, rgba(92, 230, 255, .11) 1px, transparent 1px) 0 0 / 64px 40px;
+    transform: perspective(560px) rotateX(62deg);
+    transform-origin: 50% 100%;
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.92), transparent 82%);
+    mask-image: linear-gradient(to top, rgba(0,0,0,.92), transparent 82%);
+    opacity: .55;
+  }
+  .demo-scene__glow {
+    position: absolute; left: 50%; top: 18%; width: 420px; height: 420px;
+    transform: translateX(-50%);
+    background: radial-gradient(circle, rgba(92,230,255,.16), transparent 64%);
+    filter: blur(8px);
+  }
+  /* 假传送门：给关闭浮层后的画面一点纵深，避免截图接近纯黑 */
+  .demo-scene__portal {
+    position: absolute; left: 50%; top: 46%; width: 340px; height: 340px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    border: 1px solid rgba(92, 230, 255, .22);
+    box-shadow: 0 0 90px rgba(92, 230, 255, .16), inset 0 0 70px rgba(92, 230, 255, .10);
+    background: radial-gradient(circle, rgba(92,230,255,.10), transparent 68%);
+    opacity: .8;
+  }
+  .demo-scene__portal::before,
+  .demo-scene__portal::after {
+    content: ""; position: absolute; border-radius: 50%;
+    border: 1px solid rgba(176, 133, 255, .18);
+  }
+  .demo-scene__portal::before { inset: 34px; }
+  .demo-scene__portal::after { inset: 76px; border-color: rgba(92, 230, 255, .14); }
+  .demo-scene__vignette {
+    position: absolute; inset: 0;
+    background: radial-gradient(ellipse 88% 76% at 50% 44%, transparent 56%, rgba(0,0,0,.62) 100%);
+  }
+
+  /* 假 HUD：证明浮层是叠在真实游戏画面上的 */
+  .demo-hud {
+    position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 18px;
+    padding: 9px 18px; border-radius: 999px;
+    border: 1px solid rgba(140, 178, 228, .22);
+    background: linear-gradient(180deg, rgba(22, 35, 58, .78), rgba(7, 10, 18, .9));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 12px 30px rgba(0,0,0,.45);
+    font-family: "Cascadia Mono", Consolas, monospace; font-size: 12px; color: #a8bfdc;
+    letter-spacing: .04em; white-space: nowrap; z-index: 12;
+  }
+  .demo-hud b { color: #eaf5ff; font-weight: 700; }
+  .demo-hud .gold { color: #ffc247; }
+  .demo-hud .hp { color: #47e8a7; }
+  .demo-hud .dot { width: 5px; height: 5px; border-radius: 50%; background: #5ce6ff; box-shadow: 0 0 10px #5ce6ff; }
+
+  .demo-deck {
+    position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%);
+    display: flex; gap: 8px; z-index: 12;
+  }
+  .demo-deck i {
+    display: block; width: 54px; height: 68px; border-radius: 8px;
+    border: 1px solid rgba(140, 178, 228, .18);
+    background: linear-gradient(180deg, rgba(30,47,77,.7), rgba(11,18,32,.9));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.07);
+  }
+
+  /* 预览开关条 */
+  .demo-bar {
+    position: absolute; left: 18px; top: 16px; z-index: 18;
+    display: flex; flex-direction: column; gap: 8px;
+    padding: 12px 14px; border-radius: 12px;
+    border: 1px solid rgba(140, 178, 228, .20);
+    background: linear-gradient(180deg, rgba(22, 35, 58, .82), rgba(7, 10, 18, .94));
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 14px 34px rgba(0,0,0,.45);
+    max-width: 360px;
+  }
+  .demo-bar__title { font-family: "Cascadia Mono", Consolas, monospace; font-size: 11px; letter-spacing: .16em; color: #5ce6ff; }
+  .demo-bar__sub { font-size: 11px; line-height: 1.55; color: #93a6c4; }
+  .demo-bar__actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  .demo-bar button, .demo-bar a {
+    appearance: none; cursor: pointer; text-decoration: none;
+    height: 28px; padding: 0 10px; border-radius: 8px;
+    border: 1px solid rgba(140, 178, 228, .24);
+    background: linear-gradient(180deg, rgba(30,47,77,.9), rgba(16,26,44,.9));
+    color: #c3d7ef; font-family: inherit; font-size: 11.5px; line-height: 1;
+    display: inline-flex; align-items: center;
+  }
+  .demo-bar button:hover, .demo-bar a:hover { border-color: rgba(92,230,255,.6); color: #eaf5ff; }
+  .demo-bar button:focus-visible, .demo-bar a:focus-visible { outline: 2px solid #ffc247; outline-offset: 2px; }
+
+  /* 读档结果条：刷新后仍保留，作为「刷新 → 继续」的可见证据 */
+  .demo-resume {
+    position: absolute; left: 50%; top: 64px; transform: translateX(-50%);
+    z-index: 16; display: none; align-items: center; gap: 10px;
+    padding: 9px 14px; border-radius: 10px;
+    border: 1px solid rgba(71, 232, 167, .46);
+    background: linear-gradient(180deg, rgba(16, 45, 38, .92), rgba(7, 10, 18, .96));
+    box-shadow: 0 14px 34px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.08);
+    font-size: 12px; color: #c9ffe9;
+  }
+  .demo-resume.is-show { display: flex; }
+  .demo-resume b { color: #47e8a7; font-family: "Cascadia Mono", Consolas, monospace; }
+  .demo-resume button {
+    appearance: none; cursor: pointer; height: 24px; padding: 0 8px; border-radius: 6px;
+    border: 1px solid rgba(71, 232, 167, .4); background: transparent; color: #c9ffe9; font-size: 11px;
+  }
+
+  .demo-foot {
+    position: absolute; right: 18px; bottom: 16px; z-index: 18;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 10.5px; color: rgba(147,166,196,.75); text-align: right; line-height: 1.6;
+  }
+
+  @media (max-width: 720px) {
+    .demo-bar { left: 10px; top: 10px; max-width: calc(100vw - 20px); }
+    .demo-hud { display: none; }
+    .demo-foot { display: none; }
+  }
+</style>
+</head>
+<body>
+  <!-- 假游戏画面：只是为了让存档浮层有真实叠加语境，不参与功能 -->
+  <div class="demo-scene" aria-hidden="true">
+    <div class="demo-scene__bg"></div>
+    <div class="demo-scene__glow"></div>
+    <div class="demo-scene__portal"></div>
+    <div class="demo-scene__grid"></div>
+    <div class="demo-scene__vignette"></div>
+    <div class="demo-hud">
+      <span class="dot"></span>
+      <span>第 <b>7</b> 层</span>
+      <span>结晶 <b class="gold">34</b></span>
+      <span>生命 <b class="hp">52/70</b></span>
+      <span>00:12:45</span>
+    </div>
+    <div class="demo-deck"><i></i><i></i><i></i><i></i><i></i></div>
+  </div>
+
+  <div class="demo-bar">
+    <div class="demo-bar__title">SAVE UI PREVIEW · 存档界面预览</div>
+    <div class="demo-bar__sub">数据写入 jjsv_preview_store_v1，刷新后仍在；不触碰游戏真实存档、不发起任何网络请求。</div>
+    <div class="demo-bar__actions">
+      <button type="button" data-demo="normal">正常三槽</button>
+      <button type="button" data-demo="empty">三个空槽</button>
+      <button type="button" data-demo="corrupt">损坏槽 3</button>
+      <button type="button" data-demo="unreadable">整体损坏</button>
+      <button type="button" data-demo="open">打开界面</button>
+      <a href="save-ui-preview.html?saveui=off">关闭态</a>
+    </div>
+  </div>
+
+  <div class="demo-resume" id="resumeBanner" role="status" aria-live="polite">
+    <span>已继续：<b id="resumeText">槽 1 · 第 7 层</b></span>
+    <button type="button" id="resumeClear">清除标记</button>
+  </div>
+
+  <div class="demo-foot">烬 · Canvas 2D 单文件肉鸽<br>存档界面体验 v1.0 · 预览页</div>
+
+  <div class="jjsv-offnotice jjsv-hidden" id="offNotice">
+    存档界面已按 <b>?saveui=off</b> 停用。移除 URL 参数后刷新即可恢复；主文件本身不做任何改动。
+  </div>
+
+<!-- 预览用 mock：结构与主文件 v2 完全一致，含 FNV-1a 校验和 -->
+<script>
+(function () {
+  'use strict';
+
+  var KEY = 'jjsv_preview_store_v1';
+  var RESUME_KEY = 'jjsv_preview_resumed';
+  var VERSION = 2;
+
+  /** 与主文件 hashSeedString 一致的 32 位 FNV-1a */
+  function checksum(text) {
+    var h = 2166136261 >>> 0;
+    var s = String(text);
+    for (var i = 0; i < s.length; i += 1) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return (h >>> 0).toString(16).padStart(8, '0');
+  }
+
+  /** 生成一局最小快照；字段与主文件 snapshotRunState 对齐 */
+  function makeRun(floor, crystals, elapsed, difficulty, ascension, seed, hp, hpMax) {
+    return {
+      saveFormat: 2,
+      gameVersion: '1.6.0',
+      floor: floor,
+      crystalsEarned: crystals,
+      elapsed: elapsed,
+      difficulty: difficulty,
+      ascension: ascension,
+      seedInfo: { active: true, value: seed, source: 'preview' },
+      player: { hp: hp, hpMax: hpMax },
+      rooms: [{ id: 'preview-room-' + floor, type: 'combat', cleared: true }]
+    };
+  }
+
+  /** 组装一个槽条目，checksum 用与游戏相同算法 */
+  function makeEntry(data, savedAt, reason) {
+    var text = JSON.stringify(data);
+    return { savedAt: savedAt, reason: reason, checksum: checksum(text), data: data };
+  }
+
+  /** 当前演示对局：用于「立即存档 / 覆盖」 */
+  function currentRun() {
+    return makeRun(9, 42, 900, 'normal', 2, 'demo-current', 52, 70);
+  }
+
+  /** 写入演示数据 */
+  function writeStore(store) {
+    localStorage.setItem(KEY, JSON.stringify(store));
+  }
+
+  /** 三套演示数据：正常 / 全空 / 损坏槽 / 整体不可读 */
+  function seed(kind) {
+    var now = Date.now();
+    if (kind === 'unreadable') {
+      localStorage.setItem(KEY, '{"version":2,"slots":{"1":{"savedAt":' + now + ',');
+      localStorage.removeItem(RESUME_KEY);
+      return;
+    }
+    var store = { version: VERSION, slots: {} };
+    if (kind !== 'empty') {
+      store.slots['1'] = makeEntry(makeRun(7, 34, 765, 'normal', 2, 'ember-7', 52, 70), now - 3 * 60 * 1000, 'floor');
+      store.slots['2'] = makeEntry(makeRun(12, 61, 1880, 'nightmare', 4, 'void-12', 28, 70), now - 26 * 60 * 60 * 1000, 'manual');
+    }
+    if (kind === 'corrupt') {
+      var bad = makeRun(15, 88, 2400, 'nightmare', 6, 'bad-15', 12, 70);
+      store.slots['3'] = { savedAt: now - 5 * 60 * 1000, reason: 'manual', checksum: 'deadbeef', data: bad };
+    }
+    writeStore(store);
+    localStorage.removeItem(RESUME_KEY);
+  }
+
+  /** 把某个槽的校验和改坏一个字符（演示「该槽不可用」） */
+  function corruptSlot(slot) {
+    var store = readStore();
+    if (!store.slots[String(slot)]) return false;
+    var sum = String(store.slots[String(slot)].checksum || '');
+    store.slots[String(slot)].checksum = (sum.charAt(0) === '0' ? '1' : '0') + sum.slice(1);
+    writeStore(store);
+    return true;
+  }
+
+  /** 读演示存储 */
+  function readStore() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return { version: VERSION, slots: {} };
+      return JSON.parse(raw);
+    } catch (error) {
+      return { version: VERSION, slots: {} };
+    }
+  }
+
+  /* 首次进入：正常两槽 + 一个空槽 */
+  if (!localStorage.getItem(KEY)) seed('normal');
+
+  /* mock 适配器：save-ui.js 会优先识别它 */
+  window.JJ_SAVE_MOCK = {
+    key: KEY,
+    version: VERSION,
+    mode: 'preview',
+    raw: function () { return localStorage.getItem(KEY) || ''; },
+    writeRaw: function (text) { localStorage.setItem(KEY, String(text)); return true; },
+    saveToSlot: function (slot) {
+      var store = readStore();
+      if (store.version !== VERSION) return { ok: false, error: 'store' };
+      if (!store.slots || typeof store.slots !== 'object') store.slots = {};
+      store.slots[String(slot)] = makeEntry(currentRun(), Date.now(), 'manual');
+      writeStore(store);
+      return { ok: true };
+    },
+    load: function (slot) {
+      var store = readStore();
+      var entry = store.slots && store.slots[String(slot)];
+      if (!entry || !entry.data) return { ok: false, error: 'empty' };
+      var detail = { slot: Number(slot), floor: entry.data.floor, at: Date.now() };
+      localStorage.setItem(RESUME_KEY, JSON.stringify(detail));
+      setTimeout(function () {
+        window.dispatchEvent(new CustomEvent('jjsv-preview-resume', { detail: detail }));
+      }, 0);
+      return { ok: true, slot: Number(slot), floor: entry.data.floor };
+    },
+    newGame: function () {
+      localStorage.setItem('jjsv_preview_newgame', String(Date.now()));
+      return { ok: true };
+    }
+  };
+
+  /** 供测试 / 手动演示使用的小工具 */
+  window.__DEMO = { seed: seed, corruptSlot: corruptSlot, readStore: readStore, key: KEY };
+
+  /** 显示读档结果条 */
+  function showResume(detail) {
+    var banner = document.getElementById('resumeBanner');
+    var text = document.getElementById('resumeText');
+    if (!banner || !text || !detail) return;
+    text.textContent = '槽 ' + detail.slot + ' · 第 ' + detail.floor + ' 层';
+    banner.classList.add('is-show');
+  }
+
+  /* 页面加载时：如果上次点过「继续」，把结果条恢复出来（刷新后仍在） */
+  try {
+    var saved = localStorage.getItem(RESUME_KEY);
+    if (saved) showResume(JSON.parse(saved));
+  } catch (error) { /* 忽略 */ }
+
+  window.addEventListener('jjsv-preview-resume', function (event) {
+    showResume(event && event.detail);
+  });
+
+  document.getElementById('resumeClear').addEventListener('click', function () {
+    localStorage.removeItem(RESUME_KEY);
+    document.getElementById('resumeBanner').classList.remove('is-show');
+  });
+
+  /* 演示按钮：切换数据后刷新，保证三槽状态干净 */
+  document.querySelectorAll('[data-demo]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var kind = btn.getAttribute('data-demo');
+      if (kind === 'open') { if (window.JJSAVE && JJSAVE.enabled) JJSAVE.open(); return; }
+      seed(kind);
+      if (kind === 'corrupt') corruptSlot(3);
+      location.reload();
+    });
+  });
+})();
+</script>
+
+<!-- 存档界面模块：自动识别 mock / 游戏调试口 / 纯本地 -->
+<script src="save-ui.js"></script>
+<script>
+(function () {
+  'use strict';
+  var off = document.getElementById('offNotice');
+  if (!window.JJSAVE || !window.JJSAVE.enabled) {
+    if (off) off.classList.remove('jjsv-hidden');
+    return;
+  }
+  /* 预览页默认打开浮层；正式接入时由悬浮入口 / F8 / 主菜单按钮触发 */
+  setTimeout(function () { window.JJSAVE.open(); }, 80);
+})();
+</script>
+</body>
+</html>

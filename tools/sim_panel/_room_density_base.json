@@ -1,0 +1,917 @@
+{
+  "generatedAt": "2026-11-08T14:26:32.288Z",
+  "runsPerChar": 2000,
+  "profile": "bot",
+  "chars": {
+    "base": {
+      "label": "中性(基准)",
+      "runs": 2000,
+      "clear10": 0.3415,
+      "reach20": 0.299,
+      "clear20": 0.2985
+    },
+    "warden3": {
+      "label": "守拙(104)",
+      "runs": 2000,
+      "clear10": 0.3645,
+      "reach20": 0.3145,
+      "clear20": 0.314
+    },
+    "ember4": {
+      "label": "疾火(95+增幅)",
+      "runs": 2000,
+      "clear10": 0.374,
+      "reach20": 0.328,
+      "clear20": 0.328
+    },
+    "gazer2": {
+      "label": "观星(100+回能)",
+      "runs": 2000,
+      "clear10": 0.375,
+      "reach20": 0.3245,
+      "clear20": 0.324
+    }
+  },
+  "buckets": {
+    "1": {
+      "battle": {
+        "n": 10236,
+        "countMean": 4,
+        "countMin": 4,
+        "countMax": 4,
+        "secP50": 17.99,
+        "secP95": 21.58
+      },
+      "elite": {
+        "n": 3356,
+        "countMean": 3,
+        "countMin": 3,
+        "countMax": 3,
+        "secP50": 39.22,
+        "secP95": 50.32
+      },
+      "boss": {
+        "n": 8000,
+        "secP50": 65.19,
+        "secP95": 69.18
+      },
+      "floorTotal": {
+        "n": 8000,
+        "p50": 101.98,
+        "p95": 145.87
+      },
+      "types": {
+        "battle": 10236,
+        "elite": 3356,
+        "chest": 3372,
+        "event": 3564,
+        "rest": 3472,
+        "shop": 0,
+        "survival": 0,
+        "boss": 8000,
+        "start": 8000
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 0,
+        "boss": 0
+      }
+    },
+    "2": {
+      "battle": {
+        "n": 10047,
+        "countMean": 4,
+        "countMin": 4,
+        "countMax": 4,
+        "secP50": 18.12,
+        "secP95": 23.27
+      },
+      "elite": {
+        "n": 3617,
+        "countMean": 3,
+        "countMin": 3,
+        "countMax": 3,
+        "secP50": 39.67,
+        "secP95": 53.72
+      },
+      "boss": {
+        "n": 7997,
+        "secP50": 62.6,
+        "secP95": 71.92
+      },
+      "floorTotal": {
+        "n": 8000,
+        "p50": 101.54,
+        "p95": 147.88
+      },
+      "types": {
+        "battle": 10047,
+        "elite": 3617,
+        "chest": 3524,
+        "event": 3316,
+        "rest": 3496,
+        "shop": 0,
+        "survival": 0,
+        "boss": 8000,
+        "start": 8000
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 3,
+        "boss": 564
+      }
+    },
+    "3": {
+      "battle": {
+        "n": 9081,
+        "countMean": 5,
+        "countMin": 5,
+        "countMax": 5,
+        "secP50": 18.28,
+        "secP95": 23.61
+      },
+      "elite": {
+        "n": 2939,
+        "countMean": 4,
+        "countMin": 4,
+        "countMax": 4,
+        "secP50": 40.98,
+        "secP95": 57.76
+      },
+      "boss": {
+        "n": 6763,
+        "secP50": 60.76,
+        "secP95": 71.67
+      },
+      "floorTotal": {
+        "n": 7433,
+        "p50": 90.67,
+        "p95": 145.32
+      },
+      "types": {
+        "battle": 9389,
+        "elite": 3038,
+        "chest": 3405,
+        "event": 3136,
+        "rest": 3331,
+        "shop": 0,
+        "survival": 0,
+        "boss": 7433,
+        "start": 7433
+      },
+      "deaths": {
+        "battle": 101,
+        "elite": 569,
+        "boss": 1572
+      }
+    },
+    "4": {
+      "battle": {
+        "n": 6378,
+        "countMean": 5,
+        "countMin": 5,
+        "countMax": 5,
+        "secP50": 17,
+        "secP95": 23.41
+      },
+      "elite": {
+        "n": 2168,
+        "countMean": 4,
+        "countMin": 4,
+        "countMax": 4,
+        "secP50": 37.88,
+        "secP95": 56.65
+      },
+      "boss": {
+        "n": 4855,
+        "secP50": 61.73,
+        "secP95": 72.93
+      },
+      "floorTotal": {
+        "n": 5191,
+        "p50": 91.01,
+        "p95": 146.89
+      },
+      "types": {
+        "battle": 6515,
+        "elite": 2222,
+        "chest": 2260,
+        "event": 2292,
+        "rest": 2284,
+        "shop": 0,
+        "survival": 0,
+        "boss": 5191,
+        "start": 5191
+      },
+      "deaths": {
+        "battle": 45,
+        "elite": 291,
+        "boss": 853
+      }
+    },
+    "5": {
+      "battle": {
+        "n": 4932,
+        "countMean": 5.5,
+        "countMin": 5,
+        "countMax": 6,
+        "secP50": 18.78,
+        "secP95": 25.45
+      },
+      "elite": {
+        "n": 1670,
+        "countMean": 4.52,
+        "countMin": 4,
+        "countMax": 5,
+        "secP50": 44.91,
+        "secP95": 66.72
+      },
+      "boss": {
+        "n": 3817,
+        "secP50": 62.9,
+        "secP95": 74.06
+      },
+      "floorTotal": {
+        "n": 4002,
+        "p50": 96.46,
+        "p95": 162.64
+      },
+      "types": {
+        "battle": 5021,
+        "elite": 1687,
+        "chest": 1776,
+        "event": 1858,
+        "rest": 1664,
+        "shop": 0,
+        "survival": 0,
+        "boss": 4002,
+        "start": 4002
+      },
+      "deaths": {
+        "battle": 32,
+        "elite": 153,
+        "boss": 467
+      }
+    },
+    "6": {
+      "battle": {
+        "n": 4178,
+        "countMean": 7,
+        "countMin": 7,
+        "countMax": 7,
+        "secP50": 19.03,
+        "secP95": 23.95
+      },
+      "elite": {
+        "n": 1455,
+        "countMean": 5,
+        "countMin": 5,
+        "countMax": 5,
+        "secP50": 41.69,
+        "secP95": 54.67
+      },
+      "boss": {
+        "n": 3292,
+        "secP50": 74.48,
+        "secP95": 87.15
+      },
+      "floorTotal": {
+        "n": 3350,
+        "p50": 111.91,
+        "p95": 167.85
+      },
+      "types": {
+        "battle": 4201,
+        "elite": 1464,
+        "chest": 1477,
+        "event": 1429,
+        "rest": 1479,
+        "shop": 0,
+        "survival": 0,
+        "boss": 3350,
+        "start": 3350
+      },
+      "deaths": {
+        "battle": 18,
+        "elite": 40,
+        "boss": 172
+      }
+    },
+    "7": {
+      "battle": {
+        "n": 4031,
+        "countMean": 7,
+        "countMin": 7,
+        "countMax": 7,
+        "secP50": 20.95,
+        "secP95": 26.94
+      },
+      "elite": {
+        "n": 1298,
+        "countMean": 5,
+        "countMin": 5,
+        "countMax": 5,
+        "secP50": 45.99,
+        "secP95": 63.01
+      },
+      "boss": {
+        "n": 3091,
+        "secP50": 66.22,
+        "secP95": 77.99
+      },
+      "floorTotal": {
+        "n": 3120,
+        "p50": 107.25,
+        "p95": 169.64
+      },
+      "types": {
+        "battle": 4042,
+        "elite": 1302,
+        "chest": 1327,
+        "event": 1361,
+        "rest": 1328,
+        "shop": 0,
+        "survival": 0,
+        "boss": 3120,
+        "start": 3120
+      },
+      "deaths": {
+        "battle": 5,
+        "elite": 24,
+        "boss": 72
+      }
+    },
+    "8": {
+      "battle": {
+        "n": 3884,
+        "countMean": 7.5,
+        "countMin": 7,
+        "countMax": 8,
+        "secP50": 21.36,
+        "secP95": 27.87
+      },
+      "elite": {
+        "n": 1309,
+        "countMean": 5.52,
+        "countMin": 5,
+        "countMax": 6,
+        "secP50": 48.26,
+        "secP95": 65.61
+      },
+      "boss": {
+        "n": 3007,
+        "secP50": 67.22,
+        "secP95": 80.07
+      },
+      "floorTotal": {
+        "n": 3019,
+        "p50": 112.39,
+        "p95": 172.24
+      },
+      "types": {
+        "battle": 3885,
+        "elite": 1311,
+        "chest": 1322,
+        "event": 1157,
+        "rest": 1382,
+        "shop": 0,
+        "survival": 0,
+        "boss": 3019,
+        "start": 3019
+      },
+      "deaths": {
+        "battle": 1,
+        "elite": 11,
+        "boss": 28
+      }
+    },
+    "9": {
+      "battle": {
+        "n": 3773,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 22.32,
+        "secP95": 28.55
+      },
+      "elite": {
+        "n": 1216,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 50.31,
+        "secP95": 68.61
+      },
+      "boss": {
+        "n": 2975,
+        "secP50": 68.37,
+        "secP95": 82.55
+      },
+      "floorTotal": {
+        "n": 2979,
+        "p50": 113.82,
+        "p95": 174.25
+      },
+      "types": {
+        "battle": 3773,
+        "elite": 1216,
+        "chest": 1335,
+        "event": 1316,
+        "rest": 1297,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2979,
+        "start": 2979
+      },
+      "deaths": {
+        "battle": 1,
+        "elite": 3,
+        "boss": 26
+      }
+    },
+    "10": {
+      "battle": {
+        "n": 3756,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 23.5,
+        "secP95": 30.65
+      },
+      "elite": {
+        "n": 1255,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 53.36,
+        "secP95": 73.16
+      },
+      "boss": {
+        "n": 2932,
+        "secP50": 69.48,
+        "secP95": 83.9
+      },
+      "floorTotal": {
+        "n": 2949,
+        "p50": 117.66,
+        "p95": 188.62
+      },
+      "types": {
+        "battle": 3767,
+        "elite": 1259,
+        "chest": 1264,
+        "event": 1279,
+        "rest": 1278,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2949,
+        "start": 2949
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 17,
+        "boss": 22
+      }
+    },
+    "11": {
+      "battle": {
+        "n": 3696,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 24.67,
+        "secP95": 31.82
+      },
+      "elite": {
+        "n": 1311,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 56.99,
+        "secP95": 78.2
+      },
+      "boss": {
+        "n": 2904,
+        "secP50": 70.63,
+        "secP95": 86.35
+      },
+      "floorTotal": {
+        "n": 2910,
+        "p50": 123.06,
+        "p95": 193.77
+      },
+      "types": {
+        "battle": 3700,
+        "elite": 1311,
+        "chest": 1201,
+        "event": 1226,
+        "rest": 1292,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2910,
+        "start": 2910
+      },
+      "deaths": {
+        "battle": 1,
+        "elite": 5,
+        "boss": 21
+      }
+    },
+    "12": {
+      "battle": {
+        "n": 3736,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 25.82,
+        "secP95": 33.91
+      },
+      "elite": {
+        "n": 1260,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 59.01,
+        "secP95": 82.48
+      },
+      "boss": {
+        "n": 2883,
+        "secP50": 82.15,
+        "secP95": 100.24
+      },
+      "floorTotal": {
+        "n": 2883,
+        "p50": 135.73,
+        "p95": 218.5
+      },
+      "types": {
+        "battle": 3736,
+        "elite": 1260,
+        "chest": 1218,
+        "event": 1137,
+        "rest": 1298,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2883,
+        "start": 2883
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 0,
+        "boss": 20
+      }
+    },
+    "13": {
+      "battle": {
+        "n": 3650,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 25.92,
+        "secP95": 35.61
+      },
+      "elite": {
+        "n": 1230,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 60.89,
+        "secP95": 84.93
+      },
+      "boss": {
+        "n": 2852,
+        "secP50": 73.01,
+        "secP95": 89.57
+      },
+      "floorTotal": {
+        "n": 2863,
+        "p50": 126.91,
+        "p95": 210.53
+      },
+      "types": {
+        "battle": 3651,
+        "elite": 1234,
+        "chest": 1207,
+        "event": 1217,
+        "rest": 1280,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2863,
+        "start": 2863
+      },
+      "deaths": {
+        "battle": 1,
+        "elite": 10,
+        "boss": 31
+      }
+    },
+    "14": {
+      "battle": {
+        "n": 3486,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 27.94,
+        "secP95": 38.36
+      },
+      "elite": {
+        "n": 1267,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 64.19,
+        "secP95": 93.59
+      },
+      "boss": {
+        "n": 2813,
+        "secP50": 74.37,
+        "secP95": 91.48
+      },
+      "floorTotal": {
+        "n": 2821,
+        "p50": 131.08,
+        "p95": 218.46
+      },
+      "types": {
+        "battle": 3487,
+        "elite": 1267,
+        "chest": 1236,
+        "event": 1257,
+        "rest": 1216,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2821,
+        "start": 2821
+      },
+      "deaths": {
+        "battle": 1,
+        "elite": 7,
+        "boss": 14
+      }
+    },
+    "15": {
+      "battle": {
+        "n": 3654,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 29.33,
+        "secP95": 40.49
+      },
+      "elite": {
+        "n": 1197,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 71.4,
+        "secP95": 100.89
+      },
+      "boss": {
+        "n": 2799,
+        "secP50": 75.38,
+        "secP95": 91.32
+      },
+      "floorTotal": {
+        "n": 2799,
+        "p50": 138.57,
+        "p95": 231.27
+      },
+      "types": {
+        "battle": 3654,
+        "elite": 1197,
+        "chest": 1250,
+        "event": 1116,
+        "rest": 1180,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2799,
+        "start": 2799
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 0,
+        "boss": 43
+      }
+    },
+    "16": {
+      "battle": {
+        "n": 3639,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 31.91,
+        "secP95": 44.74
+      },
+      "elite": {
+        "n": 1160,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 75.2,
+        "secP95": 109.3
+      },
+      "boss": {
+        "n": 2755,
+        "secP50": 77.02,
+        "secP95": 93.51
+      },
+      "floorTotal": {
+        "n": 2756,
+        "p50": 142.24,
+        "p95": 249.77
+      },
+      "types": {
+        "battle": 3639,
+        "elite": 1160,
+        "chest": 1167,
+        "event": 1172,
+        "rest": 1130,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2756,
+        "start": 2756
+      },
+      "deaths": {
+        "battle": 1,
+        "elite": 0,
+        "boss": 72
+      }
+    },
+    "17": {
+      "battle": {
+        "n": 3532,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 34.35,
+        "secP95": 47.51
+      },
+      "elite": {
+        "n": 1064,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 80.8,
+        "secP95": 115.95
+      },
+      "boss": {
+        "n": 2679,
+        "secP50": 78.74,
+        "secP95": 95.82
+      },
+      "floorTotal": {
+        "n": 2683,
+        "p50": 148.73,
+        "p95": 255.17
+      },
+      "types": {
+        "battle": 3535,
+        "elite": 1064,
+        "chest": 1195,
+        "event": 1090,
+        "rest": 1165,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2683,
+        "start": 2683
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 4,
+        "boss": 80
+      }
+    },
+    "18": {
+      "battle": {
+        "n": 3375,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 36.53,
+        "secP95": 51.92
+      },
+      "elite": {
+        "n": 1076,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 86.64,
+        "secP95": 128.29
+      },
+      "boss": {
+        "n": 2598,
+        "secP50": 91.65,
+        "secP95": 112.22
+      },
+      "floorTotal": {
+        "n": 2599,
+        "p50": 167.81,
+        "p95": 287.19
+      },
+      "types": {
+        "battle": 3376,
+        "elite": 1076,
+        "chest": 1178,
+        "event": 1069,
+        "rest": 1098,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2599,
+        "start": 2599
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 1,
+        "boss": 59
+      }
+    },
+    "19": {
+      "battle": {
+        "n": 3344,
+        "countMean": 8,
+        "countMin": 8,
+        "countMax": 8,
+        "secP50": 46.92,
+        "secP95": 63.98
+      },
+      "elite": {
+        "n": 1115,
+        "countMean": 6,
+        "countMin": 6,
+        "countMax": 6,
+        "secP50": 113.19,
+        "secP95": 161.78
+      },
+      "boss": {
+        "n": 2539,
+        "secP50": 88.9,
+        "secP95": 109.91
+      },
+      "floorTotal": {
+        "n": 2539,
+        "p50": 189.23,
+        "p95": 344.3
+      },
+      "types": {
+        "battle": 3344,
+        "elite": 1115,
+        "chest": 1001,
+        "event": 1094,
+        "rest": 1063,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2539,
+        "start": 2539
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 0,
+        "boss": 7
+      }
+    },
+    "20": {
+      "battle": {
+        "n": 3212,
+        "countMean": 8.51,
+        "countMin": 8,
+        "countMax": 9,
+        "secP50": 50.68,
+        "secP95": 70.39
+      },
+      "elite": {
+        "n": 1143,
+        "countMean": 6.5,
+        "countMin": 6,
+        "countMax": 7,
+        "secP50": 124.41,
+        "secP95": 173.36
+      },
+      "boss": {
+        "n": 2532,
+        "secP50": 50.33,
+        "secP95": 62.01
+      },
+      "floorTotal": {
+        "n": 2532,
+        "p50": 158.88,
+        "p95": 324.23
+      },
+      "types": {
+        "battle": 3212,
+        "elite": 1143,
+        "chest": 1061,
+        "event": 1057,
+        "rest": 1123,
+        "shop": 0,
+        "survival": 0,
+        "boss": 2532,
+        "start": 2532
+      },
+      "deaths": {
+        "battle": 0,
+        "elite": 0,
+        "boss": 3
+      }
+    }
+  }
+}

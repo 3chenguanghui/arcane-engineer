@@ -1,0 +1,236 @@
+{
+  "results": [
+    {
+      "name": "主题字幕条目数与主题数一致（3 条，键全覆盖）",
+      "ok": true,
+      "detail": {
+        "themeIds": [
+          "mech",
+          "rune",
+          "void"
+        ],
+        "themeKeys": [
+          "mech",
+          "rune",
+          "void"
+        ]
+      }
+    },
+    {
+      "name": "首领字幕条目数与首领数一致（3 条，键全覆盖）",
+      "ok": true,
+      "detail": {
+        "bossIds": [
+          "mech",
+          "rune",
+          "void"
+        ],
+        "bossKeys": [
+          "mech",
+          "rune",
+          "void"
+        ]
+      }
+    },
+    {
+      "name": "全部 7 条字幕长度都在 12–20 字（含标点）",
+      "ok": true,
+      "detail": [
+        {
+          "t": "铁锈味比上一次记录更浓，齿轮还在咬。",
+          "n": 18
+        },
+        {
+          "t": "墙上的符线醒了过来，它在记你的名字。",
+          "n": 18
+        },
+        {
+          "t": "这里安静得像被谁删掉了一行记录。",
+          "n": 16
+        },
+        {
+          "t": "核心露出来的几秒，它只讲一次道理。",
+          "n": 17
+        },
+        {
+          "t": "刻印开始排布了，别站进空格里。",
+          "n": 15
+        },
+        {
+          "t": "引力压在你脚边，往反方向蹬。",
+          "n": 14
+        },
+        {
+          "t": "蓝图接上了，你的路线被改写。",
+          "n": 14
+        }
+      ]
+    },
+    {
+      "name": "蓝图装配后文案存在且为非空字符串",
+      "ok": true,
+      "detail": {
+        "blueprint": "蓝图接上了，你的路线被改写。"
+      }
+    },
+    {
+      "name": "总开关默认开启、停留时长 ≤3s（不占屏）",
+      "ok": true,
+      "detail": {
+        "enabled": true,
+        "dwell": 2.6
+      }
+    },
+    {
+      "name": "关闭总开关后 push 返回 null，且队列 / 当前条都被清空",
+      "ok": true,
+      "detail": {
+        "push": null,
+        "info": {
+          "enabled": false,
+          "current": null,
+          "currentKind": null,
+          "queue": [],
+          "count": 0,
+          "shown": [
+            "theme:mech"
+          ],
+          "blocked": false
+        }
+      }
+    },
+    {
+      "name": "关闭后即使强制显示也不会出现",
+      "ok": true,
+      "detail": {
+        "show": null,
+        "current": null
+      }
+    },
+    {
+      "name": "同一主题第二次进入不再重复播报",
+      "ok": true,
+      "detail": {
+        "first": "铁锈味比上一次记录更浓，齿轮还在咬。",
+        "second": null,
+        "shown": [
+          "theme:mech"
+        ]
+      }
+    },
+    {
+      "name": "真实换层：三个主题各播一次，第四层回到机械不重复",
+      "ok": true,
+      "detail": {
+        "lastShown": [
+          "theme:mech",
+          "theme:rune",
+          "theme:void"
+        ],
+        "floors": [
+          {
+            "floor": 1,
+            "shown": [
+              "theme:mech"
+            ]
+          },
+          {
+            "floor": 2,
+            "shown": [
+              "theme:mech",
+              "theme:rune"
+            ]
+          },
+          {
+            "floor": 3,
+            "shown": [
+              "theme:mech",
+              "theme:rune",
+              "theme:void"
+            ]
+          },
+          {
+            "floor": 4,
+            "shown": [
+              "theme:mech",
+              "theme:rune",
+              "theme:void"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "首领字幕与配置一致，并能进入当前显示位",
+      "ok": true,
+      "detail": {
+        "bossLine": {
+          "text": "引力压在你脚边，往反方向蹬。",
+          "expect": "引力压在你脚边，往反方向蹬。"
+        },
+        "bossState": {
+          "enabled": true,
+          "current": "引力压在你脚边，往反方向蹬。",
+          "currentKind": "boss",
+          "queue": [],
+          "count": 0,
+          "shown": [
+            "theme:mech",
+            "theme:rune",
+            "theme:void"
+          ],
+          "blocked": false
+        }
+      }
+    },
+    {
+      "name": "蓝图字幕只在装配成功时播一次（重复装配不重复刷屏）",
+      "ok": true,
+      "detail": {
+        "a": "蓝图接上了，你的路线被改写。",
+        "b": null,
+        "expect": "蓝图接上了，你的路线被改写。"
+      }
+    },
+    {
+      "name": "字幕不新增任何 DOM 节点、不改变 activeElement（结构上不可能抢焦点）",
+      "ok": true,
+      "detail": {
+        "before": "BODY",
+        "after": "BODY",
+        "noDom": true,
+        "shown": "墙上的符线醒了过来，它在记你的名字。"
+      }
+    },
+    {
+      "name": "暂停 / 弹窗期间让位：不占屏但保留队列，恢复后自动接上并显示虚空字幕",
+      "ok": true,
+      "detail": {
+        "pauseProbe": {
+          "queue": 1,
+          "blocked": true
+        },
+        "pausedInfo": {
+          "enabled": true,
+          "current": null,
+          "currentKind": null,
+          "queue": [
+            "这里安静得像被谁删掉了一行记录。"
+          ],
+          "count": 0,
+          "shown": [
+            "blueprint:default"
+          ],
+          "blocked": true
+        },
+        "resumed": "这里安静得像被谁删掉了一行记录。"
+      }
+    },
+    {
+      "name": "运行期无 JS 异常",
+      "ok": true,
+      "detail": []
+    }
+  ],
+  "runtimeErrors": []
+}

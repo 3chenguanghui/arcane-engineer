@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>烬 · 结算面板三方案（UI Lab）</title>
+<style>
+/* ============================================================
+   0. 设计令牌：照抄主文件 :root（与技能卡页同一套，不新增色相）
+   ============================================================ */
+:root{
+  --bg:#070b14; --bg-deep:#03060c;
+  --surface-1:#0d1424; --surface-2:#131e33; --surface-3:#1b2942;
+  --panel:#121d31; --panel-2:#16233a;
+  --line:rgba(126,164,214,.24); --line-strong:rgba(120,190,255,.46);
+  --line-soft:rgba(140,178,228,.14);
+  --text-1:#eaf5ff; --text-2:#c3d7ef; --text-3:#a8bfdc; --muted:#a8bfdc;
+  --tech:#3ee6ff; --magic:#b085ff; --gold:#ffc247; --good:#47e8a7; --bad:#ff6b7f;
+  --rar-common:#9fb0c8; --rar-rare:#4aa8ff; --rar-epic:#b47cff; --rar-relic:#ffc247;
+  --rar-epic-text:#c9a6ff;
+  --r-xs:4px; --r-sm:8px; --r-md:12px; --r-lg:16px; --r-pill:999px;
+  --sans:"Microsoft YaHei UI","Microsoft YaHei","PingFang SC","Segoe UI",system-ui,sans-serif;
+  --mono:"Cascadia Mono","Consolas","Courier New",monospace;
+  --sheen:linear-gradient(160deg,rgba(255,255,255,.10),rgba(255,255,255,0) 42%);
+  --inner:inset 0 1px 0 rgba(255,255,255,.08),inset 0 -18px 32px rgba(0,0,0,.35);
+  --shadow-panel:0 18px 46px rgba(0,0,0,.55);
+  --shadow-pop:0 28px 80px rgba(0,0,0,.66);
+  --page:1320px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  min-height:100%;
+  background:
+    radial-gradient(900px 460px at 50% -8%,rgba(62,230,255,.075),transparent 70%),
+    radial-gradient(760px 420px at 92% 4%,rgba(176,133,255,.065),transparent 70%),
+    linear-gradient(rgba(120,190,255,.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(120,190,255,.04) 1px,transparent 1px),
+    var(--bg);
+  background-size:auto,auto,48px 48px,48px 48px,auto;
+  color:var(--text-2);font-family:var(--sans);font-size:14px;
+  -webkit-font-smoothing:antialiased;padding:44px 24px 72px;
+}
+.wrap{max-width:var(--page);margin:0 auto}
+
+/* ============================================================
+   1. 页头
+   ============================================================ */
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.22em;color:var(--tech);text-transform:uppercase}
+h1{margin:8px 0 10px;font-size:34px;line-height:1.15;letter-spacing:.03em;color:var(--text-1);font-weight:700}
+.lede{margin:0;max-width:780px;font-size:13px;line-height:1.8;color:var(--text-3)}
+.lede b{color:var(--text-1);font-weight:600}
+.head-rule{height:1px;margin:24px 0 0;background:linear-gradient(90deg,var(--line-strong),rgba(120,190,255,0) 62%)}
+.constraints{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0 0;padding:0;list-style:none}
+.constraints li{display:flex;align-items:center;gap:8px;padding:7px 12px;border:1px solid var(--line);
+  border-radius:var(--r-sm);background:rgba(10,18,30,.62);font-size:12px;color:var(--text-3)}
+.constraints em{font-style:normal;font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;color:var(--tech)}
+
+/* ============================================================
+   2. 三列方案
+   ============================================================ */
+.schemes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px;margin-top:28px}
+.col{position:relative;padding:16px 16px 18px;border:1px solid var(--line);border-radius:var(--r-lg);
+  background:var(--sheen),linear-gradient(180deg,rgba(19,30,51,.92),rgba(9,15,26,.96));box-shadow:var(--inner)}
+.col::before{content:"";position:absolute;left:12px;top:12px;width:14px;height:14px;
+  border-left:1px solid rgba(92,230,255,.4);border-top:1px solid rgba(92,230,255,.4)}
+.col-head{display:flex;align-items:flex-start;gap:10px;padding-bottom:12px;border-bottom:1px dashed var(--line-soft)}
+.badge{flex:none;width:30px;height:30px;display:grid;place-items:center;border-radius:var(--r-sm);
+  border:1px solid rgba(92,230,255,.45);background:rgba(20,60,84,.42);
+  font-family:var(--mono);font-size:13px;font-weight:700;color:#d6f8ff}
+.col-head h2{margin:0;font-size:17px;line-height:1.25;color:var(--text-1)}
+.scene{margin:3px 0 0;font-size:11.5px;line-height:1.55;color:var(--muted)}
+.spec{display:flex;flex-wrap:wrap;gap:6px;margin:11px 0 12px;padding:0;list-style:none}
+.spec li{font-family:var(--mono);font-size:10px;letter-spacing:.03em;padding:3px 7px;border-radius:var(--r-xs);
+  border:1px solid var(--line);color:var(--text-3);background:rgba(255,255,255,.028)}
+.spec li b{color:var(--text-1);font-weight:700}
+.zoomnote{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);margin:0 0 8px}
+.zw{zoom:.54}
+.zw .result{width:720px;max-width:none}
+
+/* ============================================================
+   3. 结算板公共骨架（720px 设计宽）
+   ============================================================
+   参考 guladam/deck_builder_tutorial 的 battle_over_panel.tscn：
+   Panel → VBox → 结论 Label → 主按钮 → 次按钮。
+   ============================================================ */
+.result{
+  position:relative;width:100%;max-width:720px;margin:0 auto;padding:24px 28px 26px;
+  border-radius:18px;border:1px solid var(--line-strong);
+  background:
+    radial-gradient(560px 220px at 50% 0%,rgba(62,230,255,.10),transparent 72%),
+    var(--sheen),
+    linear-gradient(180deg,var(--surface-2),var(--surface-1));
+  box-shadow:var(--shadow-pop),var(--inner);
+  overflow:hidden;
+}
+.result::before{
+  content:"";position:absolute;left:0;right:0;top:0;height:2px;
+  background:linear-gradient(90deg,transparent,rgba(62,230,255,.55),transparent);
+}
+/* 头部 */
+.rhead{display:flex;align-items:center;gap:14px}
+.ricon{
+  flex:none;width:52px;height:52px;display:grid;place-items:center;border-radius:50%;
+  border:1px solid rgba(62,230,255,.38);background:radial-gradient(circle at 50% 40%,rgba(62,230,255,.20),rgba(6,12,22,.9));
+  box-shadow:0 0 22px -6px rgba(62,230,255,.55),inset 0 0 12px rgba(62,230,255,.10);
+}
+.ricon svg{width:24px;height:24px;color:var(--tech)}
+.rtitle{min-width:0;flex:1}
+.rtitle h2{margin:4px 0 3px;font-size:26px;line-height:1.2;color:var(--text-1);letter-spacing:.02em}
+.rsub{margin:0;font-size:12.5px;line-height:1.6;color:var(--text-3)}
+.rsub b{color:var(--bad);font-weight:600}
+.badge-v{
+  flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:3px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--muted);
+}
+.badge-v b{font-size:15px;color:var(--good);font-weight:700;letter-spacing:.02em}
+
+/* 差值：形状 + 正负号 + 颜色 三路，不靠颜色单读 */
+.dlt{display:inline-flex;align-items:center;gap:3px;font-family:var(--mono);font-size:11px;font-weight:700;white-space:nowrap}
+.dlt i{font-style:normal;font-size:8px;line-height:1}
+.dlt.up{color:var(--good)}
+.dlt.neu{color:var(--text-3);font-weight:400}
+.dlt.down{color:var(--bad)}
+.dlt.same{color:var(--muted);font-weight:400}
+
+/* 区块标签 */
+.blabel{display:flex;align-items:center;gap:8px;margin:0 0 7px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--muted)}
+.blabel::after{content:"";height:1px;flex:1;background:var(--line-soft)}
+.took{margin-top:16px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 9px;border-radius:var(--r-pill);
+  border:1px solid var(--line);background:rgba(255,255,255,.032);font-size:11.5px;color:var(--text-2)}
+.chip>i{width:6px;height:6px;border-radius:50%;flex:none}
+.chip.c-common>i{background:var(--rar-common)}
+.chip.c-rare>i{background:var(--rar-rare)}
+.chip.c-epic>i{background:var(--rar-epic)}
+.chip.c-relic>i{background:var(--rar-relic)}
+.chip.c-relic{border-color:rgba(255,194,71,.42);color:var(--gold)}
+.chip small{font-family:var(--mono);font-size:9.5px;color:var(--muted);letter-spacing:.04em}
+
+/* 按钮：主 46px 填色 / 次 38px 描边（高度 + 填充双通道区分） */
+.acts{display:flex;align-items:center;gap:10px;margin-top:18px}
+.btn-p{
+  flex:1;height:46px;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  border-radius:var(--r-sm);border:1px solid rgba(120,240,255,.55);
+  background:linear-gradient(180deg,#4be2ff,#27b9e0);color:#061621;
+  font-family:var(--sans);font-size:14px;font-weight:700;letter-spacing:.06em;cursor:pointer;
+  box-shadow:0 0 22px rgba(62,230,255,.26),inset 0 1px 0 rgba(255,255,255,.42);
+}
+.btn-p kbd,.btn-s kbd{
+  font-family:var(--mono);font-size:10px;font-weight:500;padding:2px 5px;border-radius:var(--r-xs);
+  border:1px solid rgba(6,22,33,.28);background:rgba(6,22,33,.12);color:#0a2230;letter-spacing:.04em;
+}
+.btn-s{
+  height:38px;padding:0 14px;display:inline-flex;align-items:center;gap:7px;
+  border-radius:var(--r-sm);border:1px solid var(--line);background:rgba(255,255,255,.018);
+  color:var(--text-3);font-family:var(--sans);font-size:12.5px;cursor:pointer;
+}
+.btn-s kbd{border-color:rgba(160,190,225,.28);background:rgba(160,190,225,.06);color:var(--text-3)}
+.acthint{margin:8px 0 0;font-family:var(--mono);font-size:10px;letter-spacing:.1em;color:var(--muted);text-align:center}
+
+/* ============================================================
+   4. 方案 A「结论条」：结论 → 三格大数（差值同格）→ 明细 → 动作
+   ============================================================ */
+.ra .agrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  margin:18px 0 0;padding:14px 0;border-top:1px solid var(--line-soft);border-bottom:1px solid var(--line-soft)}
+.ra .acell{padding:0 16px;border-left:1px dashed var(--line-soft);min-width:0}
+.ra .acell:first-child{padding-left:0;border-left:0}
+.ra .acell .mlabel{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;color:var(--muted)}
+.ra .acell>b{display:block;margin:4px 0 5px;font-family:var(--mono);font-size:30px;line-height:1.05;color:var(--text-1);font-weight:700}
+.ra .acell>b.t{font-size:26px;letter-spacing:.01em}
+.ra .acell>b em{font-style:normal;font-size:11px;color:var(--text-3);font-weight:400;margin-left:3px}
+.ra .anote{margin:11px 0 0;font-size:12.5px;line-height:1.7;color:var(--text-3)}
+.ra .anote b{color:var(--text-1);font-weight:600}
+.ra .micro{display:flex;flex-wrap:wrap;gap:16px;margin-top:9px;font-family:var(--mono);font-size:10.5px;color:var(--muted)}
+.ra .micro b{color:var(--text-2);font-weight:700}
+
+/* ============================================================
+   5. 方案 B「战报」：左右双栏，右侧四行指标右对齐差值
+   ============================================================ */
+.rb .rhead .ricon{width:44px;height:44px}
+.rb .rhead .ricon svg{width:21px;height:21px}
+.rb .rtitle h2{font-size:22px}
+.rb .bbody{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:22px;margin-top:16px}
+.rb .btext{font-size:12.5px;line-height:1.8;color:var(--text-3);margin:0}
+.rb .btext b{color:var(--text-1)}
+.rb .bverdict{display:inline-flex;align-items:center;gap:6px;margin:10px 0 0;padding:5px 10px;
+  border-radius:var(--r-sm);border:1px solid rgba(71,232,167,.32);background:rgba(71,232,167,.08);
+  font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--good)}
+.rb .brows{border-top:1px solid var(--line-soft)}
+.rb .brow{display:flex;align-items:baseline;gap:10px;height:34px;border-bottom:1px dashed var(--line-soft)}
+.rb .brow .bl{width:52px;flex:none;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;color:var(--muted)}
+.rb .brow>b{margin-left:auto;font-family:var(--mono);font-size:15px;font-weight:700;color:var(--text-1)}
+.rb .brow .dlt{width:74px;justify-content:flex-end;flex:none}
+.rb .footrow{display:grid;grid-template-columns:minmax(0,1fr) 296px;gap:22px;align-items:end;margin-top:14px}
+
+/* ============================================================
+   6. 方案 C「对照表」：本局 / 上局 / 差值 成列
+   ============================================================ */
+.rc .rhead{gap:12px}
+.rc .rtitle h2{font-size:24px}
+.rc .ctable{margin-top:16px}
+.rc .crow{display:grid;grid-template-columns:minmax(0,1fr) 96px 96px 92px;align-items:baseline;gap:8px;
+  padding:0;border-bottom:1px dashed var(--line-soft)}
+.rc .crow.th{height:26px;border-bottom:1px solid var(--line);}
+.rc .crow.th span{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;color:var(--muted)}
+.rc .crow.th span:last-child{text-align:right}
+.rc .crow .m{font-size:11.5px;color:var(--text-3);height:38px;line-height:38px}
+.rc .crow b{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--text-1);height:38px;line-height:38px}
+.rc .crow s{font-family:var(--mono);font-size:12.5px;color:var(--text-3);text-decoration:none;opacity:.8;height:38px;line-height:38px}
+.rc .crow .dlt{justify-content:flex-end;height:38px;line-height:38px}
+.rc .chips{margin-top:14px}
+
+/* ============================================================
+   7. 1:1 全宽预览
+   ============================================================ */
+.preview{margin-top:38px}
+.preview .kicker{color:var(--gold)}
+.preview>h2{margin:7px 0 6px;font-size:20px;color:var(--text-1)}
+.preview .note{margin:0 0 18px;font-size:12px;color:var(--muted);line-height:1.7}
+.preview .stage{display:flex;justify-content:center}
+
+/* ============================================================
+   8. 结论 / 参考来源
+   ============================================================ */
+.verdict{margin-top:38px;padding:20px 22px;border:1px solid var(--line-strong);border-radius:var(--r-lg);
+  background:radial-gradient(600px 200px at 50% 0%,rgba(176,133,255,.10),transparent 70%),var(--sheen),
+    linear-gradient(180deg,var(--surface-2),var(--surface-1));box-shadow:var(--shadow-pop),var(--inner)}
+.verdict .kicker{color:var(--gold)}
+.verdict h2{margin:7px 0 10px;font-size:22px;color:var(--text-1)}
+.verdict p{margin:0;font-size:13px;line-height:1.85;color:var(--text-3)}
+.verdict p b{color:var(--text-1)}
+.verdict .nums{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.verdict .nums span{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;padding:4px 9px;
+  border:1px solid var(--line);border-radius:var(--r-xs);color:var(--text-3)}
+.verdict .nums b{color:var(--gold);font-weight:700}
+.refs{margin-top:26px;padding:16px 18px;border:1px solid var(--line);border-radius:var(--r-md);background:rgba(10,18,30,.55)}
+.refs .kicker{color:var(--muted)}
+.refs ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.refs li{font-size:11.5px;line-height:1.65;color:var(--text-3)}
+.refs li b{color:var(--text-2);font-weight:600}
+.refs li code{font-family:var(--mono);font-size:10.5px;color:var(--tech);background:rgba(62,230,255,.06);padding:1px 4px;border-radius:3px}
+.refs .lic{font-family:var(--mono);font-size:10px;letter-spacing:.08em;color:var(--good);margin-left:6px}
+
+/* ============================================================
+   9. 页面断点
+   ============================================================ */
+@media (max-width:1100px){
+  body{padding:32px 16px 56px}
+  h1{font-size:27px}
+  .schemes{grid-template-columns:1fr;gap:16px}
+  .zw{zoom:1}
+  .zw .result{width:100%;max-width:720px}
+  .verdict h2{font-size:19px}
+}
+
+/* 手机上不再缩放，改为"板内重排"：三格大数压字号、双栏改单列、对照表压列宽 */
+@media (max-width:620px){
+  .result{padding:18px 16px 20px;border-radius:14px}
+  .rhead{gap:10px}
+  .ricon{width:42px;height:42px}
+  .ricon svg{width:20px;height:20px}
+  .rtitle h2{font-size:21px}
+  .badge-v b{font-size:13px}
+  .ra .acell{padding:0 10px}
+  .ra .acell .mlabel{font-size:9px;letter-spacing:.1em}
+  .ra .acell>b{font-size:24px}
+  .ra .acell>b.t{font-size:20px}
+  .ra .acell>b em{font-size:10px;margin-left:2px}
+  .dlt{font-size:10px}
+  .rb .bbody,.rb .footrow{grid-template-columns:1fr;gap:14px}
+  .rc .crow{grid-template-columns:minmax(0,1fr) 66px 66px 62px;gap:4px}
+  .rc .crow b{font-size:14px}
+  .rc .crow s{font-size:11.5px}
+  .rc .crow .m{font-size:11px}
+  .acts{flex-wrap:wrap}
+  .btn-p{flex:1 1 100%}
+  .btn-s{height:36px}
+  .preview .stage .result{width:100%}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="kicker">UI LAB · 09 · RUN SUMMARY</div>
+    <h1>结算面板 · 三方案</h1>
+    <p class="lede">
+      结算页只回答三件事：<b>这一局发生了什么</b>、<b>比上局好还是差</b>、<b>接下来按哪个按钮</b>。
+      三套方案共用同一条结论（第 12 层阵亡、08:41、87 击杀、上一局第 9 层），
+      所以可以直接对比信息顺序，而不是对比"好不好看"。
+    </p>
+    <ul class="constraints">
+      <li><em>01</em>结论与数字分两档，不混排</li>
+      <li><em>02</em>差值：形状 + 正负号 + 颜色</li>
+      <li><em>03</em>主 46px 填色 / 次 38px 描边</li>
+    </ul>
+    <div class="head-rule"></div>
+  </header>
+
+  <main class="schemes" id="schemes">
+
+    <!-- ============ A ============ -->
+    <section class="col">
+      <div class="col-head">
+        <div class="badge">A</div>
+        <div>
+          <h2>结论条</h2>
+          <p class="scene">默认死亡结算。单列到底，手机与桌面同一套顺序。</p>
+        </div>
+      </div>
+      <ul class="spec">
+        <li>信息层级 <b>4 层</b></li>
+        <li>大数 <b>30px</b></li>
+        <li>差值 <b>11px</b></li>
+        <li>主/次按钮 <b>46 / 38</b></li>
+      </ul>
+      <p class="zoomnote">按 54% 缩放并排展示 · 实际宽度 720px</p>
+
+      <div class="zw">
+        <section class="result ra">
+          <div class="rhead">
+            <span class="ricon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ember"/></svg></span>
+            <div class="rtitle">
+              <div class="kicker">RUN ENDED · FLOOR 12</div>
+              <h2>止步第 12 层</h2>
+              <p class="rsub">最后一击来自「裂地者」的冲撞。结晶与天赋已永久保留。</p>
+            </div>
+            <div class="badge-v"><span>历史最佳</span><b>14 层</b></div>
+          </div>
+
+          <div class="agrid">
+            <div class="acell">
+              <span class="mlabel">层数</span>
+              <b>12<em>层</em></b>
+              <span class="dlt up"><i>▲</i>+3</span>
+            </div>
+            <div class="acell">
+              <span class="mlabel">用时</span>
+              <b class="t">08:41</b>
+              <span class="dlt neu"><i>▲</i>+2:29</span>
+            </div>
+            <div class="acell">
+              <span class="mlabel">击杀</span>
+              <b>87<em>只</em></b>
+              <span class="dlt up"><i>▲</i>+26</span>
+            </div>
+          </div>
+
+          <p class="anote">比上局<b>更深 3 层</b>，多斩 <b>26</b> 只；用时多了 2:29。</p>
+          <div class="micro"><span>清层 <b>11/12</b></span><span>本局结晶 <b>+142</b></span><span>最高连击 <b>23</b></span></div>
+
+          <div class="took">
+            <div class="blabel">本局拿到</div>
+            <div class="chips">
+              <span class="chip c-rare"><i></i>熔岩地裂<small>稀有</small></span>
+              <span class="chip c-epic"><i></i>坍缩黑洞<small>史诗</small></span>
+              <span class="chip c-rare"><i></i>符文雷<small>稀有</small></span>
+              <span class="chip c-common"><i></i>冰霜环<small>普通</small></span>
+              <span class="chip c-relic"><i></i>熔岩风暴<small>融合</small></span>
+            </div>
+          </div>
+
+          <div class="acts">
+            <button class="btn-p" type="button">重新开始 <kbd>R</kbd></button>
+            <button class="btn-s" type="button">回大厅 <kbd>Esc</kbd></button>
+          </div>
+          <p class="acthint">同种子重开会保留本局卡组配置</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ B ============ -->
+    <section class="col">
+      <div class="col-head">
+        <div class="badge">B</div>
+        <div>
+          <h2>战报</h2>
+          <p class="scene">胜利/高信息量局。左边讲发生了什么，右边四行指标对齐扫读。</p>
+        </div>
+      </div>
+      <ul class="spec">
+        <li>信息层级 <b>4 层</b></li>
+        <li>标题 <b>22px</b></li>
+        <li>指标 <b>15px / 行高 34</b></li>
+        <li>双栏 <b>1fr / 296</b></li>
+      </ul>
+      <p class="zoomnote">按 54% 缩放并排展示 · 实际宽度 720px</p>
+
+      <div class="zw">
+        <section class="result rb">
+          <div class="rhead">
+            <span class="ricon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ember"/></svg></span>
+            <div class="rtitle">
+              <div class="kicker">RUN REPORT · 12F</div>
+              <h2>止步第 12 层</h2>
+            </div>
+          </div>
+
+          <div class="bbody">
+            <div>
+              <p class="btext">
+                你在第 12 层被<b>裂地者</b>的冲撞收尾。清掉 11 层，带走 <b>+142</b> 结晶；
+                这是本存档<b>第二深</b>的一次。
+              </p>
+              <span class="bverdict">▲ 比上局更深 3 层</span>
+              <div class="took">
+                <div class="blabel">本局拿到</div>
+                <div class="chips">
+                  <span class="chip c-rare"><i></i>熔岩地裂</span>
+                  <span class="chip c-epic"><i></i>坍缩黑洞</span>
+                  <span class="chip c-rare"><i></i>符文雷</span>
+                  <span class="chip c-relic"><i></i>熔岩风暴<small>融合</small></span>
+                </div>
+              </div>
+            </div>
+            <div class="brows">
+              <div class="brow"><span class="bl">层数</span><b>12</b><span class="dlt up"><i>▲</i>+3</span></div>
+              <div class="brow"><span class="bl">用时</span><b>08:41</b><span class="dlt neu"><i>▲</i>+2:29</span></div>
+              <div class="brow"><span class="bl">击杀</span><b>87</b><span class="dlt up"><i>▲</i>+26</span></div>
+              <div class="brow"><span class="bl">结晶</span><b>142</b><span class="dlt up"><i>▲</i>+46</span></div>
+            </div>
+          </div>
+
+          <div class="acts">
+            <button class="btn-p" type="button">重新开始 <kbd>R</kbd></button>
+            <button class="btn-s" type="button">回大厅 <kbd>Esc</kbd></button>
+          </div>
+          <p class="acthint">本局卡组已保存到存档槽 2</p>
+        </section>
+      </div>
+    </section>
+
+    <!-- ============ C ============ -->
+    <section class="col">
+      <div class="col-head">
+        <div class="badge">C</div>
+        <div>
+          <h2>对照表</h2>
+          <p class="scene">每日挑战 / 排行复盘。本局与上局成列，差值单独一列。</p>
+        </div>
+      </div>
+      <ul class="spec">
+        <li>信息层级 <b>4 层</b></li>
+        <li>本局 <b>16px</b></li>
+        <li>上局 <b>12.5px</b></li>
+        <li>表头 <b>9.5px</b></li>
+      </ul>
+      <p class="zoomnote">按 54% 缩放并排展示 · 实际宽度 720px</p>
+
+      <div class="zw">
+        <section class="result rc">
+          <div class="rhead">
+            <span class="ricon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ember"/></svg></span>
+            <div class="rtitle">
+              <div class="kicker">RUN COMPARE · FLOOR 12</div>
+              <h2>止步第 12 层</h2>
+              <p class="rsub">上局第 9 层 · 用时 06:12 · 击杀 61</p>
+            </div>
+            <div class="badge-v"><span>对比上局</span><b>+3 层</b></div>
+          </div>
+
+          <div class="ctable">
+            <div class="crow th"><span>指标</span><span>本局</span><span>上局</span><span>差值</span></div>
+            <div class="crow"><span class="m">层数</span><b>12</b><s>9</s><span class="dlt up"><i>▲</i>+3</span></div>
+            <div class="crow"><span class="m">击杀</span><b>87</b><s>61</s><span class="dlt up"><i>▲</i>+26</span></div>
+            <div class="crow"><span class="m">用时</span><b>08:41</b><s>06:12</s><span class="dlt neu"><i>▲</i>+2:29</span></div>
+            <div class="crow"><span class="m">结晶</span><b>142</b><s>96</s><span class="dlt up"><i>▲</i>+46</span></div>
+          </div>
+
+          <div class="chips">
+            <span class="chip c-rare"><i></i>熔岩地裂</span>
+            <span class="chip c-epic"><i></i>坍缩黑洞</span>
+            <span class="chip c-rare"><i></i>符文雷</span>
+            <span class="chip c-common"><i></i>冰霜环</span>
+            <span class="chip c-relic"><i></i>熔岩风暴<small>融合</small></span>
+          </div>
+
+          <div class="acts">
+            <button class="btn-p" type="button">重新开始 <kbd>R</kbd></button>
+            <button class="btn-s" type="button">回大厅 <kbd>Esc</kbd></button>
+          </div>
+          <p class="acthint">每日挑战重开会回到同一日期种子</p>
+        </section>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 1:1 预览 -->
+  <section class="preview" id="preview">
+    <div class="kicker">1:1 PREVIEW</div>
+    <h2>推荐方案 A · 720px 实宽</h2>
+    <p class="note">下面这块不再缩放，就是它在主文件里 720px 宽时的实际字号与留白。</p>
+    <div class="stage">
+      <!-- PREVIEW_START -->
+      <section class="result ra">
+        <div class="rhead">
+          <span class="ricon"><svg viewBox="0 0 24 24" aria-hidden="true"><use href="#i-ember"/></svg></span>
+          <div class="rtitle">
+            <div class="kicker">RUN ENDED · FLOOR 12</div>
+            <h2>止步第 12 层</h2>
+            <p class="rsub">最后一击来自「裂地者」的冲撞。结晶与天赋已永久保留。</p>
+          </div>
+          <div class="badge-v"><span>历史最佳</span><b>14 层</b></div>
+        </div>
+
+        <div class="agrid">
+          <div class="acell">
+            <span class="mlabel">层数</span>
+            <b>12<em>层</em></b>
+            <span class="dlt up"><i>▲</i>+3</span>
+          </div>
+          <div class="acell">
+            <span class="mlabel">用时</span>
+            <b class="t">08:41</b>
+            <span class="dlt neu"><i>▲</i>+2:29</span>
+          </div>
+          <div class="acell">
+            <span class="mlabel">击杀</span>
+            <b>87<em>只</em></b>
+            <span class="dlt up"><i>▲</i>+26</span>
+          </div>
+        </div>
+
+        <p class="anote">比上局<b>更深 3 层</b>，多斩 <b>26</b> 只；用时多了 2:29。</p>
+        <div class="micro"><span>清层 <b>11/12</b></span><span>本局结晶 <b>+142</b></span><span>最高连击 <b>23</b></span></div>
+
+        <div class="took">
+          <div class="blabel">本局拿到</div>
+          <div class="chips">
+            <span class="chip c-rare"><i></i>熔岩地裂<small>稀有</small></span>
+            <span class="chip c-epic"><i></i>坍缩黑洞<small>史诗</small></span>
+            <span class="chip c-rare"><i></i>符文雷<small>稀有</small></span>
+            <span class="chip c-common"><i></i>冰霜环<small>普通</small></span>
+            <span class="chip c-relic"><i></i>熔岩风暴<small>融合</small></span>
+          </div>
+        </div>
+
+        <div class="acts">
+          <button class="btn-p" type="button">重新开始 <kbd>R</kbd></button>
+          <button class="btn-s" type="button">回大厅 <kbd>Esc</kbd></button>
+        </div>
+        <p class="acthint">同种子重开会保留本局卡组配置</p>
+      </section>
+      <!-- PREVIEW_END -->
+    </div>
+  </section>
+
+  <!-- 结论 -->
+  <section class="verdict" id="verdict">
+    <div class="kicker">RECOMMENDATION</div>
+    <h2>推荐 A「结论条」</h2>
+    <p>
+      A 只有 4 层信息：结论（26px）→ 三格大数（30px，差值 11px 就贴在同一格下面）→ 明细（12.5px）→ 动作（46px 填色 / 38px 描边）。
+      差值不需要把视线拉到另一块区域，因为它和数值共用一个格子；"更好"同时用 ▲ 形状、+ 号、绿色三路表达，色弱也能读。
+      B 的双栏适合胜利局，但右栏 4 行会让眼睛在左右之间跳；C 的对照表信息最全，适合每日挑战复盘，日常死亡结算反而过重。
+    </p>
+    <div class="nums">
+      <span>层级 <b>4 层</b></span>
+      <span>标题 <b>26px</b></span>
+      <span>大数 <b>30px</b></span>
+      <span>差值 <b>11px</b></span>
+      <span>主按钮 <b>46px</b></span>
+      <span>次按钮 <b>38px</b></span>
+      <span>整板宽 <b>720px</b></span>
+    </div>
+  </section>
+
+  <!-- 参考来源 -->
+  <section class="refs">
+    <div class="kicker">REFERENCES · 只借顺序，不贴皮肤</div>
+    <ul>
+      <li>
+        <b>guladam / deck_builder_tutorial</b><span class="lic">MIT</span> ·
+        取自 <code>scenes/ui/battle_over_panel.tscn</code>：`Panel → VBoxContainer → Label（结论）→ ContinueButton（主）→ MainMenuButton（次）`。
+        本页把它翻成"结论 → 数值 → 明细 → 主按钮 → 次按钮"的纵向顺序，按钮用主 46px 填色 / 次 38px 描边拉开层级。
+      </li>
+      <li>
+        <b>DesirePathGames / Slay-The-Robot</b><span class="lic">MIT</span> ·
+        <code>scenes/ui/card/Card.tscn</code> 的修饰容器思路，用在"本局拿到"的 chips 行：每一项都能独立增删，不挤进正文句子。
+      </li>
+      <li>
+        <b>已排除：oskarrough / slaytheweb</b><span class="lic" style="color:var(--bad)">AGPL-3.0</span> ·
+        许可证不在白名单，未取用。
+      </li>
+    </ul>
+  </section>
+
+</div>
+
+<!-- 内联图标：24×24 线稿，沿用主文件线宽 -->
+<svg width="0" height="0" style="position:absolute;overflow:hidden" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-ember" viewBox="0 0 24 24">
+      <path d="M12 2.9c2.7 3.2 4.7 5.4 4.7 8.4a4.7 4.7 0 0 1-9.4 0c0-1.8 1-3.2 2.4-4.6.3 1.1.9 1.8 1.8 2.2.2-1.8.4-3.9.5-6z" stroke="currentColor" stroke-width="1.75" fill="none" stroke-linejoin="round"/>
+    </symbol>
+  </defs>
+</svg>
+</body>
+</html>

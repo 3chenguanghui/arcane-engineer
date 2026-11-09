@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>《烬》· 种子与每日挑战 · 独立预览</title>
+<style>
+  :root {
+    --bg: #0d0f12;
+    --panel: #15191f;
+    --line: #2a313a;
+    --text: #d9dee5;
+    --dim: #8b95a3;
+    --gold: #d6b26e;
+    --green: #6fcf97;
+    --red: #e57373;
+    --blue: #7fb3d5;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--text);
+    font: 14px/1.75 "Microsoft YaHei", "PingFang SC", sans-serif;
+  }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 28px 22px 56px; }
+  h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: 2px; }
+  h2 { font-size: 15px; margin: 0 0 14px; color: var(--gold); letter-spacing: 1px; }
+  .sub { color: var(--dim); font-size: 12px; margin-bottom: 26px; }
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 12px; padding: 18px; margin-bottom: 18px;
+  }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  input {
+    background: #0b0d10; border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 9px 12px; font-size: 16px; letter-spacing: 3px;
+    width: 190px; outline: none; font-family: Consolas, monospace;
+  }
+  input:focus { border-color: var(--gold); }
+  button {
+    background: #1d232c; border: 1px solid var(--line); color: var(--text);
+    border-radius: 8px; padding: 9px 14px; cursor: pointer; font-size: 13px;
+  }
+  button:hover { border-color: var(--gold); color: var(--gold); }
+  button.primary { border-color: rgba(214,178,110,.6); color: #f2dfb4; background: rgba(214,178,110,.1); }
+  .hint { font-size: 12px; color: var(--dim); margin-top: 10px; }
+  .ok { color: var(--green); }
+  .bad { color: var(--red); }
+  .badge {
+    display: inline-block; padding: 2px 9px; border-radius: 999px;
+    border: 1px solid var(--line); font-size: 12px; color: var(--dim);
+  }
+  .badge.gold { border-color: rgba(214,178,110,.55); color: #ead6a8; }
+  table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th, td { border-bottom: 1px solid var(--line); padding: 7px 8px; text-align: left; }
+  th { color: var(--dim); font-weight: 400; }
+  td.mono { font-family: Consolas, monospace; color: #c9d3de; }
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 720px) { .two { grid-template-columns: 1fr; } }
+  .kv { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px dashed var(--line); }
+  .kv span:first-child { color: var(--dim); }
+  .big { font-size: 22px; letter-spacing: 4px; font-family: Consolas, monospace; color: var(--gold); }
+  .sw { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .sw input { width: auto; }
+  .note { border-left: 3px solid var(--gold); padding: 8px 12px; background: rgba(214,178,110,.06); font-size: 12.5px; color: #cbbfa4; }
+  .result { font-family: Consolas, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>《烬》· 种子与每日挑战</h1>
+  <div class="sub">独立预览页 · 不依赖主文件、零网络请求 · 这里演示的是补丁合并后的真实规则</div>
+
+  <!-- ============ 1. 8 位种子 ============ -->
+  <div class="card">
+    <h2>一、8 位种子（6 位主体 + 2 位校验）</h2>
+    <div class="row">
+      <input id="seedInput" maxlength="8" value="" placeholder="8 位数字">
+      <button class="primary" id="btnCheck">校验并开局</button>
+      <button id="btnRandom">随机生成</button>
+      <button id="btnCopy">复制</button>
+    </div>
+    <div class="hint" id="seedHint">输入 8 位数字；校验位由前 6 位按固定权重算出，抄错一位会被直接拒绝。</div>
+  </div>
+
+  <!-- ============ 2. 每日挑战 ============ -->
+  <div class="card">
+    <h2>二、每日挑战：首次锁定，最佳只展示</h2>
+    <div class="row" style="justify-content:space-between">
+      <div>
+        <div class="kv"><span>今日日期</span><span id="dDate" class="mono"></span></div>
+        <div class="kv"><span>今日种子</span><span id="dSeed" class="big"></span></div>
+        <div class="kv"><span>状态</span><span id="dStatus" class="badge">未完成</span></div>
+      </div>
+      <div class="row">
+        <button class="primary" id="btnFirst">模拟首次通关（4 层 / 5:21 / 17 杀）</button>
+        <button id="btnReplay">模拟重玩刷分（6 层 / 6:10 / 30 杀）</button>
+        <button id="btnReset">重置今日</button>
+      </div>
+    </div>
+    <div class="two" style="margin-top:16px">
+      <div>
+        <div class="hint">首次成绩（锁定，重玩不覆盖）</div>
+        <div class="kv"><span>层数</span><span id="fFloor" class="mono">-</span></div>
+        <div class="kv"><span>用时</span><span id="fTime" class="mono">-</span></div>
+        <div class="kv"><span>击杀</span><span id="fKills" class="mono">-</span></div>
+      </div>
+      <div>
+        <div class="hint">最佳成绩（只展示，不参与排名）</div>
+        <div class="kv"><span>层数</span><span id="bFloor" class="mono">-</span></div>
+        <div class="kv"><span>用时</span><span id="bTime" class="mono">-</span></div>
+        <div class="kv"><span>击杀</span><span id="bKills" class="mono">-</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ 3. 可复现 ============ -->
+  <div class="card">
+    <h2>三、同一颗种子跑两次：房型 / 敌人 / 三选一逐项比对</h2>
+    <div class="note">
+      关键边界：玩法随机（布局 / 敌人 / 选项 / 词缀 / 掉落 / 暴击）走种子流；
+      表现层随机（粒子方向、屏震幅度、待机呼吸、音频噪声）一律 Math.random。
+      表现层一旦混进玩法流，帧率不同就会让后面的掉落和暴击漂移。
+    </div>
+    <div class="row" style="margin:14px 0">
+      <button class="primary" id="btnRunTwice">同种子跑两次并比对</button>
+      <label class="sw"><input type="checkbox" id="swPollute"> 模拟“表现层污染玩法流”</label>
+      <span class="hint" id="swHint">关闭时：两次结果完全一致</span>
+    </div>
+    <table>
+      <thead>
+        <tr><th>层</th><th>房型序列</th><th>敌人（数量/种类）</th><th>三选一（第 1 次）</th><th>结果</th></tr>
+      </thead>
+      <tbody id="reproBody">
+        <tr><td colspan="5" class="hint">点上方按钮生成对比</td></tr>
+      </tbody>
+    </table>
+    <div class="hint" id="reproVerdict" style="margin-top:10px"></div>
+  </div>
+
+  <!-- ============ 4. 说明 ============ -->
+  <div class="card">
+    <h2>四、补丁落地边界</h2>
+    <div class="kv"><span>只改取数层</span><span>rng() / pickWeightedOptions / spawnSurvivalWave</span></div>
+    <div class="kv"><span>不改上层逻辑</span><span>逐层独立流 (seed,'floor:N') 保留</span></div>
+    <div class="kv"><span>续局</span><span>快照新增 choiceRngState，读档接回游标</span></div>
+    <div class="kv"><span>每日成绩隔离</span><span>层数/用时/击杀只写每日记录，不写 meta.bestFloor</span></div>
+    <div class="kv"><span>历史种子</span><span>daily-YYYYMMDD 与任意文本只读保留，新开局只发 8 位</span></div>
+    <div class="hint" style="margin-top:12px">实际断言：tools/seed_repro_assert.js · 当前 44/44 PASS（同种子 1–5 层逐项一致 / 续局一致 / 每日锁定 / 成绩隔离 / 表现层零污染）。</div>
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   预览页逻辑：用与补丁同构的随机算法演示规则，不依赖主文件。
+   ============================================================================ */
+(function () {
+  'use strict';
+
+  const SEED8 = {
+    baseDigits: 6,
+    checkDigits: 2,
+    weights: [3, 5, 7, 11, 13, 17],
+    mod: 97
+  };
+
+  /**
+   * 计算 6 位主体的 2 位校验码
+   * @param {string} base6 6 位数字
+   * @returns {string} 2 位校验码
+   */
+  function checksum6(base6) {
+    let sum = 0;
+    for (let i = 0; i < SEED8.baseDigits; i += 1) sum += Number(base6[i]) * SEED8.weights[i];
+    return String(sum % SEED8.mod).padStart(2, '0');
+  }
+
+  /**
+   * 6 位主体 → 8 位完整种子
+   * @param {string} base6 6 位数字
+   * @returns {string} 8 位种子
+   */
+  function encode8(base6) {
+    const base = String(base6).padStart(6, '0').slice(0, 6);
+    return base + checksum6(base);
+  }
+
+  /**
+   * 校验 8 位种子
+   * @param {string} raw 原始输入
+   * @returns {{ok:boolean, value?:string, reason?:string, message?:string}}
+   */
+  function validate8(raw) {
+    const text = String(raw == null ? '' : raw).replace(/[\s\-_]/g, '');
+    if (!/^\d{8}$/.test(text)) return { ok: false, reason: 'format', message: '种子必须是 8 位数字（6 位主体 + 2 位校验）' };
+    if (checksum6(text.slice(0, 6)) !== text.slice(6)) {
+      return { ok: false, reason: 'checksum', message: '种子校验失败：请检查是否抄错一位数字' };
+    }
+    return { ok: true, value: text };
+  }
+
+  /**
+   * 字符串哈希（FNV-1a 变体），用于把 (种子, 盐) 变成 32 位整数
+   * @param {string} str 输入串
+   * @returns {number} 32 位无符号整数
+   */
+  function hashString(str) {
+    let h = 2166136261 >>> 0;
+    for (let i = 0; i < str.length; i += 1) {
+      h ^= str.charCodeAt(i);
+      h = Math.imul(h, 16777619) >>> 0;
+    }
+    return h >>> 0;
+  }
+
+  /**
+   * mulberry32：确定性随机数生成器
+   * @param {number} seed 32 位种子
+   * @returns {Function} 返回 [0,1) 的函数（带 .state 游标）
+   */
+  function makeRng(seed) {
+    let a = seed >>> 0;
+    const fn = function () {
+      a = (a + 0x6D2B79F5) >>> 0;
+      let t = a;
+      t = Math.imul(t ^ (t >>> 15), t | 1);
+      t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+      return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+    };
+    fn.state = 0;
+    return fn;
+  }
+
+  /**
+   * 按 (种子, 盐) 建一条独立随机流
+   * @param {string} seed 8 位种子
+   * @param {string} salt 盐（例：floor:3 / choice / survival:3:2）
+   * @returns {Function} 随机函数
+   */
+  function stream(seed, salt) {
+    return makeRng(hashString(seed + '|' + salt));
+  }
+
+  /**
+   * 按权重取一项
+   * @param {Array} list 候选
+   * @param {Function} rng 随机函数
+   * @returns {*} 选中项
+   */
+  function pick(list, rng) {
+    return list[Math.min(list.length - 1, Math.floor(rng() * list.length))];
+  }
+
+  /* ---------------------------------------------------------- 模拟一局 5 层 */
+  const ROOM_TYPES = ['start', 'battle', 'elite', 'event', 'boss'];
+  const ENEMY_TYPES = ['wanderer', 'shooter', 'charger', 'welder', 'splitter'];
+  const CARD_POOL = [
+    'magic:flameCone', 'magic:frost', 'magic:bolt', 'magic:heal', 'magic:mine',
+    'tech:amp', 'tech:magnet', 'tech:phase', 'tech:field', 'tech:rewind'
+  ];
+
+  /**
+   * 模拟生成一层：房型 / 敌人 / 三选一（与补丁的分层流同构）
+   * @param {string} seed 8 位种子
+   * @param {number} floorNumber 楼层
+   * @returns {Object} 该层内容
+   */
+  function simulateFloor(seed, floorNumber) {
+    const layout = stream(seed, 'floor:' + floorNumber);
+    const rooms = [];
+    const roomCount = 5 + Math.floor(layout() * 3);
+    for (let i = 0; i < roomCount; i += 1) {
+      // 房型用“稳定哈希”，不消耗主随机流（和主文件 roomHash01 同思路）
+      const h = hashString(seed + '|roomtype:' + floorNumber + ':' + i);
+      const type = i === 0 ? 'start' : (i === roomCount - 1 ? 'boss' : ROOM_TYPES[1 + (h % 3)]);
+      rooms.push(type);
+    }
+    const enemies = [];
+    const enemyRng = stream(seed, 'enemies:' + floorNumber);
+    const count = 9 + Math.floor(enemyRng() * 7);
+    for (let i = 0; i < count; i += 1) {
+      const h = hashString(seed + '|enemy:' + floorNumber + ':' + i);
+      enemies.push(ENEMY_TYPES[h % ENEMY_TYPES.length]);
+    }
+    // 三选一：独立选择流；每层第 n 次选择 = choice:floor:n
+    const options = [];
+    const choiceRng = stream(seed, 'choice:' + floorNumber + ':1');
+    const pool = CARD_POOL.slice();
+    for (let i = 0; i < 3; i += 1) options.push(pool.splice(Math.floor(choiceRng() * pool.length), 1)[0]);
+    return { rooms: rooms, enemies: enemies, options: options };
+  }
+
+  /**
+   * 模拟整局 1–5 层
+   * @param {string} seed 8 位种子
+   * @param {boolean} polluted 是否模拟表现层污染玩法流
+   * @param {number} frames 表现层每层额外消耗的随机次数（模拟不同帧率）
+   * @returns {Array<Object>} 每层内容
+   */
+  function simulateRun(seed, polluted, frames) {
+    const out = [];
+    for (let f = 1; f <= 5; f += 1) {
+      const floor = simulateFloor(seed, f);
+      if (polluted) {
+        // 错误示范：粒子/屏震在每帧从玩法流取随机，帧数不同 → 后面的流整体错位
+        const play = stream(seed, 'play');
+        for (let i = 0; i < frames; i += 1) play();
+        // 掉落从被污染后的玩法流里取
+        floor.drop = pick(['common', 'rare', 'epic'], play);
+      }
+      out.push(floor);
+    }
+    return out;
+  }
+
+  /* ------------------------------------------------------------ 每日记录 */
+  const DAILY_KEY = 'jhin_preview_daily_v1';
+  let daily = loadDaily();
+
+  /**
+   * 从本地存储读预览用每日记录
+   * @returns {Object|null} 记录
+   */
+  function loadDaily() {
+    try {
+      const raw = localStorage.getItem(DAILY_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+
+  /**
+   * 写入预览用每日记录
+   * @returns {void}
+   */
+  function saveDaily() {
+    try { localStorage.setItem(DAILY_KEY, JSON.stringify(daily)); } catch (e) { /* 隐私模式忽略 */ }
+  }
+
+  /**
+   * 今日日期键
+   * @returns {string} YYYYMMDD
+   */
+  function todayKey() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, '0');
+    return String(d.getFullYear()) + pad(d.getMonth() + 1) + pad(d.getDate());
+  }
+
+  /**
+   * 今日 8 位种子（YYMMDD + 校验）
+   * @returns {string} 8 位数字
+   */
+  function todaySeed() {
+    return encode8(todayKey().slice(2));
+  }
+
+  /**
+   * 比较两个成绩
+   * @param {Object} a 成绩
+   * @param {Object} b 成绩
+   * @returns {boolean} a 是否更好
+   */
+  function better(a, b) {
+    if (!b) return true;
+    if (a.floor > b.floor) return true;
+    if (a.floor < b.floor) return false;
+    if (a.time < b.time) return true;
+    if (a.time > b.time) return false;
+    return a.kills > b.kills;
+  }
+
+  /**
+   * 写入一次每日成绩（首次锁定）
+   * @param {Object} score {floor,time,kills,cleared}
+   * @returns {void}
+   */
+  function recordDaily(score) {
+    const key = todayKey();
+    if (!daily || daily.date !== key) {
+      daily = { date: key, seed: todaySeed(), first: null, best: null, attempts: 0 };
+    }
+    daily.attempts += 1;
+    if (!daily.first) daily.first = Object.assign({}, score);
+    if (better(score, daily.best)) daily.best = { floor: score.floor, time: score.time, kills: score.kills };
+    saveDaily();
+    renderDaily();
+  }
+
+  /* ---------------------------------------------------------------- 渲染 */
+  const $ = (id) => document.getElementById(id);
+
+  /**
+   * 秒数格式化为 m:ss
+   * @param {number} sec 秒
+   * @returns {string}
+   */
+  function fmt(sec) {
+    if (sec == null) return '-';
+    return Math.floor(sec / 60) + ':' + String(Math.floor(sec % 60)).padStart(2, '0');
+  }
+
+  /**
+   * 刷新每日挑战卡片
+   * @returns {void}
+   */
+  function renderDaily() {
+    const key = todayKey();
+    $('dDate').textContent = key.slice(0, 4) + '-' + key.slice(4, 6) + '-' + key.slice(6);
+    $('dSeed').textContent = todaySeed();
+    const isToday = daily && daily.date === key;
+    const done = !!(isToday && daily.first);
+    $('dStatus').textContent = done ? '已完成（首次已锁定）' : '未完成';
+    $('dStatus').className = 'badge' + (done ? ' gold' : '');
+    const f = isToday ? daily.first : null;
+    const b = isToday ? daily.best : null;
+    $('fFloor').textContent = f ? f.floor : '-';
+    $('fTime').textContent = f ? fmt(f.time) : '-';
+    $('fKills').textContent = f ? f.kills : '-';
+    $('bFloor').textContent = b ? b.floor : '-';
+    $('bTime').textContent = b ? fmt(b.time) : '-';
+    $('bKills').textContent = b ? b.kills : '-';
+  }
+
+  /**
+   * 刷新可复现对比表
+   * @param {Array} a 第一局
+   * @param {Array} b 第二局
+   * @param {boolean} polluted 是否污染模式
+   * @returns {void}
+   */
+  function renderRepro(a, b, polluted) {
+    const body = $('reproBody');
+    body.innerHTML = '';
+    let pass = true;
+    a.forEach((row, i) => {
+      const other = b[i];
+      const same = JSON.stringify(row) === JSON.stringify(other);
+      if (!same) pass = false;
+      const tr = document.createElement('tr');
+      const rooms = row.rooms.join(',');
+      const enemies = row.enemies.length + ' 只 / ' + Array.from(new Set(row.enemies)).join('/');
+      const opt = row.options.join(' · ');
+      tr.innerHTML = '<td class="mono">' + (i + 1) + '</td>'
+        + '<td class="mono">' + rooms + '</td>'
+        + '<td class="mono">' + enemies + '</td>'
+        + '<td class="mono">' + opt + (row.drop ? ' ｜掉落:' + row.drop : '') + '</td>'
+        + '<td class="' + (same ? 'ok' : 'bad') + '">' + (same ? '一致' : '漂移') + '</td>';
+      body.appendChild(tr);
+    });
+    $('reproVerdict').innerHTML = polluted
+      ? '<span class="bad">FAIL</span> · 表现层随机混进了玩法流：两次帧数不同，掉落跟着变。'
+      : (pass
+        ? '<span class="ok">PASS</span> · 5 层房型 / 敌人 / 三选一 / 掉落逐项一致。'
+        : '<span class="bad">FAIL</span> · 存在不一致项。');
+  }
+
+  /**
+   * 初始化输入框与按钮
+   * @returns {void}
+   */
+  function init() {
+    const input = $('seedInput');
+    input.value = todaySeed();
+    input.addEventListener('input', () => {
+      input.value = input.value.replace(/\D/g, '').slice(0, 8);
+    });
+
+    $('btnCheck').addEventListener('click', () => {
+      const r = validate8(input.value);
+      $('seedHint').innerHTML = r.ok
+        ? '<span class="ok">种子合法：' + r.value + '（校验位 ' + r.value.slice(6) + '）</span>'
+        : '<span class="bad">' + r.message + '</span>';
+    });
+
+    $('btnRandom').addEventListener('click', () => {
+      let base = '';
+      for (let i = 0; i < 6; i += 1) base += String(Math.floor(Math.random() * 10));
+      input.value = encode8(base);
+      $('seedHint').innerHTML = '<span class="ok">已生成：' + input.value + '</span>';
+    });
+
+    $('btnCopy').addEventListener('click', () => {
+      const text = validate8(input.value).ok ? input.value : todaySeed();
+      try {
+        navigator.clipboard.writeText(text);
+        $('seedHint').innerHTML = '<span class="ok">已复制：' + text + '</span>';
+      } catch (e) {
+        $('seedHint').innerHTML = '<span class="bad">复制失败，请手动抄下：' + text + '</span>';
+      }
+    });
+
+    $('btnFirst').addEventListener('click', () => recordDaily({ floor: 4, time: 321, kills: 17, cleared: true }));
+    $('btnReplay').addEventListener('click', () => recordDaily({ floor: 6, time: 370, kills: 30, cleared: true }));
+    $('btnReset').addEventListener('click', () => {
+      daily = null;
+      try { localStorage.removeItem(DAILY_KEY); } catch (e) { /* 忽略 */ }
+      renderDaily();
+    });
+
+    $('btnRunTwice').addEventListener('click', () => {
+      const seed = validate8(input.value).ok ? input.value : todaySeed();
+      const polluted = $('swPollute').checked;
+      const a = simulateRun(seed, polluted, 0);
+      const b = simulateRun(seed, polluted, 2); // 第二局多触发两次粒子
+      renderRepro(a, b, polluted);
+      $('swHint').textContent = polluted ? '开启时：第二局帧数不同 → 掉落漂移' : '关闭时：两次结果完全一致';
+    });
+
+    renderDaily();
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>

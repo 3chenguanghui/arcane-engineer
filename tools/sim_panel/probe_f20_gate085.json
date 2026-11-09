@@ -1,0 +1,746 @@
+{
+  "meta": {
+    "runs": 10000,
+    "gate": 0.85,
+    "difficulty": "normal",
+    "seed": 20261108
+  },
+  "scenarios": {
+    "A": {
+      "floors": {
+        "1": {
+          "entries": 10000,
+          "deaths": 1,
+          "cleared": 9999,
+          "bossFights": 10000,
+          "bossDeaths": 1,
+          "sumBoss": 748912.0000000516,
+          "timeouts": 0,
+          "avgBossSec": 74.9,
+          "deathRatePct": 0
+        },
+        "2": {
+          "entries": 9999,
+          "deaths": 1744,
+          "cleared": 8255,
+          "bossFights": 9849,
+          "bossDeaths": 1594,
+          "sumBoss": 669383.929999999,
+          "timeouts": 0,
+          "avgBossSec": 68,
+          "deathRatePct": 17.4
+        },
+        "3": {
+          "entries": 8255,
+          "deaths": 2004,
+          "cleared": 6251,
+          "bossFights": 7511,
+          "bossDeaths": 1260,
+          "sumBoss": 486129.10000000184,
+          "timeouts": 0,
+          "avgBossSec": 64.7,
+          "deathRatePct": 24.3
+        },
+        "4": {
+          "entries": 6251,
+          "deaths": 1040,
+          "cleared": 5211,
+          "bossFights": 5912,
+          "bossDeaths": 701,
+          "sumBoss": 390883.779999998,
+          "timeouts": 0,
+          "avgBossSec": 66.1,
+          "deathRatePct": 16.6
+        },
+        "5": {
+          "entries": 5211,
+          "deaths": 721,
+          "cleared": 4490,
+          "bossFights": 4937,
+          "bossDeaths": 447,
+          "sumBoss": 335053.8599999997,
+          "timeouts": 0,
+          "avgBossSec": 67.9,
+          "deathRatePct": 13.8
+        },
+        "6": {
+          "entries": 4490,
+          "deaths": 381,
+          "cleared": 4109,
+          "bossFights": 4382,
+          "bossDeaths": 273,
+          "sumBoss": 350176.3400000011,
+          "timeouts": 0,
+          "avgBossSec": 79.9,
+          "deathRatePct": 8.5
+        },
+        "7": {
+          "entries": 4109,
+          "deaths": 212,
+          "cleared": 3897,
+          "bossFights": 4033,
+          "bossDeaths": 136,
+          "sumBoss": 288879.82000000036,
+          "timeouts": 0,
+          "avgBossSec": 71.6,
+          "deathRatePct": 5.2
+        },
+        "8": {
+          "entries": 3897,
+          "deaths": 145,
+          "cleared": 3752,
+          "bossFights": 3844,
+          "bossDeaths": 92,
+          "sumBoss": 280458.24000000034,
+          "timeouts": 0,
+          "avgBossSec": 73,
+          "deathRatePct": 3.7
+        },
+        "9": {
+          "entries": 3752,
+          "deaths": 105,
+          "cleared": 3647,
+          "bossFights": 3708,
+          "bossDeaths": 61,
+          "sumBoss": 276485.5099999992,
+          "timeouts": 0,
+          "avgBossSec": 74.6,
+          "deathRatePct": 2.8
+        },
+        "10": {
+          "entries": 3647,
+          "deaths": 55,
+          "cleared": 3592,
+          "bossFights": 3629,
+          "bossDeaths": 37,
+          "sumBoss": 275436.2599999996,
+          "timeouts": 0,
+          "avgBossSec": 75.9,
+          "deathRatePct": 1.5
+        },
+        "11": {
+          "entries": 3592,
+          "deaths": 38,
+          "cleared": 3554,
+          "bossFights": 3579,
+          "bossDeaths": 25,
+          "sumBoss": 277433.88999999996,
+          "timeouts": 0,
+          "avgBossSec": 77.5,
+          "deathRatePct": 1.1
+        },
+        "12": {
+          "entries": 3554,
+          "deaths": 38,
+          "cleared": 3516,
+          "bossFights": 3546,
+          "bossDeaths": 30,
+          "sumBoss": 320257.67999999836,
+          "timeouts": 0,
+          "avgBossSec": 90.3,
+          "deathRatePct": 1.1
+        },
+        "13": {
+          "entries": 3516,
+          "deaths": 52,
+          "cleared": 3464,
+          "bossFights": 3497,
+          "bossDeaths": 33,
+          "sumBoss": 281164.9999999981,
+          "timeouts": 0,
+          "avgBossSec": 80.4,
+          "deathRatePct": 1.5
+        },
+        "14": {
+          "entries": 3464,
+          "deaths": 49,
+          "cleared": 3415,
+          "bossFights": 3453,
+          "bossDeaths": 38,
+          "sumBoss": 283147.2600000015,
+          "timeouts": 0,
+          "avgBossSec": 82,
+          "deathRatePct": 1.4
+        },
+        "15": {
+          "entries": 3415,
+          "deaths": 71,
+          "cleared": 3344,
+          "bossFights": 3406,
+          "bossDeaths": 62,
+          "sumBoss": 282040.38999999955,
+          "timeouts": 0,
+          "avgBossSec": 82.8,
+          "deathRatePct": 2.1
+        },
+        "16": {
+          "entries": 3344,
+          "deaths": 53,
+          "cleared": 3291,
+          "bossFights": 3342,
+          "bossDeaths": 51,
+          "sumBoss": 282360.92999999906,
+          "timeouts": 0,
+          "avgBossSec": 84.5,
+          "deathRatePct": 1.6
+        },
+        "17": {
+          "entries": 3291,
+          "deaths": 52,
+          "cleared": 3239,
+          "bossFights": 3288,
+          "bossDeaths": 49,
+          "sumBoss": 283798.4099999993,
+          "timeouts": 0,
+          "avgBossSec": 86.3,
+          "deathRatePct": 1.6
+        },
+        "18": {
+          "entries": 3239,
+          "deaths": 57,
+          "cleared": 3182,
+          "bossFights": 3238,
+          "bossDeaths": 56,
+          "sumBoss": 326160.2200000001,
+          "timeouts": 0,
+          "avgBossSec": 100.7,
+          "deathRatePct": 1.8
+        },
+        "19": {
+          "entries": 3182,
+          "deaths": 12,
+          "cleared": 3170,
+          "bossFights": 3177,
+          "bossDeaths": 7,
+          "sumBoss": 310698.1599999991,
+          "timeouts": 0,
+          "avgBossSec": 97.8,
+          "deathRatePct": 0.4
+        },
+        "20": {
+          "entries": 3170,
+          "deaths": 16,
+          "cleared": 3154,
+          "bossFights": 3156,
+          "bossDeaths": 2,
+          "sumBoss": 267375.4200000009,
+          "timeouts": 0,
+          "avgBossSec": 84.7,
+          "deathRatePct": 0.5
+        }
+      },
+      "pass10Pct": 35.9,
+      "reach20Pct": 31.7,
+      "clear20Pct": 31.5,
+      "bossSec18": {
+        "n": 3238,
+        "avg": 100.7,
+        "p50": 99.7,
+        "p95": 128.6,
+        "max": 158.1
+      },
+      "bossSec19": {
+        "n": 3177,
+        "avg": 97.8,
+        "p50": 97.3,
+        "p95": 124.4,
+        "max": 154.8
+      },
+      "bossSec20": {
+        "n": 3156,
+        "avg": 84.7,
+        "p50": 84.3,
+        "p95": 107.7,
+        "max": 134.8
+      },
+      "hpLeft18": {
+        "n": 56,
+        "avg": 26.8,
+        "p50": 20,
+        "bins": [
+          {
+            "lo": 0,
+            "hi": 5,
+            "pct": 0
+          },
+          {
+            "lo": 5,
+            "hi": 10,
+            "pct": 32.1
+          },
+          {
+            "lo": 10,
+            "hi": 20,
+            "pct": 0
+          },
+          {
+            "lo": 20,
+            "hi": 30,
+            "pct": 19.6
+          },
+          {
+            "lo": 30,
+            "hi": 50,
+            "pct": 39.3
+          },
+          {
+            "lo": 50,
+            "hi": 100,
+            "pct": 8.9
+          }
+        ],
+        "le5": 0,
+        "le10": 32.1,
+        "le12": 32.1
+      },
+      "hpLeft19": {
+        "n": 7,
+        "avg": 25.7,
+        "p50": 20,
+        "bins": [
+          {
+            "lo": 0,
+            "hi": 5,
+            "pct": 0
+          },
+          {
+            "lo": 5,
+            "hi": 10,
+            "pct": 0
+          },
+          {
+            "lo": 10,
+            "hi": 20,
+            "pct": 14.3
+          },
+          {
+            "lo": 20,
+            "hi": 30,
+            "pct": 42.9
+          },
+          {
+            "lo": 30,
+            "hi": 50,
+            "pct": 42.9
+          },
+          {
+            "lo": 50,
+            "hi": 100,
+            "pct": 0
+          }
+        ],
+        "le5": 0,
+        "le10": 14.3,
+        "le12": 14.3
+      },
+      "hpLeft20": {
+        "n": 2,
+        "avg": 25,
+        "p50": 40,
+        "bins": [
+          {
+            "lo": 0,
+            "hi": 5,
+            "pct": 0
+          },
+          {
+            "lo": 5,
+            "hi": 10,
+            "pct": 0
+          },
+          {
+            "lo": 10,
+            "hi": 20,
+            "pct": 50
+          },
+          {
+            "lo": 20,
+            "hi": 30,
+            "pct": 0
+          },
+          {
+            "lo": 30,
+            "hi": 50,
+            "pct": 50
+          },
+          {
+            "lo": 50,
+            "hi": 100,
+            "pct": 0
+          }
+        ],
+        "le5": 0,
+        "le10": 50,
+        "le12": 50
+      }
+    },
+    "A′": {
+      "floors": {
+        "1": {
+          "entries": 10000,
+          "deaths": 1,
+          "cleared": 9999,
+          "bossFights": 10000,
+          "bossDeaths": 1,
+          "sumBoss": 748912.0000000516,
+          "timeouts": 0,
+          "avgBossSec": 74.9,
+          "deathRatePct": 0
+        },
+        "2": {
+          "entries": 9999,
+          "deaths": 1751,
+          "cleared": 8248,
+          "bossFights": 9883,
+          "bossDeaths": 1635,
+          "sumBoss": 672706.3799999958,
+          "timeouts": 0,
+          "avgBossSec": 68.1,
+          "deathRatePct": 17.5
+        },
+        "3": {
+          "entries": 8248,
+          "deaths": 1652,
+          "cleared": 6596,
+          "bossFights": 8007,
+          "bossDeaths": 1411,
+          "sumBoss": 516553.6900000033,
+          "timeouts": 0,
+          "avgBossSec": 64.5,
+          "deathRatePct": 20
+        },
+        "4": {
+          "entries": 6596,
+          "deaths": 1200,
+          "cleared": 5396,
+          "bossFights": 6153,
+          "bossDeaths": 757,
+          "sumBoss": 407661.9399999989,
+          "timeouts": 0,
+          "avgBossSec": 66.3,
+          "deathRatePct": 18.2
+        },
+        "5": {
+          "entries": 5396,
+          "deaths": 799,
+          "cleared": 4597,
+          "bossFights": 5067,
+          "bossDeaths": 470,
+          "sumBoss": 343132.70999999996,
+          "timeouts": 0,
+          "avgBossSec": 67.7,
+          "deathRatePct": 14.8
+        },
+        "6": {
+          "entries": 4597,
+          "deaths": 438,
+          "cleared": 4159,
+          "bossFights": 4433,
+          "bossDeaths": 274,
+          "sumBoss": 354754.5400000005,
+          "timeouts": 0,
+          "avgBossSec": 80,
+          "deathRatePct": 9.5
+        },
+        "7": {
+          "entries": 4159,
+          "deaths": 221,
+          "cleared": 3938,
+          "bossFights": 4071,
+          "bossDeaths": 133,
+          "sumBoss": 292238.8900000002,
+          "timeouts": 0,
+          "avgBossSec": 71.8,
+          "deathRatePct": 5.3
+        },
+        "8": {
+          "entries": 3938,
+          "deaths": 142,
+          "cleared": 3796,
+          "bossFights": 3878,
+          "bossDeaths": 82,
+          "sumBoss": 283985.1700000004,
+          "timeouts": 0,
+          "avgBossSec": 73.2,
+          "deathRatePct": 3.6
+        },
+        "9": {
+          "entries": 3796,
+          "deaths": 80,
+          "cleared": 3716,
+          "bossFights": 3763,
+          "bossDeaths": 47,
+          "sumBoss": 281422.87999999913,
+          "timeouts": 0,
+          "avgBossSec": 74.8,
+          "deathRatePct": 2.1
+        },
+        "10": {
+          "entries": 3716,
+          "deaths": 72,
+          "cleared": 3644,
+          "bossFights": 3696,
+          "bossDeaths": 52,
+          "sumBoss": 281123.00000000006,
+          "timeouts": 0,
+          "avgBossSec": 76.1,
+          "deathRatePct": 1.9
+        },
+        "11": {
+          "entries": 3644,
+          "deaths": 47,
+          "cleared": 3597,
+          "bossFights": 3625,
+          "bossDeaths": 28,
+          "sumBoss": 282051.8099999993,
+          "timeouts": 0,
+          "avgBossSec": 77.8,
+          "deathRatePct": 1.3
+        },
+        "12": {
+          "entries": 3597,
+          "deaths": 31,
+          "cleared": 3566,
+          "bossFights": 3592,
+          "bossDeaths": 26,
+          "sumBoss": 325756.94999999995,
+          "timeouts": 0,
+          "avgBossSec": 90.7,
+          "deathRatePct": 0.9
+        },
+        "13": {
+          "entries": 3566,
+          "deaths": 61,
+          "cleared": 3505,
+          "bossFights": 3549,
+          "bossDeaths": 44,
+          "sumBoss": 286146.19999999885,
+          "timeouts": 0,
+          "avgBossSec": 80.6,
+          "deathRatePct": 1.7
+        },
+        "14": {
+          "entries": 3505,
+          "deaths": 47,
+          "cleared": 3458,
+          "bossFights": 3492,
+          "bossDeaths": 34,
+          "sumBoss": 287167.6800000011,
+          "timeouts": 0,
+          "avgBossSec": 82.2,
+          "deathRatePct": 1.3
+        },
+        "15": {
+          "entries": 3458,
+          "deaths": 72,
+          "cleared": 3386,
+          "bossFights": 3450,
+          "bossDeaths": 64,
+          "sumBoss": 287011.12999999954,
+          "timeouts": 0,
+          "avgBossSec": 83.2,
+          "deathRatePct": 2.1
+        },
+        "16": {
+          "entries": 3386,
+          "deaths": 67,
+          "cleared": 3319,
+          "bossFights": 3380,
+          "bossDeaths": 61,
+          "sumBoss": 286931.96999999974,
+          "timeouts": 0,
+          "avgBossSec": 84.9,
+          "deathRatePct": 2
+        },
+        "17": {
+          "entries": 3319,
+          "deaths": 41,
+          "cleared": 3278,
+          "bossFights": 3314,
+          "bossDeaths": 36,
+          "sumBoss": 287784.6199999994,
+          "timeouts": 0,
+          "avgBossSec": 86.8,
+          "deathRatePct": 1.2
+        },
+        "18": {
+          "entries": 3278,
+          "deaths": 59,
+          "cleared": 3219,
+          "bossFights": 3278,
+          "bossDeaths": 59,
+          "sumBoss": 331579.4799999995,
+          "timeouts": 0,
+          "avgBossSec": 101.2,
+          "deathRatePct": 1.8
+        },
+        "19": {
+          "entries": 3219,
+          "deaths": 8,
+          "cleared": 3211,
+          "bossFights": 3218,
+          "bossDeaths": 7,
+          "sumBoss": 316657.74999999953,
+          "timeouts": 0,
+          "avgBossSec": 98.4,
+          "deathRatePct": 0.2
+        },
+        "20": {
+          "entries": 3211,
+          "deaths": 17,
+          "cleared": 3194,
+          "bossFights": 3197,
+          "bossDeaths": 3,
+          "sumBoss": 272352.4700000001,
+          "timeouts": 0,
+          "avgBossSec": 85.2,
+          "deathRatePct": 0.5
+        }
+      },
+      "pass10Pct": 36.4,
+      "reach20Pct": 32.1,
+      "clear20Pct": 31.9,
+      "bossSec18": {
+        "n": 3278,
+        "avg": 101.2,
+        "p50": 99.9,
+        "p95": 129.3,
+        "max": 175.2
+      },
+      "bossSec19": {
+        "n": 3218,
+        "avg": 98.4,
+        "p50": 97.7,
+        "p95": 125.9,
+        "max": 171.5
+      },
+      "bossSec20": {
+        "n": 3197,
+        "avg": 85.2,
+        "p50": 84.5,
+        "p95": 108.8,
+        "max": 149.3
+      },
+      "hpLeft18": {
+        "n": 59,
+        "avg": 26.2,
+        "p50": 20,
+        "bins": [
+          {
+            "lo": 0,
+            "hi": 5,
+            "pct": 0
+          },
+          {
+            "lo": 5,
+            "hi": 10,
+            "pct": 27.1
+          },
+          {
+            "lo": 10,
+            "hi": 20,
+            "pct": 0
+          },
+          {
+            "lo": 20,
+            "hi": 30,
+            "pct": 25.4
+          },
+          {
+            "lo": 30,
+            "hi": 50,
+            "pct": 40.7
+          },
+          {
+            "lo": 50,
+            "hi": 100,
+            "pct": 6.8
+          }
+        ],
+        "le5": 0,
+        "le10": 27.1,
+        "le12": 27.1
+      },
+      "hpLeft19": {
+        "n": 7,
+        "avg": 17.1,
+        "p50": 10,
+        "bins": [
+          {
+            "lo": 0,
+            "hi": 5,
+            "pct": 0
+          },
+          {
+            "lo": 5,
+            "hi": 10,
+            "pct": 0
+          },
+          {
+            "lo": 10,
+            "hi": 20,
+            "pct": 57.1
+          },
+          {
+            "lo": 20,
+            "hi": 30,
+            "pct": 28.6
+          },
+          {
+            "lo": 30,
+            "hi": 50,
+            "pct": 14.3
+          },
+          {
+            "lo": 50,
+            "hi": 100,
+            "pct": 0
+          }
+        ],
+        "le5": 0,
+        "le10": 57.1,
+        "le12": 57.1
+      },
+      "hpLeft20": {
+        "n": 3,
+        "avg": 13.3,
+        "p50": 10,
+        "bins": [
+          {
+            "lo": 0,
+            "hi": 5,
+            "pct": 0
+          },
+          {
+            "lo": 5,
+            "hi": 10,
+            "pct": 0
+          },
+          {
+            "lo": 10,
+            "hi": 20,
+            "pct": 66.7
+          },
+          {
+            "lo": 20,
+            "hi": 30,
+            "pct": 33.3
+          },
+          {
+            "lo": 30,
+            "hi": 50,
+            "pct": 0
+          },
+          {
+            "lo": 50,
+            "hi": 100,
+            "pct": 0
+          }
+        ],
+        "le5": 0,
+        "le10": 66.7,
+        "le12": 66.7
+      }
+    }
+  }
+}

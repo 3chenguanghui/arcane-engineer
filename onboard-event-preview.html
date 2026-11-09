@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<title>烬 · 首局事件教学（独立预览）</title>
+<style>
+  :root { --bg:#0d0f14; --panel:#161a22; --line:#2a3140; --text:#dfe7f2; --dim:#8d9bb0; --gold:#ffd166; }
+  * { box-sizing: border-box; }
+  body { margin:0; background:radial-gradient(circle at 50% 0%, #1a2030, var(--bg) 60%); color:var(--text);
+         font-family:"Microsoft YaHei", system-ui, sans-serif; min-height:100vh; }
+  .wrap { max-width:1040px; margin:0 auto; padding:24px 20px 60px; }
+  h1 { font-size:20px; margin:0 0 6px; letter-spacing:1px; }
+  .sub { color:var(--dim); font-size:13px; margin:0 0 20px; line-height:1.7; }
+  .cols { display:grid; grid-template-columns:1.4fr 1fr; gap:16px; }
+  @media (max-width: 820px) { .cols { grid-template-columns:1fr; } }
+  .panel { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px; }
+  .stage { position:relative; height:340px; overflow:hidden; border-radius:8px;
+           background:radial-gradient(circle at 50% 55%, #223049, #10141c 70%); border:1px solid #232a38; }
+  .floorbar { position:absolute; top:10px; left:50%; transform:translateX(-50%);
+              padding:4px 12px; border-radius:999px; background:rgba(10,12,18,.8); border:1px solid #2d3646;
+              font-size:12px; color:#cfd8e5; }
+  .hpbar { position:absolute; left:14px; bottom:14px; width:190px; }
+  .hpbar .label { font-size:11px; color:var(--dim); margin-bottom:4px; }
+  .hpbar .track { height:10px; background:#1b2130; border-radius:6px; overflow:hidden; }
+  .hpbar .fill { height:100%; width:78%; background:linear-gradient(90deg,#5cff9d,#2bd67b); transition:width .2s; }
+  .hero { position:absolute; left:50%; top:52%; width:16px; height:16px; margin:-8px 0 0 -8px;
+          border-radius:50%; background:#9ad7ff; box-shadow:0 0 18px #4aa8ff; }
+  /* 教学提示：右上、楼层条下方；3 秒由 JS 控制 */
+  .onboard-hint { position:absolute; top:64px; right:18px; max-width:230px;
+                  padding:8px 12px; border-radius:9px; background:rgba(16,20,28,.92);
+                  border:1px solid rgba(255,209,102,.45); color:#ffe7b8; font-size:13px; line-height:1.6;
+                  opacity:0; transform:translate(10px,0); transition:opacity .22s ease, transform .22s ease;
+                  pointer-events:none; }
+  .onboard-hint.is-on { opacity:1; transform:translate(0,0); }
+  .ob-verb { display:block; font-size:11px; color:#ffd166; letter-spacing:1px; margin-bottom:2px; }
+  .btns { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+  button { background:#1e2634; color:#dfe7f2; border:1px solid #334055; border-radius:7px;
+           padding:7px 11px; font-size:12px; cursor:pointer; }
+  button:hover { border-color:var(--gold); color:#fff; }
+  button.primary { background:#2a3446; border-color:#4a5d7a; }
+  .log { height:176px; overflow:auto; font-family:Consolas, monospace; font-size:12px;
+         line-height:1.65; color:#9fb3c8; background:#0f131a; border:1px solid #232a38;
+         border-radius:7px; padding:9px; white-space:pre-wrap; }
+  .stat { display:flex; justify-content:space-between; font-size:12px; color:var(--dim); padding:4px 0;
+          border-bottom:1px dashed #232a38; }
+  .stat b { color:#dfe7f2; font-weight:600; }
+  .modal { position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+           background:rgba(6,8,12,.72); z-index:60; }
+  .modal.is-on { display:flex; }
+  .modal-card { width:82%; max-width:420px; background:#171c26; border:1px solid #3a4a63; border-radius:12px;
+                padding:16px; box-shadow:0 18px 50px rgba(0,0,0,.55); }
+  .modal-kicker { font-size:11px; letter-spacing:2px; color:#8d9bb0; }
+  .modal-card h2 { font-size:17px; margin:6px 0 8px; }
+  .modal-sub { font-size:12px; color:#aeb9ca; line-height:1.6; margin:0 0 8px; }
+  .ob-modal-line { margin:6px 0 10px; padding:6px 10px; border-left:2px solid rgba(255,210,120,.65);
+                   border-radius:0 6px 6px 0; background:rgba(28,20,6,.55); color:#ffe7b8;
+                   font-size:12px; line-height:1.55; }
+  .ob-modal-line b { color:#fff3cf; }
+  .cards { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; }
+  .card { height:64px; border-radius:7px; background:#1f2735; border:1px solid #34415a;
+          display:flex; align-items:center; justify-content:center; font-size:11px; color:#c8d4e5; }
+  .note { margin-top:14px; color:#6f7d91; font-size:11px; line-height:1.7; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>烬 · 首局事件教学（独立预览）</h1>
+  <p class="sub">
+    这是补丁逻辑的独立预览：5 条提示跟着玩家真实遇到的事触发，每条只出现一次、停留 3 秒、可按键跳过。
+    首次三选一渲染在弹窗内部（弹窗层 z-index 60 会盖住浮动提示，所以不抬 z-index）。
+  </p>
+
+  <div class="cols">
+    <div class="panel">
+      <div class="stage" id="stage">
+        <div class="floorbar" id="floorbar">第 1 层</div>
+        <div class="hero"></div>
+        <div class="hpbar">
+          <div class="label">机体完整度 <span id="hpText">78%</span></div>
+          <div class="track"><div class="fill" id="hpFill"></div></div>
+        </div>
+        <div class="onboard-hint" id="onboardHint" aria-hidden="true"></div>
+        <div class="modal" id="rewardModal">
+          <div class="modal-card">
+            <div class="modal-kicker">FLOOR 1 CLEARED</div>
+            <h2>楼层清空 · 技能三选一</h2>
+            <p class="modal-sub">本层敌人已全部清除。先选一项技能。</p>
+            <div id="modalObSlot"></div>
+            <div class="cards"><div class="card">1 · 熔火弹</div><div class="card">2 · 磁轨</div><div class="card">3 · 霜环</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="btns">
+        <button class="primary" data-sim="room">① 第一次进房</button>
+        <button class="primary" data-sim="choice">② 第一次三选一</button>
+        <button class="primary" data-sim="elite">③ 第一次精英</button>
+        <button class="primary" data-sim="low">④ 第一次低血</button>
+        <button class="primary" data-sim="crystal">⑤ 第一次结晶</button>
+        <button data-action="closeModal">关闭奖励弹窗</button>
+        <button data-action="skip">跳过当前提示</button>
+        <button data-action="run1">重置为第一局</button>
+        <button data-action="run2">模拟第二局</button>
+      </div>
+      <div class="note">
+        测试顺序：第一局 → 依次点 5 个按钮 → 每条只出现一次 → 点“模拟第二局”后 5 条全部不再出现。
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="stat"><span>runs（局数）</span><b id="stRuns">1</b></div>
+      <div class="stat"><span>非首局</span><b id="stReturning">false</b></div>
+      <div class="stat"><span>本局已触发</span><b id="stEv">—</b></div>
+      <div class="stat"><span>触发顺序</span><b id="stOrder">—</b></div>
+      <div class="stat"><span>已看存档</span><b id="stSeen">—</b></div>
+      <div class="stat"><span>当前提示剩余</span><b id="stHint">0s</b></div>
+      <div class="log" id="log"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   预览用的最小运行环境（真实游戏里这些对象已存在）
+   ============================================================ */
+const KEY = 'preview_onboard_v1';
+const store = {
+  get() { try { return JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { return {}; } },
+  set(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} },
+  clear() { try { localStorage.removeItem(KEY); } catch (e) {} }
+};
+
+const ONBOARD_CONFIG = {
+  enabled: true, maxFloors: 5, skipBestFloor: 5,
+  enemyCountMul: 0.8, floor1CountCap: 3,
+  hintStorageKey: KEY, hintMaxChars: 12, hintLifeSec: 3.0,
+  hintDelaySec: 1.2, killEvidence: 3, moveEvidencePx: 48,
+  skipKeys: ['Escape', 'Space', ' '], seedOnRuns: 2,
+  weakFloor1: { hpMul: 0.6, speedMul: 0.8, damageMul: 0.7 }
+};
+
+const ONBOARD_STEPS = [
+  { key: 'firstRoom',    n: 1, verb: '移动', hint: 'WASD 移动，左键开火', delay: 1.2 },
+  { key: 'firstChoice',  n: 2, verb: '选牌', hint: '选牌优先凑融合', delay: 0.0 },
+  { key: 'firstElite',   n: 3, verb: '精英', hint: '精英更肉，K 装置', delay: 0.0 },
+  { key: 'lowHp',        n: 4, verb: '低血', hint: '血少就退，Shift 跑', delay: 0.0 },
+  { key: 'firstCrystal', n: 5, verb: '结晶', hint: '结晶留着升天赋', delay: 0.0 }
+];
+
+const state = {
+  mode: 'playing', status: 'playing', floor: 1, currentRoomId: -1,
+  player: { x: 0, y: 0 }, enemies: [], kills: 0, fusions: [],
+  meta: { runs: 1, bestFloor: 0 }, fx: { lowHpFired: false },
+  rewardStage: 'skill', onboard: null, lastHit: null
+};
+const ui = {
+  onboardHint: document.getElementById('onboardHint'),
+  spiritLine: null,
+  modalObSlot: document.getElementById('modalObSlot')
+};
+let onboardPendingToast = null;
+function toastNow(message) { log('TOAST ' + message); }
+
+/* ============================================================
+   以下为补丁里的真实函数（与 ONBOARD_PATCH.md 保持一致）
+   ============================================================ */
+function onboardState() {
+  if (!state.onboard) {
+    state.onboard = {
+      progress: {}, ev: {}, evOrder: [], queue: [], pending: null, gap: 0,
+      modalHint: null, hint: null, floor: state.floor,
+      delay: ONBOARD_CONFIG.hintDelaySec, lastPos: null, moveAcc: 0,
+      moved: false, techUsed: false, dashUsed: false, routeSeen: false,
+      lastRoomId: state.currentRoomId, startKills: state.kills || 0,
+      startFusions: (state.fusions || []).length
+    };
+  }
+  return state.onboard;
+}
+function loadOnboardSeen() { return store.get(); }
+function saveOnboardSeen(v) { store.set(v); }
+function onboardSeedSeen() {
+  const seen = loadOnboardSeen();
+  let changed = false;
+  ONBOARD_STEPS.forEach((step) => {
+    if (!seen[step.key]) { seen[step.key] = true; changed = true; }
+  });
+  if (changed) saveOnboardSeen(seen);
+  return seen;
+}
+function onboardReturningPlayer() {
+  const runs = Number(state.meta && state.meta.runs) || 0;
+  const best = Number(state.meta && state.meta.bestFloor) || 0;
+  return runs >= ONBOARD_CONFIG.seedOnRuns || best >= ONBOARD_CONFIG.skipBestFloor;
+}
+function onboardRenderHint(step, forceModal) {
+  const st = onboardState();
+  const seen = loadOnboardSeen();
+  if (seen[step.key]) return false;
+  seen[step.key] = true;
+  saveOnboardSeen(seen);
+  if (forceModal || state.mode === 'reward') {
+    st.modalHint = { key: step.key, verb: step.verb, text: step.hint };
+    renderModal();
+    return true;
+  }
+  st.hint = { key: step.key, text: step.hint, t: ONBOARD_CONFIG.hintLifeSec };
+  ui.onboardHint.innerHTML = '<span class="ob-verb">教学 · ' + step.verb + '</span>' + step.hint;
+  ui.onboardHint.classList.add('is-on');
+  ui.onboardHint.setAttribute('aria-hidden', 'false');
+  return true;
+}
+function onboardShowHint(key, forceModal) {
+  if (!ONBOARD_CONFIG.enabled || !state) return false;
+  const step = ONBOARD_STEPS.find((item) => item.key === key);
+  if (!step) return false;
+  const st = onboardState();
+  if (st.ev[key]) return false;
+  if (loadOnboardSeen()[key]) return false;
+  if (st.hint || st.pending || st.queue.length) {
+    if (!st.queue.some((item) => item.key === key)) st.queue.push({ key: key, modal: !!forceModal });
+    return true;
+  }
+  st.ev[key] = true;
+  st.evOrder.push(key);
+  return onboardRenderHint(step, !!forceModal);
+}
+function onboardHideHint(completed) {
+  if (!state || !state.onboard) return;
+  const st = state.onboard;
+  if (!st.hint) return;
+  st.hint = null;
+  st.gap = 0.5;
+  ui.onboardHint.classList.remove('is-on');
+  ui.onboardHint.setAttribute('aria-hidden', 'true');
+  if (onboardPendingToast) {
+    const pending = onboardPendingToast;
+    onboardPendingToast = null;
+    toastNow(pending.message);
+  } else if (completed) {
+    toastNow('教学完成');
+  }
+}
+function onboardMark(key) {
+  if (!ONBOARD_CONFIG.enabled || !state) return false;
+  const st = onboardState();
+  if (st.progress[key]) return false;
+  st.progress[key] = true;
+  if (st.hint && st.hint.key === key) onboardHideHint(true);
+  return true;
+}
+function onboardTick(dt) {
+  const st = onboardState();
+  if (st.hint) {
+    st.hint.t -= dt;
+    if (st.hint.t <= 0) onboardHideHint(false);
+  }
+  if (st.gap > 0) st.gap = Math.max(0, st.gap - dt);
+  if (st.pending) {
+    st.pending.t -= dt;
+    if (st.pending.t <= 0) {
+      const key = st.pending.key;
+      const step = ONBOARD_STEPS.find((item) => item.key === key);
+      st.pending = null;
+      if (step) {
+        if (st.hint || st.modalHint) st.queue.push({ key: key, modal: false });
+        else onboardRenderHint(step, false);
+      }
+    }
+  }
+  if (!st.hint && !st.modalHint && st.queue.length && st.gap <= 0) {
+    const item = st.queue.shift();
+    const step = ONBOARD_STEPS.find((entry) => entry.key === item.key);
+    if (step) onboardRenderHint(step, item.modal);
+  }
+}
+function onboardEvent(key, forceModal) {
+  if (!ONBOARD_CONFIG.enabled || !state) return false;
+  if (state.mode !== 'playing' && state.mode !== 'reward') return false;
+  if (onboardReturningPlayer()) return false;
+  const st = onboardState();
+  if (st.ev[key] || loadOnboardSeen()[key]) return false;
+  const step = ONBOARD_STEPS.find((item) => item.key === key);
+  if (!step) return false;
+  const delay = Number(step.delay) || 0;
+  if (delay > 0) {
+    st.ev[key] = true;
+    st.evOrder.push(key);
+    st.pending = { key: key, t: delay };
+    return true;
+  }
+  return onboardShowHint(key, !!forceModal);
+}
+function onboardOnRoomEnter(room) {
+  if (!state || !ONBOARD_CONFIG.enabled || !room) return false;
+  const st = onboardState();
+  if (st.lastRoomId === room.id) return false;
+  const prev = st.lastRoomId;
+  st.lastRoomId = room.id;
+  if (!st.ev.firstRoom && prev != null && room.type !== 'start') onboardEvent('firstRoom');
+  if (!st.ev.firstElite) {
+    const hasElite = room.type === 'elite'
+      || (state.enemies || []).some((e) => e && !e.dead && e.roomId === room.id && e.elite);
+    if (hasElite) onboardEvent('firstElite');
+  }
+  return true;
+}
+function onboardBeginRun() {
+  const st = onboardState();
+  st.progress = {}; st.ev = {}; st.evOrder = []; st.queue = [];
+  st.pending = null; st.gap = 0; st.modalHint = null; st.hint = null;
+  st.floor = state.floor; st.delay = ONBOARD_CONFIG.hintDelaySec;
+  st.lastPos = null; st.moveAcc = 0; st.moved = false; st.techUsed = false;
+  st.dashUsed = false; st.routeSeen = false; st.lastRoomId = state.currentRoomId;
+  st.startKills = state.kills || 0; st.startFusions = (state.fusions || []).length;
+  if (onboardReturningPlayer()) onboardSeedSeen();
+  ui.onboardHint.classList.remove('is-on');
+  ui.onboardHint.setAttribute('aria-hidden', 'true');
+  ui.modalObSlot.innerHTML = '';
+  renderModal();
+}
+
+/* ============================================================
+   预览交互
+   ============================================================ */
+let currentRoom = null;
+let floorForRoom = 1;
+function log(text) {
+  const el = document.getElementById('log');
+  el.textContent += (el.textContent ? '\n' : '') + text;
+  el.scrollTop = el.scrollHeight;
+}
+function renderModal() {
+  const modal = document.getElementById('rewardModal');
+  const st = state.onboard;
+  const hint = st && st.modalHint;
+  modal.classList.toggle('is-on', state.mode === 'reward');
+  ui.modalObSlot.innerHTML = hint
+    ? '<div class="ob-modal-line" data-onboard-modal="1">教学 · <b>'
+      + hint.verb + ' · ' + hint.text + '</b></div>'
+    : '';
+  if (hint) st.modalHint = null; // 读完即清空，避免下次奖励重复
+}
+function simulate(kind) {
+  if (kind === 'room') {
+    floorForRoom += 1;
+    state.floor = Math.min(5, floorForRoom);
+    currentRoom = { id: floorForRoom, type: 'battle' };
+    state.currentRoomId = currentRoom.id;
+    onboardOnRoomEnter(currentRoom);
+    log('SIM 进入房间 id=' + currentRoom.id);
+  } else if (kind === 'choice') {
+    onboardEvent('firstChoice', true);
+    state.mode = 'reward';
+    state.rewardStage = 'skill';
+    renderModal();
+    log('SIM 技能三选一');
+  } else if (kind === 'elite') {
+    currentRoom = { id: 'elite_' + floorForRoom, type: 'elite' };
+    state.currentRoomId = currentRoom.id;
+    state.enemies = [{ id: 'e1', roomId: currentRoom.id, elite: true, dead: false }];
+    onboardOnRoomEnter(currentRoom);
+    log('SIM 进入精英房');
+  } else if (kind === 'low') {
+    state.fx.lowHpFired = true;
+    onboardEvent('lowHp');
+    log('SIM 血量低于 30%（lowHpFired=true）');
+  } else if (kind === 'crystal') {
+    onboardEvent('firstCrystal');
+    log('SIM 获得结晶 +3');
+  }
+  refreshStats();
+}
+function refreshStats() {
+  const st = onboardState();
+  document.getElementById('stRuns').textContent = state.meta.runs;
+  document.getElementById('stReturning').textContent = String(onboardReturningPlayer());
+  document.getElementById('stEv').textContent = Object.keys(st.ev).join(', ') || '—';
+  document.getElementById('stOrder').textContent = st.evOrder.join(' → ') || '—';
+  document.getElementById('stSeen').textContent = Object.keys(loadOnboardSeen()).join(', ') || '—';
+  document.getElementById('stHint').textContent = (st.hint ? st.hint.t.toFixed(1) : '0.0') + 's';
+  document.getElementById('floorbar').textContent = '第 ' + state.floor + ' 层';
+}
+
+document.querySelectorAll('[data-sim]').forEach((btn) => {
+  btn.addEventListener('click', () => simulate(btn.getAttribute('data-sim')));
+});
+document.querySelector('[data-action="closeModal"]').addEventListener('click', () => {
+  state.mode = 'playing';
+  renderModal();
+  refreshStats();
+});
+document.querySelector('[data-action="skip"]').addEventListener('click', () => {
+  onboardHideHint(false);
+  refreshStats();
+});
+document.querySelector('[data-action="run1"]').addEventListener('click', () => {
+  __previewDebug.onboard.resetRun({ clearSeen: true, runs: 1 });
+});
+document.querySelector('[data-action="run2"]').addEventListener('click', () => {
+  __previewDebug.onboard.resetRun({ clearSeen: true, runs: 2 });
+});
+window.addEventListener('keydown', (event) => {
+  if (state.onboard && state.onboard.hint
+      && ONBOARD_CONFIG.skipKeys.indexOf(event.key) >= 0) {
+    onboardHideHint(false);
+    event.preventDefault();
+  }
+});
+
+/* 每帧推进：真实游戏里由主循环调用 */
+let last = performance.now();
+function loop(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  onboardTick(dt);
+  refreshStats();
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+
+/* ============================================================
+   自检口：只转调真实入口，不复制判定
+   ============================================================ */
+window.__previewDebug = {
+  onboard: {
+    /** 重置一局；clearSeen=true 会清空"已看"存档 */
+    resetRun(opts) {
+      const o = opts || {};
+      if (o.clearSeen) store.clear();
+      state.meta.runs = Number(o.runs) || 1;
+      state.floor = Number(o.floor) || 1;
+      floorForRoom = state.floor;
+      state.currentRoomId = -1;
+      state.mode = 'playing';
+      state.onboard = null;
+      state.fx.lowHpFired = false;
+      onboardBeginRun();
+      refreshStats();
+      return this.info();
+    },
+    setRuns(n) { state.meta.runs = Number(n) || 1; refreshStats(); return this.info(); },
+    closeModal() { state.mode = 'playing'; renderModal(); refreshStats(); return this.info(); },
+    event(key, forceModal) { return { ok: onboardEvent(String(key || ''), !!forceModal), info: this.info() }; },
+    modal(key) {
+      state.mode = 'reward';
+      const r = onboardEvent(String(key || 'firstChoice'), true);
+      return { ok: r, line: this.modalLine() };
+    },
+    modalLine() {
+      const el = document.querySelector('[data-onboard-modal="1"]');
+      return el ? el.innerText : null;
+    },
+    hide() { onboardHideHint(false); refreshStats(); },
+    info() {
+      const st = onboardState();
+      return {
+        seen: loadOnboardSeen(),
+        ev: Object.assign({}, st.ev),
+        evOrder: st.evOrder.slice(),
+        queue: st.queue.map((item) => item.key),
+        modalHint: st.modalHint ? st.modalHint.text : null,
+        hintText: ui.onboardHint.textContent,
+        hintVisible: ui.onboardHint.classList.contains('is-on'),
+        hintT: st.hint ? Number(st.hint.t.toFixed(2)) : 0,
+        returning: onboardReturningPlayer(),
+        runs: state.meta.runs
+      };
+    }
+  }
+};
+onboardBeginRun();
+refreshStats();
+log('READY 预览已就绪');
+</script>
+</body>
+</html>

@@ -1,0 +1,436 @@
+{
+  "meta": {
+    "at": "2026-11-08T11:53:41.582Z",
+    "runs": 6000,
+    "profile": "bot",
+    "seed": 20261108,
+    "hp18": 0.6,
+    "hp19": 1,
+    "dmg18": 1,
+    "floor": "F18",
+    "scope": [
+      18
+    ]
+  },
+  "floors": {
+    "1": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 6000,
+      "died": 0,
+      "timedOut": 0,
+      "won": {
+        "n": 6000,
+        "avg": 68.4,
+        "p50": 69.18,
+        "p90": 69.18,
+        "p95": 69.18,
+        "max": 74.95,
+        "over75": 0,
+        "over75Pct": 0,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "2": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 5998,
+      "died": 259,
+      "timedOut": 0,
+      "won": {
+        "n": 5739,
+        "avg": 65.4,
+        "p50": 64.34,
+        "p90": 71.92,
+        "p95": 74.36,
+        "max": 77.91,
+        "over75": 256,
+        "over75Pct": 4.5,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "3": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 5089,
+      "died": 1180,
+      "timedOut": 0,
+      "won": {
+        "n": 3909,
+        "avg": 65,
+        "p50": 64.97,
+        "p90": 72.3,
+        "p95": 74.66,
+        "max": 80.88,
+        "over75": 173,
+        "over75Pct": 4.4,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "4": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 3594,
+      "died": 707,
+      "timedOut": 0,
+      "won": {
+        "n": 2887,
+        "avg": 65.8,
+        "p50": 65.58,
+        "p90": 74.29,
+        "p95": 74.95,
+        "max": 83.85,
+        "over75": 122,
+        "over75Pct": 4.2,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "5": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2711,
+      "died": 315,
+      "timedOut": 0,
+      "won": {
+        "n": 2396,
+        "avg": 66.9,
+        "p50": 67.05,
+        "p90": 74.83,
+        "p95": 76.92,
+        "max": 86.82,
+        "over75": 207,
+        "over75Pct": 8.6,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "6": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2351,
+      "died": 101,
+      "timedOut": 0,
+      "won": {
+        "n": 2250,
+        "avg": 77.8,
+        "p50": 78.49,
+        "p90": 87.15,
+        "p95": 90.37,
+        "max": 98.43,
+        "over75": 1446,
+        "over75Pct": 64.3,
+        "over90": 115,
+        "over90Pct": 5.1
+      }
+    },
+    "7": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2227,
+      "died": 35,
+      "timedOut": 0,
+      "won": {
+        "n": 2192,
+        "avg": 68.8,
+        "p50": 69.36,
+        "p90": 78.39,
+        "p95": 79.94,
+        "max": 88.52,
+        "over75": 478,
+        "over75Pct": 21.8,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "8": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2186,
+      "died": 23,
+      "timedOut": 0,
+      "won": {
+        "n": 2163,
+        "avg": 69.8,
+        "p50": 70.23,
+        "p90": 80.07,
+        "p95": 81.12,
+        "max": 86.86,
+        "over75": 511,
+        "over75Pct": 23.6,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "9": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2150,
+      "died": 15,
+      "timedOut": 0,
+      "won": {
+        "n": 2135,
+        "avg": 71,
+        "p50": 71.27,
+        "p90": 82.55,
+        "p95": 83.39,
+        "max": 89.55,
+        "over75": 691,
+        "over75Pct": 32.4,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "10": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2132,
+      "died": 9,
+      "timedOut": 0,
+      "won": {
+        "n": 2123,
+        "avg": 72,
+        "p50": 71.89,
+        "p90": 85.03,
+        "p95": 85.9,
+        "max": 93.79,
+        "over75": 792,
+        "over75Pct": 37.3,
+        "over90": 32,
+        "over90Pct": 1.5
+      }
+    },
+    "11": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2120,
+      "died": 18,
+      "timedOut": 0,
+      "won": {
+        "n": 2102,
+        "avg": 73.4,
+        "p50": 72.93,
+        "p90": 85.87,
+        "p95": 87.75,
+        "max": 96.53,
+        "over75": 898,
+        "over75Pct": 42.7,
+        "over90": 55,
+        "over90Pct": 2.6
+      }
+    },
+    "12": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2099,
+      "died": 23,
+      "timedOut": 0,
+      "won": {
+        "n": 2076,
+        "avg": 85.3,
+        "p50": 85.07,
+        "p90": 99.6,
+        "p95": 103.36,
+        "max": 112.15,
+        "over75": 1721,
+        "over75Pct": 82.9,
+        "over90": 691,
+        "over90Pct": 33.3
+      }
+    },
+    "13": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2072,
+      "died": 15,
+      "timedOut": 0,
+      "won": {
+        "n": 2057,
+        "avg": 76,
+        "p50": 75.96,
+        "p90": 88.27,
+        "p95": 92.46,
+        "max": 100.32,
+        "over75": 1117,
+        "over75Pct": 54.3,
+        "over90": 171,
+        "over90Pct": 8.3
+      }
+    },
+    "14": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2056,
+      "died": 19,
+      "timedOut": 0,
+      "won": {
+        "n": 2037,
+        "avg": 77.4,
+        "p50": 77.33,
+        "p90": 89.86,
+        "p95": 94.94,
+        "max": 103.01,
+        "over75": 1222,
+        "over75Pct": 60,
+        "over90": 196,
+        "over90Pct": 9.6
+      }
+    },
+    "15": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 2034,
+      "died": 39,
+      "timedOut": 0,
+      "won": {
+        "n": 1995,
+        "avg": 78.3,
+        "p50": 78.15,
+        "p90": 90.84,
+        "p95": 97.42,
+        "max": 103.48,
+        "over75": 1244,
+        "over75Pct": 62.4,
+        "over90": 260,
+        "over90Pct": 13
+      }
+    },
+    "16": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 1993,
+      "died": 52,
+      "timedOut": 0,
+      "won": {
+        "n": 1941,
+        "avg": 79.9,
+        "p50": 79.79,
+        "p90": 93.07,
+        "p95": 99.9,
+        "max": 106.12,
+        "over75": 1293,
+        "over75Pct": 66.6,
+        "over90": 357,
+        "over90Pct": 18.4
+      }
+    },
+    "17": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 1938,
+      "died": 47,
+      "timedOut": 0,
+      "won": {
+        "n": 1891,
+        "avg": 81.6,
+        "p50": 81.77,
+        "p90": 95.38,
+        "p95": 102.38,
+        "max": 108.75,
+        "over75": 1372,
+        "over75Pct": 72.6,
+        "over90": 446,
+        "over90Pct": 23.6
+      }
+    },
+    "18": {
+      "inScope": true,
+      "gateOk": true,
+      "fights": 1891,
+      "died": 11,
+      "timedOut": 0,
+      "won": {
+        "n": 1880,
+        "avg": 57.4,
+        "p50": 57.6,
+        "p90": 67.27,
+        "p95": 72.59,
+        "max": 77.1,
+        "over75": 9,
+        "over75Pct": 0.5,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    },
+    "19": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 1879,
+      "died": 4,
+      "timedOut": 0,
+      "won": {
+        "n": 1875,
+        "avg": 92.3,
+        "p50": 92.18,
+        "p90": 109.3,
+        "p95": 117.98,
+        "max": 125.34,
+        "over75": 1715,
+        "over75Pct": 91.5,
+        "over90": 1045,
+        "over90Pct": 55.7
+      }
+    },
+    "20": {
+      "inScope": false,
+      "gateOk": null,
+      "fights": 1873,
+      "died": 0,
+      "timedOut": 0,
+      "won": {
+        "n": 1873,
+        "avg": 52,
+        "p50": 51.97,
+        "p90": 61.46,
+        "p95": 64.89,
+        "max": 70.86,
+        "over75": 0,
+        "over75Pct": 0,
+        "over90": 0,
+        "over90Pct": 0
+      }
+    }
+  },
+  "gate": {
+    "ok": true,
+    "fails": []
+  },
+  "redLines": {
+    "ok": true,
+    "pass10": 35.4,
+    "clear20": 31.2,
+    "pass10Max": 40,
+    "clear20Max": 36
+  },
+  "deaths": {
+    "byRoom": {
+      "boss": 2872,
+      "elite": 1198,
+      "battle": 57
+    },
+    "byFloor": {
+      "2": 261,
+      "3": 1830,
+      "4": 1022,
+      "5": 491,
+      "6": 146,
+      "7": 58,
+      "8": 29,
+      "9": 28,
+      "10": 12,
+      "11": 21,
+      "12": 26,
+      "13": 19,
+      "14": 20,
+      "15": 42,
+      "16": 54,
+      "17": 50,
+      "18": 11,
+      "19": 5,
+      "20": 2
+    }
+  }
+}

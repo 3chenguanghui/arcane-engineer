@@ -1,0 +1,60 @@
+﻿FIRST-SCREEN: 2590ms（navigate → 标题可见，headless 冷启动口径）
+PASS  首屏可渲染（DOM complete + 标题可见）  "title"
+PASS  标题卡不超出视口  {"x":0,"y":0,"w":1410,"h":805,"bottom":805}
+PASS  默认 BGM 关闭 / 非静音  {"muted":false,"bgmOn":false,"bgm":0.25,"sfx":0.62}
+PASS  首屏零报错  []
+PASS  点击“开始探索”进入游戏  {"mode":"playing","runs":1,"titleHidden":true,"ctx":"running"}
+PASS  敌人受击后 vx/vy > 10（方向击退）  {"enemyId":9,"typeId":"wanderer","damage":24,"crit":false,"dirAngle":0,"vx":232.5,"vy":0,"heavy":true,"lethal":false,"freeze":0.09,"freezeScale":0.16,"knockbackMul":1.55}
+PASS  命中粒子全部落在配置锥角内且贴近中轴  {"avgDev":0.411,"spread":0.9,"dirBurst":{"x":672.7004479058304,"y":1425.2480071418345,"dirAngle":0,"spread":0.9,"count":8,"angles":[0.6447983761283346,0.401432444428944,-0.17552108303924263,0.8237211406525321,0.1450770481380389,0.7459567197582838,0.11802374794804804,0.22985657525314884]},"lastBurst":{"x":672.7004479058304,"y":1425.2480071418345,"dirAngle":0,"spread":0.9,"count":8,"angles":[0.6447983761283346,0.401432444428944,-0.17552108303924263,0.8237211406525321,0.1450770481380389,0.7459567197582838,0.11802374794804804,0.22985657525314884]}}
+PASS  命中写入顿帧（lastHit.freeze > 0）  {"freeze":0.09,"scale":0.16}
+PASS  damagePlayer 返回 knockbackApplied === true  {"applied":8,"hp":92,"knockbackApplied":true,"vx":-96,"vy":1.175660927181459e-14,"dirAngle":3.141592653589793}
+PASS  玩家受击后获得反向速度  {"vx":-96,"vy":1.175660927181459e-14}
+PASS  击杀敌人计数增加  9
+PASS  清场后出现楼梯并进入奖励三选一  {"mode":"reward","options":["tech:nanite","magic:lavaFissure","tech:capacitor","tech:amp"]}
+PASS  奖励弹窗触发 reward 音效  {"ui":1,"fire":1,"cast":1,"heavyHit":1,"hit":1,"hurt":1,"reward":1,"kill":1,"heavy":1}
+PASS  选择奖励后回到 playing  "playing"
+PASS  下楼进入下一层  2
+PASS  楼层转场动画被触发  "floor-wipe is-on"
+PASS  手动开启 BGM 后确有音轨  {"tracks":10}
+PASS  连续切层不叠加音轨  {"before":10,"after":10}
+PASS  N 键切换为静音（M 已让位给全屏地图）  true
+PASS  再按 N 恢复声音  false
+PASS  BGM / 音效音量可独立调整  {"muted":false,"bgmOn":true,"bgm":0.4,"sfx":0.7}
+PASS  H 打开规则面板且含音频设置  {"mode":"rules","open":true,"sliders":true}
+PASS  死亡进入结算页  {"mode":"result"}
+PASS  死亡触发 death 音效  {"ui":7,"fire":1,"cast":1,"heavyHit":1,"hit":1,"hurt":1,"reward":2,"kill":1,"heavy":1,"descend":2,"death":1}
+PASS  重开回到第 1 层满血  {"mode":"playing","status":"playing","floor":1,"hp":100,"modal":"modal-layer hidden"}
+PERF(负载敏感) OK  战斗后帧率 ≥ 45fps  {"fps":101,"hitStop":0,"stateFps":103,"enemies":12}
+PASS  顿帧会衰减（不会持续掉帧）  {"atMeasure":0,"after320ms":0}
+PASS  全部音效离线渲染 RMS > 0.001（真的出声）  {"fire":{"peak":0.4293,"rms":0.029,"zcr":65},"frost":{"peak":0.4309,"rms":0.0388,"zcr":215},"bolt":{"peak":0.4836,"rms":0.028,"zcr":152.5},"heal":{"peak":0.3951,"rms":0.0416,"zcr":390},"hit":{"peak":0.5623,"rms":0.0289,"zcr":47.5},"heavy":{"peak":0.7252,"rms":0.0557,"zcr":65},"kill":{"peak":0.5948,"rms":0.0479,"zcr":112.5},"hurt":{"peak":0.5733,"rms":0.0534,"zcr":80},"reward":{"peak":0.4426,"rms":0.0475,"zcr":495},"fuse":{"peak":0.5219,"rms":0.0545,"zcr":675},"descend":{"peak":0.4498,"rms":0.0613,"zcr":505},"death":{"peak":0.6231,"rms":0.1065,"zcr":220},"lightHit":{"peak":0.5218,"rms":0.0238,"zcr":62.5},"heavyHit":{"peak":0.6827,"rms":0.0605,"zcr":60},"cast":{"peak":0.4874,"rms":0.0391,"zcr":292.5},"fusionCast":{"peak":0.5491,"rms":0.0614,"zcr":712.5},"critHit":{"peak":0.68,"rms":0.0508,"zcr":195},"clearAll":{"peak":0.7136,"rms":0.0911,"zcr":187.5}}
+PASS  刷新后回到标题页  "title"
+PASS  刷新后音频设置被记住  {"muted":false,"bgmOn":true,"bgm":0.4,"sfx":0.7}
+PASS  刷新后永久进度保留  {"runs":2,"bestFloor":3,"crystals":3,"talents":{"hp":0,"aether":0,"armor":0,"swift":0,"regen":0,"leech":0,"lastStand":0,"iron":0,"steady":0,"crit":0,"reaction":0,"execute":0,"break":0,"fusion":0,"cdr":0,"thrift":0,"greed":0,"chest":0,"wager":0,"altar":0,"reroll":0,"event":0,"shop":0,"floorBonus":0,"startPool":0,"startRelic":0,"thirdWeapon":0,"fusionSlot":0,"startAether":0,"startEmber":0},"talentsMigrated":true,"talentsMigration":null,"talentsRespecLog":[],"startCard":"fireball","aimMode":"weak","difficulty":"normal","storySeen":[],"hintsSeen":0,"postFx":true,"postfx":{"bloom":true,"chroma":false,"crt":false,"vignette":true},"alwaysAim":false,"reduceShake":false,"reduceFlash":false,"colorblind":false,"infoMode":"standard","unlocks":{"fusion":true,"device":true,"overdrive":true,"parallel":true},"milestones":{"highestFloor":0,"titles":[]},"bossBlueprints":[],"version":9,"performance":{"mode":false},"comboFx":true,"stats":{"kills":9,"deaths":1,"eliteKills":3,"bossKills":1,"flawlessFloors":1,"hiddenRooms":0,"voidRifts":0,"singleSchoolClears":0,"barrelKills":0},"eventStats":{"sacrifice":0,"wagerWins":0,"wagerLosses":0,"curses":0,"curseTicks":0},"bestCombo":9,"bestRunRecipes":0,"clears":0,"achievements":{"first_kill":1794135552211,"boss_kills_1":1794135552252,"flawless_1":1794135555254,"floor_3":1794135558246},"achievementsAether":{"first_kill":1,"boss_kills_1":1,"flawless_1":1,"floor_3":1},"recipes":[],"rewards":{"aether":4,"cards":0},"seedRuns":{},"ascensionUnlocked":0,"ascension":0,"challengeCleared":{},"codex":{"enemies":["crawler","patrol","assembler","riveter","welder","wanderer"],"recipes":[],"blueprints":[],"relics":["thorns"],"cards":["fireball","nanite","frost"],"terms":[]},"weaponId":"dagger","weaponsEnabled":true,"gameTitle":"烬","gameSlug":"emberfall","legacyTitle":""}
+PASS  刷新后 BGM 不自动响（需手动开）  0
+PASS  作者署名配置字段存在  "陈光辉 制作"
+PASS  标题页 / 关于 / 设置页脚三处文案与配置完全一致  {"cfg":"陈光辉 制作","title":"陈光辉 制作","about":"陈光辉 制作","settings":"陈光辉 制作"}
+PASS  X 批进入第 6 层可测状态  {"floor":6,"mode":"playing"}
+PASS  C1-3 事件房 15%/层：20 层命中 3 层（F3 / F8 / F18）  {"floors":[3,8,18],"hit":[{"f":3,"eventIds":[1],"types":["start","event","battle","battle","boss"],"want":true,"gateEnabled":true,"hostId":2,"riftSource":3,"riftTarget":0,"hidden":false,"hasRift":true},{"f":8,"eventIds":[2],"types":["start","battle","event","boss","shop"],"want":true,"gateEnabled":true,"hostId":1,"riftSource":4,"riftTarget":0,"hidden":false,"hasRift":true},{"f":18,"eventIds":[2],"types":["start","battle","event","elite","boss"],"want":true,"gateEnabled":true,"hostId":1,"riftSource":1,"riftTarget":3,"hidden":false,"hasRift":true}]}
+PASS  C1-3 事件房不占隐藏房宿主 / 裂隙起终点（同房互斥）  [{"f":3,"eventIds":[1],"types":["start","event","battle","battle","boss"],"want":true,"gateEnabled":true,"hostId":2,"riftSource":3,"riftTarget":0,"hidden":false,"hasRift":true},{"f":8,"eventIds":[2],"types":["start","battle","event","boss","shop"],"want":true,"gateEnabled":true,"hostId":1,"riftSource":4,"riftTarget":0,"hidden":false,"hasRift":true},{"f":18,"eventIds":[2],"types":["start","battle","event","elite","boss"],"want":true,"gateEnabled":true,"hostId":1,"riftSource":1,"riftTarget":3,"hidden":false,"hasRift":true}]
+PASS  X-A1 迷雾 alpha=1.0 + 二次覆盖开启  {"alpha":1,"feather":6,"secondPass":true,"markers":false,"parallax":true,"bloom":true,"seamMul":0.35,"gridMul":0.45}
+PASS  X-A1 未探索区最高亮度 ≤12（纯黑）  {"max":6.7,"avg":5.7,"p99":6.7}
+PASS  X-A2 未探索文字/虚线标记默认关闭  false
+PASS  X-B1 武器代码闸门默认 false  false
+PASS  X-B2 界面不显示武器入口（武器条 / 设置行）  {"chipHidden":true,"rowHidden":true}
+PASS  X-B3 融合目录条目数 = 实际可合条目数（无武器标签死条目）  {"active":13,"all":13,"tag":null}
+PASS  X-B4 开启武器也不再增加融合死条目（目录恒等于可合数）  {"tag":{"id":"conductive","name":"导电","glyph":"⌁","color":"#8fe8ff","weapon":"dagger"},"active":13,"all":13,"tagged":0}
+PASS  X-C1 命中 1/3/5 只分属 S0/S1/S2 三档  ["1→S0","3→S1","5→S2","8→S2"]
+PASS  X-C2 顿帧 / 震屏 / 粒子 / 音层随命中数递增  {"hitStop":[0,0.055,0.12],"particles":[8,20,60]}
+PASS  X-C3 命中徽标 ×3 / ×5 存在  ["","×3","×5"]
+PASS  X-C4 群体爆裂门槛=3 且同帧合并开关在  3
+PASS  X-C5 连杀边光三段递增 0.24 / 0.34 / 0.46  [0.24,0.34,0.46]
+PASS  X-C6 范围技能 ≥5 种可辨形状（线/域/环/扇…）  {"count":6,"unique":6,"shapes":["line","field","ringband","pull","cone","selfring"]}
+PASS  window.__errors 为空  []
+PASS  控制台无异常事件  []
+
+RESULT 52/52
+
+===== 断言分类汇总 =====
+FUNCTION(功能类·判红)      51/51 PASS
+PERF(负载敏感·只记录)      1/1 OK  （PENDING 0 条不判失败）
+VERDICT: PASS

@@ -1,0 +1,639 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>《烬》数值与战斗数据面板</title>
+<style>
+  :root{
+    --bg:#080b12; --panel:#111725; --panel2:#0d1320; --line:#202a3d;
+    --ink:#e8edf7; --muted:#8b97ad; --dim:#5c6880;
+    --fire:#ff5f3c; --fire2:#ffa347; --blue:#4ea8ff; --green:#42d6a0;
+    --purple:#a78bfa; --red:#ff4d6d; --cyan:#37d4e8;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:
+      radial-gradient(900px 500px at 12% -10%, rgba(255,95,60,.13), transparent 60%),
+      radial-gradient(800px 500px at 92% 0%, rgba(78,168,255,.10), transparent 60%),
+      var(--bg);
+    color:var(--ink); font-family:"Segoe UI","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1400px; margin:0 auto; padding:34px 28px 60px}
+  header{display:flex; align-items:flex-end; justify-content:space-between; gap:20px; flex-wrap:wrap}
+  h1{margin:0; font-size:30px; letter-spacing:.5px}
+  h1 span{color:var(--fire)}
+  .sub{color:var(--muted); font-size:13px; line-height:1.7; margin-top:8px}
+  .stamp{font-size:12px; color:var(--dim); text-align:right; line-height:1.8}
+  .badge{display:inline-block; padding:2px 9px; border:1px solid var(--line); border-radius:999px; color:var(--muted); font-size:11px; margin-left:6px}
+  .kpis{display:grid; grid-template-columns:repeat(6,1fr); gap:12px; margin:26px 0 18px}
+  .kpi{background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line);
+       border-radius:12px; padding:14px 16px; position:relative; overflow:hidden}
+  .kpi:after{content:""; position:absolute; left:0; top:0; width:100%; height:2px;
+       background:linear-gradient(90deg,var(--fire),transparent)}
+  .kpi .k{font-size:11px; color:var(--dim); letter-spacing:.6px}
+  .kpi .v{font-size:24px; font-weight:650; margin-top:6px; font-variant-numeric:tabular-nums}
+  .kpi .v small{font-size:13px; color:var(--muted); font-weight:400; margin-left:3px}
+  .grid{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2)); border:1px solid var(--line);
+        border-radius:14px; padding:16px 18px 12px; min-width:0}
+  .card h2{font-size:14px; margin:0 0 2px; font-weight:600; letter-spacing:.4px}
+  .card .note{font-size:11px; color:var(--dim); margin:0 0 10px}
+  .cvbox{position:relative; width:100%; height:250px}
+  canvas{width:100%; height:100%; display:block; border-radius:8px}
+  .legend{display:flex; gap:14px; flex-wrap:wrap; font-size:11px; color:var(--muted); padding:8px 2px 0}
+  .legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px}
+  .span2{grid-column:1 / -1}
+  table{width:100%; border-collapse:collapse; font-size:12px; font-variant-numeric:tabular-nums}
+  th,td{padding:7px 8px; text-align:right; border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  th{color:var(--dim); font-weight:500; font-size:11px}
+  td.pos{color:var(--green)} td.neg{color:var(--red)} td.eq{color:var(--muted)}
+  .concl{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:12px; margin-top:16px}
+  .cbox{background:rgba(255,255,255,.025); border:1px solid var(--line); border-left:3px solid var(--fire);
+        border-radius:10px; padding:12px 14px; font-size:12.5px; line-height:1.75; color:#cbd5e6}
+  .cbox b{color:var(--fire2); font-weight:600; margin-right:6px}
+  footer{margin-top:28px; color:var(--dim); font-size:11px; line-height:1.9; border-top:1px solid var(--line); padding-top:14px}
+  .hint{color:var(--dim); font-size:11px; margin-top:9px}
+  @media (max-width:1000px){ .kpis{grid-template-columns:repeat(3,1fr)} .grid{grid-template-columns:1fr} .span2{grid-column:auto} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1><span>《烬》</span> 数值与战斗数据面板<span class="badge">离线模拟 · Canvas 2D</span></h1>
+      <div class="sub">从 <code>index_arcane_v2.html</code> 抽取战斗数值，用固定种子跑 N 局事件驱动模拟。<br>
+        零外部请求、图表全部 Canvas 自绘、双击即开。</div>
+    </div>
+    <div class="stamp" id="stamp"></div>
+  </header>
+
+  <section class="kpis" id="kpis"></section>
+
+  <section class="grid">
+    <div class="card">
+      <h2>① 存活曲线</h2>
+      <p class="note">纵轴 = 从开局算起通过第 N 层的比例（含首领房）</p>
+      <div class="cvbox"><canvas id="cvSurvival"></canvas></div>
+      <div class="legend" id="lgSurvival"></div>
+    </div>
+
+    <div class="card">
+      <h2>② 每层承伤分布</h2>
+      <p class="note">实线 = 平均承伤；阴影 = P50~P90 区间（越靠上层越厚）</p>
+      <div class="cvbox"><canvas id="cvDamage"></canvas></div>
+      <div class="legend" id="lgDamage"></div>
+    </div>
+
+    <div class="card">
+      <h2>③ 结晶收入分布</h2>
+      <p class="note">每局入账结晶（清层 3 + 首领宝箱 3 + 房间额外，单局上限 40）</p>
+      <div class="cvbox"><canvas id="cvIncome"></canvas></div>
+      <div class="legend" id="lgIncome"></div>
+    </div>
+
+    <div class="card">
+      <h2>④ 参数敏感度（±10%）</h2>
+      <p class="note">横条 = 该参数 −10% / +10% 时，5 层通关率相对基线的百分点变化</p>
+      <div class="cvbox" style="height:250px"><canvas id="cvSens"></canvas></div>
+      <div class="legend"><span><i style="background:var(--red)"></i>该侧变化使通关率下降</span><span><i style="background:var(--green)"></i>该侧变化使通关率上升</span><span>左侧 = 参数 −10%，右侧 = 参数 +10%</span></div>
+    </div>
+
+    <div class="card">
+      <h2>⑤ 平均清房时间</h2>
+      <p class="note">每个战斗房的平均耗时（含 4 秒接敌开销）</p>
+      <div class="cvbox" style="height:230px"><canvas id="cvClear"></canvas></div>
+      <div class="legend" id="lgClear"></div>
+    </div>
+
+    <div class="card">
+      <h2>⑥ build 使用率</h2>
+      <p class="note">主动选到的魔法 / 科技 / 遗物持有率（开局自带的火球、冰环不计）</p>
+      <div class="cvbox" style="height:230px"><canvas id="cvBuild"></canvas></div>
+      <div class="legend" id="lgBuild"></div>
+    </div>
+
+    <div class="card span2">
+      <h2>敏感度明细</h2>
+      <p class="note">存活率口径：5 层通关率（正式一局）与通过第 10 层率（无尽下潜）</p>
+      <div id="sensTable"></div>
+    </div>
+
+    <div class="card span2">
+      <h2>数据结论</h2>
+      <div class="concl" id="conclusions"></div>
+    </div>
+  </section>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+/* ==========================================================================
+ * 内联数据（由 run.js 注入；本文件不读取任何外部资源）
+ * ========================================================================== */
+window.__SIM_DATA__ = /*__SIM_DATA__*/null;
+</script>
+<script>
+/* ==========================================================================
+ * 面板渲染：全部图表用 Canvas 2D 手绘，无 CDN / 无外部字体
+ * ========================================================================== */
+(function () {
+  'use strict';
+  const D = window.__SIM_DATA__;
+  if (!D) {
+    document.body.innerHTML = '<div style="padding:40px;color:#ff5f3c;font-size:14px">缺少模拟数据：请先运行 node tools/sim_panel/run.js</div>';
+    return;
+  }
+
+  const C = {
+    ink: '#e8edf7', muted: '#8b97ad', dim: '#5c6880', line: '#202a3d',
+    grid: 'rgba(255,255,255,.055)', fire: '#ff5f3c', fire2: '#ffa347',
+    blue: '#4ea8ff', green: '#42d6a0', purple: '#a78bfa', red: '#ff4d6d',
+    cyan: '#37d4e8', panel: '#0d1320'
+  };
+  const PCOL = { novice: C.fire, veteran: C.blue, bot: C.green };
+  const PNAME = { novice: '新手', veteran: '老手', bot: '机器人' };
+  const font = (px, w) => `${w || 400} ${px}px "Segoe UI","Microsoft YaHei",sans-serif`;
+
+  /* ---------- 画布初始化：处理 DPR，返回绘图上下文与逻辑尺寸 ---------- */
+  function fit(cv) {
+    const dpr = Math.max(1, window.devicePixelRatio || 1);
+    const w = cv.clientWidth || 460;
+    const h = cv.clientHeight || 240;
+    cv.width = Math.round(w * dpr);
+    cv.height = Math.round(h * dpr);
+    const ctx = cv.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    cv._w = w; cv._h = h; cv._ctx = ctx;
+    return { ctx, w, h };
+  }
+
+  /* ---------- 通用：坐标轴与网格 ---------- */
+  function frame(ctx, w, h, pad, yMax, yMin, xLabels, opts) {
+    const o = opts || {};
+    ctx.clearRect(0, 0, w, h);
+    const pw = w - pad.l - pad.r;
+    const ph = h - pad.t - pad.b;
+    ctx.save();
+    ctx.font = font(10);
+    ctx.textBaseline = 'middle';
+    // 横向网格 + y 轴刻度
+    const ticks = o.ticks || 4;
+    for (let i = 0; i <= ticks; i += 1) {
+      const t = i / ticks;
+      const y = pad.t + ph * (1 - t);
+      const val = yMin + (yMax - yMin) * t;
+      ctx.strokeStyle = C.grid;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + pw, y); ctx.stroke();
+      ctx.fillStyle = C.dim;
+      ctx.textAlign = 'right';
+      ctx.fillText(o.fmtY ? o.fmtY(val) : Math.round(val), pad.l - 7, y);
+    }
+    // x 轴标签
+    ctx.textAlign = 'center';
+    ctx.fillStyle = C.dim;
+    const step = o.xStep || 1;
+    xLabels.forEach((lab, i) => {
+      if (i % step !== 0 && i !== xLabels.length - 1) return;
+      const x = pad.l + (xLabels.length === 1 ? pw / 2 : pw * i / (xLabels.length - 1));
+      ctx.fillText(lab, x, pad.t + ph + 14);
+    });
+    // 轴线
+    ctx.strokeStyle = C.line;
+    ctx.beginPath(); ctx.moveTo(pad.l, pad.t + ph); ctx.lineTo(pad.l + pw, pad.t + ph); ctx.stroke();
+    return { pw, ph };
+  }
+
+  /* ---------- 折线图 ---------- */
+  function drawLine(cv, series, opts) {
+    const { ctx, w, h } = fit(cv);
+    const pad = { l: 42, r: 16, t: 16, b: 26 };
+    const o = opts || {};
+    const yMax = o.yMax || Math.max(1, ...series.map((s) => Math.max(...s.data)));
+    const p = frame(ctx, w, h, pad, yMax, 0, o.xLabels, { xStep: o.xStep, fmtY: o.fmtY, ticks: 4 });
+    const n = o.xLabels.length;
+    cv._points = [];
+    series.forEach((s) => {
+      const pts = [];
+      s.data.forEach((v, i) => {
+        if (v == null) return;
+        const x = pad.l + p.pw * (n === 1 ? 0.5 : i / (n - 1));
+        const y = pad.t + p.ph * (1 - v / yMax);
+        pts.push([x, y, v, i]);
+      });
+      if (s.area) {
+        ctx.beginPath();
+        ctx.moveTo(pts[0][0], pad.t + p.ph);
+        pts.forEach((q) => ctx.lineTo(q[0], q[1]));
+        ctx.lineTo(pts[pts.length - 1][0], pad.t + p.ph);
+        ctx.closePath();
+        const g = ctx.createLinearGradient(0, pad.t, 0, pad.t + p.ph);
+        g.addColorStop(0, s.color + '55');
+        g.addColorStop(1, s.color + '08');
+        ctx.fillStyle = g; ctx.fill();
+      }
+      ctx.beginPath();
+      pts.forEach((q, i) => (i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])));
+      ctx.strokeStyle = s.color;
+      ctx.lineWidth = s.width || 2;
+      ctx.setLineDash(s.dash ? [5, 4] : []);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      if (s.dots !== false) {
+        pts.forEach((q) => {
+          ctx.beginPath(); ctx.arc(q[0], q[1], 2.6, 0, Math.PI * 2);
+          ctx.fillStyle = C.panel; ctx.fill();
+          ctx.strokeStyle = s.color; ctx.lineWidth = 1.6; ctx.stroke();
+        });
+      }
+      cv._points.push({ name: s.label, color: s.color, pts });
+    });
+    return cv;
+  }
+
+  /* ---------- 柱状图 ---------- */
+  function drawBars(cv, values, opts) {
+    const { ctx, w, h } = fit(cv);
+    const pad = { l: 42, r: 16, t: 16, b: 26 };
+    const o = opts || {};
+    const yMax = o.yMax || Math.max(1, ...values);
+    const p = frame(ctx, w, h, pad, yMax, 0, o.xLabels, { xStep: o.xStep, fmtY: o.fmtY, ticks: 4 });
+    const n = values.length;
+    const gap = o.gap == null ? 2 : o.gap;
+    const bw = Math.max(1, p.pw / n - gap);
+    cv._points = [];
+    const pts = [];
+    values.forEach((v, i) => {
+      const x = pad.l + p.pw * i / n + gap / 2;
+      const bh = p.ph * v / yMax;
+      const y = pad.t + p.ph - bh;
+      const g = ctx.createLinearGradient(0, y, 0, pad.t + p.ph);
+      g.addColorStop(0, o.color || C.fire);
+      g.addColorStop(1, (o.color2 || C.fire) + '40');
+      ctx.fillStyle = g;
+      ctx.fillRect(x, y, bw, bh);
+      pts.push([x + bw / 2, y, v, i]);
+    });
+    // 参考线
+    (o.marks || []).forEach((m) => {
+      const x = pad.l + p.pw * (m.at / n);
+      ctx.strokeStyle = m.color || C.muted;
+      ctx.setLineDash([4, 4]);
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + p.ph); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = m.color || C.muted;
+      ctx.font = font(10, 500);
+      ctx.textAlign = 'left';
+      ctx.fillText(m.label, x + 4, pad.t + 10);
+    });
+    cv._points.push({ name: o.name || '', color: o.color || C.fire, pts, bars: true });
+    return cv;
+  }
+
+  /* ---------- 横向条形图（build / 敏感度） ---------- */
+  function drawHBar(cv, items, opts) {
+    const { ctx, w, h } = fit(cv);
+    const o = opts || {};
+    ctx.clearRect(0, 0, w, h);
+    const pad = { l: o.labelW || 96, r: 54, t: 8, b: 8 };
+    const n = items.length;
+    const rowH = (h - pad.t - pad.b) / n;
+    const maxV = o.maxV || Math.max(1, ...items.map((it) => Math.abs(it.value)));
+    ctx.font = font(11);
+    ctx.textBaseline = 'middle';
+    items.forEach((it, i) => {
+      const y = pad.t + rowH * i + rowH / 2;
+      const barMax = w - pad.l - pad.r;
+      const val = Math.max(0, it.value);
+      const bw = barMax * val / maxV;
+      const color = it.color || C.blue;
+      // 底槽
+      ctx.fillStyle = 'rgba(255,255,255,.045)';
+      ctx.fillRect(pad.l, y - rowH * 0.32, barMax, rowH * 0.64);
+      // 条
+      const g = ctx.createLinearGradient(pad.l, 0, pad.l + bw, 0);
+      g.addColorStop(0, color + 'aa');
+      g.addColorStop(1, color);
+      ctx.fillStyle = g;
+      ctx.fillRect(pad.l, y - rowH * 0.32, Math.max(1, bw), rowH * 0.64);
+      // 名称
+      ctx.fillStyle = C.muted;
+      ctx.textAlign = 'right';
+      ctx.fillText(it.label, pad.l - 8, y);
+      // 数值
+      ctx.fillStyle = C.ink;
+      ctx.textAlign = 'left';
+      ctx.fillText(it.text != null ? it.text : (val * 100).toFixed(1) + '%', pad.l + bw + 8, y);
+    });
+    return cv;
+  }
+
+  /* ---------- 敏感度发散条（-10% / +10% 成对） ---------- */
+  function drawDiverge(cv, rows) {
+    const { ctx, w, h } = fit(cv);
+    ctx.clearRect(0, 0, w, h);
+    const pad = { l: 84, r: 74, t: 20, b: 10 };
+    const n = rows.length;
+    const rowH = (h - pad.t - pad.b) / n;
+    const all = rows.flatMap((r) => [r.low, r.high]).map((v) => Math.abs(v));
+    const maxV = Math.max(1.5, ...all);
+    const mid = pad.l + (w - pad.l - pad.r) * 0.38;
+    const halfW = Math.min((w - pad.l - pad.r) * 0.30, 150);
+    const scale = halfW / maxV;
+
+    // 中线
+    ctx.strokeStyle = C.line;
+    ctx.beginPath(); ctx.moveTo(mid, pad.t - 4); ctx.lineTo(mid, h - pad.b); ctx.stroke();
+    ctx.font = font(10);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = C.dim;
+    ctx.fillText('0', mid, pad.t - 8);
+
+    rows.forEach((r, i) => {
+      const cy = pad.t + rowH * i + rowH / 2;
+      const bh = Math.min(13, rowH * 0.34);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = C.muted;
+      ctx.font = font(11, 500);
+      ctx.fillText(r.label, pad.l - 8, cy);
+      // -10% 侧
+      const lv = r.low;
+      const lw = Math.abs(lv) * scale;
+      ctx.fillStyle = lv < 0 ? C.red : C.green;
+      ctx.fillRect(mid - lw, cy - bh - 2, lw, bh);
+      // +10% 侧
+      const hv = r.high;
+      const hw = Math.abs(hv) * scale;
+      ctx.fillStyle = hv > 0 ? C.green : C.red;
+      ctx.fillRect(mid, cy + 2, hw, bh);
+      // 数值
+      ctx.font = font(10, 500);
+      ctx.textAlign = 'left';
+      const fmt = (v) => (v >= 0 ? '+' : '') + v.toFixed(1) + 'pp';
+      ctx.fillStyle = lv < 0 ? C.red : C.green;
+      ctx.textAlign = 'right';
+      ctx.fillText(fmt(lv), mid - lw - 5, cy - bh / 2 - 2);
+      ctx.fillStyle = hv > 0 ? C.green : C.red;
+      ctx.textAlign = 'left';
+      ctx.fillText(fmt(hv), mid + hw + 5, cy + bh / 2 + 2);
+      // 参数名左侧标记
+      ctx.textAlign = 'left';
+      ctx.fillStyle = C.dim;
+      ctx.font = font(9);
+      ctx.fillText('−10%', mid - halfW - 2, pad.t - 8);
+      ctx.textAlign = 'right';
+      ctx.fillText('+10%', mid + halfW + 2, pad.t - 8);
+    });
+    return cv;
+  }
+
+  /* ---------- 悬停提示 ---------- */
+  function attachTip(cv, fmt) {
+    let hover = null;
+    cv.addEventListener('mousemove', (e) => {
+      if (!cv._points) return;
+      const rect = cv.getBoundingClientRect();
+      const mx = e.clientX - rect.left;
+      const my = e.clientY - rect.top;
+      let best = null;
+      let bd = 1e9;
+      cv._points.forEach((s) => {
+        (s.pts || []).forEach((q) => {
+          const d = Math.abs(q[0] - mx) + Math.abs(q[1] - my) * 0.6;
+          if (d < bd) { bd = d; best = { s, q }; }
+        });
+      });
+      if (best && bd < 34) hover = best; else hover = null;
+      if (cv._redraw) cv._redraw(hover);
+    });
+    cv.addEventListener('mouseleave', () => { hover = null; if (cv._redraw) cv._redraw(null); });
+    cv._drawTip = function (ctx, hover2, w, h) {
+      if (!hover2) return;
+      const q = hover2.q;
+      const text = fmt ? fmt(hover2.s, q) : `${hover2.s.name}  ${q[2]}`;
+      ctx.font = font(11, 500);
+      const tw = ctx.measureText(text).width + 16;
+      const tx = Math.min(w - tw - 4, Math.max(4, q[0] - tw / 2));
+      const ty = Math.max(4, q[1] - 34);
+      ctx.fillStyle = 'rgba(6,9,16,.94)';
+      ctx.strokeStyle = hover2.s.color || C.line;
+      ctx.lineWidth = 1;
+      roundRect(ctx, tx, ty, tw, 24, 6);
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = C.ink;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(text, tx + 8, ty + 12);
+    };
+  }
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+
+  /* ==========================================================================
+   * 数据准备
+   * ========================================================================== */
+  const floors = D.overall.levels.map((l) => l.floor);
+  const xLabels = floors.map((f) => String(f));
+
+  /* KPI 卡片 */
+  const kpis = [
+    { k: '模拟局数', v: D.meta.runs.toLocaleString(), u: '局' },
+    { k: '实际耗时', v: (D.meta.elapsedMs / 1000).toFixed(1), u: '秒' },
+    { k: '5 层通关率', v: (D.overall.pass5 * 100).toFixed(1), u: '%' },
+    { k: '平均通过层', v: D.overall.avgFloor.toFixed(2), u: '层' },
+    { k: '平均每局收入', v: D.overall.income.mean.toFixed(1), u: '结晶' },
+    { k: '平均清房', v: D.overall.avgClearTime.toFixed(1), u: '秒' }
+  ];
+  document.getElementById('kpis').innerHTML = kpis.map((x) =>
+    `<div class="kpi"><div class="k">${x.k}</div><div class="v">${x.v}<small>${x.u}</small></div></div>`
+  ).join('');
+  document.getElementById('stamp').innerHTML =
+    `生成于 ${D.meta.generatedAt.replace('T', ' ').slice(0, 19)}<br>` +
+    `种子 ${D.meta.seed} · ${D.meta.difficulty} · ${D.meta.workers} 线程<br>` +
+    `正式一局 ${D.meta.finalFloor} 层 / 模拟上限 ${D.meta.maxFloor} 层`;
+
+  /* ---------- ① 存活曲线 ---------- */
+  (function () {
+    const series = ['novice', 'veteran', 'bot'].map((id) => ({
+      label: PNAME[id],
+      color: PCOL[id],
+      data: D.profiles[id].levels.map((l) => l.passRate * 100)
+    }));
+    series.push({
+      label: '总体',
+      color: C.muted,
+      dash: true,
+      dots: false,
+      data: D.overall.levels.map((l) => l.passRate * 100)
+    });
+    const cv = document.getElementById('cvSurvival');
+    const draw = (hover) => {
+      drawLine(cv, series, { xLabels, yMax: 100, fmtY: (v) => v.toFixed(0) + '%', xStep: 2 });
+      if (cv._drawTip) cv._drawTip(cv._ctx, hover, cv._w, cv._h);
+    };
+    cv._redraw = draw;
+    draw(null);
+    attachTip(cv, (s, q) => `${s.label} 第 ${q[3] + 1} 层  通过 ${q[2].toFixed(1)}%`);
+    document.getElementById('lgSurvival').innerHTML = series.map((s) =>
+      `<span><i style="background:${s.color}"></i>${s.label}</span>`).join('');
+  })();
+
+  /* ---------- ② 每层承伤分布 ---------- */
+  (function () {
+    const mean = D.overall.levels.map((l) => l.dmgMean);
+    const p50 = D.overall.levels.map((l) => l.dmgP50);
+    const p90 = D.overall.levels.map((l) => l.dmgP90);
+    const series = [
+      { label: 'P90', color: C.fire, data: p90, dots: false, width: 1.4 },
+      { label: '平均', color: C.fire2, data: mean, width: 2.2 },
+      { label: 'P50', color: C.blue, data: p50, dots: false, width: 1.4 }
+    ];
+    const cv = document.getElementById('cvDamage');
+    const yMax = Math.max(20, ...p90) * 1.12;
+    const draw = (hover) => {
+      drawLine(cv, series, { xLabels, yMax, fmtY: (v) => Math.round(v), xStep: 2 });
+      if (cv._drawTip) cv._drawTip(cv._ctx, hover, cv._w, cv._h);
+    };
+    cv._redraw = draw;
+    draw(null);
+    attachTip(cv, (s, q) => `第 ${q[3] + 1} 层 ${s.label}承伤 ${q[2].toFixed(0)}`);
+    document.getElementById('lgDamage').innerHTML = series.map((s) =>
+      `<span><i style="background:${s.color}"></i>${s.label}</span>`).join('');
+  })();
+
+  /* ---------- ③ 收入分布 ---------- */
+  (function () {
+    const hist = D.overall.income.hist;
+    const cv = document.getElementById('cvIncome');
+    const p50 = D.overall.income.p50;
+    const p90 = D.overall.income.p90;
+    const draw = (hover) => {
+      drawBars(cv, hist, {
+        xLabels: hist.map((_, i) => (i % 5 === 0 ? i : '')),
+        color: C.cyan, color2: C.blue,
+        fmtY: (v) => Math.round(v / 1000) + 'k',
+        marks: [
+          { at: p50, color: C.fire2, label: `P50 ${p50}` },
+          { at: p90, color: C.fire, label: `P90 ${p90}` }
+        ]
+      });
+      if (cv._drawTip) cv._drawTip(cv._ctx, hover, cv._w, cv._h);
+    };
+    cv._redraw = draw;
+    draw(null);
+    attachTip(cv, (s, q) => `收入 ${q[3]} 结晶  占 ${(q[2] / D.meta.runs * 100).toFixed(1)}%`);
+    document.getElementById('lgIncome').innerHTML =
+      `<span><i style="background:${C.cyan}"></i>局数分布</span>` +
+      `<span>平均 ${D.overall.income.mean.toFixed(1)} · P50 ${p50} · P90 ${p90} · 上限 40</span>`;
+  })();
+
+  /* ---------- ④ 敏感度发散条 ---------- */
+  (function () {
+    const rows = D.sensitivity.map((p) => {
+      const low = p.points[0];
+      const high = p.points[p.points.length - 1];
+      return {
+        label: p.label,
+        low: (low.pass5 - p.baseValue.pass5) * 100,
+        high: (high.pass5 - p.baseValue.pass5) * 100,
+        lowPass: low.pass5 * 100,
+        highPass: high.pass5 * 100,
+        basePass: p.baseValue.pass5 * 100
+      };
+    }).sort((a, b) => Math.abs(b.low) + Math.abs(b.high) - Math.abs(a.low) - Math.abs(a.high));
+    drawDiverge(document.getElementById('cvSens'), rows);
+
+    // 明细表
+    const th = `<tr><th>参数</th><th>类型</th><th>−10%</th><th>基线</th><th>+10%</th><th>10 层 −10%</th><th>10 层 基线</th><th>10 层 +10%</th><th>平均收入</th></tr>`;
+    const trs = D.sensitivity.map((p) => {
+      const lo = p.points[0];
+      const mi = p.baseValue;
+      const hi = p.points[p.points.length - 1];
+      const cell = (v) => {
+        const d = (v - mi.pass5) * 100;
+        return `<td class="${d > 0.05 ? 'pos' : d < -0.05 ? 'neg' : 'eq'}">${(v * 100).toFixed(1)}% <small>(${d >= 0 ? '+' : ''}${d.toFixed(1)}pp)</small></td>`;
+      };
+      const tag = p.group === '补充'
+        ? `<span style="color:${C.purple};font-size:10px">补充</span>`
+        : `<span style="color:${C.dim};font-size:10px">指定</span>`;
+      return `<tr><td>${p.label}<br><small style="color:${C.dim}">${p.desc}</small></td><td>${tag}</td>` +
+        cell(lo.pass5) + `<td>${(mi.pass5 * 100).toFixed(1)}%</td>` + cell(hi.pass5) +
+        `<td>${(lo.pass10 * 100).toFixed(1)}%</td><td>${(mi.pass10 * 100).toFixed(1)}%</td><td>${(hi.pass10 * 100).toFixed(1)}%</td>` +
+        `<td>${mi.income.toFixed(1)}</td></tr>`;
+    }).join('');
+    document.getElementById('sensTable').innerHTML = `<table>${th}${trs}</table>`;
+  })();
+
+  /* ---------- ⑤ 清房时间 ---------- */
+  (function () {
+    const series = ['novice', 'veteran', 'bot'].map((id) => ({
+      label: PNAME[id], color: PCOL[id],
+      data: D.profiles[id].levels.map((l) => l.clearTime || null)
+    }));
+    const cv = document.getElementById('cvClear');
+    const yMax = Math.max(10, ...series.flatMap((s) => s.data.filter((v) => v != null))) * 1.1;
+    const draw = (hover) => {
+      drawLine(cv, series, { xLabels, yMax, fmtY: (v) => Math.round(v) + 's', xStep: 2 });
+      if (cv._drawTip) cv._drawTip(cv._ctx, hover, cv._w, cv._h);
+    };
+    cv._redraw = draw; draw(null);
+    attachTip(cv, (s, q) => `第 ${q[3] + 1} 层 ${s.label} ${q[2].toFixed(1)} 秒`);
+    document.getElementById('lgClear').innerHTML = series.map((s) =>
+      `<span><i style="background:${s.color}"></i>${s.label}</span>`).join('');
+  })();
+
+  /* ---------- ⑥ build 使用率 ---------- */
+  (function () {
+    const magic = D.overall.ownedMagic
+      .filter((m) => m.id !== 'fireball' && m.id !== 'frost')
+      .slice(0, 7).map((m) => ({
+        label: m.name, value: m.rate, text: (m.rate * 100).toFixed(1) + '%', color: C.fire
+      }));
+    const tech = D.overall.techs.slice(0, 5).map((m) => ({
+      label: m.name, value: m.rate, text: (m.rate * 100).toFixed(1) + '%', color: C.blue
+    }));
+    const relic = D.overall.relics.slice(0, 4).map((m) => ({
+      label: m.name, value: m.rate, text: (m.rate * 100).toFixed(1) + '%', color: C.purple
+    }));
+    drawHBar(document.getElementById('cvBuild'), magic.concat(tech, relic), { labelW: 100, maxV: 0.35 });
+    document.getElementById('lgBuild').innerHTML =
+      `<span><i style="background:${C.fire}"></i>拥有的魔法</span>` +
+      `<span><i style="background:${C.blue}"></i>科技</span>` +
+      `<span><i style="background:${C.purple}"></i>遗物</span>` +
+      `<span>融合达成率 ${(D.overall.fusionRate * 100).toFixed(1)}%（平均 ${D.overall.avgFusions.toFixed(2)} 个/局）</span>`;
+  })();
+
+  /* ---------- 结论 ---------- */
+  document.getElementById('conclusions').innerHTML = D.conclusions.map((c) =>
+    `<div class="cbox"><b>${c.tag}</b>${c.text}</div>`).join('');
+
+  document.getElementById('footer').innerHTML =
+    `口径说明：模拟按“杀一只怪”为阶段推进，不逐帧模拟弹道；命中/闪避由 profile 参数折算。<br>` +
+    `档案：新手（命中 80% / 冷却利用 86% / 闪避 38%）；老手（92% / 96% / 62%）；机器人（94% / 94% / 40%，但不会用无敌帧）。<br>` +
+    `复现：node tools/sim_panel/run.js --runs ${D.meta.runs} --difficulty ${D.meta.difficulty} --seed ${D.meta.seed} --workers ${D.meta.workers}<br>` +
+    `总计 ${D.meta.runs} 局 + 敏感度扫描，用时 ${(D.meta.elapsedMs / 1000).toFixed(2)} 秒（${D.meta.cpu} 核）。`;
+
+  /* ---------- 尺寸变化时重绘 ---------- */
+  let rt = null;
+  window.addEventListener('resize', () => {
+    clearTimeout(rt);
+    rt = setTimeout(() => {
+      document.querySelectorAll('canvas').forEach((cv) => { if (cv._redraw) cv._redraw(null); });
+    }, 120);
+  });
+})();
+</script>
+</body>
+</html>

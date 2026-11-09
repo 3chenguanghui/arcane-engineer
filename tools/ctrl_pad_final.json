@@ -1,0 +1,452 @@
+{
+  "time": "2026-11-08T15:21:55.289Z",
+  "target": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "snapshotMd5Before": "8C7DC978C5F671979F022746F5B67584",
+  "snapshotMd5After": "8C7DC978C5F671979F022746F5B67584",
+  "bytesAfter": 2836186,
+  "asserts": [
+    {
+      "id": "G1",
+      "name": "G1 无手柄基线：connected=false、padKeys 全 false、0.3s 速度<20、#padLegend hidden",
+      "pass": true,
+      "detail": {
+        "connected": false,
+        "keys": {
+          "left": false,
+          "right": false,
+          "up": false,
+          "down": false
+        },
+        "speed": 0,
+        "legendHidden": true,
+        "mode": "playing"
+      }
+    },
+    {
+      "id": "G2",
+      "name": "G2 热插入：0.45s 内 connected=true、name 回显、图例显示且文案含“手柄已连接 / A 普攻 / LT 交互”",
+      "pass": true,
+      "detail": {
+        "connected": true,
+        "name": "Virtual Pad",
+        "legendHidden": false,
+        "textMatched": {
+          "connectedWord": true,
+          "aWord": true,
+          "ltWord": true
+        },
+        "legendText": "手柄已连接 · 左摇杆 移动 · A 普攻 · B 影步 · X 装置 · LB 换相 · RB 融合 · LT 交互",
+        "visibilityDefaultHud": {
+          "exists": true,
+          "hiddenAttr": false,
+          "display": "flex",
+          "visibility": "visible",
+          "opacity": "1",
+          "width": 168,
+          "height": 56,
+          "top": 722,
+          "bottom": 778,
+          "viewportH": 900,
+          "bodyCompact": true
+        },
+        "visibilityAfterHudExpand": {
+          "exists": true,
+          "hiddenAttr": false,
+          "display": "flex",
+          "visibility": "visible",
+          "opacity": "1",
+          "width": 316,
+          "height": 37,
+          "top": 637,
+          "bottom": 674,
+          "viewportH": 900,
+          "bodyCompact": false
+        },
+        "phenomenon": "图例在默认 HUD 下真实可见"
+      }
+    },
+    {
+      "id": "G3",
+      "name": "G3 摇杆移动：axes[0]=0.9 → padKeys.right=true、0.55s 位移 ≥40px",
+      "pass": true,
+      "detail": {
+        "x0": 584.1,
+        "x1": 827.9,
+        "dx": 243.8,
+        "keys": {
+          "left": false,
+          "right": true,
+          "up": false,
+          "down": false
+        },
+        "midSpeed": 413.28,
+        "midKeys": {
+          "left": false,
+          "right": true,
+          "up": false,
+          "down": false
+        }
+      }
+    },
+    {
+      "id": "G4",
+      "name": "G4 死区边界：0.20（<0.24）四向全 false；0.26 → right=true",
+      "pass": true,
+      "detail": {
+        "deadzone": 0.24,
+        "read_0.20": {
+          "left": false,
+          "right": false,
+          "up": false,
+          "down": false
+        },
+        "read_0.26": {
+          "left": false,
+          "right": true,
+          "up": false,
+          "down": false
+        },
+        "speedAfter020": 17.9
+      }
+    },
+    {
+      "id": "G5",
+      "name": "G5 十字键：按下 15 → padKeys.right=true；按下 12 → up=true",
+      "pass": true,
+      "detail": {
+        "dpad15_right": {
+          "left": false,
+          "right": true,
+          "up": false,
+          "down": false
+        },
+        "dpad12_up": {
+          "left": false,
+          "right": false,
+          "up": true,
+          "down": false
+        },
+        "dpad15_buttons": [
+          "15"
+        ]
+      }
+    },
+    {
+      "id": "G6",
+      "name": "G6 A(0)→primary：actions.count+1、last=primary，且至少一个魔法进冷却或 castAnim>0",
+      "pass": true,
+      "detail": {
+        "beforeCount": 0,
+        "afterCount": 1,
+        "last": "primary",
+        "cooldownCount": 2,
+        "castAnim": 0,
+        "activeMagic": "frost"
+      }
+    },
+    {
+      "id": "G7",
+      "name": "G7 B(1)→dash：dashCd 或 dashTime >0、last=dash",
+      "pass": true,
+      "detail": {
+        "dashTime": 0,
+        "dashCd": 1.797,
+        "last": "dash",
+        "count": 2
+      }
+    },
+    {
+      "id": "G8",
+      "name": "G8 X(2)→device：last=device（未解锁时动作仍计数、无实际效果，记录 isUnlocked 与现象）",
+      "pass": true,
+      "detail": {
+        "beforeCount": 2,
+        "afterCount": 3,
+        "last": "device",
+        "isUnlocked_device": false,
+        "deviceCooldown": 0,
+        "phenomenon": "装置未解锁：动作已计数但 castDevice 被 isUnlocked 拦截，deviceCooldown=0"
+      }
+    },
+    {
+      "id": "G9",
+      "name": "G9 Y(3)→weapon：state.weapon.stats.swings +1、last=weapon",
+      "pass": false,
+      "detail": {
+        "beforeSwings": 0,
+        "afterSwings": 0,
+        "last": "weapon",
+        "weaponCdAfter": 0,
+        "WEAPON_CONFIG_enabled": false,
+        "meta_weaponsEnabled": true,
+        "weaponId": "dagger",
+        "phenomenon": "武器系统代码级总开关关闭（WEAPON_CONFIG.enabled=false，X 批裁决），last=weapon 但 weaponSwingNow 未执行，swings 保持 0"
+      }
+    },
+    {
+      "id": "G10",
+      "name": "G10 LB(4)→swap、RB(5)→fuse：分别记录 last 与是否真的换相/融合（未解锁时只记 last）",
+      "pass": true,
+      "detail": {
+        "swap": {
+          "pass": true,
+          "last": "swap",
+          "count": 5,
+          "isUnlocked_parallel": false,
+          "focusBefore": 0,
+          "focusAfter": 0,
+          "switchCdAfter": 0,
+          "phenomenon": "并联未解锁：只计数不换相，focus 保持 0"
+        },
+        "fuse": {
+          "pass": true,
+          "last": "fuse",
+          "count": 6,
+          "isUnlocked_fusion": false,
+          "fusionsBefore": 0,
+          "fusionsAfter": 0,
+          "phenomenon": "融合未解锁：只计数不融合，融合数保持 0"
+        }
+      }
+    },
+    {
+      "id": "G11",
+      "name": "G11 LT(6)→descend、RT(7)→skilltree：两个方向都测，last 正确",
+      "pass": true,
+      "detail": {
+        "lt": {
+          "pass": true,
+          "last": "descend",
+          "count": 7,
+          "modeAfter": "playing"
+        },
+        "rt": {
+          "pass": true,
+          "last": "skilltree",
+          "count": 8,
+          "modeAfter": "skilltree",
+          "modeAfterSecondPress": "playing"
+        }
+      }
+    },
+    {
+      "id": "G12",
+      "name": "G12 模拟扳机边界：buttons[6]={pressed:false,value:0.65} → actions.count 是否变化（不变即 FAIL）",
+      "pass": true,
+      "detail": {
+        "beforeCount": 9,
+        "afterCount": 10,
+        "last": "descend",
+        "connected": true,
+        "pressedRead": true,
+        "injected": {
+          "pressed": false,
+          "value": 0.65
+        },
+        "phenomenon": "模拟量 0.65 触发了动作计数"
+      }
+    },
+    {
+      "id": "G13",
+      "name": "G13 长按 A 0.8s：动作只触发 1 次（按下沿检测）",
+      "pass": true,
+      "detail": {
+        "before": 11,
+        "after450ms": 12,
+        "after800ms": 12,
+        "last": "primary"
+      }
+    },
+    {
+      "id": "G14",
+      "name": "G14 热拔（clearFake）：0.4s 内 padKeys 全 false、角色停走、图例隐藏；是否出现 toast/提示",
+      "pass": true,
+      "detail": {
+        "connected": false,
+        "keys": {
+          "left": false,
+          "right": false,
+          "up": false,
+          "down": false
+        },
+        "speedWhileUnplugged": 0,
+        "legendHidden": true,
+        "speedBeforeUnplug": 0,
+        "cleanedStaleToast": {
+          "pendingToast": null,
+          "hintVisible": false
+        },
+        "toastVisible": true,
+        "toastText": "手柄已断开 · 已自动切回键鼠操作",
+        "toastClass": "toast is-on is-warn",
+        "phenomenon": "断连后有提示：手柄已断开 · 已自动切回键鼠操作"
+      }
+    },
+    {
+      "id": "G15",
+      "name": "G15 断连后键盘不受影响：handleKeyDown w → state.keys.up=true，handleKeyUp → false",
+      "pass": true,
+      "detail": {
+        "down": true,
+        "upAfter": false
+      }
+    },
+    {
+      "id": "G18",
+      "name": "G18 手柄暂停：按 8（rules）→ state.mode 变 rules；再按 8 → 关闭回 playing",
+      "pass": true,
+      "detail": {
+        "modeAfterFirstPress": "rules",
+        "modeAfterSecondPress": "playing",
+        "lastAction": "rules"
+      }
+    },
+    {
+      "id": "G19",
+      "name": "G19 手柄设置：按 11（settings）→ 面板打开；再按 11 → 关闭",
+      "pass": true,
+      "detail": {
+        "modeAfterFirstPress": "settings",
+        "panelOpenDom": {
+          "exists": true,
+          "isOpen": true
+        },
+        "modeAfterSecondPress": "playing",
+        "lastAction": "settings"
+      }
+    },
+    {
+      "id": "G20",
+      "name": "G20 手柄与键盘不互斥：键盘 d + 手柄 up 同时 true；拔手柄后键盘 right 仍 true",
+      "pass": true,
+      "detail": {
+        "whileBoth": {
+          "keyboardRight": true,
+          "padUp": true
+        },
+        "afterUnplug": {
+          "keyboardRight": true,
+          "padUp": false,
+          "connected": false
+        }
+      }
+    },
+    {
+      "id": "G16",
+      "name": "G16 奖励三选一/四选一：临时 state.mode=reward，依次按 A/B/X/Y/LB/RB，chooseRewardByIndex 是否被调用",
+      "pass": true,
+      "detail": {
+        "panel": {
+          "mode": "reward",
+          "options": 4,
+          "cards": 4,
+          "layerVisible": true
+        },
+        "wrapWorks": true,
+        "totalRewardCalls": 2,
+        "finalMode": "playing",
+        "presses": [
+          {
+            "button": 0,
+            "last": "primary",
+            "mode": "reward",
+            "rewardCalls": 1
+          },
+          {
+            "button": 1,
+            "last": "dash",
+            "mode": "playing",
+            "rewardCalls": 2
+          },
+          {
+            "button": 2,
+            "last": "device",
+            "mode": "playing",
+            "rewardCalls": 2
+          },
+          {
+            "button": 3,
+            "last": "weapon",
+            "mode": "playing",
+            "rewardCalls": 2
+          },
+          {
+            "button": 4,
+            "last": "swap",
+            "mode": "playing",
+            "rewardCalls": 2
+          },
+          {
+            "button": 5,
+            "last": "fuse",
+            "mode": "playing",
+            "rewardCalls": 2
+          }
+        ],
+        "phenomenon": "手柄按钮成功触发选卡，共 2 次"
+      }
+    },
+    {
+      "id": "G17",
+      "name": "G17 结算界面：临时 state.mode=result，依次按 A/Start(9)/B，restartRun 是否被调用",
+      "pass": true,
+      "detail": {
+        "panel": {
+          "mode": "result",
+          "layerVisible": true,
+          "restartButton": true
+        },
+        "wrapWorks": true,
+        "totalRestartCalls": 1,
+        "presses": [
+          {
+            "button": 0,
+            "modeBefore": "result",
+            "last": "",
+            "modeAfter": "playing",
+            "restartCalls": 1
+          },
+          {
+            "button": 9,
+            "modeBefore": "playing",
+            "last": "start",
+            "modeAfter": "playing",
+            "restartCalls": 1
+          },
+          {
+            "button": 1,
+            "modeBefore": "playing",
+            "last": "dash",
+            "modeAfter": "playing",
+            "restartCalls": 1
+          }
+        ],
+        "phenomenon": "手柄成功触发重开，共 1 次"
+      }
+    }
+  ],
+  "extraProbes": [
+    {
+      "id": "P4.trigger_value_0.65",
+      "detail": {
+        "beforeCount": 10,
+        "afterCount": 11,
+        "delta": 1,
+        "last": "descend",
+        "pressedRead": true
+      }
+    },
+    {
+      "id": "P4.trigger_value_0.40",
+      "detail": {
+        "beforeCount": 11,
+        "afterCount": 11,
+        "delta": 0,
+        "last": "descend",
+        "pressedRead": false
+      }
+    }
+  ],
+  "passCount": 19,
+  "total": 20
+}

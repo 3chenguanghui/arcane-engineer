@@ -1,0 +1,391 @@
+{
+  "port": 9584,
+  "asserts": [
+    {
+      "name": "R1 8 条词缀都有权重计划；5 条高收益房的每一个都带真实代价（更多敌人或血税）",
+      "pass": true,
+      "detail": {
+        "missingWeights": [],
+        "valueCount": 5,
+        "badValue": [],
+        "noteEmpty": [],
+        "noValueMods": [
+          "overpressure",
+          "chillWave",
+          "deathZone"
+        ]
+      }
+    },
+    {
+      "name": "R2 同种子换词缀：淘金层精英房显著多于死域层（权重真的进了生成结果）",
+      "pass": true,
+      "detail": {
+        "seed": 20261107,
+        "floor": 6,
+        "eliteGold": 3,
+        "eliteDeath": 2,
+        "goldCounts": {
+          "start": 1,
+          "battle": 1,
+          "elite": 3,
+          "shop": 1,
+          "survival": 1,
+          "chest": 1,
+          "boss": 1
+        },
+        "deathCounts": {
+          "start": 1,
+          "battle": 1,
+          "elite": 2,
+          "chest": 1,
+          "curse": 1,
+          "survival": 1,
+          "shop": 1,
+          "boss": 1
+        }
+      }
+    },
+    {
+      "name": "R3 同种子 + 同词缀重复进入：房型 / 敌人数量 / 分数 / 标记完全一致（可预测）",
+      "pass": true,
+      "detail": {
+        "identical": true,
+        "rooms": 9,
+        "first": [
+          {
+            "id": 0,
+            "type": "start",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 0
+          },
+          {
+            "id": 1,
+            "type": "battle",
+            "enemyCount": 5,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 24
+          },
+          {
+            "id": 2,
+            "type": "elite",
+            "enemyCount": 4,
+            "routeExtra": 1,
+            "tag": "淘金精英",
+            "score": 66
+          },
+          {
+            "id": 3,
+            "type": "elite",
+            "enemyCount": 5,
+            "routeExtra": 1,
+            "tag": "淘金精英",
+            "score": 66
+          },
+          {
+            "id": 4,
+            "type": "shop",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 14
+          },
+          {
+            "id": 5,
+            "type": "survival",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 44
+          },
+          {
+            "id": 6,
+            "type": "elite",
+            "enemyCount": 5,
+            "routeExtra": 1,
+            "tag": "淘金精英",
+            "score": 66
+          },
+          {
+            "id": 7,
+            "type": "chest",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 40
+          },
+          {
+            "id": 8,
+            "type": "boss",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 0
+          }
+        ],
+        "second": [
+          {
+            "id": 0,
+            "type": "start",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 0
+          },
+          {
+            "id": 1,
+            "type": "battle",
+            "enemyCount": 5,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 24
+          },
+          {
+            "id": 2,
+            "type": "elite",
+            "enemyCount": 4,
+            "routeExtra": 1,
+            "tag": "淘金精英",
+            "score": 66
+          },
+          {
+            "id": 3,
+            "type": "elite",
+            "enemyCount": 5,
+            "routeExtra": 1,
+            "tag": "淘金精英",
+            "score": 66
+          },
+          {
+            "id": 4,
+            "type": "shop",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 14
+          },
+          {
+            "id": 5,
+            "type": "survival",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 44
+          },
+          {
+            "id": 6,
+            "type": "elite",
+            "enemyCount": 5,
+            "routeExtra": 1,
+            "tag": "淘金精英",
+            "score": 66
+          },
+          {
+            "id": 7,
+            "type": "chest",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 40
+          },
+          {
+            "id": 8,
+            "type": "boss",
+            "enemyCount": 0,
+            "routeExtra": 0,
+            "tag": null,
+            "score": 0
+          }
+        ]
+      }
+    },
+    {
+      "name": "R4 同种子换词缀：路线收益排序真的变了（同一批 room id 的位置发生移动，第一优先的分数也不同）",
+      "pass": true,
+      "detail": {
+        "movedPositions": 8,
+        "totalRooms": 9,
+        "topGold": "2:elite@66",
+        "topDeath": "2:elite@46",
+        "orderGold": [
+          "2:elite@66",
+          "3:elite@66",
+          "6:elite@66",
+          "5:survival@44",
+          "7:chest@40",
+          "1:battle@24",
+          "4:shop@14",
+          "0:start@0",
+          "8:boss@0"
+        ],
+        "orderDeath": [
+          "2:elite@46",
+          "6:elite@46",
+          "5:survival@44",
+          "3:chest@40",
+          "1:battle@24",
+          "7:shop@14",
+          "0:start@0",
+          "4:curse@0",
+          "8:boss@0"
+        ],
+        "orderCalm": [
+          "3:elite@56",
+          "6:elite@56",
+          "5:survival@44",
+          "7:chest@40",
+          "1:battle@24",
+          "2:battle@24",
+          "4:shop@14",
+          "0:start@0",
+          "8:boss@0"
+        ]
+      }
+    },
+    {
+      "name": "R5/R6 小地图与全屏地图都画出高收益标记，数量与 routeTag 房数一致",
+      "pass": true,
+      "detail": {
+        "tagged": 3,
+        "minimap": 3,
+        "fullMap": 3,
+        "modColor": "#ffd166",
+        "list": [
+          {
+            "id": 0,
+            "type": "start",
+            "tag": false
+          },
+          {
+            "id": 1,
+            "type": "battle",
+            "tag": false
+          },
+          {
+            "id": 2,
+            "type": "elite",
+            "tag": true
+          },
+          {
+            "id": 3,
+            "type": "elite",
+            "tag": true
+          },
+          {
+            "id": 4,
+            "type": "shop",
+            "tag": false
+          },
+          {
+            "id": 5,
+            "type": "survival",
+            "tag": false
+          },
+          {
+            "id": 6,
+            "type": "elite",
+            "tag": true
+          },
+          {
+            "id": 7,
+            "type": "chest",
+            "tag": false
+          },
+          {
+            "id": 8,
+            "type": "boss",
+            "tag": false
+          }
+        ],
+        "shotFull": 410184,
+        "shotMini": 1134179
+      }
+    },
+    {
+      "name": "R7 代价真实生效：淘金精英房每房 +1 敌人；守卫宝箱比普通宝箱多给结晶，但开箱扣 12% 最大生命",
+      "pass": true,
+      "detail": {
+        "eliteRooms": 3,
+        "extraSum": 3,
+        "allExtra": true,
+        "hpMax": 100,
+        "plain": {
+          "crystals": 1,
+          "hpLoss": 0
+        },
+        "guarded": {
+          "crystals": 2,
+          "hpLoss": 12
+        },
+        "expectTax": 12
+      }
+    },
+    {
+      "name": "R8 每个高收益房型都有代价，且净收益仍高于基础房型（高风险高回报，不是纯白给）",
+      "pass": true,
+      "detail": {
+        "rows": [
+          {
+            "mod": "richVein",
+            "type": "chest",
+            "base": 40,
+            "score": 56,
+            "cost": 0.12,
+            "hasCost": true,
+            "stillBetter": true
+          },
+          {
+            "mod": "calmField",
+            "type": "elite",
+            "base": 46,
+            "score": 56,
+            "cost": 0.2,
+            "hasCost": true,
+            "stillBetter": true
+          },
+          {
+            "mod": "goldRush",
+            "type": "elite",
+            "base": 46,
+            "score": 66,
+            "cost": 0.2,
+            "hasCost": true,
+            "stillBetter": true
+          },
+          {
+            "mod": "frenzy",
+            "type": "elite",
+            "base": 46,
+            "score": 66,
+            "cost": 0.2,
+            "hasCost": true,
+            "stillBetter": true
+          },
+          {
+            "mod": "overclock",
+            "type": "elite",
+            "base": 46,
+            "score": 56,
+            "cost": 0.2,
+            "hasCost": true,
+            "stillBetter": true
+          }
+        ],
+        "allCost": true,
+        "allBetter": true
+      }
+    },
+    {
+      "name": "R9 全流程无页面异常",
+      "pass": true,
+      "detail": {
+        "errors": []
+      }
+    }
+  ],
+  "pageErrors": [],
+  "screenshotBytes": 1117396,
+  "verdict": "PASS"
+}

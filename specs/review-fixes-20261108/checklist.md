@@ -1,0 +1,32 @@
+# 验收清单 · 审查整改（review-fixes-20261108）
+
+- [x] 主文件零改动（大小 2,693,678 / mtime 2026-11-08 18:05:23 / SHA256 92B649BC…477E6）
+- [x] `P1_CATEGORY_META` 键集为 `boss/melee/ranged/env/self/other`，无 `ground`、无 `collapse`
+- [x] `p1CategoryOf({kind:'hazard'}) === 'env'`；带 `bossKind` 仍为 `boss`
+- [x] 六分类各有真实生产者函数（见 REVIEW_FIX_REPORT 审计表）
+- [x] `onboardReturningPlayer()` 只读 `state.onboardBaseline`，无基线返回 true
+- [x] 新号 `showFloor(5)` 后基线 `bestFloor=0`、seen 未播种、事件仍可触发
+- [x] `ONBOARD_VERDICT_LABEL.boss === '被首领（含贴身）'`，boss 判决含「贴身接触 X 点（Y%）」
+- [x] 首领贴身子计数只统计 `cat==='boss' && kind==='contact'`，不新增分类
+- [x] 帮助速查现场为 `[data-quickref-step]` 5 行，序号 `1..5`
+- [x] 设置页回顾显示「事件 N · verb」，不再出现「第 N 层 · 低血」
+- [x] 调试 `steps` 字段为 `n`，无 `floor`
+- [x] 副本 `arcane_syntax` 通过
+- [x] `reviewfix_onboard_test.js` PASS
+- [x] `reviewfix_death_test.js` PASS
+- [x] `arcane_onboard.js` 31/31 PASS，已知红 0 条
+- [x] 「第 1 层 2 只」断言已改为设计值 3，并写明「2 是旧版残留」
+- [x] `onboardTick()` 总开关门禁：`set({enabled:false})` 后队列不再出队；断言「关闭后不出队 / 队列仍挂起 / 重开后队列继续」
+- [x] 已知红门禁：四要素（name/reason/date/reviewCondition）缺一即按 FAIL，孤儿条目同按 FAIL
+- [x] 已知红新增必须显式批准：未批准打印 `KNOWN-RED ADDED` + 退出码 2；`--allow-known-red-add` 才写入 `approved`
+- [x] 已知红数量行固定「已知红 N 条（上轮 M 条）」，N>M 打印 ▲ 新增；门禁拦下时不回写 baseline
+- [x] 门禁自检实测：未批准 → exitCode 2；缺 reviewCondition → FAIL；批准后 approved=[A]、baseline=1、exitCode=1
+- [x] `death_parity.js` 扩到每页 750 个**不同场景**（HP 20–239、敌人 2–4 只、站位逐局变化），两页注入同一张表
+- [x] `death_parity.js` 固定种子接管 `Math.random`，房间几何一致；逐局比对（死亡/死因），750/750 一致、差异 0
+- [x] 粘贴顺序已写入两份补丁文档与报告：教学第 1 份、归因第 2 份，一份一验
+- [x] `arcane_playthrough.js` 23/23 PASS
+- [x] `arcane_help.js` 16/16 PASS
+- [x] 旧脚本改动逐处写明「改前/改后/理由」，未混入补丁文档
+- [x] `_ac_new_arcane_help.js` 登记为不存在，未虚构改动
+- [x] 两份 v2 补丁文档每块带唯一锚点与回退动作
+- [x] 自检副本在完成后删除

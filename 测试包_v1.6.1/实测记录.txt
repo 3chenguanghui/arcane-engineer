@@ -1,0 +1,123 @@
+《烬》v1.6.1 · 可测试交付包 · 实测记录
+时间：2026-11-08（Asia/Shanghai）
+
+发布包（自检.html 的游戏源）：
+  dist\emberfall_v1.6.1\烬_v1.6.1.html
+  LEN=2711040  MD5=23194ECC5F7733054C4E511476B885C7（本包读取后未变）
+
+当前主文件（补丁目标，21:13 由发布线更新）：
+  index_arcane_v2.html
+  LEN=2711566  MD5=12E7D7C03232EC484AB0196DE064DB67（本包只读，未写入）
+  说明：本包开始验证时主文件还是 23194E…（=发布包字节），验证中途被发布线改为 12E7D7…，
+        因此补丁在两个字节上都做了实测（见第二节 5.1 / 5.2）。
+
+====================================================================
+一、自检.html（v1.6.1 原字节 + 尾部自检脚本）
+====================================================================
+构建参数：
+  SRC_LEN=2711040
+  OUT_LEN=2725936（自检.html）
+  HARNESS_LEN=14896（追加的自检脚本）
+  INSERT_AT=2711022（最后一个 </body> 字节位置）
+  OUT_MD5=CA7944023F9149F3C5566F270D14EA5B
+  重复构建两次 MD5 一致（幂等=true）
+字节一致性（拆回两段原字节分别算 MD5）：
+  PREFIX_MATCH=true (9BD9CFCF6D10D172C1E0A8F81068B930)
+  SUFFIX_MATCH=true (len=18)
+  （即：除插入的自检脚本外，游戏部分字节与 v1.6.1 完全一致）
+
+实跑（1 个无头 Edge，串行；等前一个无响应残留进程退出后才启动）：
+  SELFCHECK-DONE=true
+  SELFCHECK-MS=2376
+  PASS | ① 页面加载 | readyState=complete | 标题可见=true | 画布=true | 调试口=true
+  PASS | ② 版本一致 | 配置版本=1.6.1 | 标题页显示=v1.6.1 | 标签页=烬 · Emberfall
+  PASS | ③ 进入第 1 层 | 开局返回=true | 模式=playing | 楼层=1 | 房间=5 | 敌人=8 | 生命=100
+  PASS | ④ 键盘操作 | 按 W 后 state.keys.up=true（移动输入已接上）
+  PASS | ⑤ 层数推进 | 下楼返回=true | 楼层=2 | 房间=5 | 敌人=10 | bestFloor=2 | 奥能回满=true
+  PASS | ⑥ 存档读写 | 写入后存档结晶=7 | 重新读取=7 | 存档字节=1646
+  PASS | ⑦ 设置项生效 | 原值=false → 切换后存档=true | 开关显示=true
+  PASS | ⑧ 无外部请求 | 资源条目=0 | 外部 http(s) 请求=0
+  PASS | ⑨ 无 console 错误 | 捕获到 0 条错误
+  PASS | ⑩ 开发者开关默认关 | 正式包未加载 ?dev=1 的开发者开关（符合发布要求）
+  SELFCHECK-SUMMARY=全部通过：10/10 项，用时 2376 ms。可以放心交付。
+  CDP-ERRORS=0
+  SELFCHECK: PASS
+
+存档还原验证（自检期间临时把结晶 +7、推进到第 2 层、打开色盲开关）：
+  LS-AFTER={"count":1,"keys":["arcane_rogue_meta"]}
+  META-AFTER={"crystals":0,"bestFloor":1,"runs":0,"colorblind":false,"perfMode":false}
+  说明：唯一残留的 arcane_rogue_meta 是游戏启动时自己写的默认档（非测试产物）；
+        测试造成的 +7 结晶 / bestFloor=2 / colorblind=true 均已还原。
+
+====================================================================
+二、开发者开关补丁（?dev=1）—— 只应用在副本上验证，已删除副本
+====================================================================
+5.1 应用（v1.6.1 发布包字节）
+  TARGET_MD5（应用前现场读取）=23194ECC5F7733054C4E511476B885C7（与编写时快照一致）
+  应用结果：
+  MAIN_LEN=2711040
+  MAIN_MD5=23194ECC5F7733054C4E511476B885C7
+  PATCH_LEN=7103
+  ANCHOR_FOUND=true（锚点 installDebugApi()，1 处，无行号依赖）
+  OUT_LEN=2719247（副本）
+  OUT_MD5=0C1A1D8889604AFCB79B0DF7B9906580（副本，非发布件）
+  MAIN_MD5_MATCH_TARGET=true
+
+实跑（1 个无头 Edge，串行）：
+  PASS | D0 默认关闭 | __devMode=undefined | devPanel=0 | 按] 层数 1→1 | 引导错误=0
+  PASS | D1 ?dev=1 生效 | __devMode=object | panel=1 | 面板含DEV=true
+  PASS | D1b 开局正常 | mode=playing | floor=1 | hp=100
+  PASS | D2 跳层到 6（首领层） | floor=6 | 首领层=true | 首领=true(机械暴君) | 敌人=16 | 房间=5
+  PASS | D3 键盘 ] 跳层 | 按 ] 后 floor=7（期望 7）
+  PASS | D4 回血回蓝 | hp=100/100 | aether=100/100
+  PASS | D5 结晶 +1000 | 内存 0→1000 | 存档=1000
+  PASS | D6 天赋预设循环 | 生存满(8项) → 输出满(8项) → 经济满(8项) → 全部满(30项,全满=true) → 清空(0项)
+  PASS | D7 无 console 错误 & 下楼正常 | CDP错误=0 | 下楼=true floor=8 | 页面错误=0
+  DEV-PATCH: PASS (9/9)
+
+5.2 主文件被发布线更新后，复验（目标改读当前字节）
+  TARGET_MD5（应用前现场读取）=12E7D7C03232EC484AB0196DE064DB67
+  应用结果：
+    MAIN_LEN=2711566
+    MAIN_MD5=12E7D7C03232EC484AB0196DE064DB67
+    PATCH_LEN=7103
+    OUT_LEN=2719773（副本）
+    OUT_MD5=8F9A1555BB988D2491813DE476CA14EC（副本，非发布件）
+  PRE=12E7D7C03232EC484AB0196DE064DB67  POST=12E7D7C03232EC484AB0196DE064DB67  STABLE=True
+  （即：验证前后主文件字节未变，本包确实只读）
+  实跑（1 个无头 Edge，串行）：
+  PASS | D0 默认关闭 | __devMode=undefined | panel=0 | 按] 1→1 | 版本=1.6.1
+  PASS | D1 ?dev=1 生效 | __devMode=object | panel=1 | 面板含DEV=true
+  PASS | D1b 开局正常 | mode=playing | floor=1 | hp=100
+  PASS | D2 跳层到 6（首领层） | floor=6 | 首领层=true | 首领=true(机械暴君) | 敌人=22 | 房间=5
+  PASS | D3 键盘 ] 跳层 | 按 ] 后 floor=7（期望 7）
+  PASS | D4 回血回蓝 | hp=100/100 | aether=100/100
+  PASS | D5 结晶 +1000 | 内存 0→1000 | 存档=1000
+  PASS | D6 天赋预设循环 | 升级数 8 → 8 → 8 → 30（全满=true） → 0
+  PASS | D7 无 console 错误 & 下楼正常 | CDP错误=0 | 下楼=true floor=8 | 页面错误=0
+  DEV-PATCH: PASS (9/9)
+
+====================================================================
+三、说明
+====================================================================
+- 本轮没有做性能测量，没有并发浏览器；功能验证均为单实例串行。
+- 主文件没有由本包写入：本包对 index_arcane_v2.html 只做读取。验证期间该文件被发布线
+  从 23194E…（2,711,040 B）更新为 12E7D7…（2,711,566 B），因此补丁在两个字节版本上都
+  做了完整实测（5.1 / 5.2 均为 9/9）。
+- 最终粘贴时 MD5 以现场 Get-FileHash 结果为准；若与 12E7D7… 不同，说明主文件又被更新过，
+  锚点仍应存在（锚点用函数签名 installDebugApi()，不依赖行号），但需重新读 TARGET_MD5。
+- 副本 dev_copy.html 与全部临时脚本、日志已删除，交付目录只保留 4 个文件。
+
+====================================================================
+四、测试指引.html 打开验证（单实例无头 Edge，file:// 本机）
+====================================================================
+  PASS | G1 页面加载 | readyState=complete
+  PASS | G2 标题与 H1 | title=烬 v1.6.1 · 测试指引
+  PASS | G3 分档齐全 | 含3分钟=true 含15分钟=true
+  PASS | G4 步骤数量 | 步骤=29 勾选框=29
+  PASS | G5 勾选可交互 | 点击前=false 点击后=true
+  PASS | G6 无外链 | 外链=0 外部资源=0
+  PASS | G7 首领名与运行时一致 | 含机械暴君=true
+  PASS | G8 无 console 错误 | 错误=0
+  GUIDE-CHECK: PASS (8/8)
+  说明：步骤 29 = 快速验 9 + 完整验 20（A1-A4 / B1-B5 / C1-C5 / D1-D3 / E1-E3）。

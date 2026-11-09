@@ -1,0 +1,210 @@
+/* ============================================================
+   烬 · 技能视觉补丁 · 卡面反馈层（skill-fx.css）
+   ------------------------------------------------------------
+   作用域：body.skillfx。移除这个类名 = 卡面立刻回到原样。
+   不改任何战斗数值、不改 S0/S1/S2 演出分级参数、不新增 DOM。
+   所有动画只做 transform / opacity / box-shadow，走合成层。
+   配套脚本：skill-fx.js（命名空间 SKILLFX）
+   ============================================================ */
+
+/* ---------- 0. 状态变量：元素色由 JS 写入，缺省紫色 ---------- */
+body.skillfx .mini-card {
+  --sfx-c: #b085ff;                       /* 技能元素主色（火橙 / 冰蓝 / 雷青 / 毒绿 / 虚空紫） */
+  --sfx-c-soft: rgba(176, 133, 255, 0.26);/* 同色低透明度，用于柔光 */
+  --sfx-line: rgba(120, 190, 255, 0.34);  /* 元素色描边 */
+  --sfx-ok: #55f0b0;                      /* “可用”状态的小绿点 */
+  --sfx-cda: 0deg;                        /* 冷却环指针角度（JS 每 50ms 写一次） */
+}
+
+/* ---------- 1. 可用但没按：左下角一颗 4px 绿点 ----------
+   与“冷却中”（有环 + 暗罩）、“缺能”（琥珀字）形成一眼可分的三态。 */
+body.skillfx .mini-card:not(.is-locked):not(.is-cooling):not(.sfx-aether) .m-name::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: var(--sfx-ok);
+  box-shadow: 0 0 6px rgba(85, 240, 176, 0.62);
+  vertical-align: 2px;
+}
+
+/* ---------- 2. 按下：卡面下压 1px + 元素色描边 ---------- */
+body.skillfx .mini-card.sfx-press {
+  transform: translateY(1px) scale(0.985);
+  border-color: var(--sfx-c);
+  box-shadow: 0 0 0 1px var(--sfx-line), 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+body.skillfx .mini-card.sfx-press::after {
+  opacity: 1;
+  background: radial-gradient(circle at 50% 110%, var(--sfx-c-soft), transparent 68%);
+}
+
+/* ---------- 3. 冷却开始：一次蓝色“落闸”脉冲 ----------
+   和“充能完毕”的金色回弹成对出现，玩家能听/看到周期两端的两个节点。 */
+body.skillfx .mini-card.sfx-coolstart {
+  animation: sfxCoolStart 0.34s var(--ease, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+@keyframes sfxCoolStart {
+  0% {
+    box-shadow: 0 0 0 0 rgba(120, 200, 255, 0.55), inset 0 0 0 1px rgba(120, 200, 255, 0.5);
+    filter: brightness(1.16);
+  }
+  100% {
+    box-shadow: 0 0 0 8px rgba(120, 200, 255, 0), inset 0 0 0 1px rgba(120, 200, 255, 0);
+    filter: brightness(0.92);
+  }
+}
+
+/* ---------- 4. 冷却进度：环形刻度 + 指针 + 自下而上的扫描边界 ----------
+   原来只有一条 conic 弧 + 变暗；现在加 12 格刻度和一根指针，
+   远看是“表”，近看能读出剩余比例。 */
+body.skillfx .mini-card.is-cooling .m-ring {
+  background: conic-gradient(from 0deg,
+    var(--sfx-c) 0 var(--sfx-cda),
+    rgba(120, 160, 200, 0.16) var(--sfx-cda) 360deg);
+  box-shadow: 0 0 0 1px rgba(150, 205, 255, 0.28), 0 0 10px var(--sfx-c-soft);
+}
+body.skillfx .mini-card.is-cooling .m-ring::before {
+  content: "";
+  position: absolute;
+  left: calc(50% - 1px);
+  top: -3px;
+  width: 2px;
+  height: calc(50% + 3px);
+  background: #ffffff;
+  box-shadow: 0 0 5px var(--sfx-c);
+  transform-origin: 50% 100%;
+  transform: rotate(var(--sfx-cda));
+}
+body.skillfx .mini-card.is-cooling .m-ring::after {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  background: repeating-conic-gradient(rgba(170, 215, 255, 0.55) 0 2deg, transparent 2deg 30deg);
+  -webkit-mask: radial-gradient(circle, transparent 8px, #000 8px 9.5px, transparent 9.5px);
+  mask: radial-gradient(circle, transparent 8px, #000 8px 9.5px, transparent 9.5px);
+  pointer-events: none;
+}
+body.skillfx .mini-card.is-cooling .m-cd {
+  background:
+    repeating-linear-gradient(180deg, rgba(110, 170, 255, 0.1) 0 2px, transparent 2px 5px),
+    rgba(3, 8, 16, 0.64);
+  border-top: 1px solid rgba(150, 210, 255, 0.6);
+  box-shadow: 0 -7px 14px rgba(90, 180, 255, 0.16) inset;
+}
+body.skillfx .card-row.is-dense .mini-card.is-cooling .m-ring::after {
+  -webkit-mask: radial-gradient(circle, transparent 6px, #000 6px 7.5px, transparent 7.5px);
+  mask: radial-gradient(circle, transparent 6px, #000 6px 7.5px, transparent 7.5px);
+}
+
+/* ---------- 5. 充能完毕：金色回弹一次 ---------- */
+body.skillfx .mini-card.sfx-ready {
+  animation: sfxReady 0.9s var(--ease, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+body.skillfx .mini-card.sfx-ready::after {
+  animation: sfxReadyFlash 0.9s ease-out;
+}
+@keyframes sfxReady {
+  0% {
+    border-color: var(--gold, #ffc247);
+    box-shadow: 0 0 0 1px rgba(255, 194, 71, 0.85), 0 0 26px rgba(255, 194, 71, 0.34);
+  }
+  45% {
+    border-color: rgba(255, 194, 71, 0.55);
+    box-shadow: 0 0 0 1px rgba(255, 194, 71, 0.34), 0 0 10px rgba(255, 194, 71, 0.12);
+  }
+  100% {
+    box-shadow: var(--mat-inner, none);
+  }
+}
+@keyframes sfxReadyFlash {
+  0% { opacity: 0.55; background: radial-gradient(circle at 50% 100%, rgba(255, 226, 150, 0.85), transparent 70%); }
+  100% { opacity: 0; background: radial-gradient(circle at 50% 100%, rgba(255, 226, 150, 0), transparent 70%); }
+}
+
+/* ---------- 6. 成功施法：元素色外溢 + 图标弹一下 ---------- */
+body.skillfx .mini-card.sfx-casting {
+  border-color: var(--sfx-c);
+  box-shadow: inset 0 0 0 1px var(--sfx-line), inset 0 0 18px var(--sfx-c-soft);
+}
+body.skillfx .mini-card.sfx-casting::after {
+  animation: sfxCastFlash 0.42s ease-out;
+}
+body.skillfx .mini-card.sfx-casting .m-glyph {
+  animation: sfxGlyphPop 0.36s var(--ease, cubic-bezier(0.2, 0.8, 0.2, 1));
+}
+@keyframes sfxCastFlash {
+  0% { opacity: 1; background: radial-gradient(circle at 50% 120%, var(--sfx-c-soft), transparent 62%); }
+  100% { opacity: 0; background: radial-gradient(circle at 50% 120%, transparent, transparent 62%); }
+}
+@keyframes sfxGlyphPop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.24); filter: brightness(1.3); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 7. 奥能不足：琥珀色“缺能”字 + 琥珀描边 ----------
+   与冷却中不同：这里没有任何遮罩和环形进度，明确是“条件不满足”。 */
+body.skillfx .mini-card.sfx-aether {
+  border-color: rgba(255, 178, 84, 0.5);
+}
+body.skillfx .mini-card.sfx-aether .m-glyph {
+  opacity: 0.82;
+  filter: saturate(0.7);
+}
+body.skillfx .mini-card.sfx-aether .m-name::before {
+  content: "";
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  margin-right: 4px;
+  border-radius: 50%;
+  background: #ffb254;
+  box-shadow: 0 0 6px rgba(255, 178, 84, 0.62);
+  vertical-align: 2px;
+}
+body.skillfx .mini-card.sfx-aether .m-cd-text {
+  display: block;
+  position: absolute;
+  left: 50%;
+  bottom: 4px;
+  transform: translateX(-50%);
+  font-family: var(--mono, monospace);
+  font-size: 8px;
+  line-height: 1.35;
+  letter-spacing: 0.08em;
+  color: #ffc57a;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  pointer-events: none;
+}
+body.skillfx .mini-card.sfx-aether .m-cd-text::before {
+  content: "奥能不足";
+}
+
+/* ---------- 8. 按下但被拒：图标快速左右抖一下 ----------
+   冷却中 / 缺能时再按，卡面给出“我收到了但放不出”的回执。 */
+body.skillfx .mini-card.sfx-denied .m-glyph {
+  animation: sfxShake 0.28s ease-in-out;
+}
+@keyframes sfxShake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+  80% { transform: translateX(1px); }
+}
+
+/* ---------- 9. 降级：性能模式 / 系统“减少动态效果” ----------
+   只关动画，不关状态色，保证信息仍可读。 */
+@media (prefers-reduced-motion: reduce) {
+  body.skillfx .mini-card,
+  body.skillfx .mini-card .m-glyph,
+  body.skillfx .mini-card .m-ring::before { transition: none !important; animation: none !important; }
+}
+body.skillfx.is-lowfx .mini-card.sfx-casting .m-glyph,
+body.skillfx.is-lowfx .mini-card.sfx-ready::after,
+body.skillfx.is-lowfx .mini-card.sfx-coolstart { animation: none !important; }
