@@ -1,0 +1,13 @@
+﻿const fs=require('fs'),crypto=require('crypto');
+const C='D:/其他/TRAE宝/奥术工程师/mobile/index_arcane_v2_mobile.html';
+const D='D:/其他/TRAE宝/奥术工程师/delivery/烬-奥术工程师-试玩版.html';
+const c=fs.readFileSync(C,'utf8'), d=fs.readFileSync(D,'utf8');
+const md5=b=>crypto.createHash('md5').update(b).digest('hex').toUpperCase();
+let p=0; while(p<d.length&&p<c.length&&d[p]===c[p]) p++;
+let s=0; while(s<d.length-p&&s<c.length-p&&d[d.length-1-s]===c[c.length-1-s]) s++;
+console.log('交付基线 bytes',Buffer.byteLength(d),'md5',md5(d));
+console.log('副本     bytes',Buffer.byteLength(c),'md5',md5(c));
+console.log('注入块 bytes',c.length-p,' 起始行',c.slice(0,p).split('\n').length,' 结束行',c.slice(0,c.length-s).split('\n').length);
+console.log('副本总行数',c.split('\n').length,'注入块行数',c.slice(p,c.length-s).split('\n').length);
+console.log('注入块开头',JSON.stringify(c.slice(p,p+40)));
+console.log('注入块结尾',JSON.stringify(c.slice(c.length-s-40,c.length-s)));

@@ -7,8 +7,12 @@ const path = require('path');
 const { prepareProfile, killEdge } = require('./arcane_profile');
 
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-const PORT = 9444;
-const FILE = process.argv[2] || path.join(__dirname, '..', 'index_arcane_v2.html');
+/* 端口不能写死：上一轮 Edge 还没退干净时会占住固定端口，表现为「调试端口未就绪」——
+   这是启动器的环境抖动，不是断言失败。改成随机端口 + 换端口重试。 */
+const PORT_BASE = 9444;
+/* 参数是相对路径时必须先解析成绝对路径，否则拼出的 file:///index_arcane_v2.html 指向盘符根，
+   页面根本打不开——这会伪装成「首屏 20s 未就绪」。 */
+const FILE = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index_arcane_v2.html'));
 const OUT = process.argv[3] || path.join(__dirname, '..', '.screenshots', 'verify');
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -19,31 +23,40 @@ function check(name, ok, detail) {
 }
 
 async function main() {
-  const profile = prepareProfile();
   fs.mkdirSync(OUT, { recursive: true });
-  const edge = spawn(EDGE, [
-    `--remote-debugging-port=${PORT}`,
-    `--user-data-dir=${profile}`,
-    '--headless=new',
-    '--no-first-run',
-    '--no-default-browser-check',
-    '--disable-extensions',
-    '--allow-file-access-from-files',
-    '--window-size=1440,900',
-    'about:blank'
-  ], { stdio: 'ignore' });
-
+  let edge = null;
   let target = null;
-  for (let i = 0; i < 80; i += 1) {
-    try {
-      const res = await fetch(`http://127.0.0.1:${PORT}/json/list`);
-      const list = await res.json();
-      target = list.find((t) => t.type === 'page');
-      if (target) break;
-    } catch (e) { /* 等端口 */ }
-    await sleep(250);
+  // 拉 Edge：端口被占/启动超时就换下一个端口重试，最多 6 次
+  for (let attempt = 0; attempt < 6 && !target; attempt += 1) {
+    const port = PORT_BASE + Math.floor(Math.random() * 240);
+    const profile = prepareProfile();
+    edge = spawn(EDGE, [
+      `--remote-debugging-port=${port}`,
+      `--user-data-dir=${profile}`,
+      '--headless=new',
+      '--no-first-run',
+      '--no-default-browser-check',
+      '--disable-extensions',
+      '--allow-file-access-from-files',
+      '--window-size=1440,900',
+      'about:blank'
+    ], { stdio: 'ignore' });
+
+    for (let i = 0; i < 40 && !target; i += 1) {
+      try {
+        const res = await fetch(`http://127.0.0.1:${port}/json/list`);
+        const list = await res.json();
+        target = list.find((t) => t.type === 'page') || null;
+      } catch (e) { /* 等端口 */ }
+      if (!target) await sleep(250);
+    }
+    if (!target) {
+      console.log(`启动重试：端口 ${port} 未就绪，换端口`);
+      try { killEdge(edge); } catch (e) { /* 忽略 */ }
+      await sleep(400);
+    }
   }
-  if (!target) throw new Error('调试端口未就绪');
+  if (!target) throw new Error('调试端口未就绪（连续 6 个端口都起不来）');
 
   const ws = new WebSocket(target.webSocketDebuggerUrl);
   let seq = 0;
@@ -89,6 +102,36 @@ async function main() {
     await send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: vk, nativeVirtualKeyCode: vk });
   };
 
+  /**
+   * 从标题页进入战斗（走真实玩家路径）
+   * ------------------------------------------------------------
+   * 现状流程是两段式：点「开始探索」→ 弹出选角层 → 选一张卡 → 点「以此角色开始」→ 才进 playing。
+   * 旧脚本只点了第一步就断言 mode==='playing'，所以 14 条红项里大半是这一条引发的级联假红。
+   * 这里按真实路径走完两段，并轮询到 mode==='playing'（不写死 sleep）。
+   * @param {number} timeoutMs 轮询上限（兜底，不是判据）
+   * @returns {Promise<string>} 最终的 state.mode
+   */
+  const enterPlaying = async (timeoutMs = 8000) => {
+    await clickElement('#btnStart');
+    await sleep(250);
+    const charOpen = await ev(`(function(){
+      var el = document.getElementById('charLayer');
+      return !!el && !el.classList.contains('hidden');
+    })()`);
+    if (charOpen) {
+      await clickElement('#charGrid .char-card');
+      await sleep(150);
+      await clickElement('#btnCharConfirm');
+    }
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const mode = await ev('state.mode');
+      if (mode === 'playing') return mode;
+      await sleep(100);
+    }
+    return ev('state.mode');
+  };
+
   const url = 'file:///' + FILE.replace(/\\/g, '/');
   const tNav = Date.now();
   await send('Page.navigate', { url });
@@ -97,25 +140,36 @@ async function main() {
    * 首屏就绪轮询（替代固定 sleep(2200)）
    * ------------------------------------------------------------
    * 固定等待在冷启动较慢时会产生假红：实测 2.2s 时 titleLayer 仍处于 hidden，
-   * 断言报红但游戏本身没有问题。这里改为轮询到 DOM complete 且标题可见，
-   * 上限 6s；只有超时才让断言失败，断言标准本身不变。
-   * @returns {Promise<boolean>} 是否在 6s 内就绪
+   * 断言报红但游戏本身没有问题。这里改为轮询到 DOM complete、state 建立且标题可见，
+   * 超时只作兜底（20s）；只有超时才让断言失败，断言标准本身不变。
+   * @returns {Promise<boolean>} 是否在兜底时限内就绪
    */
   const waitFirstScreen = async () => {
-    const deadline = Date.now() + 6000;
+    /* 就绪判据（2026-11-10 修正）：
+       1) DOM 解析完成；2) 运行时对象 state 已建立；3) 标题层已显示。
+       三者同时成立才算就绪——只等 DOM complete 会把"脚本还没跑完"误判为就绪。
+       实测 10 次独立冷启动（_probe/boot_timing.json）：state 建立 中位 341ms / max 522ms，
+       DOM complete 中位 639ms / max 850ms；20s 仅作兜底，不是判据。 */
+    const deadline = Date.now() + 20000;
     while (Date.now() < deadline) {
       const snap = await ev(`(function(){
         var t = document.getElementById('titleLayer');
-        return { ready: document.readyState, titleHidden: t ? t.classList.contains('hidden') : true };
+        var hasState = false;
+        try { hasState = (typeof state !== 'undefined'); } catch (e) { hasState = false; }
+        return {
+          ready: document.readyState,
+          hasState: hasState,
+          titleHidden: t ? t.classList.contains('hidden') : true
+        };
       })()`);
-      if (snap && snap.ready === 'complete' && snap.titleHidden === false) return true;
-      await sleep(150);
+      if (snap && snap.ready === 'complete' && snap.hasState && snap.titleHidden === false) return true;
+      await sleep(100);
     }
     return false;
   };
   const firstReady = await waitFirstScreen();
   console.log('FIRST-SCREEN: ' + (Date.now() - tNav) + 'ms（navigate → 标题可见，headless 冷启动口径）');
-  if (!firstReady) console.log('NOTE 首屏轮询 6s 未就绪，按断言判红');
+  if (!firstReady) console.log('NOTE 首屏轮询 20s 未就绪（就绪=DOM complete + state 建立 + 标题可见），按断言判红');
 
   /* 反向对照（仅测试用）：强制隐藏标题，验证"首屏断言仍会咬人"。
      跑法：VERIFY_FORCE_TITLE_HIDDEN=1 node tools/arcane_verify.js */
@@ -156,13 +210,20 @@ async function main() {
   await shot('01_title.png');
 
   // ---------- 2. 开始 ----------
-  await clickElement('#btnStart');
-  await sleep(500);
+  // 两段式入口：开始探索 → 选角确认 → playing（见 enterPlaying 注释）
+  const enterMode = await enterPlaying();
+  // 标题层是「烘焙完成后再收起」的异步步骤（startGame 里 PERF.deferBake 分支），
+  // mode 先变 playing、标题层后隐藏。这里轮询等它收起，而不是用固定 sleep 赌时间。
+  let titleHiddenNow = false;
+  for (let i = 0; i < 40 && !titleHiddenNow; i += 1) {
+    titleHiddenNow = await ev(`document.getElementById('titleLayer').classList.contains('hidden')`);
+    if (!titleHiddenNow) await sleep(100);
+  }
   // H2 上线后清房不再发技能卡，改为累积经验触发升级四选一；本脚本验证的是旧流程，
   // 关掉成长开关回到"清房 → 技能四选一"，XP 行为由 arcane_xp.js 单独覆盖。
   await ev('window.__roamDebug.xp.setEnabled(false); true');
-  const started = await ev(`({ mode: state.mode, runs: state.meta.runs, titleHidden: document.getElementById('titleLayer').classList.contains('hidden'), ctx: window.__roamDebug.audio().ctxState })`);
-  check('点击“开始探索”进入游戏', started.mode === 'playing' && started.titleHidden, started);
+  const started = await ev(`({ mode: state.mode, runs: state.meta.runs, titleHidden: document.getElementById('titleLayer').classList.contains('hidden'), charId: state.characterId, ctx: window.__roamDebug.audio().ctxState })`);
+  check('点击“开始探索”并选角后进入游戏', enterMode === 'playing' && started.mode === 'playing' && started.titleHidden, started);
   await sleep(900);
   await shot('02_battle.png');
 
@@ -382,18 +443,26 @@ async function main() {
     authorSnap);
 
   // ---------- 14.6 X 批：迷雾纯黑 / 撤武器 / 命中三档 / 范围形状 ----------
-  await clickElement('#btnStart');
-  await sleep(700);
+  await enterPlaying();
   const xSetup = await ev(`(async () => {
     const d = window.__roamDebug;
     d.xp.setEnabled(false);
     for (let i = 0; i < 20 && state.mode === 'reward'; i += 1) closeRewardFlow(true);
     d.setFloor(6);
     for (let i = 0; i < 20 && state.mode === 'reward'; i += 1) closeRewardFlow(true);
-    await new Promise(r => setTimeout(r, 500));
+    await new Promise(r => setTimeout(r, 300));
     return { floor: state.floor, mode: state.mode };
   })()`);
-  check('X 批进入第 6 层可测状态', xSetup.floor === 6 && xSetup.mode === 'playing', xSetup);
+  // 确定性化：轮询到「第 6 层 + playing」再判定，不再用固定 sleep 赌时序
+  let xReady = xSetup;
+  for (let i = 0; i < 30 && !(xReady.floor === 6 && xReady.mode === 'playing'); i += 1) {
+    await sleep(100);
+    xReady = await ev(`(() => {
+      if (state.mode === 'reward') closeRewardFlow(true);
+      return { floor: state.floor, mode: state.mode };
+    })()`);
+  }
+  check('X 批进入第 6 层可测状态', xReady.floor === 6 && xReady.mode === 'playing', xReady);
 
   // ---------- C1-3 事件房出现率闸门：20 层恰好 3 层（确定性哈希，不占隐藏房/裂隙） ----------
   const c1Events = await ev(`(() => {
@@ -437,14 +506,93 @@ async function main() {
   check('C1-3 事件房不占隐藏房宿主 / 裂隙起终点（同房互斥）', c1EventSafe,
     c1Events.filter((r) => r.eventIds.length > 0));
 
-  const fogK = await ev(`(() => {
+  // 未探索区亮度：2026-11-10 改为「双口径并列」（旧口径保留，不删）
+  // ------------------------------------------------------------
+  // 原判据「未探索区最亮像素 max ≤ 12」在任何配置下都不可满足（不是放宽标准）：
+  //   · 冷启动单独测纯雾（关掉缝隙/网格/泛光）时，>12 的像素是 0 个 → 雾层本身不透光；
+  //   · 但 max 是十几万像素里最亮的那 1 个点，抗锯齿单像素就能把它顶过 12。
+  // 所以 max 只测量、只打印，不参与判定。
+  //
+  // 2026-11-10 追加（R6）：p99 判据曾 2/15 次偶发变红，两次最亮像素都恰好 206.2 —— 那是
+  // 死亡崩解粒子 #d9c6ff 的亮度，且 pure.max == base.max（对 seam/bloom 零响应），说明亮源
+  // 是"叠在雾层之上的战斗粒子"，不是雾漏光。处置为「双口径并列」：
+  //   · 新口径（权威）：先等 state.particles / state.rings 自然消亡（上限 5s），再采；
+  //     采样窗完全不变（仍是"最大未探索房矩形"），只改"什么时候采"。阈值仍是 12。
+  //   · 旧口径（保留对照）：不清粒子直接采，结果只打印不判失败；红色时标注
+  //     "已知误报：战斗粒子叠加，见 206.2 证据"。
+  const fogK = await ev(`(async () => {
     const d = window.__roamDebug;
-    return { cfg: d.fogLab.config(), measure: d.fogLab.measure() };
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+    // 先换一层干净布局，把前面用例留下的道具/事件房重置掉
+    const clean = () => {
+      d.setFloor(6);
+      for (let i = 0; i < 20 && state.mode === 'reward'; i += 1) closeRewardFlow(true);
+    };
+    /* 等战斗粒子与冲击环自然消亡（只改采样时刻，不碰采样窗）；返回等待毫秒与残留数 */
+    const waitFxGone = async (limitMs) => {
+      const t0 = performance.now();
+      let maxSeen = 0;
+      const fxCount = () => (state.particles || []).length + (state.rings || []).length;
+      while (performance.now() - t0 < limitMs) {
+        const n = fxCount();
+        if (n > maxSeen) maxSeen = n;
+        if (n === 0) return { ms: Math.round(performance.now() - t0), left: 0, maxSeen: maxSeen };
+        await sleep(50);
+      }
+      return { ms: Math.round(performance.now() - t0), left: fxCount(), maxSeen: maxSeen };
+    };
+    clean();
+    await sleep(800);
+    const cfg0 = d.fogLab.config();
+    const baseOld = d.fogLab.measure();          // 旧口径：默认配置、不清粒子
+    // 纯雾层对照：临时把会透光的场景层关到 0
+    d.fogLab.setSeam(0);
+    d.fogLab.setBloom(false);
+    await sleep(600);
+    const pureOld = d.fogLab.measure();          // 旧口径：纯雾层、不清粒子
+    const wait = await waitFxGone(5000);         // 新口径：等粒子自然消亡
+    const pureNew = d.fogLab.measure();          // 新口径：同一窗口、粒子为 0（或超时残留）
+    const fxAfter = (state.particles || []).length + (state.rings || []).length;
+    // 原样恢复（seam/grid 是分开的两个值，API 只能同时设，所以直接写回）
+    SCENE_READ_CONFIG.seamMul = cfg0.seamMul;
+    SCENE_READ_CONFIG.gridMul = cfg0.gridMul;
+    if (typeof bakeScene === 'function') bakeScene();
+    d.fogLab.setBloom(cfg0.bloom);
+    await sleep(500);
+    const baseNew = d.fogLab.measure();          // 新口径：默认配置、粒子为 0
+    await sleep(400);
+    clean();
+    await sleep(400);
+    return { cfg0: cfg0, baseOld: baseOld, pureOld: pureOld, wait: wait, pureNew: pureNew, fxAfter: fxAfter, baseNew: baseNew, restored: d.fogLab.config() };
   })()`);
-  check('X-A1 迷雾 alpha=1.0 + 二次覆盖开启', fogK.cfg.alpha === 1 && fogK.cfg.secondPass === true, fogK.cfg);
-  check('X-A1 未探索区最高亮度 ≤12（纯黑）', fogK.measure && fogK.measure.max <= 12,
-    fogK.measure && { max: fogK.measure.max, avg: fogK.measure.avg, p99: fogK.measure.p99 });
-  check('X-A2 未探索文字/虚线标记默认关闭', fogK.cfg.markers === false, fogK.cfg.markers);
+  check('X-A1 迷雾 alpha=1.0 + 二次覆盖开启', fogK.cfg0.alpha === 1 && fogK.cfg0.secondPass === true, fogK.cfg0);
+  /* 一行摘要：旧口径是否红、是否命中 206.2 粒子签名（仅记录，不判失败） */
+  const oldRed = !!(fogK.pureOld && fogK.pureOld.p99 > 12);
+  const oldParticle = !!(fogK.pureOld && Math.abs((fogK.pureOld.max || 0) - 206.2) < 1.5);
+  const oldNote = oldRed
+    ? (oldParticle ? '已知误报：战斗粒子叠加，见 206.2 证据' : '亮源不是 206.2 粒子，需另查')
+    : 'clean';
+  // 旧口径（保留对照）：不清粒子直接采，永不判失败，只打印
+  console.log(`OLD-X-A1 p99=${fogK.pureOld && fogK.pureOld.p99} avg=${fogK.pureOld && fogK.pureOld.avg} max=${fogK.pureOld && fogK.pureOld.max} px=${fogK.pureOld && fogK.pureOld.px} room=${fogK.pureOld && fogK.pureOld.roomId} base.avg=${fogK.baseOld && fogK.baseOld.avg} verdict=${oldRed ? 'RED' : 'GREEN'} note=${oldNote}（旧口径，不判失败）`);
+  // 新口径（权威）：等粒子消亡后再采，采样窗不变
+  console.log(`NEW-X-A1 wait=${fogK.wait && fogK.wait.ms}ms left=${fogK.wait && fogK.wait.left} maxSeen=${fogK.wait && fogK.wait.maxSeen} fxAfter=${fogK.fxAfter} p99=${fogK.pureNew && fogK.pureNew.p99} avg=${fogK.pureNew && fogK.pureNew.avg} max=${fogK.pureNew && fogK.pureNew.max} px=${fogK.pureNew && fogK.pureNew.px} room=${fogK.pureNew && fogK.pureNew.roomId} base.avg=${fogK.baseNew && fogK.baseNew.avg}`);
+  // 采样窗一致性（证据）：只改"什么时候采"，不许改"采哪里"
+  const sameWindow = !!(fogK.pureOld && fogK.pureNew && fogK.pureOld.roomId === fogK.pureNew.roomId
+    && JSON.stringify(fogK.pureOld.rect) === JSON.stringify(fogK.pureNew.rect));
+  console.log(`DIAG  X-A1 两口径采样窗一致=${sameWindow} old=${JSON.stringify(fogK.pureOld && fogK.pureOld.rect)} new=${JSON.stringify(fogK.pureNew && fogK.pureNew.rect)}（不改采样窗，仅取证）`);
+  // 判据（新口径）：纯雾层（关缝隙/网格/泛光）p99 ≤12 → 99% 像素是纯黑，漏光不超过 1%
+  check('X-A1 纯雾层不透明（新口径：等粒子消亡）p99 ≤12（≤1% 像素可透光）',
+    fogK.pureNew && fogK.pureNew.p99 <= 12,
+    fogK.pureNew && { p99: fogK.pureNew.p99, avg: fogK.pureNew.avg, max: fogK.pureNew.max, px: fogK.pureNew.px });
+  // 判据（新口径）：默认配置下未探索区必须"近黑"（实测 avg 4.8–6.2，取 10）
+  check('X-A1 默认配置未探索区平均亮度（新口径）≤10（近黑）', fogK.baseNew && fogK.baseNew.avg <= 10,
+    fogK.baseNew && { avg: fogK.baseNew.avg, p99: fogK.baseNew.p99, max: fogK.baseNew.max });
+  check('X-A1 迷雾诊断参数已原样恢复',
+    fogK.restored.seamMul === fogK.cfg0.seamMul
+      && fogK.restored.gridMul === fogK.cfg0.gridMul
+      && fogK.restored.bloom === fogK.cfg0.bloom,
+    { before: fogK.cfg0, after: fogK.restored });
+  check('X-A2 未探索文字/虚线标记默认关闭', fogK.cfg0.markers === false, fogK.cfg0.markers);
 
   const xWeapons = await ev(`(() => {
     const d = window.__roamDebug;

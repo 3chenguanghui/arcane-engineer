@@ -1,0 +1,418 @@
+{
+  "generatedAt": "2026-11-10T00:59:16.752Z",
+  "startedAt": "2026-11-10T00:58:48.863Z",
+  "page": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "pageBytes": 3043714,
+  "pollMs": 50,
+  "limitMs": 30000,
+  "method": "每次独立进程 + 全新临时 profile；Page.navigate 前起表，每 50ms 一次 Runtime.evaluate；命中时刻取该次求值的 [发送,收到] 中点",
+  "signals": {
+    "readyStateComplete": "document.readyState === 'complete'（且 URL 已切到目标文件）",
+    "stateDefined": "typeof state !== \"undefined\"",
+    "roamDebugReady": "typeof window.__roamDebug !== \"undefined\" && window.__roamDebug",
+    "titleVisible": "#titleLayer 存在且不带 hidden 类"
+  },
+  "runs": [
+    {
+      "run": 1,
+      "values": {
+        "readyStateComplete": 585.5,
+        "stateDefined": 326.5,
+        "roamDebugReady": 326.5,
+        "titleVisible": 52
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 585,
+          "stateDefined": 129,
+          "roamDebugReady": 129,
+          "titleVisible": 32
+        },
+        "hi": {
+          "readyStateComplete": 586,
+          "stateDefined": 524,
+          "roamDebugReady": 524,
+          "titleVisible": 72
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 145.3,
+      "errors": []
+    },
+    {
+      "run": 2,
+      "values": {
+        "readyStateComplete": 710,
+        "stateDefined": 401,
+        "roamDebugReady": 401,
+        "titleVisible": 69
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 709,
+          "stateDefined": 145,
+          "roamDebugReady": 145,
+          "titleVisible": 46
+        },
+        "hi": {
+          "readyStateComplete": 711,
+          "stateDefined": 657,
+          "roamDebugReady": 657,
+          "titleVisible": 92
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 186.7,
+      "errors": []
+    },
+    {
+      "run": 3,
+      "values": {
+        "readyStateComplete": 548,
+        "stateDefined": 318,
+        "roamDebugReady": 318,
+        "titleVisible": 318
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 547,
+          "stateDefined": 141,
+          "roamDebugReady": 141,
+          "titleVisible": 141
+        },
+        "hi": {
+          "readyStateComplete": 549,
+          "stateDefined": 495,
+          "roamDebugReady": 495,
+          "titleVisible": 495
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 132.7,
+      "errors": []
+    },
+    {
+      "run": 4,
+      "values": {
+        "readyStateComplete": 613,
+        "stateDefined": 352.5,
+        "roamDebugReady": 352.5,
+        "titleVisible": 58.5
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 611,
+          "stateDefined": 144,
+          "roamDebugReady": 144,
+          "titleVisible": 33
+        },
+        "hi": {
+          "readyStateComplete": 615,
+          "stateDefined": 561,
+          "roamDebugReady": 561,
+          "titleVisible": 84
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 157.3,
+      "errors": []
+    },
+    {
+      "run": 5,
+      "values": {
+        "readyStateComplete": 658.5,
+        "stateDefined": 330,
+        "roamDebugReady": 330,
+        "titleVisible": 330
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 658,
+          "stateDefined": 67,
+          "roamDebugReady": 67,
+          "titleVisible": 67
+        },
+        "hi": {
+          "readyStateComplete": 659,
+          "stateDefined": 593,
+          "roamDebugReady": 593,
+          "titleVisible": 593
+        }
+      },
+      "pollCount": 2,
+      "avgEvalRtt": 263.5,
+      "errors": []
+    },
+    {
+      "run": 6,
+      "values": {
+        "readyStateComplete": 850,
+        "stateDefined": 522,
+        "roamDebugReady": 522,
+        "titleVisible": 199.5
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 849,
+          "stateDefined": 259,
+          "roamDebugReady": 259,
+          "titleVisible": 198
+        },
+        "hi": {
+          "readyStateComplete": 851,
+          "stateDefined": 785,
+          "roamDebugReady": 785,
+          "titleVisible": 201
+        }
+      },
+      "pollCount": 5,
+      "avgEvalRtt": 115.8,
+      "errors": []
+    },
+    {
+      "run": 7,
+      "values": {
+        "readyStateComplete": 555,
+        "stateDefined": 317,
+        "roamDebugReady": 317,
+        "titleVisible": 317
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 554,
+          "stateDefined": 131,
+          "roamDebugReady": 131,
+          "titleVisible": 131
+        },
+        "hi": {
+          "readyStateComplete": 556,
+          "stateDefined": 503,
+          "roamDebugReady": 503,
+          "titleVisible": 503
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 135.7,
+      "errors": []
+    },
+    {
+      "run": 8,
+      "values": {
+        "readyStateComplete": 637,
+        "stateDefined": 353,
+        "roamDebugReady": 353,
+        "titleVisible": 353
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 636,
+          "stateDefined": 124,
+          "roamDebugReady": 124,
+          "titleVisible": 124
+        },
+        "hi": {
+          "readyStateComplete": 638,
+          "stateDefined": 582,
+          "roamDebugReady": 582,
+          "titleVisible": 582
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 165,
+      "errors": []
+    },
+    {
+      "run": 9,
+      "values": {
+        "readyStateComplete": 640.5,
+        "stateDefined": 314.5,
+        "roamDebugReady": 314.5,
+        "titleVisible": 314.5
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 639,
+          "stateDefined": 44,
+          "roamDebugReady": 44,
+          "titleVisible": 44
+        },
+        "hi": {
+          "readyStateComplete": 642,
+          "stateDefined": 585,
+          "roamDebugReady": 585,
+          "titleVisible": 585
+        }
+      },
+      "pollCount": 2,
+      "avgEvalRtt": 272,
+      "errors": []
+    },
+    {
+      "run": 10,
+      "values": {
+        "readyStateComplete": 681.5,
+        "stateDefined": 370,
+        "roamDebugReady": 370,
+        "titleVisible": 370
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 680,
+          "stateDefined": 122,
+          "roamDebugReady": 122,
+          "titleVisible": 122
+        },
+        "hi": {
+          "readyStateComplete": 683,
+          "stateDefined": 618,
+          "roamDebugReady": 618,
+          "titleVisible": 618
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 180,
+      "errors": []
+    }
+  ],
+  "raw": {
+    "readyStateComplete": [
+      585.5,
+      710,
+      548,
+      613,
+      658.5,
+      850,
+      555,
+      637,
+      640.5,
+      681.5
+    ],
+    "stateDefined": [
+      326.5,
+      401,
+      318,
+      352.5,
+      330,
+      522,
+      317,
+      353,
+      314.5,
+      370
+    ],
+    "roamDebugReady": [
+      326.5,
+      401,
+      318,
+      352.5,
+      330,
+      522,
+      317,
+      353,
+      314.5,
+      370
+    ],
+    "titleVisible": [
+      52,
+      69,
+      318,
+      58.5,
+      330,
+      199.5,
+      317,
+      353,
+      314.5,
+      370
+    ]
+  },
+  "stats": {
+    "readyStateComplete": {
+      "n": 10,
+      "timeouts": 0,
+      "min": 548,
+      "median": 638.8,
+      "p90": 724,
+      "max": 850
+    },
+    "stateDefined": {
+      "n": 10,
+      "timeouts": 0,
+      "min": 314.5,
+      "median": 341.3,
+      "p90": 413.1,
+      "max": 522
+    },
+    "roamDebugReady": {
+      "n": 10,
+      "timeouts": 0,
+      "min": 314.5,
+      "median": 341.3,
+      "p90": 413.1,
+      "max": 522
+    },
+    "titleVisible": {
+      "n": 10,
+      "timeouts": 0,
+      "min": 52,
+      "median": 315.8,
+      "p90": 354.7,
+      "max": 370
+    }
+  },
+  "hot": {
+    "note": "同一浏览器同一 profile 连续两次导航，第 2 次为热启动（不新建 profile）",
+    "first": {
+      "values": {
+        "readyStateComplete": 725,
+        "stateDefined": 388.5,
+        "roamDebugReady": 388.5,
+        "titleVisible": 41
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 721,
+          "stateDefined": 114,
+          "roamDebugReady": 114,
+          "titleVisible": 24
+        },
+        "hi": {
+          "readyStateComplete": 729,
+          "stateDefined": 663,
+          "roamDebugReady": 663,
+          "titleVisible": 58
+        }
+      },
+      "pollCount": 3,
+      "avgEvalRtt": 197
+    },
+    "second": {
+      "values": {
+        "readyStateComplete": 134,
+        "stateDefined": 134,
+        "roamDebugReady": 134,
+        "titleVisible": 48
+      },
+      "bounds": {
+        "lo": {
+          "readyStateComplete": 124,
+          "stateDefined": 124,
+          "roamDebugReady": 124,
+          "titleVisible": 30
+        },
+        "hi": {
+          "readyStateComplete": 144,
+          "stateDefined": 144,
+          "roamDebugReady": 144,
+          "titleVisible": 66
+        }
+      },
+      "pollCount": 2,
+      "avgEvalRtt": 28
+    },
+    "delta": {
+      "readyStateComplete": -591,
+      "stateDefined": -254.5,
+      "roamDebugReady": -254.5,
+      "titleVisible": 7
+    }
+  }
+}

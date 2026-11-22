@@ -1,0 +1,249 @@
+{
+  "runs": 20000,
+  "md5": {
+    "sim": "224BFB8764DC594BC8839220431049E8",
+    "config": "6CA6E486DB5AA35FA20CD4A54ADD3052"
+  },
+  "variants": {
+    "s1r": {
+      "runs": 80000,
+      "levelUps": 525966,
+      "draws": 328600,
+      "dup": 27017,
+      "f3Distinct": 157166,
+      "repeatRuns": 19416,
+      "zeroSAcq": 41973,
+      "zeroSOffer": 35532,
+      "anySAcq": 38027,
+      "anySOffer": 44468,
+      "cardAcq": {
+        "fireball": 317,
+        "frost": 4268,
+        "bolt": 20095,
+        "heal": 20285,
+        "blade": 4060,
+        "mine": 27185,
+        "lavaFissure": 28206,
+        "arcanePool": 13308,
+        "runeOrbit": 23387,
+        "collapseHole": 29903,
+        "flameCone": 22496,
+        "frostRing": 19847,
+        "pulseShock": 8848,
+        "pierceLance": 14074,
+        "skyfall": 16899,
+        "hammer": 9497,
+        "brand": 16307,
+        "ward": 7896,
+        "riftStep": 11229,
+        "frostSeal": 3476,
+        "voidNeedle": 0
+      },
+      "cardOffer": {
+        "fireball": 3157,
+        "frost": 25227,
+        "bolt": 35523,
+        "heal": 29962,
+        "blade": 35095,
+        "mine": 35596,
+        "lavaFissure": 34753,
+        "arcanePool": 35210,
+        "runeOrbit": 35042,
+        "collapseHole": 35527,
+        "flameCone": 35292,
+        "frostRing": 35122,
+        "pulseShock": 20022,
+        "pierceLance": 19326,
+        "skyfall": 19931,
+        "hammer": 19888,
+        "brand": 18799,
+        "ward": 18990,
+        "riftStep": 19835,
+        "frostSeal": 12068,
+        "voidNeedle": 0
+      },
+      "prof": {
+        "中性": {
+          "f10": 6716,
+          "f20": 5463
+        },
+        "守拙": {
+          "f10": 7256,
+          "f20": 5832
+        },
+        "疾火": {
+          "f10": 7150,
+          "f20": 5757
+        },
+        "观星": {
+          "f10": 7183,
+          "f20": 5760
+        }
+      },
+      "ashBurns": 0,
+      "ashStacks": 0,
+      "ashDeck": 0,
+      "ashRuns": 0
+    },
+    "s1r_ash04": {
+      "runs": 80000,
+      "levelUps": 553814,
+      "draws": 347854,
+      "dup": 29557,
+      "f3Distinct": 160932,
+      "repeatRuns": 21396,
+      "zeroSAcq": 38760,
+      "zeroSOffer": 31824,
+      "anySAcq": 41240,
+      "anySOffer": 48176,
+      "cardAcq": {
+        "fireball": 352,
+        "frost": 4581,
+        "bolt": 20933,
+        "heal": 21394,
+        "blade": 4241,
+        "mine": 28204,
+        "lavaFissure": 29289,
+        "arcanePool": 13872,
+        "runeOrbit": 24307,
+        "collapseHole": 31070,
+        "flameCone": 23407,
+        "frostRing": 20642,
+        "pulseShock": 9680,
+        "pierceLance": 15387,
+        "skyfall": 18424,
+        "hammer": 10347,
+        "brand": 17507,
+        "ward": 8611,
+        "riftStep": 12343,
+        "frostSeal": 3706,
+        "voidNeedle": 0
+      },
+      "cardOffer": {
+        "fireball": 3546,
+        "frost": 26944,
+        "bolt": 36908,
+        "heal": 31543,
+        "blade": 36376,
+        "mine": 36835,
+        "lavaFissure": 36081,
+        "arcanePool": 36649,
+        "runeOrbit": 36377,
+        "collapseHole": 36883,
+        "flameCone": 36564,
+        "frostRing": 36471,
+        "pulseShock": 21810,
+        "pierceLance": 21113,
+        "skyfall": 21712,
+        "hammer": 21613,
+        "brand": 20193,
+        "ward": 20689,
+        "riftStep": 21675,
+        "frostSeal": 13005,
+        "voidNeedle": 0
+      },
+      "prof": {
+        "中性": {
+          "f10": 7228,
+          "f20": 5589
+        },
+        "守拙": {
+          "f10": 7838,
+          "f20": 5968
+        },
+        "疾火": {
+          "f10": 7715,
+          "f20": 5898
+        },
+        "观星": {
+          "f10": 7744,
+          "f20": 5917
+        }
+      },
+      "ashBurns": 231356,
+      "ashStacks": 231356,
+      "ashDeck": 268978,
+      "ashRuns": 76240
+    },
+    "s1r_ash06": {
+      "runs": 80000,
+      "levelUps": 531146,
+      "draws": 332182,
+      "dup": 26997,
+      "f3Distinct": 158986,
+      "repeatRuns": 19560,
+      "zeroSAcq": 40903,
+      "zeroSOffer": 34209,
+      "anySAcq": 39097,
+      "anySOffer": 45791,
+      "cardAcq": {
+        "fireball": 321,
+        "frost": 4357,
+        "bolt": 20274,
+        "heal": 20393,
+        "blade": 4099,
+        "mine": 27410,
+        "lavaFissure": 28488,
+        "arcanePool": 13426,
+        "runeOrbit": 23585,
+        "collapseHole": 30229,
+        "flameCone": 22689,
+        "frostRing": 20050,
+        "pulseShock": 9059,
+        "pierceLance": 14309,
+        "skyfall": 17285,
+        "hammer": 9683,
+        "brand": 16602,
+        "ward": 8031,
+        "riftStep": 11465,
+        "frostSeal": 3430,
+        "voidNeedle": 0
+      },
+      "cardOffer": {
+        "fireball": 3196,
+        "frost": 25647,
+        "bolt": 35840,
+        "heal": 30256,
+        "blade": 35396,
+        "mine": 35927,
+        "lavaFissure": 35109,
+        "arcanePool": 35594,
+        "runeOrbit": 35415,
+        "collapseHole": 35898,
+        "flameCone": 35635,
+        "frostRing": 35431,
+        "pulseShock": 20436,
+        "pierceLance": 19665,
+        "skyfall": 20360,
+        "hammer": 20273,
+        "brand": 19159,
+        "ward": 19394,
+        "riftStep": 20324,
+        "frostSeal": 12036,
+        "voidNeedle": 0
+      },
+      "prof": {
+        "中性": {
+          "f10": 6764,
+          "f20": 5219
+        },
+        "守拙": {
+          "f10": 7255,
+          "f20": 5516
+        },
+        "疾火": {
+          "f10": 7168,
+          "f20": 5462
+        },
+        "观星": {
+          "f10": 7186,
+          "f20": 5475
+        }
+      },
+      "ashBurns": 225105,
+      "ashStacks": 225105,
+      "ashDeck": 259557,
+      "ashRuns": 76240
+    }
+  }
+}

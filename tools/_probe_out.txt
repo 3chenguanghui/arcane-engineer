@@ -1,0 +1,179 @@
+﻿{
+  "file": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "tag": "before",
+  "at": "2026-11-10T10:21:35.663Z",
+  "geom": {
+    "floor": 1,
+    "rooms": [
+      {
+        "id": 0,
+        "type": "battle",
+        "name": "战斗",
+        "x": 170,
+        "y": 1168,
+        "w": 795,
+        "h": 544,
+        "cx": 567,
+        "cy": 1440,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 4,
+        "sides": {
+          "bottom": 2,
+          "right": 2
+        }
+      },
+      {
+        "id": 1,
+        "type": "chest",
+        "name": "宝箱",
+        "x": 1128,
+        "y": 816,
+        "w": 774,
+        "h": 512,
+        "cx": 1515,
+        "cy": 1072,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 5,
+        "sides": {
+          "bottom": 3,
+          "left": 1,
+          "right": 1
+        }
+      },
+      {
+        "id": 2,
+        "type": "start",
+        "name": "休整点",
+        "x": 1116,
+        "y": 1398,
+        "w": 851,
+        "h": 649,
+        "cx": 1542,
+        "cy": 1723,
+        "cleared": false,
+        "locked": false,
+        "visited": true,
+        "doors": 5,
+        "sides": {
+          "top": 3,
+          "left": 1,
+          "right": 1
+        }
+      },
+      {
+        "id": 3,
+        "type": "chest",
+        "name": "宝箱",
+        "x": 2165,
+        "y": 1143,
+        "w": 630,
+        "h": 625,
+        "cx": 2480,
+        "cy": 1455,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 4,
+        "sides": {
+          "bottom": 1,
+          "left": 2,
+          "right": 1
+        }
+      },
+      {
+        "id": 4,
+        "type": "boss",
+        "name": "首领",
+        "x": 3006,
+        "y": 1122,
+        "w": 854,
+        "h": 648,
+        "cx": 3433,
+        "cy": 1446,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 1,
+        "sides": {
+          "left": 1
+        }
+      }
+    ],
+    "doorCount": 19,
+    "corridorCount": 13,
+    "pairs": {
+      "0-2": 4,
+      "0-1": 3,
+      "1-2": 4,
+      "1-3": 3,
+      "2-3": 3,
+      "3-4": 2
+    },
+    "world": {
+      "w": 4000,
+      "h": 2875
+    }
+  },
+  "black": {
+    "blocks": [
+      {
+        "cssX": 0,
+        "cssY": 432,
+        "cssW": 1416,
+        "cssH": 376,
+        "fill": 0.67,
+        "roomId": 2,
+        "roomType": "start",
+        "roomSeen": true
+      },
+      {
+        "cssX": 744,
+        "cssY": 0,
+        "cssW": 672,
+        "cssH": 376,
+        "fill": 0.68
+      },
+      {
+        "cssX": 0,
+        "cssY": 0,
+        "cssW": 672,
+        "cssH": 368,
+        "fill": 0.68
+      }
+    ],
+    "player": {
+      "x": 1542,
+      "y": 1723
+    }
+  },
+  "fit": {
+    "zoom": 0.38,
+    "cam": {
+      "x": 159,
+      "y": 373
+    },
+    "bounds": {
+      "minX": 169.60523778852075,
+      "minY": 816.4265663749538,
+      "maxX": 3859.640091677662,
+      "maxY": 2047.6383410734124
+    },
+    "view": {
+      "vw": 3711,
+      "vh": 2118
+    },
+    "fits": true
+  },
+  "marked": {
+    "ok": true,
+    "cam": {
+      "x": 159,
+      "y": 373
+    },
+    "zoom": 0.38
+  }
+}

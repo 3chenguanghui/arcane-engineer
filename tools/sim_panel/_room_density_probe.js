@@ -70,6 +70,19 @@ function buildAlignedSim() {
     'budgetFrom'
   );
 
+  // 5) v2.2.3：主文件预算分支现在乘 areaMul（按房间面积 0.85–1.5），cap 8→10。
+  //    sim 没有房间几何，只能用均值 1.06 近似；逐房 0.85–1.37 的差异表达不了（报告里标注为模拟近似）。
+  //    设 AREAMUL_PATCH=0 可关掉这条，得到同一 har ne ss 的"改前"基线。
+  const areaOn = process.env.AREAMUL_PATCH !== '0';
+  src = replaceOnce(
+    src,
+    `  const baseCap = budgetOn`,
+    `  if (${areaOn}) count = Math.round(count * 1.06);
+  const baseCap = budgetOn`,
+    'areamul'
+  );
+  src = src.replace('Math.max(C.FLOOR_GEN.enemyCountCap, range[1])', 'Math.max(10, range[1])');
+
   // 2) runOne 结果里加 roomTrace
   src = replaceOnce(
     src,

@@ -7,30 +7,51 @@
 const { spawn } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { prepareProfile } = require('./arcane_profile');
+const { prepareProfile, killEdge } = require('./arcane_profile');
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const PORT = 9758;
-const FILE = process.argv[2] || path.join(__dirname, '..', 'index_arcane_v2.html');
+/* 命令行参数一律解析成绝对路径：
+   过去直接拼 'file:///' + 参数，若传入相对路径（如 index_arcane_v2.html）会得到
+   file:///index_arcane_v2.html —— 指向 C 盘根目录，页面根本打不开，探针随即报
+   "Cannot read properties of null (reading 'getBoundingClientRect')" 的假红。 */
+const FILE = path.resolve(process.argv[2] || path.join(__dirname, '..', 'index_arcane_v2.html'));
 const OUT = path.join(__dirname, '..', '.screenshots', 'perf');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+/* 保存本次拉起的 Edge 句柄：正常结束或中途抛错都要整棵树杀掉，
+   否则残留实例会继续占着 9758，导致下一次运行连不上调试端口。 */
+let EDGE_PROC = null;
 
 async function main() {
   const profile = prepareProfile();
   fs.mkdirSync(OUT, { recursive: true });
+  /* 起 Edge 之前先等旧实例把 9758 放开：连续跑多次时上一个进程刚退出，
+     端口可能还被它占着几百毫秒，新实例会绑定失败 → 探针误报"端口未就绪"。 */
+  for (let i = 0; i < 40; i += 1) {
+    try {
+      await fetch(`http://127.0.0.1:${PORT}/json/version`);
+      await sleep(250);
+    } catch (e) { break; /* 连不上 = 端口已空 */ }
+  }
   const edge = spawn(EDGE, [
     `--remote-debugging-port=${PORT}`, `--user-data-dir=${profile}`, '--headless=new',
     '--no-first-run', '--no-default-browser-check', '--disable-extensions',
     '--allow-file-access-from-files', '--window-size=1600,1000', 'about:blank'
   ], { stdio: 'ignore' });
+  EDGE_PROC = edge;
+  /* 等调试端口：原为固定 80×250ms 且只判 type=page。
+     上一个进程若没被整棵树杀掉，9758 会被旧实例占着，新实例起不来 →
+     target 为 null → "Cannot read properties of null (reading 'webSocketDebuggerUrl')"。
+     这里延长到 30s，并要求 target 真的带 webSocketDebuggerUrl。 */
   let target = null;
-  for (let i = 0; i < 80; i += 1) {
+  for (let i = 0; i < 120; i += 1) {
     try {
       const list = await (await fetch(`http://127.0.0.1:${PORT}/json/list`)).json();
-      target = list.find((t) => t.type === 'page');
+      target = list.find((t) => t.type === 'page' && t.webSocketDebuggerUrl);
       if (target) break;
     } catch (e) { /* wait */ }
     await sleep(250);
   }
+  if (!target) throw new Error('Edge 调试端口 30s 内未就绪（疑似 9758 被残留实例占用）');
   const ws = new WebSocket(target.webSocketDebuggerUrl);
   let seq = 0; const pending = new Map();
   ws.onmessage = (ev) => { const m = JSON.parse(ev.data); if (m.id && pending.has(m.id)) { pending.get(m.id)(m); pending.delete(m.id); } };
@@ -44,13 +65,29 @@ async function main() {
     await send('Emulation.setDeviceMetricsOverride', { width: w, height: h, deviceScaleFactor: dpr, mobile: mobile });
   };
   await setViewport(1920, 1080, 1, false);
+  const navAt = Date.now();
   await send('Page.navigate', { url: 'file:///' + FILE.replace(/\\/g, '/') });
-  await sleep(2400);
   const ev = async (expression) => {
     const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
     if (r.exceptionDetails) throw new Error(JSON.stringify(r.exceptionDetails));
     return r.result.value;
   };
+  /* 探针就绪等待（v2.2.1 修）：
+     原实现是固定 sleep(2400) 后直接取 btnStart 的包围盒，页面没打开就会报
+     "Cannot read properties of null (reading 'getBoundingClientRect')" 并 exit 1。
+     改成：①先轮询到"按钮存在且 startGame 已定义"（最多 20s，失败才报红）；
+           ②再用"距 navigate 满 2400ms"补齐等待，保证开跑时机与改前基线完全一致，
+              否则页面提前就绪会让开局落在引擎预热期，p95 被拉高、对比失真。 */
+  let ready = false;
+  for (let i = 0; i < 80; i += 1) {
+    try {
+      ready = await ev("!!document.getElementById('btnStart') && typeof startGame === 'function'");
+    } catch (e) { ready = false; }
+    if (ready) break;
+    await sleep(250);
+  }
+  if (!ready) throw new Error('页面 20s 内未就绪：btnStart / startGame 缺失');
+  await sleep(Math.max(0, 2400 - (Date.now() - navAt)));
   const clickStart = async () => {
     const p = await ev(`(() => { const el = document.getElementById('btnStart'); const r = el.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
@@ -170,9 +207,19 @@ async function main() {
   check('D2 主路径最坏帧 ≤16.6ms×1.5（瞬时抖动不判红，只做上限）', main.worst <= 16.6 * 1.5,
     { worst: +fmt(main.worst) });
   check('D3 四段可拆分（特效/迷雾包装器生效）', main.hasFx && main.hasFog, { fx: main.hasFx, fog: main.hasFog });
-  check('D4 主路径负载真的到位（6 怪 + 粒子 ≥300，按渲染帧的谷值算）',
-    main.enemies >= 6 && main.minParticles >= 300,
-    { enemies: main.enemies, minParticles: main.minParticles, endParticles: main.particles });
+  /* D4 判据（v2.1.1 返修）：这里要证明的是"负载真的上去了"，不是"粒子能超过池上限"。
+     游戏粒子池上限是 100（index_arcane_v2.html addBurst 末尾 splice 到 100，
+     依据 docs/爽感曲线.md §8.2），探针请求的 340 会被池子裁到 100，
+     所以旧判据「谷值 ≥300」在本版永远红，属于判据失真而不是性能退化。
+     现在的有效值直接取"布场后池里的真实数量"（与 340 取较小值），判据再留 10% 余量
+     （粒子寿命 0.25–0.55s，帧间自然掉几颗）：
+       · 有效值 = min(340, 布场后池内数量)
+       · 判据   = 6 怪 且 布场数量 ≥60（防"一颗都没生成"）且 渲染帧谷值 ≥ 有效值 × 0.9
+     池上限以后若调整，本判据会自动跟着走，不会再次变成常红。 */
+  const expectedParticles = Math.min(340, load.particles);
+  check('D4 主路径负载真的到位（6 怪 + 粒子达池上限，按渲染帧谷值算）',
+    main.enemies >= 6 && load.particles >= 60 && main.minParticles >= Math.round(expectedParticles * 0.9),
+    { enemies: main.enemies, minParticles: main.minParticles, expectedParticles: expectedParticles, spawnedParticles: load.particles });
 
   // ---------- 低端机模拟：只记录 fps ----------
   await setViewport(390, 844, 2, true);
@@ -192,9 +239,16 @@ async function main() {
   console.log('\n===== 断言 =====');
   checks.forEach((c) => console.log(`${c.ok ? 'PASS' : 'FAIL'}  ${c.name}  ${JSON.stringify(c.detail)}`));
   const fails = checks.filter((c) => !c.ok);
+  /* 汇总口径固定打印：总数 / 通过 / 废弃 / 红 —— 常红断言必须被消掉，不能靠"看习惯了"糊过去 */
+  console.log(`\n断言总数 ${checks.length} · 通过 ${checks.length - fails.length} · 废弃 0 · 红 ${fails.length}`);
   console.log(`\nVERDICT: ${fails.length ? 'FAIL' : 'PASS'}`);
-  edge.kill();
+  killEdge(edge);
   process.exit(fails.length ? 1 : 0);
 }
-main().catch((e) => { console.error('FATAL', e && e.message); process.exit(1); });
+main().catch((e) => {
+  console.error('FATAL', e && e.message);
+  // 抛错路径同样整棵树清理，避免 9758 被残留实例占死
+  if (EDGE_PROC) killEdge(EDGE_PROC);
+  process.exit(1);
+});
 

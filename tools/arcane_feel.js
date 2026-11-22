@@ -25,7 +25,8 @@ const { prepareProfile, killEdge } = require('./arcane_profile');
 const EDGE = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 const PORT = 9519;
 const ROOT = path.join(__dirname, '..');
-const FILE = path.join(ROOT, 'index_arcane_v2.html');
+// 允许用环境变量指定被测文件（A/B 时指向候选副本，默认仍是主文件）
+const FILE = process.env.ARCANE_FILE ? path.resolve(process.env.ARCANE_FILE) : path.join(ROOT, 'index_arcane_v2.html');
 const OUT_DIR = path.join(ROOT, '.screenshots', 'art');
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 

@@ -1,0 +1,52 @@
+﻿{
+  "file": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "tag": "geo2",
+  "at": "2026-11-10T10:31:45.361Z",
+  "geom": {
+    "__err": "Uncaught ReferenceError: pointWalkable is not defined\n    at <anonymous>:46:9\n    at <anonymous>:51:7\n    at <anonymous>:54:3"
+  },
+  "black": {
+    "blocks": [
+      {
+        "cssX": 0,
+        "cssY": 0,
+        "cssW": 1416,
+        "cssH": 808,
+        "fill": 0.63,
+        "roomId": 2,
+        "roomType": "start",
+        "roomSeen": true
+      }
+    ],
+    "player": {
+      "x": 1542,
+      "y": 1723
+    }
+  },
+  "fit": {
+    "zoom": 0.38,
+    "cam": {
+      "x": 159,
+      "y": 373
+    },
+    "bounds": {
+      "minX": 169.60523778852075,
+      "minY": 816.4265663749538,
+      "maxX": 3859.640091677662,
+      "maxY": 2047.6383410734124
+    },
+    "view": {
+      "vw": 3711,
+      "vh": 2118
+    },
+    "fits": true
+  },
+  "marked": {
+    "ok": true,
+    "cam": {
+      "x": 159,
+      "y": 373
+    },
+    "zoom": 0.38
+  }
+}

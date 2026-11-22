@@ -126,17 +126,23 @@ async function main() {
       && a2.chest.tip && a2.elite.tip && a2.boss.tip, a2);
 
   // ---------- A3 迷雾 ----------
+  // R1 起 "未知" 只留给真正没走到过的门：当前房间的相邻门永远可读。
+  // 所以这里必须挑一扇"非相邻"的门，否则测的是被明确改掉的老语义。
   const a3 = await ev(`(function(){
     DOOR_INFO_CONFIG.fog = true;
+    var cur = state.currentRoomId;
+    function nonAdjacent(door){
+      return door.targetRoomId >= 0 && door.roomId !== cur && door.targetRoomId !== cur;
+    }
     var d = state.doors.find(function(door){
       var t = state.rooms[door.targetRoomId];
-      return t && door.targetRoomId >= 0 && !t.visited && !t.cleared;
+      return nonAdjacent(door) && t && !t.visited && !t.cleared && !t.pricedTag;
     });
     if (!d) {
-      // 兜底：把第一扇有目标的门的目标房改成"未访问"，只为验证迷雾分支
-      d = state.doors.find(function(door){ return door.targetRoomId >= 0; });
+      // 兜底：找一扇非相邻、非双价的门，把目标房改成"未访问"，只为验证迷雾分支
+      d = state.doors.find(nonAdjacent);
       var t2 = state.rooms[d.targetRoomId];
-      t2.visited = false; t2.cleared = false;
+      t2.visited = false; t2.cleared = false; t2.pricedTag = null;
     }
     var before = doorInfoFor(d);
     var revealed = window.__roamDebug.doorInfo.reveal(true);
@@ -145,14 +151,49 @@ async function main() {
     window.__roamDebug.doorInfo.reveal(false);
     return {
       unknownText: DOOR_INFO_CONFIG.unknownText,
+      adjacent: d.roomId === cur || d.targetRoomId === cur,
       before: { unknown: before.unknown, typeName: before.typeName },
       after: { unknown: after.unknown, typeName: after.typeName },
       revealed: revealed
     };
   })()`);
-  ok('A3 迷雾：未访问→未探测；reveal(true) 后恢复具体信息',
-    a3.before.unknown === true && a3.after.unknown === false && a3.revealed === true
+  ok('A3 迷雾：非相邻且未访问→未探测；reveal(true) 后恢复具体信息',
+    a3.adjacent === false
+      && a3.before.unknown === true && a3.after.unknown === false && a3.revealed === true
       && a3.unknownText === '未探测 · 随机', a3);
+
+  // ---------- A3b 相邻门永远可读 ----------
+  // R1 的另一半：当前房间的相邻门，不管有没有访问过，门牌和信息板都必须读得出
+  // 房型/危险度，且绝不能显示"未知"。这里故意把 fog 打开（最坏情况），
+  // 用来证明"相邻"这一条能压过迷雾开关。
+  const a3b = await ev(`(function(){
+    DOOR_INFO_CONFIG.fog = true;
+    var cur = state.currentRoomId;
+    var adj = state.doors.filter(function(door){
+      return door.targetRoomId >= 0 && door.roomId === cur;
+    });
+    if (!adj.length) { DOOR_INFO_CONFIG.fog = false; return null; }
+    var d = adj[0];
+    var t = state.rooms[d.targetRoomId];
+    var sv = t.visited, sc = t.cleared;
+    t.visited = false; t.cleared = false;
+    var infoU = doorInfoFor(d), visU = doorVisFor(d);
+    t.visited = true; t.cleared = false;
+    var infoV = doorInfoFor(d);
+    t.visited = sv; t.cleared = sc;
+    DOOR_INFO_CONFIG.fog = false;
+    return {
+      count: adj.length,
+      typeName: infoU.typeName, riskLabel: infoU.riskLabel,
+      unvisited: { infoUnknown: infoU.unknown, plateUnknown: visU.unknown, plateLabel: visU.label },
+      visited: { infoUnknown: infoV.unknown }
+    };
+  })()`);
+  ok('A3b 相邻门永远可读：未访问/已访问都不得显示"未知"，房型与危险度可见',
+    !!a3b
+      && a3b.unvisited.infoUnknown === false && a3b.visited.infoUnknown === false
+      && a3b.unvisited.plateUnknown === false && a3b.unvisited.plateLabel !== '未知'
+      && !!a3b.typeName && !!a3b.riskLabel, a3b);
 
   // ---------- A4 距离 ----------
   const a4 = await ev(`(function(){

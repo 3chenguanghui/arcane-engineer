@@ -1,8 +1,13 @@
-// 种子与每日挑战 · 可复现断言（headless Edge + CDP）
+// 种子可复现断言（headless Edge + CDP）
 // 用法：node tools/seed_repro_assert.js [被测文件] [输出目录] [--e1]
-//   --e1 = 额外跑 E1 兼容断言（F1 清层多一次三选一）
-// 默认测 .seedwork/index_seed_patched.html（主文件未改动；合并补丁后把参数换成主文件即可）
+//   --e1 = 额外跑 E1 兼容断言（F1 清层多一次三选一，仅 seed-suite 模式有效）
+// 两种模式：
+//   1) deterministic-core（默认）：自带 mulberry32 种子注入，不依赖任何补丁，
+//      断言「同种子 + 同操作序列 → 40 层生成逐字节一致」，并输出 FNV-1a / SHA-256 指纹，
+//      供「接线前 vs 接线后」两个文件逐字节比对。
+//   2) seed-suite：文件里若存在 window.__seedDebug（种子/每日挑战补丁），额外跑完整种子套件。
 const { spawn } = require('child_process');
+const crypto = require('crypto');
 const fs = require('fs');
 const path = require('path');
 const { prepareProfile, killEdge } = require('./arcane_profile');
@@ -12,6 +17,8 @@ const PORT = 9455;
 const FILE = path.resolve(process.argv[2] || path.join(__dirname, '..', '.seedwork', 'index_seed_patched.html'));
 const OUT = path.resolve(process.argv[3] || path.join(__dirname, '..', '.seedwork', 'shots'));
 const E1_MODE = process.argv.includes('--e1');
+// 确定性核心使用的固定种子（与 _probe/parity_generation.js 同一颗，便于交叉核对）
+const SEED = 261108;
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const results = [];
@@ -19,6 +26,116 @@ function check(name, ok, detail) {
   results.push({ name, ok: !!ok, detail });
   console.log(`${ok ? 'PASS' : 'FAIL'}  ${name}  ${detail == null ? '' : JSON.stringify(detail)}`);
 }
+
+/**
+ * FNV-1a 32 位哈希（对 UTF-8 字节计算）
+ * @param {string} str 输入字符串
+ * @returns {number} 无符号 32 位哈希
+ */
+function fnv1a32(str) {
+  const buf = Buffer.from(str, 'utf8');
+  let h = 0x811c9dc5;
+  for (let i = 0; i < buf.length; i += 1) {
+    h ^= buf[i];
+    h = Math.imul(h, 0x01000193) >>> 0;
+  }
+  return h >>> 0;
+}
+/** 把 32 位哈希格式化成 0x 前缀的 8 位十六进制 */
+const hex32 = (n) => '0x' + (n >>> 0).toString(16).padStart(8, '0');
+
+// 注入脚本：在页面任何脚本执行前替换 Math.random 为固定种子的 mulberry32，
+// 并暴露重播种函数 __probeSeedReset。这样不依赖任何测试补丁（如 __seedDebug），
+// 主文件、备份、任意版本都能在同一随机流起点上复现。
+const INJECT = `(function () {
+  var SEED = ${SEED};
+  /** mulberry32：32 位确定性伪随机数发生器 */
+  function mulberry32(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  var rng = mulberry32(SEED);
+  Math.random = function () { return rng(); };
+  window.__probeSeed = SEED;
+  window.__probeSeedReset = function () { rng = mulberry32(SEED); };
+  window.__probeMathRandomInstalled = true;
+})();`;
+
+// 页面内表达式：两次独立重播种各生成 1–40 层 + 两次模拟，返回原始字符串供逐字节比较。
+// 字段顺序固定，避免 JSON 键序抖动造成假差异。
+const DET_EXPR = `(async () => {
+  const has = (n) => { try { return typeof eval(n); } catch (e) { return 'THROW:' + e.name; } };
+  const types = {
+    buildValidatedFloorLayout: has('buildValidatedFloorLayout'),
+    GAME_CONFIG: has('GAME_CONFIG'),
+    simulate: (function () {
+      try { return typeof (window.__roamDebug && window.__roamDebug.floorGen && window.__roamDebug.floorGen.simulate); }
+      catch (e) { return 'THROW:' + e.name; }
+    })()
+  };
+  if (typeof buildValidatedFloorLayout !== 'function') {
+    return { types: types, error: 'buildValidatedFloorLayout 不存在，无法做确定性生成对拍' };
+  }
+  const minR = GAME_CONFIG.floorMinRooms || 4;
+  const maxR = GAME_CONFIG.floorMaxRooms || 7;
+  const cols = GAME_CONFIG.roomColumns || 3;
+  const span = maxR - minR + 1;
+
+  /** 把单层布局规范化为固定字段顺序的对象（不含时间戳等易变字段） */
+  const norm = (floor, lay) => {
+    const list = (lay && Array.isArray(lay.rooms)) ? lay.rooms : [];
+    return {
+      floor: floor,
+      valid: !!(lay && lay.valid),
+      fallback: !!(lay && lay.fallback),
+      attempts: lay ? lay.attempts : null,
+      spawnId: lay ? lay.spawnId : null,
+      stairId: lay ? lay.stairId : null,
+      rooms: list.map((r) => ({
+        id: r.id,
+        type: (r.type === undefined || r.type === null) ? null : String(r.type),
+        x: r.x, y: r.y, w: r.w, h: r.h, cx: r.cx, cy: r.cy,
+        seed: (r.seed === undefined) ? null : r.seed
+      }))
+    };
+  };
+
+  /** 从同一随机流起点生成 1–40 层，拼成多行字符串 */
+  function genOnce() {
+    window.__probeSeedReset();
+    const out = [];
+    for (let f = 1; f <= 40; f += 1) {
+      const target = minR + (f % span);
+      out.push(JSON.stringify(norm(f, buildValidatedFloorLayout(f, target, cols))));
+    }
+    return out.join('\\n');
+  }
+
+  const a = genOnce();
+  const b = genOnce();
+
+  // 备用入口：__roamDebug.floorGen.simulate(40)，同样两次重播种
+  let s1 = ''; let s2 = ''; let simErr = null;
+  try {
+    const fg = window.__roamDebug && window.__roamDebug.floorGen;
+    if (fg && typeof fg.simulate === 'function') {
+      window.__probeSeedReset(); s1 = JSON.stringify(fg.simulate.call(fg, 40));
+      window.__probeSeedReset(); s2 = JSON.stringify(fg.simulate.call(fg, 40));
+    }
+  } catch (e) { simErr = String((e && e.message) || e); }
+
+  return {
+    types: types,
+    config: { minRooms: minR, maxRooms: maxR, cols: cols },
+    genA: a, genB: b,
+    simA: s1, simB: s2, simErr: simErr,
+    ready: { dom: document.readyState, titleVisible: !!(document.getElementById('titleLayer') && !document.getElementById('titleLayer').classList.contains('hidden')) }
+  };
+})()`;
 
 async function main() {
   // 每次用独立的 profile 目录，避免上一次异常退出残留的锁导致 Edge 起不来
@@ -90,23 +207,32 @@ async function main() {
   };
 
   const url = 'file:///' + FILE.replace(/\\/g, '/');
+  // 关键顺序：注入脚本必须在导航之前登记，否则页面主脚本已经跑完，Math.random 换不掉
+  await send('Page.addScriptToEvaluateOnNewDocument', { source: INJECT });
   await send('Page.navigate', { url });
 
-  // 等待主脚本完成装载（2.7MB 大文件，headless 下偶发慢于固定等待）
+  // 等待主脚本完成装载（大文件 headless 冷启动可达 10s+，这里轮询 30s；
+  // 就绪判据 = state 已建立，__seedDebug 由补丁提供，单独给出诊断）
   let bootReady = false;
-  for (let i = 0; i < 40; i += 1) {
+  for (let i = 0; i < 120; i += 1) {
     await sleep(250);
     try {
-      bootReady = await ev(`typeof state !== 'undefined' && !!window.__seedDebug`);
+      bootReady = await ev(`typeof state !== 'undefined'`);
       if (bootReady) break;
     } catch (e) { /* 页面仍在解析 */ }
   }
   if (!bootReady) {
-    const dump = await ev(`({ url: location.href, ready: document.readyState, debug: typeof window.__seedDebug, stateType: typeof state, errors: (window.__errors || []).slice(0, 5) })`).catch(() => null);
+    const dump = await ev(`({ url: location.href, ready: document.readyState, errors: (window.__errors || []).slice(0, 5) })`).catch(() => null);
     console.error('BOOT DUMP', JSON.stringify(dump));
-    throw new Error('页面启动失败（30 秒内未就绪）');
+    throw new Error('页面启动失败（30 秒内 state 仍未建立）：这是脚本装载超时，不是断言失败');
   }
+  // __seedDebug 是「种子 / 每日挑战」补丁提供的调试桥。该补丁从未合入主文件，
+  // 历史补丁副本 .seedwork/index_seed_patched.html 也已不存在。
+  // 所以这里不再把「缺补丁」当失败：有补丁跑完整种子套件，没补丁跑自带的确定性核心。
+  const hasSeedDebug = await ev(`typeof window.__seedDebug !== 'undefined' && !!window.__seedDebug`).catch(() => false);
+  console.log(`MODE  ${hasSeedDebug ? 'seed-suite（检测到 __seedDebug 补丁）' : 'deterministic-core（无补丁，跑自带种子注入）'}`);
 
+  if (hasSeedDebug) {
   // 0. 启动检查
   const boot = await ev(`({ ready: document.readyState, hasDebug: !!window.__seedDebug, errors: (window.__errors || []).slice(0, 3), mode: state.mode })`);
   check('页面启动且补丁已装载', boot.ready === 'complete' && boot.hasDebug && boot.mode === 'title', boot);
@@ -566,6 +692,51 @@ async function main() {
       postReload.hp === preReload.hp
         && postReload.onboard.progressFloor === postReload.onboard.baseline,
       { hpSame: postReload.hp === preReload.hp, onboard: postReload.onboard });
+  }
+  } else {
+    // ---- 确定性核心：不依赖任何测试补丁，主文件 / 备份 / 任意版本都能跑 ----
+    // 判据：同一种子、同一操作序列（1–40 层顺序生成），两次独立重播种必须逐字节一致。
+    const det = await ev(DET_EXPR);
+    check('页面启动且标题层可见', det.ready.dom === 'complete' && det.ready.titleVisible, det.ready);
+    if (det.error) {
+      check('确定性生成入口存在', false, det.error);
+    } else {
+      check('确定性生成：同种子两次生成 40 层逐字节一致',
+        det.genA === det.genB, { lenA: det.genA.length, lenB: det.genB.length });
+      const floors = det.genA.split('\n').map((s) => { try { return JSON.parse(s); } catch (e) { return null; } });
+      check('确定性生成：40 层全部有效且无回退',
+        floors.length === 40 && floors.every((f) => f && f.valid && !f.fallback),
+        {
+          floors: floors.length,
+          invalid: floors.filter((f) => !f || !f.valid).length,
+          fallback: floors.filter((f) => f && f.fallback).length
+        });
+      if (det.simA) {
+        check('确定性模拟：floorGen.simulate(40) 两次逐字节一致', det.simA === det.simB, { len: det.simA.length });
+      } else {
+        check('确定性模拟：floorGen.simulate(40) 可用', false, det.simErr || '未暴露 simulate');
+      }
+      // 指纹落盘：长度 + FNV-1a + SHA-256，两个文件各跑一次后即可逐字节比对
+      const fp = {
+        file: FILE,
+        seed: SEED,
+        config: det.config,
+        gen: {
+          length: det.genA.length,
+          bytes: Buffer.byteLength(det.genA, 'utf8'),
+          fnv1a32Hex: hex32(fnv1a32(det.genA)),
+          sha256: crypto.createHash('sha256').update(det.genA, 'utf8').digest('hex')
+        },
+        sim: det.simA ? {
+          length: det.simA.length,
+          fnv1a32Hex: hex32(fnv1a32(det.simA)),
+          sha256: crypto.createHash('sha256').update(det.simA, 'utf8').digest('hex')
+        } : null
+      };
+      console.log('FINGERPRINT ' + JSON.stringify(fp));
+      fs.writeFileSync(path.join(OUT, 'det_fingerprint.json'), JSON.stringify(fp, null, 2), 'utf8');
+      fs.writeFileSync(path.join(OUT, 'det_gen.txt'), det.genA, 'utf8');
+    }
   }
 
   const failed = results.filter((r) => !r.ok);

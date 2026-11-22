@@ -188,6 +188,8 @@ function summarize(agg) {
     avgClearTime: levels.filter((l) => l.clearTime > 0).reduce((s, l) => s + l.clearTime, 0) / 20,
     avgRooms: agg.clearRooms / totalRuns,
     avgLevel: agg.levels / totalRuns,
+    /* M2：F5 首领前等级（只统计走到 F5 首领的局），用于与真机探针 14 级同口径对照 */
+    avgLevelAt5: agg.levels5 ? agg.levels5Sum / agg.levels5 : 0,
     avgRunSeconds: agg.seconds / totalRuns,
     fusionRate: agg.fusionRuns / totalRuns,
     avgFusions: agg.fusionTotal / totalRuns,

@@ -1,0 +1,44 @@
+{
+  "id": "sprite",
+  "line": "烬 · 精灵接入 / 压缩复核",
+  "project": "烬",
+  "status": "stopped",
+  "stage": "v2.2.0 已交付并验过；压缩实现待复核处置（未改动主文件）",
+  "doing": "精灵压缩复核（定案 A.2 pngquant vs 当前 Pillow 八叉树）",
+  "note": "1) 主文件与交付件：index_arcane_v2.html 与 delivery\\烬-奥术工程师-试玩版.html 均为 4,257,101 B / MD5 6C7DD7BED7169AB37DD80872E58A171F / version 2.2.0，逐字节一致；check_version.ps1 正向 exit 0。本轮没有对主文件做任何改动，不存在半成品。2) 压缩现状：当前这版是 Pillow 八叉树 256 色 + Floyd-Steinberg（不是定案 A.2 的 pngquant）。pngquant 2.17.0 三族 409,789 / 499,571 / 196,838 = 1,106,198 B，PSNR 37.50 / 42.37 / 43.62 dB；当前 Pillow 304,865 / 283,468 / 139,154 = 727,487 B，PSNR 33.48 / 34.98 / 36.56 dB，base64 969,988 B。200% 对比已做（lab\\sprite_size\\cmp_pillow_{hero,mech,rune}_200pct.png，另加 400% 轮廓边缘 cmp_pillow_*_edge400.png），PSNR 最低族 = hero（33.48 dB）。目视初判：三族平面区都有轻微抖点、轮廓 alpha 边缘比 pngquant 脏，平面区平均误差 3.90 / 3.19 / 2.44 vs pngquant 1.76 / 0.81 / 0.79；尚未给处置结论。3) pngquant 位置已查明：%TEMP%\\pngquant_win\\pngquant\\pngquant.exe（2.17.0）一直在，只是不在 PATH；此前\"本机无 pngquant\"的判断是错的，根因是只查了 PATH 没看 measure_sprites.py 里记录的路径。",
+  "done": [
+    "D4 常红断言已消：判据改为 min(340, 布场后池内数量)×0.9，断言 5/5/0/0、VERDICT PASS",
+    "v2.2.0 三族贴图接入 + 分族加载（hero 即载，mech/rune 延后 1.2s）",
+    "TTI 五次冷启动 799.1 / 778.5 / 806.4 / 828.0 / 849.5 ms，中位 806.4ms（判据 ≤1.2s）",
+    "核对脚本正反两向已过（正向 exit 0，篡改期望 MD5 后 exit 1）",
+    "版本清单里分族字节数已按实测更正（base64 406,488 / 377,960 / 185,540）",
+    "lab\\sprite_size\\cmp_pillow_*_200pct.png 与 cmp_pillow_*_edge400.png 已出图；tools\\sprites_cmp_pngquant.py 已建成（py_compile 通过）"
+  ],
+  "todo": [
+    "压缩处置未决：按 200% 目视终判——判脏则回退 pngquant（≈4.75MB），判不脏则保留并在版本清单写明实现与 PSNR",
+    "fx123_verify2.js 补 mech/rune 贴图白环闪白（sentinel + runesprite 同帧采样），现在只有 void 族矢量描边被覆盖",
+    "场景 12 条（暗角、接触阴影那批）",
+    "真机 60fps 帧格实测未做；闪白帧数结论来自推演 + headless",
+    "压缩实现一旦变更，版本清单措辞、check_version 三值、交付件、TTI/帧预算需同批重跑（版本升 2.2.1）"
+  ],
+  "next": "定压缩处置：看 lab\\sprite_size\\cmp_pillow_{hero,mech,rune}_200pct.png 与 _edge400.png 做终判；若判脏，把 sprites_embed.py 的输入由 sprites\\out\\q 换成 lab\\sprite_size\\bin\\*_sheet.pngquant.png（pngquant quality 82-96，即定案 A.2），重嵌后按顺序跑帧预算 D1–D5 → TTI 五次 → 更新版本清单/check_version/交付件 → 正反两向，版本记 2.2.1。",
+  "updatedAt": "2026-11-12T17:40:00+08:00",
+  "artifacts": [
+    "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+    "D:\\其他\\TRAE宝\\奥术工程师\\delivery\\烬-奥术工程师-试玩版.html",
+    "D:\\其他\\TRAE宝\\奥术工程师\\delivery\\版本清单.txt",
+    "D:\\其他\\TRAE宝\\奥术工程师\\delivery\\check_version.ps1",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\measure.json",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\cmp_pillow_quality.json",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\cmp_pillow_hero_200pct.png",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\cmp_pillow_mech_200pct.png",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\cmp_pillow_rune_200pct.png",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\cmp_pillow_hero_edge400.png",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\cmp_pillow_mech_edge400.png",
+    "D:\\其他\\TRAE宝\\奥术工程师\\lab\\sprite_size\\cmp_pillow_rune_edge400.png",
+    "D:\\其他\\TRAE宝\\奥术工程师\\tools\\sprites_cmp_pngquant.py",
+    "D:\\其他\\TRAE宝\\奥术工程师\\tools\\arcane_perf.js",
+    "D:\\其他\\TRAE宝\\奥术工程师\\tools\\boot_tti.js",
+    "D:\\其他\\TRAE宝\\奥术工程师\\tools\\fx123_verify2.js"
+  ]
+}

@@ -33,6 +33,14 @@ const crypto = require('crypto');
 const DIR = path.join(__dirname, 'sim_panel');
 const C = require(path.join(DIR, 'config.js'));
 
+/* --sim=<绝对路径>：允许指定被测 sim.js（A/B 时用旧版副本做"同代码旧秤"对照） */
+const SIM_ARG = process.argv.find((s) => s.startsWith('--sim='));
+const SIM_PATH = SIM_ARG ? path.resolve(SIM_ARG.slice('--sim='.length)) : path.join(DIR, 'sim.js');
+
+/* 跑分前置闸：sim.ASH 与主文件 ASH_CONFIG 有任何字段/数值漂移就不许跑。
+   上一次就是少了 hpCostPct → ashTakenMul 静默按 0 代价跑了整批。 */
+require('./_ash_drift_check').assertAshDrift();
+
 /**
  * 算文件 MD5（大写），用于口径头指纹。
  * @param {string} file 绝对路径
@@ -40,6 +48,21 @@ const C = require(path.join(DIR, 'config.js'));
  */
 function md5Of(file) {
   return crypto.createHash('md5').update(fs.readFileSync(file)).digest('hex').toUpperCase();
+}
+
+/* 主文件（真·发布物）：D6 落地复核从它的 ASH_CONFIG 里读灼身代价，
+   保证"文档写 0.06、代码里也是 0.06"，不再抄一遍常量自我验证。 */
+const LIVE_HTML = path.join(__dirname, '..', 'index_arcane_v2.html');
+
+/**
+ * 读主文件 ASH_CONFIG.hpCostPct（焚稿灼身的血量代价）。
+ * @returns {number} 例如 0.06；字段缺失直接抛错，防止静默用错值
+ */
+function readAshHpCost() {
+  const html = fs.readFileSync(LIVE_HTML, 'utf8');
+  const m = html.match(/var ASH_CONFIG = \{[\s\S]{0,800}?hpCostPct:\s*([0-9.]+)/);
+  if (!m) throw new Error('主文件 ASH_CONFIG 里没有 hpCostPct');
+  return Number(m[1]);
 }
 
 /**
@@ -78,7 +101,17 @@ const GROUPS = {
   fireball: '基础', frost: '基础', bolt: '基础', heal: '基础', blade: '基础', mine: '基础',
   lavaFissure: 'A', arcanePool: 'A', runeOrbit: 'A', collapseHole: 'A', flameCone: 'A', frostRing: 'A',
   pulseShock: 'S', pierceLance: 'S', skyfall: 'S', hammer: 'S', brand: 'S', ward: 'S',
-  riftStep: 'P0', frostSeal: 'P0'
+  riftStep: 'P0', frostSeal: 'P0',
+  /* D5 虚空针：只在该变体里临时进池（见 D5_CARD / applyConfig），其余变体池子不变 */
+  voidNeedle: 'P1'
+};
+
+/* D5：虚空针。主文件的两条机制（无视 20% 减伤 / 破防期 ×1.3）模拟器无法表达，
+   这里按"纯单体高爆发"的面板建模：64 伤 / 3.2s / 28 法力 / minFloor 4。
+   这条限制会在报告里标注，不能把模拟 Δ 当成最终强度。 */
+const D5_CARD = {
+  id: 'voidNeedle', name: '虚空针', cost: 28, cooldown: 3.2, damage: 64,
+  aoe: false, tag: '单体', minFloor: 4, rarity: 'rare'
 };
 const ALL_IDS = Object.keys(GROUPS);
 const S_IDS = ALL_IDS.filter((id) => GROUPS[id] === 'S');
@@ -108,7 +141,7 @@ function replaceOnce(src, from, to) {
  * @returns {object} 模拟器模块
  */
 function buildSim(v) {
-  let src = fs.readFileSync(path.join(DIR, 'sim.js'), 'utf8');
+  let src = fs.readFileSync(SIM_PATH, 'utf8');
 
   /* --- 基础补丁（所有变体都要，用来记录抽牌日志） --- */
 
@@ -126,10 +159,10 @@ function buildSim(v) {
     '  for (let floor = 1; floor <= maxFloor; floor += 1) {\n'
     + '    p.__auditFloor = floor;\n    p.__floorLevelUps = 0;');
 
-  /* B3：optionPool 增加 minFloor 闸门（模拟器原本不读这个字段） */
+  /* B3：技能段候选池增加 minFloor 闸门（两段池拆分后魔法只在 skillPool） */
   src = replaceOnce(src,
-    'function optionPool(p) {',
-    'function optionPool(p) {\n  const __fl = (p && p.__auditFloor) || 1;');
+    'function skillPool(p) {',
+    'function skillPool(p) {\n  const __fl = (p && p.__auditFloor) || 1;');
   src = replaceOnce(src,
     '  C.MAGIC.forEach((m) => {\n    if (p.magics.includes(m.id)) return;',
     '  C.MAGIC.forEach((m) => {\n    if (p.magics.includes(m.id)) return;\n'
@@ -154,11 +187,13 @@ function buildSim(v) {
       + '    }');
   }
 
-  /* B4：levelUp 内部统一记录（覆盖 gainXp / E1 / S2 全部调用点） */
+  /* B4：levelUp 内部统一记录（覆盖 gainXp / E1 / 全部调用点）
+     两段池下被动段也会走 levelUp：它只出遗物，不参与「魔法可见性」统计，
+     也不该算进「每层升级次数」（否则每 3 级会多记 1 次）。 */
   src = replaceOnce(src,
-    '  applyOption(p, chosen, rng);\n  p.level += 1;\n  if (rec) rec({ choices, effective, chosen, allDud: effective.every((v) => !v) });',
-    '  applyOption(p, chosen, rng);\n  p.level += 1;\n'
-    + '  if (p.__drawLog) {\n'
+    '  if (stage !== \'passive\') p.level += 1;\n  if (rec) rec(',
+    '  if (stage !== \'passive\') p.level += 1;\n'
+    + '  if (p.__drawLog && stage !== \'passive\') {\n'
     + '    p.__drawLog.push({\n'
     + '      floor: p.__auditFloor || 1,\n'
     + '      chosen: chosen && chosen.kind === \'magic\' ? chosen.id : null,\n'
@@ -166,7 +201,7 @@ function buildSim(v) {
     + '    });\n'
     + '    p.__floorLevelUps = (p.__floorLevelUps || 0) + 1;\n'
     + '  }\n'
-    + '  if (rec) rec({ choices, effective, chosen, allDud: effective.every((v) => !v) });');
+    + '  if (rec) rec(');
 
   /* B5：结果带上日志 */
   src = replaceOnce(src,
@@ -195,13 +230,22 @@ function buildSim(v) {
       + '      return;\n'
       + '    }\n'
       + '    const isHeal = m.damage <= 0;');
-    /* 位移卡：伤害只有 12，但给的是"活着"的价值 → 伤害价值下调、生存价值上调，
-       综合分 ≈0.071（与纯伤害魔法的 0.073 基本持平，略低于它，保证不会被无脑优先） */
-    src = replaceOnce(src,
-      '    options.push({ kind: \'magic\', id: m.id, name: m.name, value: 0.10, survival: 0.01, data: m });',
-      '    options.push({ kind: \'magic\', id: m.id, name: m.name,\n'
-      + '      value: (m.tag === \'位移\' ? 0.05 : 0.10),\n'
-      + '      survival: (m.tag === \'位移\' ? 0.12 : 0.01), data: m });');
+    /* 位移卡：伤害只有 12，但给的是"活着"的价值 → 伤害价值固定 0.05、生存价值 0.12。
+       其余伤害卡统一走 damageCardValue（2026-11-09 修秤后的"单次爆发"估值）。
+       兼容旧版 sim（--sim=旧副本）：旧版没有 damageCardValue，按原 0.10 常数贴。 */
+    const NEW_ANCHOR = '    options.push({ kind: \'magic\', id: m.id, name: m.name, value: damageCardValue(m), survival: 0.01, data: m });';
+    const OLD_ANCHOR = '    options.push({ kind: \'magic\', id: m.id, name: m.name, value: 0.10, survival: 0.01, data: m });';
+    if (src.indexOf(NEW_ANCHOR) >= 0) {
+      src = replaceOnce(src, NEW_ANCHOR,
+        '    options.push({ kind: \'magic\', id: m.id, name: m.name,\n'
+        + '      value: (m.tag === \'位移\' ? 0.05 : damageCardValue(m)),\n'
+        + '      survival: (m.tag === \'位移\' ? 0.12 : 0.01), data: m });');
+    } else {
+      src = replaceOnce(src, OLD_ANCHOR,
+        '    options.push({ kind: \'magic\', id: m.id, name: m.name,\n'
+        + '      value: (m.tag === \'位移\' ? 0.05 : 0.10),\n'
+        + '      survival: (m.tag === \'位移\' ? 0.12 : 0.01), data: m });');
+    }
 
     /* F2：效果判定——护盾卡只看有没有护盾，位移卡永远"有效" */
     src = replaceOnce(src,
@@ -251,8 +295,8 @@ function buildSim(v) {
     /* S4（折中案）：S 批提前到 F3 可见，但要求本局已拿到 ≥2 张 A 批才放行。
        目的是"先有基础强化，再开高级档"，避免新手局开局就被 S 批占坑。 */
     src = replaceOnce(src,
-      'function optionPool(p) {\n  const __fl = (p && p.__auditFloor) || 1;',
-      'function optionPool(p) {\n  const __fl = (p && p.__auditFloor) || 1;\n'
+      'function skillPool(p) {\n  const __fl = (p && p.__auditFloor) || 1;',
+      'function skillPool(p) {\n  const __fl = (p && p.__auditFloor) || 1;\n'
       + '  const __SID = ' + JSON.stringify(S_IDS) + ';\n'
       + '  const __AID = ' + JSON.stringify(A_IDS) + ';');
     src = replaceOnce(src,
@@ -268,8 +312,8 @@ function buildSim(v) {
   if (v.scheme === 's3' || v.scheme === 's13') {
     /* S3：连续 4 次升级都没出现 S 批选项 → 第 4 次强制塞一张 S 进候选（只出现，不白送） */
     src = replaceOnce(src,
-      '  const choices = shuffle(rng, pool).slice(0, 3);',
-      '  const choices = shuffle(rng, pool).slice(0, 3);\n'
+      '  const choices = shuffle(rng, pool).slice(0, count);',
+      '  const choices = shuffle(rng, pool).slice(0, count);\n'
       + '  if (p.__s3On) {\n'
       + '    const __SID = ' + JSON.stringify(S_IDS) + ';\n'
       + '    const __hasS = choices.some((o) => o.kind === \'magic\' && __SID.indexOf(o.id) >= 0);\n'
@@ -336,7 +380,21 @@ const VARIANTS = [
      · s1r_rf_c  = 资源房：同样的槽位换成资源房，其余逐位不变
      两个变体唯一的差别就是那一间房的房型，所以 c0 → c 的差值只归因于资源房。 */
   { id: 's1r_rf_c0', name: '采纳版+火球移出+槽位对照', fix: true, scheme: 's1r', banId: 'fireball', cachePlan: 'chest' },
-  { id: 's1r_rf_c',  name: '采纳版+火球移出+资源房',   fix: true, scheme: 's1r', banId: 'fireball', cachePlan: 'cache' }
+  { id: 's1r_rf_c',  name: '采纳版+火球移出+资源房',   fix: true, scheme: 's1r', banId: 'fireball', cachePlan: 'cache' },
+  /* D5 虚空针（单独一批）：baseline = s1r，aug = s1r + voidNeedle，唯一差别是池里多一张卡。 */
+  { id: 's1r_vn', name: '采纳版+虚空针（D5）', fix: true, scheme: 's1r', addCard: 'voidNeedle' },
+  /* D6 焚稿灼身（单独一批）：baseline = s1r，aug = s1r + ash{hpCostPct:0.08}。
+     唯一差别是焚稿开关；hpCostPct=0.08 表示每层灰烬扣 8% 有效生命（承伤 ×1/(1-0.08×层数)）。 */
+  { id: 's1r_ash', name: '采纳版+焚稿灼身(0.08)', fix: true, scheme: 's1r', ash: { enabled: true, hpCostPct: 0.08 } },
+  /* D6 归因对照：只开焚稿机制、不收血量代价（hpCostPct=0）。
+     s1r → s1r_ash0 的差 = 焚稿本身的收益（焚卡+三仪式）；s1r_ash0 → s1r_ash 的差 = 纯血量代价。 */
+  { id: 's1r_ash0', name: '采纳版+焚稿(0代价)', fix: true, scheme: 's1r', ash: { enabled: true, hpCostPct: 0 } },
+  /* D6 数值扫描：0.08 判死后的降档候选（只想回答“改到多少才不亏”，不是继续扩功能） */
+  { id: 's1r_ash04', name: '采纳版+焚稿(0.04)', fix: true, scheme: 's1r', ash: { enabled: true, hpCostPct: 0.04 } },
+  { id: 's1r_ash06', name: '采纳版+焚稿(0.06)', fix: true, scheme: 's1r', ash: { enabled: true, hpCostPct: 0.06 } },
+  /* D6 落地复核：hpCostPct 不写死，直接从主文件 ASH_CONFIG 读。
+     让"主文件里到底是不是 0.06"参与跑分，而不是拿同一个常量自我验证。 */
+  { id: 's1r_ashfile', name: '采纳版+焚稿(读主文件)', fix: true, scheme: 's1r', ashFile: true }
 ];
 
 /* 原值备份（config 是 require 共享对象，改完必须还原） */
@@ -346,6 +404,8 @@ const XP_BACKUP = { baseNeed: C.XP.baseNeed };
 /* D4：层计划是按变体临时改写的，跑完必须逐键还原（undefined 也要还原成"没有这一层"） */
 const ROOM_PLAN_BACKUP = {};
 const CACHE_PLAN_FLOORS = [6, 14];
+/* 变体临时插进 C.MAGIC 的卡（restoreConfig 必须拔掉，否则会污染后续变体） */
+let ADDED_CARD_ID = null;
 
 /**
  * 按变体调整卡表状态（共享 config 对象，跑完必须 restoreConfig）。
@@ -382,6 +442,11 @@ function applyConfig(v) {
       C.ROOM.cacheEmbers = 12;                 // 与主文件 cacheReward.embers 对齐
     }
   }
+  /* D5：把虚空针临时插进卡池（只影响该变体）。config.js 文件不动。 */
+  if (v.addCard === 'voidNeedle' && !C.MAGIC.some((m) => m.id === D5_CARD.id)) {
+    C.MAGIC.push(Object.assign({}, D5_CARD));
+    ADDED_CARD_ID = D5_CARD.id;
+  }
 }
 
 /**
@@ -404,6 +469,12 @@ function restoreConfig() {
   });
   delete C.ROOM.cacheCrystal;
   delete C.ROOM.cacheEmbers;
+  /* D5：拔掉临时卡，保证下一个变体的池子逐位不变 */
+  if (ADDED_CARD_ID) {
+    const i = C.MAGIC.findIndex((m) => m.id === ADDED_CARD_ID);
+    if (i >= 0) C.MAGIC.splice(i, 1);
+    ADDED_CARD_ID = null;
+  }
 }
 
 /* 四口径：与 p0_probe / stack_matrix 完全一致 */
@@ -427,11 +498,15 @@ const PROFILES = [
 function runVariant(v, runs) {
   const SIM = buildSim(v);
   applyConfig(v);
+  /* 主文件只读一次：这个 3MB 的 HTML 不能每局读一遍（16 万次读会拖死跑分） */
+  const ashFileCfg = v.ashFile ? { enabled: true, hpCostPct: readAshHpCost() } : null;
 
   const agg = {
     runs: 0, levelUps: 0, draws: 0, dup: 0, f3Distinct: 0, repeatRuns: 0,
     zeroSAcq: 0, zeroSOffer: 0, anySAcq: 0, anySOffer: 0,
-    cardAcq: {}, cardOffer: {}, prof: {}
+    cardAcq: {}, cardOffer: {}, prof: {},
+    /* 焚稿探针（未启用时为 0）：焚卡次数 / 末态灰烬层数 / 末态卡组张数 */
+    ashBurns: 0, ashStacks: 0, ashDeck: 0, ashRuns: 0
   };
   ALL_IDS.forEach((id) => { agg.cardAcq[id] = 0; agg.cardOffer[id] = 0; });
   PROFILES.forEach((p) => { agg.prof[p.name] = { f10: 0, f20: 0 }; });
@@ -439,7 +514,12 @@ function runVariant(v, runs) {
   PROFILES.forEach((prof) => {
     for (let i = 0; i < runs; i += 1) {
       const seed = C.SIM_PARAMS.baseSeed + i;
-      const r = SIM.runOne(seed, C.PROFILES.bot, 'normal', { charSpec: Object.assign({}, prof.spec) });
+      /* 单局覆写：角色档案照旧；焚稿变体额外带上 ash 配置（其余变体 ov 与原来逐位相同） */
+      const ov = { charSpec: Object.assign({}, prof.spec) };
+      if (v.ash) ov.ash = Object.assign({}, v.ash);
+      /* 读主文件的变体：用本次运行开头读到的那一份（文件改过要重跑，不是边跑边变） */
+      if (ashFileCfg) ov.ash = Object.assign({}, ashFileCfg);
+      const r = SIM.runOne(seed, C.PROFILES.bot, 'normal', ov);
       const log = r.__drawLog || [];
 
       const acq = {};
@@ -472,6 +552,12 @@ function runVariant(v, runs) {
 
       if (r.clearedFloors >= 10) agg.prof[prof.name].f10 += 1;
       if (r.clearedFloors >= C.SIM_PARAMS.maxFloor) agg.prof[prof.name].f20 += 1;
+      if (r.ashBurns) {
+        agg.ashRuns += 1;
+        agg.ashBurns += r.ashBurns;
+        agg.ashStacks += r.ashStacks || 0;
+        agg.ashDeck += r.ashDeck || 0;
+      }
     }
   });
 
@@ -487,7 +573,7 @@ const runs = readRuns();
 const pad = (s, n) => String(s).padEnd(n);
 const pct = (n, d) => (n / d * 100);
 
-console.log('【口径头】sim.js MD5 ' + md5Of(path.join(DIR, 'sim.js'))
+console.log('【口径头】sim.js MD5 ' + md5Of(SIM_PATH)
   + ' | config.js MD5 ' + md5Of(path.join(DIR, 'config.js')));
 console.log('【口径头】基线含熔炉房 ON（G1）｜真·全关 = G0');
 console.log('【口径头】卡池 20 张（基础6 + A6 + S6 + P0 2，运行时补入内存，config 文件不动）');
@@ -505,6 +591,12 @@ if (onlyIds) {
   if (missing.length) throw new Error('未知变体：' + missing.join(','));
 }
 const ACTIVE = onlyIds ? VARIANTS.filter((v) => onlyIds.includes(v.id)) : VARIANTS;
+
+/* 读主文件的变体：把主文件 MD5 与读到的 hpCostPct 打进口径头，日志本身就是证据 */
+if (ACTIVE.some((v) => v.ashFile)) {
+  console.log('【口径头】主文件 ' + path.basename(LIVE_HTML) + ' MD5 ' + md5Of(LIVE_HTML)
+    + ' | 读到 hpCostPct=' + readAshHpCost());
+}
 
 ACTIVE.forEach((v) => {
   process.stdout.write('  跑 ' + v.name + ' ... ');
@@ -546,12 +638,28 @@ if (onlyIds) {
     console.log(pad(v.name, 30) + S_IDS.map((id) => pad(pct(results[v.id].cardAcq[id], results[v.id].runs).toFixed(1), 13)).join(''));
   });
 
+  /* D6 焚稿诊断：只在跑过焚稿变体时打印（不进主表，避免影响其他实验的版面） */
+  ACTIVE.forEach((v) => {
+    const x = results[v.id];
+    if (!x.ashBurns) return;
+    console.log('  [焚稿] ' + v.name
+      + '：触发局 ' + pct(x.ashRuns, x.runs).toFixed(1) + '%'
+      + '｜平均焚 ' + (x.ashBurns / x.runs).toFixed(2) + ' 张/局'
+      + '｜末态灰烬 ' + (x.ashStacks / x.runs).toFixed(2) + ' 层'
+      + '｜触发局末态卡组 ' + (x.ashDeck / Math.max(1, x.ashRuns)).toFixed(2) + ' 张'
+      + '｜升级 ' + (x.levelUps / x.runs).toFixed(2) + ' 次/局');
+  });
+
   const outOnly = {};
   ACTIVE.forEach((v) => { outOnly[v.id] = results[v.id]; });
-  const outTest = path.join(__dirname, '..', '.seedwork', 's_band_test_' + runs + '.json');
+  /* --tag=xxx：给存档文件名加后缀，避免不同实验互相覆盖（例如 D6 焚稿用 ash，不碰 D5 的 n=20000 存档） */
+  const tagArg = process.argv.find((s) => s.startsWith('--tag='));
+  const TAG = tagArg ? tagArg.slice('--tag='.length) : '';
+  const outTest = path.join(__dirname, '..', '.seedwork',
+    's_band_test_' + runs + (TAG ? '_' + TAG : '') + '.json');
   fs.writeFileSync(outTest, JSON.stringify({
     runs,
-    md5: { sim: md5Of(path.join(DIR, 'sim.js')), config: md5Of(path.join(DIR, 'config.js')) },
+    md5: { sim: md5Of(SIM_PATH), config: md5Of(path.join(DIR, 'config.js')) },
     variants: outOnly
   }, null, 2), 'utf8');
   console.log('\n已存档 ' + outTest);
@@ -648,7 +756,7 @@ S_IDS.forEach((id) => {
 const outJson = path.join(__dirname, '..', '.seedwork', 's_visibility_' + runs + '.json');
 fs.writeFileSync(outJson, JSON.stringify({
   runs,
-  md5: { sim: md5Of(path.join(DIR, 'sim.js')), config: md5Of(path.join(DIR, 'config.js')) },
+  md5: { sim: md5Of(SIM_PATH), config: md5Of(path.join(DIR, 'config.js')) },
   variants: VARIANTS,
   modelFix: {
     brandDamage: 108,

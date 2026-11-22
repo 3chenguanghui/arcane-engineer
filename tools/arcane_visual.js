@@ -31,8 +31,10 @@ async function main() {
   await new Promise((r) => { ws.onopen = r; });
   const send = (method, params = {}) => new Promise((res, rej) => { seq += 1; pending.set(seq, (m) => m.error ? rej(new Error(JSON.stringify(m.error))) : res(m.result)); ws.send(JSON.stringify({ id: seq, method, params })); });
   await send('Runtime.enable'); await send('Page.enable');
-  await send('Page.navigate', { url: 'file:///' + FILE.replace(/\\/g, '/') });
-  await sleep(1800);
+  /* v2.2.0：路径含中文，必须 encodeURI，否则 file:// 导航失败停在 about:blank；
+     主文件涨到 4.2MB 后给 2.5s 起底 */
+  await send('Page.navigate', { url: require('url').pathToFileURL(FILE).href });
+  await sleep(2500);
   const ev = async (expression) => {
     const r = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
     if (r.exceptionDetails) throw new Error(r.exceptionDetails.text + ' ' + (r.exceptionDetails.exception && r.exceptionDetails.exception.description));
@@ -43,8 +45,46 @@ async function main() {
     fs.writeFileSync(path.join(OUT, name), Buffer.from(r.data, 'base64'));
   };
 
-  await ev(`(() => { document.getElementById('btnStart').click(); return true; })()`);
-  await sleep(900);
+  /* v2.2.0：标题流程按 firstplay_probe 的同口径走 —— 等 titleLayer 就绪后
+     用真实鼠标事件点 #btnStart → 角色卡 → #btnCharConfirm。
+     element.click() 在这些按钮上不触发内部逻辑（之前误判为"按钮不存在"）。 */
+  const clickSel = async (sel) => {
+    const box = await ev(`(() => {
+      const e = document.querySelector(${JSON.stringify(sel)});
+      if (!e) return null;
+      const b = e.getBoundingClientRect();
+      return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
+    })()`);
+    if (!box) return false;
+    await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: box.x, y: box.y });
+    await send('Input.dispatchMouseEvent', { type: 'mousePressed', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+    await send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: box.x, y: box.y, button: 'left', clickCount: 1 });
+    return true;
+  };
+  let titleReady = false;
+  for (let i = 0; i < 40; i += 1) {
+    titleReady = await ev(`(function(){
+      var t = document.getElementById('titleLayer');
+      return document.readyState === 'complete' && !!t && !t.classList.contains('hidden');
+    })()`);
+    if (titleReady) break;
+    await sleep(150);
+  }
+  if (!(await clickSel('#btnStart'))) {
+    const diag = await ev(`(function(){
+      var t = document.getElementById('titleLayer');
+      return { rs: document.readyState, href: location.href, hasTitle: !!t,
+        cls: t ? t.className : null,
+        cards: document.querySelectorAll('#charGrid .char-card').length,
+        bodyLen: ((document.body && document.body.innerText) || '').length };
+    })()`);
+    throw new Error('#btnStart 不存在 ' + JSON.stringify(diag));
+  }
+  await sleep(800);
+  await clickSel('#charGrid .char-card');
+  await sleep(400);
+  if (!(await clickSel('#btnCharConfirm'))) throw new Error('#btnCharConfirm 不存在');
+  await sleep(1200);
 
   // 生成三种敌人 + 让玩家移动一点，制造可辨识的画面
   await ev(`(() => {
@@ -52,7 +92,7 @@ async function main() {
     d.centerPlayer();
     d.spawnEnemy('wanderer', 120, -40);
     d.spawnEnemy('sentinel', -140, 30);
-    d.spawnEnemy('phaser', 40, 150);
+    d.spawnEnemy('runesprite', 40, 150);
     return d.getState().enemyList;
   })()`);
   await sleep(700);

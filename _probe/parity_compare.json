@@ -1,0 +1,17 @@
+{
+  "a": {
+    "file": "D:\\其他\\TRAE宝\\奥术工程师\\_backup\\feely_20261110\\before_unused_keys.html",
+    "length": 38572,
+    "fnv1a32Hex": "0xe0306ecb",
+    "sha256": "79d3583538ad4b0213b73cd9852e5c31c11ad3d0f9a55c3584f34e33c4a03010"
+  },
+  "b": {
+    "file": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+    "length": 38572,
+    "fnv1a32Hex": "0xe0306ecb",
+    "sha256": "79d3583538ad4b0213b73cd9852e5c31c11ad3d0f9a55c3584f34e33c4a03010"
+  },
+  "byteIdentical": true,
+  "simulateIdentical": true,
+  "firstDiff": null
+}

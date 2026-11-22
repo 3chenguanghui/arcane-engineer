@@ -1,0 +1,321 @@
+﻿{
+  "file": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "tag": "geo3",
+  "at": "2026-11-10T10:32:38.304Z",
+  "geom": {
+    "floor": 1,
+    "rooms": [
+      {
+        "id": 0,
+        "type": "battle",
+        "name": "战斗",
+        "x": 170,
+        "y": 1168,
+        "w": 795,
+        "h": 544,
+        "cx": 567,
+        "cy": 1440,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 2,
+        "sides": {
+          "right": 2
+        }
+      },
+      {
+        "id": 1,
+        "type": "chest",
+        "name": "宝箱",
+        "x": 1128,
+        "y": 816,
+        "w": 774,
+        "h": 512,
+        "cx": 1515,
+        "cy": 1072,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 3,
+        "sides": {
+          "bottom": 1,
+          "left": 1,
+          "right": 1
+        }
+      },
+      {
+        "id": 2,
+        "type": "start",
+        "name": "休整点",
+        "x": 1116,
+        "y": 1398,
+        "w": 851,
+        "h": 649,
+        "cx": 1542,
+        "cy": 1723,
+        "cleared": false,
+        "locked": false,
+        "visited": true,
+        "doors": 3,
+        "sides": {
+          "top": 1,
+          "left": 1,
+          "right": 1
+        }
+      },
+      {
+        "id": 3,
+        "type": "chest",
+        "name": "宝箱",
+        "x": 2165,
+        "y": 1143,
+        "w": 630,
+        "h": 625,
+        "cx": 2480,
+        "cy": 1455,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 3,
+        "sides": {
+          "left": 2,
+          "right": 1
+        }
+      },
+      {
+        "id": 4,
+        "type": "boss",
+        "name": "首领",
+        "x": 3006,
+        "y": 1122,
+        "w": 854,
+        "h": 648,
+        "cx": 3433,
+        "cy": 1446,
+        "cleared": false,
+        "locked": false,
+        "visited": false,
+        "doors": 1,
+        "sides": {
+          "left": 1
+        }
+      }
+    ],
+    "doorCount": 12,
+    "doors": [
+      {
+        "room": 0,
+        "side": "right",
+        "x": 965,
+        "y": 1555,
+        "to": 2
+      },
+      {
+        "room": 0,
+        "side": "right",
+        "x": 965,
+        "y": 1248,
+        "to": 1
+      },
+      {
+        "room": 1,
+        "side": "bottom",
+        "x": 1515,
+        "y": 1328,
+        "to": 2
+      },
+      {
+        "room": 1,
+        "side": "left",
+        "x": 1128,
+        "y": 1248,
+        "to": 0
+      },
+      {
+        "room": 1,
+        "side": "right",
+        "x": 1902,
+        "y": 1236,
+        "to": 3
+      },
+      {
+        "room": 2,
+        "side": "top",
+        "x": 1515,
+        "y": 1398,
+        "to": 1
+      },
+      {
+        "room": 2,
+        "side": "left",
+        "x": 1116,
+        "y": 1555,
+        "to": 0
+      },
+      {
+        "room": 2,
+        "side": "right",
+        "x": 1967,
+        "y": 1583,
+        "to": 3
+      },
+      {
+        "room": 3,
+        "side": "left",
+        "x": 2165,
+        "y": 1583,
+        "to": 2
+      },
+      {
+        "room": 3,
+        "side": "left",
+        "x": 2165,
+        "y": 1236,
+        "to": 1
+      },
+      {
+        "room": 3,
+        "side": "right",
+        "x": 2795,
+        "y": 1455,
+        "to": 4
+      },
+      {
+        "room": 4,
+        "side": "left",
+        "x": 3006,
+        "y": 1455,
+        "to": 3
+      }
+    ],
+    "corridors": [
+      {
+        "i": 0,
+        "a": 1,
+        "b": 2,
+        "x": 1467,
+        "y": 1324,
+        "w": 96,
+        "h": 96,
+        "horiz": false
+      },
+      {
+        "i": 1,
+        "a": 3,
+        "b": 4,
+        "x": 2791,
+        "y": 1407,
+        "w": 219,
+        "h": 96,
+        "horiz": true
+      },
+      {
+        "i": 2,
+        "a": 2,
+        "b": 3,
+        "x": 1963,
+        "y": 1535,
+        "w": 206,
+        "h": 96,
+        "horiz": true
+      },
+      {
+        "i": 3,
+        "a": 2,
+        "b": 0,
+        "x": 961,
+        "y": 1507,
+        "w": 159,
+        "h": 96,
+        "horiz": true
+      },
+      {
+        "i": 4,
+        "a": 0,
+        "b": 1,
+        "x": 961,
+        "y": 1200,
+        "w": 171,
+        "h": 96,
+        "horiz": true
+      },
+      {
+        "i": 5,
+        "a": 3,
+        "b": 1,
+        "x": 1898,
+        "y": 1188,
+        "w": 271,
+        "h": 96,
+        "horiz": true
+      }
+    ],
+    "corridorCount": 6,
+    "pairs": {
+      "0-2": 2,
+      "0-1": 2,
+      "1-2": 2,
+      "1-3": 2,
+      "2-3": 2,
+      "3-4": 2
+    },
+    "reachable": {
+      "rooms": [
+        0,
+        1,
+        2,
+        3,
+        4
+      ],
+      "blocks": 17209
+    },
+    "world": {
+      "w": 4000,
+      "h": 2875
+    }
+  },
+  "black": {
+    "blocks": [
+      {
+        "cssX": 0,
+        "cssY": 0,
+        "cssW": 1416,
+        "cssH": 808,
+        "fill": 0.63,
+        "roomId": 2,
+        "roomType": "start",
+        "roomSeen": true
+      }
+    ],
+    "player": {
+      "x": 1542,
+      "y": 1723
+    }
+  },
+  "fit": {
+    "zoom": 0.38,
+    "cam": {
+      "x": 159,
+      "y": 373
+    },
+    "bounds": {
+      "minX": 169.60523778852075,
+      "minY": 816.4265663749538,
+      "maxX": 3859.640091677662,
+      "maxY": 2047.6383410734124
+    },
+    "view": {
+      "vw": 3711,
+      "vh": 2118
+    },
+    "fits": true
+  },
+  "marked": {
+    "ok": true,
+    "cam": {
+      "x": 159,
+      "y": 373
+    },
+    "zoom": 0.38
+  }
+}

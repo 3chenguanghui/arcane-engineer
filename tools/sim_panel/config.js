@@ -8,6 +8,25 @@
  *   3) 主文件不改动，这里的改动只影响离线模拟与面板。
  *
  * 重新核对的方法：在主文件里搜索下面注释中的符号名（例如 GAME_CONFIG）。
+ *
+ * 同步记录（2026-11-13，对齐 index_arcane_v2.html v2.2.7 / 4,273,779 B /
+ * MD5 F68320FD6F4668B3358F6A85D6922828）：
+ *   · RAMP_BY_FLOOR[1..5]：battle / elite / hpScale 全部按 HTML 现值；
+ *   · XP.baseNeed 80 → 40；ONBOARD.weakFloor1.hpMul 0.6 → 0.9；
+ *   · FLOOR_GEN.enemyCountCap 7 → 10；GAME.talentMaxLevel 5 → 3；
+ *   · ROOM.plan 补齐 F1–F20（F1–F5 每层 6 个内容槽，F6–F20 每层 3 个）；
+ *   · shardling 去掉 HTML 不存在的 selfdestruct 字段。
+ *
+ * 已知引擎缺口（本副本未建模，读数时必须区分）：
+ *   1) sim.js 仍按 budgetFrom=6，前五层额外 ×0.8 且 F1 上限 3，
+ *      主文件 ENEMY_BUDGET_CONFIG.minFloor=1 已从 F1 起走 ramp 硬区间；
+ *   2) 未建模 DENSITY_CONFIG 的 +1/+2 敌潮；
+ *   3) 未建模 enemyWaveFirst 首波拆分（一房一次出完）；
+ *   4) 未建模 areaMul（统一按 1.0 计）；
+ *   5) 未读 BOSS_CONFIG.hpScaleByFloor（F2/F3/F12–F19 首领血量偏高）；
+ *   6) 不建模 F5 生存房额外刷怪。
+ *   ⇒ 每房怪数 / 首波数请用 _room_density_probe.js 或主文件探针，
+ *     不要用 run.js 的整局统计代替。
  * ============================================================================ */
 'use strict';
 
@@ -23,12 +42,14 @@ const GAME = {
   contactInterval: 0.85,    // 单只敌人两次接触伤害间隔
   contactLock: 0.32,        // 玩家侧全局接触伤害冷却（防止 6 只叠加）
   floorScale: 1.07,         // 单只敌人血量 ×1.07^层
-  /* C1-11 调参：非首领怪基础血量 −10%（主文件 ENEMY_BUDGET_CONFIG.globalHpMul） */
-  enemyHpMul: 0.9,
+  /* C1-11 调参：非首领怪基础血量 −10%（主文件 ENEMY_BUDGET_CONFIG.globalHpMul）
+     回削 E（2026-11-09）：0.9 → 1.035（×1.15），与主文件 globalHpMul 同步
+     回削 F（2026-11-09）：1.035 → 1.5525（再 ×1.50），与主文件同步 */
+  enemyHpMul: 1.5525,
   speedScaleCap: 1.8,       // 敌人速度缩放上限
   playerSpeed: 230,         // 玩家移速（用于估算走图开销）
   finalFloor: 5,            // 正式一局 5 层通关
-  talentMaxLevel: 5
+  talentMaxLevel: 3         // 主文件 GAME_CONFIG.talentMaxLevel（运行时无消费者，仅兼容）
 };
 
 /* ---------------------------------------------------------------------------
@@ -56,7 +77,7 @@ const ONBOARD = {
   maxFloors: 5,
   enemyCountMul: 0.8,                       // 前五层敌人数 -20%
   floor1CountCap: 3,                        // 第 1 层单房敌人数上限
-  weakFloor1: { hpMul: 0.6, speedMul: 0.8, damageMul: 0.7 }
+  weakFloor1: { hpMul: 0.9, speedMul: 0.8, damageMul: 0.7 }   // D3：0.6 → 0.9
 };
 
 /* ---------------------------------------------------------------------------
@@ -79,7 +100,7 @@ const ENEMY_TYPES = {
   warden:     { id: 'warden',     name: '戍卫碑像',   hp: 80, damage: 11, ai: 'chaser', role: 'rush' },
   /* 虚空层（F13-18） */
   stalker:    { id: 'stalker',    name: '潜行者',     hp: 42, damage: 8,  ai: 'blink', role: 'orbit' },
-  shardling:  { id: 'shardling',  name: '裂隙残片',   hp: 26, damage: 6,  ai: 'chaser', role: 'rush', selfdestruct: true },
+  shardling:  { id: 'shardling',  name: '裂隙残片',   hp: 26, damage: 6,  ai: 'chaser', role: 'rush' },
   devourer:   { id: 'devourer',   name: '虚空吞噬者', hp: 92, damage: 12, ai: 'chaser', role: 'burst' },
   riftling:   { id: 'riftling',   name: '裂隙幼体',   hp: 33, damage: 6,  ai: 'blink', role: 'summon' },
   screamer:   { id: 'screamer',   name: '尖啸者',     hp: 50, damage: 6,  ai: 'shooter', role: 'suppress', fireInterval: 2.5 },
@@ -101,11 +122,13 @@ const REGION_POOLS = {
 
 /* 每层战斗房 / 精英房敌人数区间与单只血量倍率（来源：ENEMY_BUDGET_CONFIG.rampByFloor，L10510） */
 const RAMP_BY_FLOOR = {
-  1: { battle: [4, 4], elite: [3, 3], hpScale: 1.543 },
-  2: { battle: [4, 4], elite: [3, 3], hpScale: 0.961 },
-  3: { battle: [5, 5], elite: [4, 4], hpScale: 0.800 },
-  4: { battle: [5, 5], elite: [4, 4], hpScale: 0.546 },
-  5: { battle: [5, 6], elite: [4, 5], hpScale: 0.550 },
+  /* 2026-11-13 同步：F1–F5 与主文件 rampByFloor 现值逐位一致
+     （第二批 A 档 v2.2.8：战斗房 10–12、精英房 5–7、hpScale 经主文件探针复标）。 */
+  1: { battle: [10, 10], elite: [5, 5], hpScale: 0.297 },
+  2: { battle: [10, 10], elite: [6, 6], hpScale: 0.273 },
+  3: { battle: [11, 11], elite: [6, 6], hpScale: 0.227 },
+  4: { battle: [11, 11], elite: [7, 7], hpScale: 0.277 },
+  5: { battle: [12, 12], elite: [7, 7], hpScale: 0.405 },
   6: { battle: [7, 7], elite: [5, 5], hpScale: 0.515 },
   7: { battle: [7, 7], elite: [5, 5], hpScale: 0.467 },
   8: { battle: [7, 8], elite: [5, 6], hpScale: 0.428 },
@@ -131,24 +154,45 @@ const ELITE_ROOM = { countMul: 1.4, countCap: 8, hpMul: 1.35 };
 /* 楼层生成预算（来源：FLOOR_GEN_CONFIG，主文件 L10790–L10810）
  * budgetFrom：从第 6 层起，战斗/精英房敌人数改用 rampByFloor 硬区间，不再叠 ×1.4；
  * enemyCountCap：基础上限 7，但上限 = max(7, 区间上界)，所以 F20 战斗房可以是 9 只。 */
-const FLOOR_GEN = { budgetFrom: 6, enemyCountCap: 7 };
+const FLOOR_GEN = {
+  budgetFrom: 6,        // sim 侧分界（主文件 minFloor=1；见文件头"已知引擎缺口"第 1 条）
+  enemyCountCap: 12     // 主文件 FLOOR_GEN_CONFIG.enemyCountCap（v2.2.8：10 → 12）
+};
 
 /* 房间类型权重（来源：ROOM_TYPE_CONFIG.weights，L11072）
- * 每层固定 5 间：1 出生房 + 3 内容房 + 1 首领房（GAME_CONFIG.floorMinRooms=5） */
+ * 兜底层口径：1 出生房 + 3 内容房 + 1 首领房；1–20 层实际读下方 plan。 */
 const ROOM = {
-  roomsPerFloor: 5,
-  contentRooms: 3,
+  roomsPerFloor: 10,
+  contentRooms: 8,
   weights: { battle: 3, elite: 1, chest: 1, event: 1, rest: 1 },
   eliteWeightFloor2: 2,          // 第 2 层起精英权重提高
   restHealRatio: 0.3,            // 休整房回复 30% 最大生命
   chestCrystal: 1,               // 宝箱房即时结晶
-  /* B2-a 熔炉房：只覆盖"确实带熔炉"的层（与主文件 applyRoomMixPlan 的层计划一致），
-     其余层继续走上面的随机权重，保证四口径可与历史基线逐层对比。
-     F4 主文件：battle / elite / shop → 熔炉替代商店
-     F13 主文件：battle / rest / chest → 熔炉替代宝箱 */
+  /* 层计划：2026-11-14 按主文件 v2.2.9（第三批）逐行同步。
+     每层 8 个内容槽（1 出生 + 8 内容 + 1 首领 = 10 间）。
+     同步前这里是 F1–F5 6 槽 / F6–F20 3 槽的旧版，差三倍，
+     任何用它跑出来的人群结论都不能与主文件对照。 */
   plan: {
-    4: ['battle', 'elite', 'forge'],
-    13: ['battle', 'rest', 'forge']
+    1: ['battle', 'battle', 'battle', 'battle', 'chest', 'rest', 'battle', 'shop'],
+    2: ['battle', 'battle', 'battle', 'elite', 'chest', 'rest', 'battle', 'cache'],
+    3: ['battle', 'battle', 'battle', 'battle', 'chest', 'rest', 'battle', 'shop'],
+    4: ['battle', 'battle', 'battle', 'elite', 'chest', 'rest', 'battle', 'cache'],
+    5: ['battle', 'battle', 'battle', 'survival', 'chest', 'rest', 'battle', 'shop'],
+    6: ['battle', 'elite', 'cache', 'battle', 'rest', 'chest', 'battle', 'shop'],
+    7: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge'],
+    8: ['battle', 'elite', 'event', 'battle', 'rest', 'chest', 'battle', 'shop'],
+    9: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'cache'],
+    10: ['battle', 'elite', 'survival', 'battle', 'rest', 'chest', 'battle', 'shop'],
+    11: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge'],
+    12: ['battle', 'elite', 'shop', 'battle', 'rest', 'chest', 'battle', 'cache'],
+    13: ['battle', 'rest', 'forge', 'battle', 'battle', 'chest', 'battle', 'shop'],
+    14: ['battle', 'elite', 'cache', 'battle', 'rest', 'chest', 'battle', 'shop'],
+    15: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'forge'],
+    16: ['battle', 'elite', 'rest', 'battle', 'battle', 'chest', 'battle', 'shop'],
+    17: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge'],
+    18: ['battle', 'elite', 'event', 'battle', 'rest', 'chest', 'battle', 'shop'],
+    19: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'cache'],
+    20: ['battle', 'elite', 'rest', 'battle', 'battle', 'chest', 'battle', 'shop']
   },
   forgeEmberCost: 4,            // 熔炉首次刻印价（ENGRAVE_CONFIG.forgeLadder[0]）
   emberPerKill: 1,              // 普通击杀余烬（U11_CONFIG.emberPerKill）
@@ -259,11 +303,17 @@ const EXECUTION = {
  * 8. 首领（来源：BOSS_CONFIG，主文件 L13592）
  * ------------------------------------------------------------------------- */
 const BOSS = {
+  /* 第五批 A-1：浅层（≤5 层）首领血量阶梯，与主文件 SHALLOW_TUNING_CONFIG 同源。
+     run.js 可用 ov.shallowBossHpScaleByFloor 覆盖（第二档 A-2 评估用）。 */
+  shallow: { maxFloor: 5, bossHpScaleByFloor: { 1: 1.00, 2: 1.05, 3: 1.10, 4: 1.15, 5: 1.20 } },
   introTime: 0.75,
   phaseThreshold: 0.5,
   hpBase: 1250,
   hpFloorMul: 1.30,
-  hpCap: 3200,
+  /* 回削 E（2026-11-09）：3200 → 4160（×1.3），与主文件 BOSS_CONFIG.hpCap 同步。
+     首领段长的唯一有效旋钮：bossHpMul 会被 Math.min(cap, …) 吞掉（该字段已删，传值会抛错）。
+     回削 F（2026-11-09）：4160 → 8320（再 ×2.0），与主文件同步 */
+  hpCap: 8320,
   /* C1-15 / B1：上限按层抬升 cap(f) = hpCap × (1 + 0.04 × (f−1))（与主文件同源） */
   hpCapRampPerFloor: 0.04,
   /* C1-15 · 75 秒硬闸门：真机 F20 首领战 135.4s → scale = 75/135.4 ≈ 0.55 */
@@ -340,7 +390,7 @@ const ECONOMY = {
 /* 敌人 XP 与升级门槛（来源：XP_CONFIG，L9811） */
 const XP = {
   killXp: { normal: 10, elite: 35, boss: 120 },
-  baseNeed: 80,
+  baseNeed: 40,        // C2 首玩爽感：80 → 40（主文件 XP_CONFIG.baseNeed）
   growth: 1.28
 };
 
@@ -370,7 +420,14 @@ const SIM_PARAMS = {
   sensitivityRuns: 4000,      // 每个敏感度档位的局数
   sensitivityMuls: [0.9, 1.0, 1.1],
   approachSeconds: 4,         // 进入房间 + 接敌的固定开销（秒）
-  roomLenPenalty: 1.0         // 房间长度对走位的影响系数（保留调参入口）
+  roomLenPenalty: 1.0,        // 房间长度对走位的影响系数（保留调参入口）
+  /* 两段池结构（对齐主文件 index_arcane_v2.html）
+     skillCount   技能段每次给几张（主文件 REWARD_CHOICES_CONFIG.count 默认 4）
+     passiveEvery 每几级额外接一次被动段（主文件 XP_CONFIG.passiveEvery 默认 3）
+     passiveCount 被动段每次给几张（主文件 XP_CONFIG.passiveCount 默认 3） */
+  skillCount: 4,
+  passiveEvery: 3,
+  passiveCount: 3
 };
 
 module.exports = {

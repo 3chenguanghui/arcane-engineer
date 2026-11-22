@@ -35,6 +35,9 @@ const DIR = path.join(__dirname, 'sim_panel');
 const C = require(path.join(DIR, 'config.js'));
 const SIM = require(path.join(DIR, 'sim.js'));
 
+/* 跑分前置闸：sim.ASH 与主文件 ASH_CONFIG 有任何字段/数值漂移就不许跑。 */
+require('./_ash_drift_check').assertAshDrift();
+
 /**
  * 算文件 MD5（大写），用于口径头指纹。
  * @param {string} file 绝对路径

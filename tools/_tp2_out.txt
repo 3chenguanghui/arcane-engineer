@@ -1,0 +1,118 @@
+﻿{
+  "file": "D:\\其他\\TRAE宝\\奥术工程师\\index_arcane_v2.html",
+  "tag": "final",
+  "at": "2026-11-10T10:35:03.269Z",
+  "checks": {
+    "roomChanged": true,
+    "insideRoom": true,
+    "wallGapOk": true,
+    "enemyGapOk": true,
+    "wallGapAtLandingOk": true,
+    "fadeUsed": true,
+    "teleportCounted": true,
+    "blockedWhileEnemiesAlive": true
+  },
+  "pick": {
+    "cur": 1,
+    "cand": [
+      0,
+      2,
+      3
+    ],
+    "types": [
+      "battle",
+      "battle",
+      "chest"
+    ]
+  },
+  "before": {
+    "roomId": 1,
+    "roomType": "start",
+    "player": {
+      "x": 1529,
+      "y": 1455
+    },
+    "fade": {
+      "mode": "room",
+      "target": "1",
+      "dur": 0.18,
+      "peak": 0.74026
+    },
+    "stats": {
+      "count": 0,
+      "blocked": 0,
+      "last": null
+    },
+    "wallGap": 322,
+    "insideRoom": true,
+    "nearestEnemy": 714,
+    "nearestEnemyRoom": 0
+  },
+  "clickPoint": {
+    "x": 31,
+    "y": 375,
+    "wx": 736,
+    "wy": 1422,
+    "d": 158.98957628989592
+  },
+  "midFade": {
+    "active": true,
+    "mode": "room",
+    "target": "1",
+    "dur": 0.28,
+    "opacity": 0.922267
+  },
+  "after": {
+    "roomId": 0,
+    "roomType": "battle",
+    "player": {
+      "x": 724,
+      "y": 1426
+    },
+    "fade": {
+      "mode": "room",
+      "target": "1",
+      "dur": 0.18,
+      "peak": 1
+    },
+    "stats": {
+      "count": 1,
+      "blocked": 0,
+      "last": {
+        "from": {
+          "x": 1529,
+          "y": 1455
+        },
+        "to": {
+          "x": 724,
+          "y": 1426
+        },
+        "roomId": 0,
+        "retired": true,
+        "nearestEnemyAtLanding": 119,
+        "wallGapAtLanding": 171,
+        "at": 1.167
+      }
+    },
+    "wallGap": 171,
+    "insideRoom": true,
+    "nearestEnemy": 78,
+    "nearestEnemyRoom": 0
+  },
+  "blockedSetup": {
+    "other": 1,
+    "p": {
+      "x": 1036,
+      "y": 222
+    },
+    "onCanvas": true,
+    "blockedBefore": 0
+  },
+  "blockedAfter": {
+    "roomId": 0,
+    "blocked": 1,
+    "count": 1,
+    "toast": "本房没清完 · 清完敌人才选下一间"
+  },
+  "verdict": "PASS"
+}

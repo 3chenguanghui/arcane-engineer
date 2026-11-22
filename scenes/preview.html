@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>烬 · 场景建模提质对照（起点房 / 首领房 · 无门版）</title>
+<style>
+  :root {
+    --bg: #070a10;
+    --panel: #0c121b;
+    --line: #1d2836;
+    --text: #cfd8e3;
+    --dim: #7f8d9f;
+    --gold: #ffc247;
+    --cyan: #62e6ff;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--text); }
+  body {
+    font: 14px/1.65 "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    min-width: 1200px;
+  }
+  header {
+    padding: 16px 24px 10px;
+    border-bottom: 1px solid var(--line);
+    background: linear-gradient(180deg, #0d1420, #080c13);
+  }
+  header h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: .5px; }
+  header .sub { color: var(--dim); font-size: 12.5px; }
+  header .sub b { color: var(--text); font-weight: 600; }
+  header .sub .gold { color: var(--gold); }
+  main { padding: 16px 20px 4px; }
+  .cmp { display: flex; gap: 18px; align-items: flex-start; margin-bottom: 20px; }
+  .cmp > h3 {
+    flex: 0 0 100%; margin: 0; font-size: 13px; font-weight: 600; color: var(--dim);
+    letter-spacing: .5px;
+  }
+  .cmp { flex-wrap: wrap; }
+  .panel {
+    flex: 1 1 0; min-width: 0; max-width: 1120px;
+    background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+  }
+  .panel-head { display: flex; align-items: center; gap: 10px; padding: 10px 16px 6px; }
+  .panel-head h2 { margin: 0; font-size: 15px; font-weight: 600; }
+  .tag {
+    font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid;
+    letter-spacing: .5px; white-space: nowrap;
+  }
+  .tag.old { color: #ff9a9a; border-color: #5a2530; background: #2a1016; }
+  .tag.new { color: var(--cyan); border-color: #1d4d5c; background: #0b2530; }
+  /* 画布内部固定 1120×880 渲染，显示尺寸交给浏览器等比缩放：
+     窄屏上整间房仍然看得全，出图仍是 1:1 */
+  canvas.scene {
+    display: block; width: calc(100% - 32px); margin: 0 16px;
+    aspect-ratio: 1120 / 880; border-radius: 8px;
+  }
+  .cap { padding: 8px 16px 14px; color: var(--dim); font-size: 12px; }
+  .cap b { color: var(--text); }
+  #closeups {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+    padding: 6px 20px 20px;
+  }
+  #closeups figure { margin: 0; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  #closeups canvas { display: block; width: 100%; aspect-ratio: 640 / 460; }
+  #closeups figcaption { padding: 6px 14px 10px; color: var(--dim); font-size: 12px; }
+  footer { padding: 4px 24px 26px; color: var(--dim); font-size: 12px; }
+  footer code { color: #9fd7ff; }
+  #err {
+    display: none; margin: 10px 20px; padding: 10px 14px; border-radius: 8px;
+    background: #3a1116; border: 1px solid #7a2a35; color: #ffb3b3; white-space: pre-wrap;
+    font: 12px/1.5 Consolas, monospace;
+  }
+  /* 单张出图模式：?shot=start-new|start-old|boss-new|boss-old|den10|den25|stairs|junction|decor|boss-close */
+  #shotStage { display: none; position: fixed; inset: 0; background: #05070b; }
+  #cvShot { display: block; width: 100vw; height: 100vh; }
+  body.shot header, body.shot main, body.shot #closeups, body.shot footer { display: none; }
+  body.shot { min-width: 0; }
+  body.shot #shotStage { display: block; }
+</style>
+</head>
+<body>
+<header>
+  <h1>烬 · 场景建模提质对照 · 起点房 / 首领房（无门版）</h1>
+  <div class="sub">
+    房间 <b>1216 × 896 px</b>（<b>ROOM_SCALE_CONFIG.scale = 2.0</b> 区间 960–1376 × 768–1056 的中值）　墙厚 <b>18</b>　门宽 <b>96</b>（<b>本轮关闭</b>：出口改为传送，四面完整墙）　可走面积 <b id="statWalk">--</b>　相机 <b>zoom 0.85</b> · 高度按 <b>52°</b> 正交收缩（cos52° = 0.6157）<br>
+    新场景实测（起点房 / 10 件）：三角面 <b class="gold" id="statTri">--</b>　贴图 <b class="gold" id="statTex">--</b>　单帧绘制 <b class="gold" id="statMs">--</b>（本页离屏重绘实测，<b>不是游戏内帧率</b>）
+  </div>
+</header>
+<div id="err"></div>
+
+<main>
+  <section class="cmp">
+    <h3>起点房 · 10 件装饰（当前密度）</h3>
+    <div class="panel">
+      <div class="panel-head"><span class="tag old">旧画法</span><h2>底图烘焙：地面 / 墙 / 装饰全是 2D 图层</h2></div>
+      <canvas id="cvStartOld" class="scene"></canvas>
+      <div class="cap">按主文件 2D 画法复刻：64px 地砖 + 18px 平墙带 + 无投影的椭圆贴片（不是游戏截图）。</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="tag new">新场景</span><h2>实体预制件：石板地面 + 62 高墙体 + 踢脚线 + 体积装饰</h2></div>
+      <canvas id="cvStartNew" class="scene"></canvas>
+      <div class="cap">同一房心、同一 <b>0.85</b> 缩放。<b>无门</b>：四面完整墙，出口靠传送。</div>
+    </div>
+  </section>
+
+  <section class="cmp">
+    <h3>首领房 · 金色楼梯 + 火盆 + 断柱（10 件）</h3>
+    <div class="panel">
+      <div class="panel-head"><span class="tag old">旧画法</span><h2>楼梯只是地上一枚旋转 45° 的菱形</h2></div>
+      <canvas id="cvBossOld" class="scene"></canvas>
+      <div class="cap">同一间首领房，旧画法：楼梯是菱形标记，火盆/断柱都只是地面贴片。</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="tag new">新场景</span><h2>6 级实体台阶 + 包边 + 落地影 + 火光</h2></div>
+      <canvas id="cvBossNew" class="scene"></canvas>
+      <div class="cap">同一机位。台阶有踏步高差与鼻线，火盆有光晕，断柱有断口。</div>
+    </div>
+  </section>
+
+  <section class="cmp">
+    <h3>装饰密度对照 · 起点房（<b>10 件</b> vs <b>25 件</b>，布点未定，等你看图拍板）</h3>
+    <div class="panel">
+      <div class="panel-head"><span class="tag old">方案 A</span><h2>10 件（沿用当前密度）</h2></div>
+      <canvas id="cvDen10" class="scene"></canvas>
+      <div class="cap">房间面积放大 2.56 倍后，10 件读起来是"空"。这是沿用旧密度的样子。</div>
+    </div>
+    <div class="panel">
+      <div class="panel-head"><span class="tag new">方案 B</span><h2>25 件（同密度换算 24–26 件）</h2></div>
+      <canvas id="cvDen25" class="scene"></canvas>
+      <div class="cap">按 2.56 倍面积换算的等密度布点，只贴墙、中心战斗区留空。</div>
+    </div>
+  </section>
+
+  <section id="closeups">
+    <figure><canvas id="cvStairs"></canvas><figcaption>金色楼梯特写 · 2.4×：6 级实体台阶、包边、接触阴影</figcaption></figure>
+    <figure><canvas id="cvJunction"></canvas><figcaption>墙地交界 · 2.8×：踢脚线 + 软化 AO，不是一条硬线</figcaption></figure>
+    <figure><canvas id="cvDecor"></canvas><figcaption>装饰特写 · 2.4×：木箱堆 / 木桶 / 管路，每件有厚度与投影</figcaption></figure>
+    <figure><canvas id="cvBossClose"></canvas><figcaption>首领房祭坛特写 · 1.8×：祭坛 + 火盆 + 断柱</figcaption></figure>
+  </section>
+</main>
+
+<footer>
+  数据来源：<code>index_arcane_v2.html</code>（只读）的 <code>ROOM_SCALE_CONFIG</code>、<code>cameraZoom()</code>、<code>GAME_CONFIG.corridorWidth=96</code>、<code>U10_CONFIG.wallThickness=18</code>。
+  门洞代码保留为开关（<code>SHOW_DOORS</code>），本轮关闭。贴图为运行时程序化生成，无外部素材。
+</footer>
+
+<div id="shotStage"><canvas id="cvShot"></canvas></div>
+
+<script>
+'use strict';
+
+/* ============================================================================
+   0. 错误兜底：任何脚本异常直接显示在页面上，避免"看起来空白但其实是报错"
+   ========================================================================== */
+window.addEventListener('error', (e) => {
+  const box = document.getElementById('err');
+  box.style.display = 'block';
+  box.textContent += '[error] ' + (e.message || e.error) + '\n' + (e.filename || '') + ':' + (e.lineno || '') + '\n';
+});
+
+/* ============================================================================
+   1. 实测常量（全部来自主文件，不做主观估计）
+   ----------------------------------------------------------------------------
+   ROOM：1216×896。用户要的房间是原 760×560 的 1.6 倍观感，对应主文件
+         ROOM_SCALE_CONFIG.scale = 2.0；该档位世界尺寸 960–1376 × 768–1056，
+         取中值 1216×896。
+   WALL：墙厚 18（U10_CONFIG.wallThickness）。物理尺寸不随房间放大，
+         否则砖缝会显得笨重、可走面积也会失真。随面积增加的只有地面
+         网格数量与装饰件数。
+   DOOR：门洞宽 96（GAME_CONFIG.corridorWidth）。本轮结构改成"四面完整墙 +
+         传送出口"，所以门洞代码保留但开关关闭（SHOW_DOORS = false）。
+   ZOOM：cameraZoom() 在 CAMERA_DISTANCE_CONFIG.zoom=0.85、enabled=true 时恒为 0.85。
+   DECOR：旧密度 10 件（战斗房密度 1.0 × 10）；面积放大 2.56 倍后同密度约 25 件。
+   ========================================================================== */
+const ROOM = { w: 1216, h: 896, wall: 18 };
+const CAMERA = { zoom: 0.85, pitchDeg: 52, kz: Math.cos(52 * Math.PI / 180) };
+const WALL_H = 62;        // 墙体可视高度（世界 px，仅视觉；主文件墙带本身是平面）
+const DOOR_W = 96;
+
+/* 门洞总开关：false = 四面完整墙（本轮口径）；true = 恢复上一轮的三扇门。
+   门洞的建墙切分、门柱/过梁/门槛、光溢出代码全部保留，只由这一行控制。 */
+const SHOW_DOORS = false;
+
+/* 三扇门的走廊矩形（只作为 collectRoomDoorSpans 的开口数据源，按 1216×896 重摆）。
+   矩形必须跨过房边 ±8 的容差，才会被判定为门洞。 */
+const CORRIDOR_RECTS = [
+  { x: 330, y: -90, w: DOOR_W, h: 110 },  // 上墙门：x 330..426
+  { x: -90, y: 520, w: 110, h: DOOR_W },  // 左墙门：y 520..616
+  { x: 1196, y: 150, w: 110, h: DOOR_W }   // 右墙门：y 150..246
+];
+
+/**
+ * 逐字移植主文件的 collectRoomDoorSpans（只把 state.corridorRects 改成传参）
+ * @param {{x:number,y:number,w:number,h:number}} room 房间矩形
+ * @param {Array} corridors 走廊矩形
+ * @returns {Array<{side:string,horiz:boolean,o1:number,o2:number,cx:number,cy:number}>}
+ */
+function collectRoomDoorSpans(room, corridors) {
+  const spans = [];
+  const edges = [
+    { side: 'top', x: room.x, y: room.y, len: room.w, horiz: true },
+    { side: 'bottom', x: room.x, y: room.y + room.h, len: room.w, horiz: true },
+    { side: 'left', x: room.x, y: room.y, len: room.h, horiz: false },
+    { side: 'right', x: room.x + room.w, y: room.y, len: room.h, horiz: false }
+  ];
+  edges.forEach((edge) => {
+    corridors.forEach((c) => {
+      let o1; let o2;
+      if (edge.horiz) {
+        o1 = Math.max(edge.x, c.x);
+        o2 = Math.min(edge.x + edge.len, c.x + c.w);
+        if (o2 - o1 < 26) return;
+        if (edge.y < c.y - 8 || edge.y > c.y + c.h + 8) return;
+      } else {
+        o1 = Math.max(edge.y, c.y);
+        o2 = Math.min(edge.y + edge.len, c.y + c.h);
+        if (o2 - o1 < 26) return;
+        if (edge.x < c.x - 8 || edge.x > c.x + c.w + 8) return;
+      }
+      spans.push({
+        side: edge.side, horiz: edge.horiz, o1: o1, o2: o2,
+        cx: edge.horiz ? (o1 + o2) / 2 : edge.x,
+        cy: edge.horiz ? edge.y : (o1 + o2) / 2
+      });
+    });
+  });
+  return spans;
+}
+
+/* 门洞数据全量保留；SHOW_DOORS=false 时 DOORS 为空，所有建门循环自然跳过。 */
+const ALL_DOORS = collectRoomDoorSpans({ x: 0, y: 0, w: ROOM.w, h: ROOM.h }, CORRIDOR_RECTS);
+const DOORS = SHOW_DOORS ? ALL_DOORS : [];
+
+/* ============================================================================
+   2. 小工具：确定性哈希 / 颜色 / 画布
+   ========================================================================== */
+/** 稳定的二维哈希（0–1），保证每次打开页面贴图一致，不会闪变 */
+function hash01(a, b) {
+  const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453123;
+  return s - Math.floor(s);
+}
+/** 十六进制颜色按亮度倍率压暗/提亮，用于石板逐块色差 */
+function shadeHex(hex, mul) {
+  const n = parseInt(hex.slice(1), 16);
+  const r = Math.min(255, Math.round(((n >> 16) & 255) * mul));
+  const g = Math.min(255, Math.round(((n >> 8) & 255) * mul));
+  const b = Math.min(255, Math.round((n & 255) * mul));
+  return 'rgb(' + r + ',' + g + ',' + b + ')';
+}
+/** 新建离屏画布 */
+function makeCanvas(w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  return c;
+}
+
+/* ============================================================================
+   3. 程序化贴图（无外部图片）
+   ----------------------------------------------------------------------------
+   每张贴图都是运行时用 Canvas 画出来的：石板缝、磨损、苔藓、水渍、墙板铆钉、
+   木纹、金属拉丝、黄铜划痕。README 里的"贴图字节"就是这些画布实测出来的。
+   ========================================================================== */
+const TEX = {};
+
+/**
+ * 地面石板贴图：尺寸 = 房间世界尺寸，1 个纹素对应 1 个世界像素
+ * 内容顺序：底色 → 逐块石板（色差/倒角）→ 砖缝 → 磨损/裂缝 → 噪点
+ *          → 苔藓 → 水渍 → 四边 AO → 左上来光渐变
+ */
+function makeFloorTexture(w, h) {
+  const c = makeCanvas(w, h);
+  const g = c.getContext('2d');
+  const base = g.createLinearGradient(0, 0, 0, h);
+  base.addColorStop(0, '#53565b');
+  base.addColorStop(1, '#3f4247');
+  g.fillStyle = base;
+  g.fillRect(0, 0, w, h);
+
+  const S = 95;
+  const cols = Math.ceil(w / S);
+  const rows = Math.ceil(h / S);
+  // 面积系数：1216×896 相对原 760×560 是 2.56 倍，磨损/苔藓/噪点按面积等比增加，
+  // 否则放大后地面会明显变"干净"，石板缝还在但细节密度掉了。
+  const K = (w * h) / (760 * 560);
+
+  // 逐块石板：亮度、色相轻微浮动 + 左上受光倒角 + 右下暗倒角
+  for (let r = 0; r < rows; r += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const x = col * S;
+      const y = r * S;
+      const v = hash01(r * 17 + 3, col * 29 + 7);
+      const warm = v > 0.62;
+      const tint = shadeHex(warm ? '#54585c' : (v < 0.32 ? '#4b4f56' : '#4f535a'), 0.90 + v * 0.16);
+      g.fillStyle = tint;
+      g.fillRect(x + 2, y + 2, S - 4, S - 4);
+      g.fillStyle = 'rgba(255, 255, 255, 0.07)';
+      g.fillRect(x + 2, y + 2, S - 4, 2);
+      g.fillRect(x + 2, y + 2, 2, S - 4);
+      g.fillStyle = 'rgba(0, 0, 0, 0.24)';
+      g.fillRect(x + 2, y + S - 4, S - 4, 2);
+      g.fillRect(x + S - 4, y + 2, 2, S - 4);
+
+      // 缺角 / 崩边：约 20% 的石板在角上缺一小块（压得很淡，避免读成大色块）
+      if (v > 0.80) {
+        g.fillStyle = 'rgba(30, 33, 37, 0.30)';
+        g.beginPath();
+        g.moveTo(x + 2, y + S * 0.72);
+        g.lineTo(x + 2, y + S - 2);
+        g.lineTo(x + S * 0.26, y + S - 2);
+        g.closePath();
+        g.fill();
+      }
+    }
+  }
+
+  // 砖缝：4px 深缝 + 1px 冷色反光，1× 下也能看出"一块块铺的"
+  g.strokeStyle = 'rgba(12, 14, 17, 0.95)';
+  g.lineWidth = 4;
+  for (let x = 0; x <= w; x += S) {
+    g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, h); g.stroke();
+  }
+  for (let y = 0; y <= h; y += S) {
+    g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(w, y + 0.5); g.stroke();
+  }
+  g.strokeStyle = 'rgba(150, 165, 178, 0.10)';
+  g.lineWidth = 1;
+  for (let x = 0; x <= w; x += S) {
+    g.beginPath(); g.moveTo(x + 2.5, 0); g.lineTo(x + 2.5, h); g.stroke();
+  }
+  for (let y = 0; y <= h; y += S) {
+    g.beginPath(); g.moveTo(0, y + 2.5); g.lineTo(w, y + 2.5); g.stroke();
+  }
+
+  // 磨损划痕
+  for (let i = 0; i < Math.round(90 * K); i += 1) {
+    const x = hash01(i + 1, 5) * w;
+    const y = hash01(i + 7, 11) * h;
+    const len = 10 + hash01(i + 13, 3) * 46;
+    const ang = (hash01(i + 19, 9) - 0.5) * 0.5;
+    g.strokeStyle = hash01(i, 7) > 0.5 ? 'rgba(220, 230, 240, 0.06)' : 'rgba(0, 0, 0, 0.20)';
+    g.lineWidth = hash01(i, 13) > 0.8 ? 2 : 1;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + Math.cos(ang) * len, y + Math.sin(ang) * len);
+    g.stroke();
+  }
+
+  // 裂缝：折线，暗缝 + 极淡的受光侧
+  for (let i = 0; i < Math.round(12 * K); i += 1) {
+    let x = hash01(i + 31, 2) * w;
+    let y = hash01(i + 37, 6) * h;
+    g.strokeStyle = 'rgba(10, 12, 14, 0.55)';
+    g.lineWidth = 1.4;
+    g.beginPath();
+    g.moveTo(x, y);
+    for (let k = 0; k < 4; k += 1) {
+      x += (hash01(i + k, 17) - 0.5) * 40;
+      y += (hash01(i + k, 23) - 0.5) * 34;
+      g.lineTo(x, y);
+    }
+    g.stroke();
+  }
+
+  // 细噪点
+  for (let i = 0; i < Math.round(7000 * K); i += 1) {
+    const x = hash01(i + 101, 3) * w;
+    const y = hash01(i + 211, 8) * h;
+    const a = 0.015 + hash01(i, 5) * 0.05;
+    g.fillStyle = (i % 2 === 0) ? 'rgba(255, 255, 255, ' + a.toFixed(3) + ')' : 'rgba(0, 0, 0, ' + (a * 1.2).toFixed(3) + ')';
+    g.fillRect(x, y, 1.4, 1.4);
+  }
+
+  // 苔藓：集中在上/左两边（靠墙、潮），边缘更密
+  for (let i = 0; i < Math.round(70 * K); i += 1) {
+    const edge = i % 3;
+    const x = edge === 0 ? hash01(i, 3) * w : (edge === 1 ? hash01(i, 4) * w * 0.38 : hash01(i, 5) * w);
+    const y = edge === 2 ? hash01(i, 6) * h : hash01(i, 7) * h * 0.42;
+    const r = 4 + hash01(i, 9) * 16;
+    g.fillStyle = 'rgba(86, 108, 62, ' + (0.08 + hash01(i, 11) * 0.14).toFixed(3) + ')';
+    g.beginPath();
+    g.ellipse(x, y, r, r * 0.55, hash01(i, 13) * 3, 0, Math.PI * 2);
+    g.fill();
+  }
+
+  // 水渍：按面积等比，暗色水体 + 一圈浅边（压得很淡，避免读成"地面破洞"）
+  for (let i = 0; i < Math.round(3 * K); i += 1) {
+    const x = 90 + hash01(i + 5, 2) * (w - 180);
+    const y = 90 + hash01(i + 9, 4) * (h - 180);
+    const rx = 18 + hash01(i, 6) * 30;
+    g.fillStyle = 'rgba(26, 34, 40, 0.13)';
+    g.beginPath(); g.ellipse(x, y, rx, rx * 0.6, 0.3, 0, Math.PI * 2); g.fill();
+    g.strokeStyle = 'rgba(150, 175, 190, 0.12)';
+    g.lineWidth = 1.2;
+    g.beginPath(); g.ellipse(x, y, rx, rx * 0.6, 0.3, 0, Math.PI * 2); g.stroke();
+  }
+
+  // 四边 AO：墙脚接触阴影（软过渡 30px），并让下/右更重（光从左上来）
+  const edges = [
+    { x: 0, y: 0, w: w, h: 34, gx: 0, gy: 34 },
+    { x: 0, y: h - 44, w: w, h: 44, gx: 0, gy: h - 44 },
+    { x: 0, y: 0, w: 30, h: h, gx: 30, gy: 0 },
+    { x: w - 38, y: 0, w: 38, h: h, gx: w - 38, gy: 0 }
+  ];
+  edges.forEach((e, i) => {
+    const grad = i === 0
+      ? g.createLinearGradient(0, e.y, 0, e.y + e.h)
+      : i === 1
+        ? g.createLinearGradient(0, e.y + e.h, 0, e.y)
+        : i === 2
+          ? g.createLinearGradient(e.x, 0, e.x + e.w, 0)
+          : g.createLinearGradient(e.x + e.w, 0, e.x, 0);
+    grad.addColorStop(0, 'rgba(2, 5, 9, 0.42)');
+    grad.addColorStop(0.55, 'rgba(2, 5, 9, 0.14)');
+    grad.addColorStop(1, 'rgba(2, 5, 9, 0)');
+    g.fillStyle = grad;
+    g.fillRect(e.x, e.y, e.w, e.h);
+  });
+
+  // 左上来光：整间房左上亮、右下暗（与主文件 SCENE_ART2_CONFIG.light 同向）
+  const lightGrad = g.createLinearGradient(0, 0, w, h);
+  lightGrad.addColorStop(0, 'rgba(255, 248, 230, 0.06)');
+  lightGrad.addColorStop(0.5, 'rgba(255, 248, 230, 0)');
+  lightGrad.addColorStop(1, 'rgba(0, 0, 0, 0.16)');
+  g.fillStyle = lightGrad;
+  g.fillRect(0, 0, w, h);
+
+  return c;
+}
+
+/**
+ * 墙板贴图：深灰蓝钢板 + 竖向拼缝 + 铆钉 + 锈迹 + 底部积灰
+ * @returns {HTMLCanvasElement}
+ */
+function makeWallTexture() {
+  const w = 256; const h = 128;
+  const c = makeCanvas(w, h);
+  const g = c.getContext('2d');
+  const grd = g.createLinearGradient(0, 0, 0, h);
+  grd.addColorStop(0, '#4a535f');
+  grd.addColorStop(0.55, '#333b46');
+  grd.addColorStop(1, '#1b2029');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, w, h);
+
+  // 竖向拼缝
+  g.strokeStyle = 'rgba(5, 8, 13, 0.75)';
+  g.lineWidth = 3;
+  [0, 85, 170, 255].forEach((x) => {
+    g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, h); g.stroke();
+  });
+  g.strokeStyle = 'rgba(170, 200, 225, 0.10)';
+  g.lineWidth = 1;
+  [3, 88, 173].forEach((x) => {
+    g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, h); g.stroke();
+  });
+
+  // 横向中缝
+  g.strokeStyle = 'rgba(4, 7, 11, 0.7)';
+  g.lineWidth = 2;
+  g.beginPath(); g.moveTo(0, h * 0.52); g.lineTo(w, h * 0.52); g.stroke();
+
+  // 铆钉：每个分块四角
+  for (let x = 14; x < w; x += 42) {
+    for (let y = 16; y < h; y += 46) {
+      g.fillStyle = 'rgba(185, 210, 235, 0.20)';
+      g.beginPath(); g.arc(x, y, 2.2, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(0, 0, 0, 0.45)';
+      g.beginPath(); g.arc(x + 0.8, y + 0.9, 1.1, 0, Math.PI * 2); g.fill();
+    }
+  }
+
+  // 锈迹：竖向细流
+  for (let i = 0; i < 9; i += 1) {
+    const x = hash01(i + 3, 5) * w;
+    const y0 = hash01(i + 7, 9) * h * 0.5;
+    const len = 16 + hash01(i + 11, 2) * 48;
+    const grad = g.createLinearGradient(0, y0, 0, y0 + len);
+    grad.addColorStop(0, 'rgba(122, 74, 38, 0.22)');
+    grad.addColorStop(1, 'rgba(122, 74, 38, 0)');
+    g.fillStyle = grad;
+    g.fillRect(x, y0, 2 + hash01(i, 4) * 3, len);
+  }
+
+  // 划痕 + 积灰
+  for (let i = 0; i < 40; i += 1) {
+    const x = hash01(i + 21, 7) * w;
+    const y = hash01(i + 31, 3) * h;
+    g.strokeStyle = hash01(i, 9) > 0.5 ? 'rgba(220, 235, 250, 0.07)' : 'rgba(0, 0, 0, 0.22)';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(x, y);
+    g.lineTo(x + (hash01(i + 5, 11) - 0.5) * 30, y + (hash01(i + 9, 13) - 0.5) * 10);
+    g.stroke();
+  }
+  const dust = g.createLinearGradient(0, h - 40, 0, h);
+  dust.addColorStop(0, 'rgba(0, 0, 0, 0)');
+  dust.addColorStop(1, 'rgba(0, 0, 0, 0.45)');
+  g.fillStyle = dust;
+  g.fillRect(0, h - 40, w, 40);
+
+  return c;
+}
+
+/**
+ * 木纹贴图（木箱 / 工作台）
+ */
+function makeWoodTexture() {
+  const w = 128; const h = 128;
+  const c = makeCanvas(w, h);
+  const g = c.getContext('2d');
+  g.fillStyle = '#6a4a2f';
+  g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 7; i += 1) {
+    g.fillStyle = i % 2 === 0 ? 'rgba(255, 205, 140, 0.05)' : 'rgba(0, 0, 0, 0.10)';
+    g.fillRect(0, i * 18, w, 9);
+    g.fillStyle = 'rgba(20, 12, 6, 0.55)';
+    g.fillRect(0, i * 18, w, 1.5);
+  }
+  for (let i = 0; i < 60; i += 1) {
+    const y = hash01(i + 1, 3) * h;
+    g.strokeStyle = 'rgba(40, 24, 12, ' + (0.08 + hash01(i, 5) * 0.16).toFixed(3) + ')';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(0, y);
+    g.bezierCurveTo(w * 0.3, y + 3, w * 0.6, y - 3, w, y + 1);
+    g.stroke();
+  }
+  g.fillStyle = 'rgba(0, 0, 0, 0.28)';
+  g.fillRect(0, 0, 2, h);
+  g.fillRect(w - 2, 0, 2, h);
+  return c;
+}
+
+/**
+ * 金属拉丝贴图（管路 / 配电柜 / 桶）
+ */
+function makeMetalTexture() {
+  const w = 128; const h = 128;
+  const c = makeCanvas(w, h);
+  const g = c.getContext('2d');
+  const grd = g.createLinearGradient(0, 0, w, h);
+  grd.addColorStop(0, '#6b7684');
+  grd.addColorStop(0.5, '#4d5764');
+  grd.addColorStop(1, '#2c333d');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 140; i += 1) {
+    const y = hash01(i + 3, 7) * h;
+    g.strokeStyle = hash01(i, 5) > 0.5 ? 'rgba(220, 235, 250, 0.05)' : 'rgba(0, 0, 0, 0.14)';
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(0, y); g.lineTo(w, y); g.stroke();
+  }
+  g.fillStyle = 'rgba(10, 14, 20, 0.55)';
+  g.fillRect(0, 0, 2, h);
+  g.fillRect(w - 2, 0, 2, h);
+  return c;
+}
+
+/**
+ * 黄铜 / 金色贴图（门框、楼梯、包边）
+ */
+function makeGoldTexture() {
+  const w = 128; const h = 128;
+  const c = makeCanvas(w, h);
+  const g = c.getContext('2d');
+  const grd = g.createLinearGradient(0, 0, w, h);
+  grd.addColorStop(0, '#ffe6a3');
+  grd.addColorStop(0.28, '#e8b64f');
+  grd.addColorStop(0.55, '#b9812d');
+  grd.addColorStop(0.8, '#f0c96e');
+  grd.addColorStop(1, '#8f6220');
+  g.fillStyle = grd;
+  g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 40; i += 1) {
+    const y = hash01(i + 1, 3) * h;
+    g.strokeStyle = hash01(i, 7) > 0.5 ? 'rgba(255, 250, 220, 0.10)' : 'rgba(80, 48, 8, 0.18)';
+    g.lineWidth = 1;
+    g.beginPath(); g.moveTo(0, y); g.lineTo(w, y + (hash01(i, 9) - 0.5) * 2); g.stroke();
+  }
+  g.strokeStyle = 'rgba(70, 42, 8, 0.35)';
+  g.lineWidth = 2;
+  g.strokeRect(1, 1, w - 2, h - 2);
+  return c;
+}
+
+/**
+ * 石块贴图（碎砾 / 破墙断口 / 门槛）
+ */
+function makeStoneTexture() {
+  const w = 96; const h = 96;
+  const c = makeCanvas(w, h);
+  const g = c.getContext('2d');
+  g.fillStyle = '#4a4d52';
+  g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 900; i += 1) {
+    const x = hash01(i + 1, 3) * w;
+    const y = hash01(i + 5, 7) * h;
+    g.fillStyle = hash01(i, 9) > 0.5 ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.10)';
+    g.fillRect(x, y, 1.6, 1.6);
+  }
+  for (let i = 0; i < 6; i += 1) {
+    g.strokeStyle = 'rgba(10, 12, 15, 0.45)';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.moveTo(hash01(i, 2) * w, hash01(i, 4) * h);
+    g.lineTo(hash01(i + 3, 6) * w, hash01(i + 3, 8) * h);
+    g.stroke();
+  }
+  return c;
+}
+
+/**
+ * 走廊地面贴图（比房内更暗、更脏，用来衬出门洞的进深）
+ */
+function makeCorridorTexture() {
+  const w = 192; const h = 192;
+  const c = makeCanvas(w, h);
+  const g = c.getContext('2d');
+  g.fillStyle = '#2b3037';
+  g.fillRect(0, 0, w, h);
+  for (let i = 0; i < 40; i += 1) {
+    g.fillStyle = hash01(i, 3) > 0.5 ? 'rgba(255, 255, 255, 0.03)' : 'rgba(0, 0, 0, 0.12)';
+    g.fillRect(hash01(i + 1, 5) * w, hash01(i + 2, 7) * h, 12 + hash01(i, 9) * 40, 2);
+  }
+  g.strokeStyle = 'rgba(10, 12, 16, 0.8)';
+  g.lineWidth = 3;
+  g.beginPath(); g.moveTo(0, h / 2); g.lineTo(w, h / 2); g.stroke();
+  g.beginPath(); g.moveTo(w / 2, 0); g.lineTo(w / 2, h); g.stroke();
+  return c;
+}
+
+/** 一次性生成全部贴图
+ *  走廊贴图只在 SHOW_DOORS=true 时生成：无门版没有走廊，不该占贴图体积。
+ */
+function buildTextures() {
+  TEX.floor = makeFloorTexture(ROOM.w, ROOM.h);
+  TEX.wall = makeWallTexture();
+  TEX.wood = makeWoodTexture();
+  TEX.metal = makeMetalTexture();
+  TEX.gold = makeGoldTexture();
+  TEX.stone = makeStoneTexture();
+  if (SHOW_DOORS) TEX.corridor = makeCorridorTexture();
+}
+
+/* ============================================================================
+   4. 投影：正交俯视 + 高度抬升
+   ----------------------------------------------------------------------------
+   screenX = x * zoom + ox
+   screenY = y * zoom + oy - z * cos(52°) * zoom
+   说明：地面保持 1:1（与游戏实际俯视一致），只有"高度"按 52° 正交相机的
+   竖直分量 cos52° 向上收缩。这样左右两图的地面像素完全同尺度，可直接对照。
+   ========================================================================== */
+function project(p, v) {
+  return [
+    p[0] * v.zoom + v.ox,
+    p[1] * v.zoom + v.oy - p[2] * CAMERA.kz * v.zoom
+  ];
+}
+
+/* ============================================================================
+   5. 几何构建（三方数据：面 / 投影阴影 / 发光点）
+   ----------------------------------------------------------------------------
+   一个"面"= { pts:[[x,y,z]...], n:[nx,ny,nz], mat:'textureKey', flat?:颜色 }
+   面按平均 y 排序（画家算法：y 小的远、先画；y 大的近、后画）。
+   ========================================================================== */
+/* 场景容器：一间房 = 一份 face 列表 + 投影 + 发光 + 贴花 + 旧画法贴片。
+   buildScene(kind) 会新建一份并挂在 CUR 上；渲染器不读全局，只接收 scene 参数。 */
+let CUR = null;
+
+/** 新建一个空场景容器 */
+function newScene() {
+  return {
+    faces: [], shadows: [], glows: [], rune: null, nodes: [],
+    floor: null, blobs: [], stairs: null
+  };
+}
+
+/** 材质兜底色（贴图采样失败时用） */
+const MAT_COLOR = {
+  floor: '#4b4e53',
+  wall: '#2e3540',
+  wallDark: '#1a2029',
+  corridor: '#282d34',
+  wood: '#6a4a2f',
+  metal: '#434c57',
+  gold: '#c99a3c',
+  stone: '#4a4d52',
+  brass: '#b8903f'
+};
+
+/** 追加一个面（写入当前正在构建的场景） */
+function pushFace(pts, n, mat, opt) {
+  const f = Object.assign({ pts: pts, n: n, mat: mat, flat: null, rim: true }, opt || {});
+  CUR.faces.push(f);
+}
+
+/** 轴对齐盒子：只画顶面 + 四个侧面（底面贴地不需要）
+ *  opt.skipSouth 用于"近墙"：不画朝向镜头的那一面，避免挡住房内地板与踢脚线
+ *  opt.skipNorth 用于"远墙"：背向镜头的那一面本来就被顶面挡住，画了会在
+ *  顶面上方多出一圈墙面，把墙读高 20px（下墙曾经就是这个问题） */
+function addBox(x, y, w, d, h, mat, opt) {
+  const o = opt || {};
+  const z = o.z || 0;
+  const top = o.noTop ? null : [[x, y, z + h], [x + w, y, z + h], [x + w, y + d, z + h], [x, y + d, z + h]];
+  if (top) pushFace(top, [0, 0, 1], o.topMat || mat, { flat: o.topFlat || null });
+  if (!o.skipSouth) {
+    pushFace([[x, y + d, z], [x + w, y + d, z], [x + w, y + d, z + h], [x, y + d, z + h]], [0, 1, 0], mat);
+  }
+  pushFace([[x + w, y, z], [x + w, y + d, z], [x + w, y + d, z + h], [x + w, y, z + h]], [1, 0, 0], mat);
+  pushFace([[x, y, z], [x, y + d, z], [x, y + d, z + h], [x, y, z + h]], [-1, 0, 0], mat);
+  if (!o.skipNorth) {
+    pushFace([[x, y, z], [x + w, y, z], [x + w, y, z + h], [x, y, z + h]], [0, -1, 0], mat);
+  }
+}
+
+/**
+ * 圆柱（用 seg 段棱柱近似）：侧面是平行四边形，可贴图；顶面是多边形，纯色
+ * @param {number} cx 圆心 x  @param {number} cy 圆心 y  @param {number} z 底高
+ * @param {number} r 半径  @param {number} h 高  @param {number} seg 段数
+ * @param {string} mat 材质键
+ * @param {Object} [opt] {zTop 顶面高, seg 偏移, topJitter 顶面缺口}
+ */
+function addCylinder(cx, cy, z, r, h, seg, mat, opt) {
+  const o = opt || {};
+  const topZ = z + h;
+  const pts = [];
+  for (let i = 0; i < seg; i += 1) {
+    const a = (i / seg) * Math.PI * 2;
+    pts.push([cx + Math.cos(a) * r, cy + Math.sin(a) * r]);
+  }
+  for (let i = 0; i < seg; i += 1) {
+    const a1 = pts[i];
+    const a2 = pts[(i + 1) % seg];
+    const nx = Math.cos((i + 0.5) / seg * Math.PI * 2);
+    const ny = Math.sin((i + 0.5) / seg * Math.PI * 2);
+    pushFace([
+      [a1[0], a1[1], z], [a2[0], a2[1], z],
+      [a2[0], a2[1], topZ], [a1[0], a1[1], topZ]
+    ], [nx, ny, 0], mat);
+  }
+  // 顶面：多边形（纯色 + 受光），缺口时把某几段半径收小
+  const topPts = pts.map((p, i) => {
+    let rr = 1;
+    if (o.topJitter && (i % 3 === 0)) rr = 0.72;
+    return [cx + (p[0] - cx) * rr, cy + (p[1] - cy) * rr, topZ + (o.topJitter ? hash01(i, 2) * 3 : 0)];
+  });
+  pushFace(topPts, [0, 0, 1], o.topMat || mat, { flat: o.topFlat || null });
+}
+
+/** 记录一枚落地投影（软椭圆） */
+function addShadow(x, y, rx, ry, a) {
+  CUR.shadows.push({ x: x, y: y, rx: rx, ry: ry, a: a });
+}
+
+/** 记录一个发光点（楼梯 / 火盆 / 灯），渲染最后叠加 */
+function addGlow(x, y, z, r, color) {
+  CUR.glows.push({ x: x, y: y, z: z, r: r, color: color });
+}
+
+/* ----------------------------------------------------------------------------
+   5.1 地面 + 走廊 + 墙 + 门
+   -------------------------------------------------------------------------- */
+
+/** 房间地面（一张整面贴图，1 纹素 = 1 世界像素；单独绘制，不参与面的深度排序）
+ *  另外压 3 块 2–3px 高的"翘起石板"，让地面不只是一张贴图 */
+function buildFloor() {
+  CUR.floor = {
+    pts: [[0, 0, 0], [ROOM.w, 0, 0], [ROOM.w, ROOM.h, 0], [0, ROOM.h, 0]],
+    n: [0, 0, 1], mat: 'floor', flat: null, rim: false
+  };
+  // 3 块翘起石板：位置按 1216×896 重摆（避开南墙后 48px 不可见带）
+  const loose = [
+    { x: 314, y: 470, w: 58, d: 42, h: 3 },
+    { x: 748, y: 566, w: 52, d: 38, h: 2.5 },
+    { x: 520, y: 742, w: 46, d: 34, h: 2 }
+  ];
+  loose.forEach((s) => {
+    // 用石块贴图 + 压暗的顶面：纯亮顶面在 0.85× 下会读成"贴在地上的白纸片"
+    addBox(s.x, s.y, s.w, s.d, s.h, 'stone', { topFlat: '#5b6067' });
+    // 投影往东南偏 3–5px，比板本身大一圈，让"翘起"有落地感
+    addShadow(s.x + s.w / 2 + 3, s.y + s.d / 2 + 5, s.w * 0.66, s.d * 0.62, 0.22);
+  });
+}
+
+/**
+ * 门洞外侧的走廊：地板 + 两侧墙 + 尽头压黑
+ * 这段在房间之外，先于房内地板绘制，用来衬出"洞后面还有空间"。
+ */
+function buildCorridors() {
+  DOORS.forEach((door) => {
+    const L = 86;       // 走廊可视长度
+    const T = ROOM.wall; // 走廊墙厚沿用 18
+    if (door.side === 'top') {
+      // 上墙门：走廊在 62 高的墙"后面"，从 52° 俯视本来就看不到；
+      // 这里只铺门洞正对的一小段地板（透过门洞能看见一条暗走廊）。
+      // 不画两侧墙和尽头墙——它们会从墙上方露头，读成"房顶上的小塔"。
+      pushFace([[door.o1, -34, -1], [door.o2, -34, -1], [door.o2, 0, -1], [door.o1, 0, -1]], [0, 0, 1], 'corridor', { rim: false });
+    } else if (door.side === 'left') {
+      pushFace([[-L, door.o1, -1], [0, door.o1, -1], [0, door.o2, -1], [-L, door.o2, -1]], [0, 0, 1], 'corridor', { rim: false });
+      addBox(-L, door.o1 - T, L, T, 46, 'wallDark', { topFlat: '#2a3038' });
+      addBox(-L, door.o2, L, T, 46, 'wallDark', { topFlat: '#2a3038' });
+      pushFace([[-L, door.o1, -0.5], [-L, door.o2, -0.5], [-L, door.o2, 52], [-L, door.o1, 52]], [-1, 0, 0], 'wallDark');
+    } else if (door.side === 'right') {
+      pushFace([[ROOM.w, door.o1, -1], [ROOM.w + L, door.o1, -1], [ROOM.w + L, door.o2, -1], [ROOM.w, door.o2, -1]], [0, 0, 1], 'corridor', { rim: false });
+      addBox(ROOM.w, door.o1 - T, L, T, 46, 'wallDark', { topFlat: '#2a3038' });
+      addBox(ROOM.w, door.o2, L, T, 46, 'wallDark', { topFlat: '#2a3038' });
+      pushFace([[ROOM.w + L, door.o1, -0.5], [ROOM.w + L, door.o2, -0.5], [ROOM.w + L, door.o2, 52], [ROOM.w + L, door.o1, 52]], [1, 0, 0], 'wallDark');
+    }
+  });
+}
+
+/**
+ * 把一段墙按"门洞 + 破损"切成若干段
+ * @param {number} from 起点（沿墙方向）
+ * @param {number} to 终点
+ * @param {Array<Array<number>>} holes 门洞区间 [[o1,o2], ...]
+ * @param {Array<Array<number>>} breaks 破损区间（高度减半）
+ * @param {number} [maxLen] 单段最大长度（墙板贴图按 ~256px 一段，避免拉花）
+ * @returns {Array<{a:number,b:number,broken:boolean}>}
+ */
+function splitRun(from, to, holes, breaks, maxLen) {
+  const cuts = [from, to];
+  holes.forEach((h) => { cuts.push(h[0], h[1]); });
+  breaks.forEach((b) => { cuts.push(b[0], b[1]); });
+  cuts.sort((a, b) => a - b);
+  const out = [];
+  for (let i = 0; i < cuts.length - 1; i += 1) {
+    const a = cuts[i]; const b = cuts[i + 1];
+    if (b - a < 1) continue;
+    const inHole = holes.some((h) => a >= h[0] - 0.5 && b <= h[1] + 0.5);
+    if (inHole) continue;
+    const broken = breaks.some((br) => a < br[1] && b > br[0]);
+    if (maxLen && b - a > maxLen) {
+      let cur = a;
+      while (cur < b) {
+        const end = Math.min(b, cur + maxLen);
+        out.push({ a: cur, b: end, broken: broken });
+        cur = end;
+      }
+    } else {
+      out.push({ a: a, b: b, broken: broken });
+    }
+  }
+  return out;
+}
+
+/**
+ * 四面墙：18 厚环，门洞真开口（不是贴片），右墙留一段 30 高的断口
+ * 每段墙都有：内侧面 / 外侧面 / 顶面 / 洞口侧壁（门框单独建）
+ */
+function buildWalls() {
+  const W = ROOM.w; const H = ROOM.h; const T = ROOM.wall;
+
+  const holes = { top: [], bottom: [], left: [], right: [] };
+  DOORS.forEach((d) => { holes[d.side].push([d.o1, d.o2]); });
+
+  // 上墙（y 0..18）：inner face 朝 +y
+  splitRun(0, W, holes.top, [], 256).forEach((s) => {
+    addBox(s.a, 0, s.b - s.a, T, WALL_H, 'wall', { topFlat: '#4b525e' });
+  });
+  // 下墙（y H-18..H）：镜头在南侧，南面本身是可见的；反而是背向镜头的
+  // 北面要跳过，否则它会在顶面上方露出一条墙板，把下墙读高 20px。
+  splitRun(0, W, holes.bottom, [], 256).forEach((s) => {
+    addBox(s.a, H - T, s.b - s.a, T, WALL_H, 'wall', { skipNorth: true, topFlat: '#4b525e' });
+  });
+  // 左墙（x 0..18）
+  splitRun(T, H - T, holes.left, [], 256).forEach((s) => {
+    addBox(0, s.a, T, s.b - s.a, WALL_H, 'wall', { topFlat: '#4b525e' });
+  });
+  // 右墙（x W-18..W）：无门版要求"四面完整墙"，这里不做降高断口，
+  // 否则缺口处会露出背景，读成"又一个出口"。
+  splitRun(T, H - T, holes.right, [], 256).forEach((s) => {
+    const h = s.broken ? 30 : WALL_H;
+    addBox(W - T, s.a, T, s.b - s.a, h, 'wall', { topFlat: '#4b525e' });
+    if (s.broken) {
+      // 断口顶面：不规则石茬，读起来是"被打断的墙"而不是整齐切面
+      pushFace([
+        [W - T, s.a, 30], [W, s.a, 30],
+        [W, s.a + 10, 33], [W, s.a + 22, 28], [W, s.b - 8, 34], [W, s.b, 30],
+        [W - T, s.b, 30]
+      ], [0, 0, 1], 'stone', { flat: '#5a5d62' });
+    }
+  });
+
+}
+
+/**
+ * 门：门柱 + 门楣（结构过梁 + 金色压条）+ 门槛 + 洞内侧壁
+ * 四件东西合起来才会读成"可以走过去的洞口"，而不是地上一个矩形。
+ *
+ * 关键：门洞净高 52 必须小于墙高 62，上面留 10 厚的过梁。
+ * 之前门洞做到 76（比墙还高），墙上方是空的，从 52° 俯视就能直接看到
+ * 门后的走廊地板，读成"房顶上的一个露台"。补上过梁后视线被挡住，
+ * 透过门洞只能看到约 32px 的走廊地板，才是"洞"的正确读法。
+ */
+function buildDoors() {
+  DOORS.forEach((door) => {
+    const T = ROOM.wall;
+    const topZ = 52;              // 门洞净高（墙 62，上方 10 为过梁）
+    const jambW = 10;             // 门柱宽
+    const frameD = T + 8;         // 门框比墙厚 8px，正面能看出凸出
+    const headerH = WALL_H - topZ; // 过梁高度
+    const openW = door.o2 - door.o1 - jambW * 2; // 净通行宽度
+
+    if (door.side === 'top' || door.side === 'bottom') {
+      const y0 = door.side === 'top' ? 0 : ROOM.h - frameD;
+      addBox(door.o1, y0, jambW, frameD, topZ, 'gold');           // 左门柱
+      addBox(door.o2 - jambW, y0, jambW, frameD, topZ, 'gold');   // 右门柱
+      // 结构过梁：填满墙洞里 52..62 那一段，用墙体材质（不是金色）
+      addBox(door.o1, door.side === 'top' ? 0 : ROOM.h - T,
+        door.o2 - door.o1, T, headerH, 'wall', { z: topZ, topFlat: '#4b525e' });
+      // 金色压条：贴在过梁下沿、朝房内伸出 4px，读成"门楣收边"
+      addBox(door.o1 + jambW, door.side === 'top' ? T : ROOM.h - T - 4,
+        openW, 4, 5, 'gold', { z: topZ - 5 });
+      // 门槛：压在地面、跨过 18 厚的墙
+      addBox(door.o1 + jambW, door.side === 'top' ? 0 : ROOM.h - T, openW, T, 3, 'stone');
+      // 洞内侧壁（左右两面），有贴图，能看出 18px 的洞深
+      const revealPts = door.side === 'top'
+        ? [[[door.o1, 0, 3], [door.o1, T, 3], [door.o1, T, topZ - 2], [door.o1, 0, topZ - 2]],
+           [[door.o2, T, 3], [door.o2, 0, 3], [door.o2, 0, topZ - 2], [door.o2, T, topZ - 2]]]
+        : [[[door.o1, ROOM.h - T, 3], [door.o1, ROOM.h, 3], [door.o1, ROOM.h, topZ - 2], [door.o1, ROOM.h - T, topZ - 2]],
+           [[door.o2, ROOM.h, 3], [door.o2, ROOM.h - T, 3], [door.o2, ROOM.h - T, topZ - 2], [door.o2, ROOM.h, topZ - 2]]];
+      pushFace(revealPts[0], [1, 0, 0], 'wallDark');
+      pushFace(revealPts[1], [-1, 0, 0], 'wallDark');
+    } else {
+      const x0 = door.side === 'left' ? 0 : ROOM.w - frameD;
+      addBox(x0, door.o1, frameD, jambW, topZ, 'gold');
+      addBox(x0, door.o2 - jambW, frameD, jambW, topZ, 'gold');
+      addBox(door.side === 'left' ? 0 : ROOM.w - T, door.o1,
+        T, door.o2 - door.o1, headerH, 'wall', { z: topZ, topFlat: '#4b525e' });
+      addBox(door.side === 'left' ? T : ROOM.w - T - 4, door.o1 + jambW,
+        4, openW, 5, 'gold', { z: topZ - 5 });
+      addBox(door.side === 'left' ? 0 : ROOM.w - T, door.o1 + jambW, T, openW, 3, 'stone');
+      const rev = door.side === 'left'
+        ? [[[0, door.o1, 3], [T, door.o1, 3], [T, door.o1, topZ - 2], [0, door.o1, topZ - 2]],
+           [[T, door.o2, 3], [0, door.o2, 3], [0, door.o2, topZ - 2], [T, door.o2, topZ - 2]]]
+        : [[[ROOM.w - T, door.o1, 3], [ROOM.w, door.o1, 3], [ROOM.w, door.o1, topZ - 2], [ROOM.w - T, door.o1, topZ - 2]],
+           [[ROOM.w, door.o2, 3], [ROOM.w - T, door.o2, 3], [ROOM.w - T, door.o2, topZ - 2], [ROOM.w, door.o2, topZ - 2]]];
+      pushFace(rev[0], [0, 1, 0], 'wallDark');
+      pushFace(rev[1], [0, -1, 0], 'wallDark');
+    }
+  });
+}
+
+/**
+ * 踢脚线：沿四面内墙 4px 厚、9px 高的金属压条（门洞处断开）
+ * 它把"墙脚"从一条硬线变成一条有厚度的收口。
+ */
+function buildBaseboards() {
+  const T = ROOM.wall; const W = ROOM.w; const H = ROOM.h;
+  const holes = { top: [], bottom: [], left: [], right: [] };
+  DOORS.forEach((d) => { holes[d.side].push([d.o1, d.o2]); });
+
+  splitRun(T, W - T, holes.top, []).forEach((s) => {
+    addBox(s.a, T, s.b - s.a, 4, 10, 'metal', { topFlat: '#525d6b' });
+  });
+  splitRun(T, W - T, holes.bottom, []).forEach((s) => {
+    addBox(s.a, H - T - 4, s.b - s.a, 4, 10, 'metal', { topFlat: '#525d6b' });
+  });
+  splitRun(T, H - T, holes.left, []).forEach((s) => {
+    addBox(T, s.a, 4, s.b - s.a, 10, 'metal', { topFlat: '#525d6b' });
+  });
+  splitRun(T, H - T, holes.right, []).forEach((s) => {
+    addBox(W - T - 4, s.a, 4, s.b - s.a, 10, 'metal', { topFlat: '#525d6b' });
+  });
+}
+
+/* ----------------------------------------------------------------------------
+   5.2 装饰 10 件（战斗房实测均值 10 件）+ 中心符文圈 + 四角节点
+   -------------------------------------------------------------------------- */
+
+/** 木箱（上下两块横板 + 顶部小箱） */
+function addCrateStack(x, y) {
+  addBox(x, y, 50, 44, 32, 'wood');
+  addBox(x - 2, y + 10, 54, 4, 4, 'metal', { z: 14 });
+  addBox(x - 2, y + 10, 54, 4, 4, 'metal', { z: 28 });
+  addBox(x + 8, y + 6, 32, 30, 24, 'wood', { z: 32 });
+  addShadow(x + 25, y + 26, 40, 30, 0.30);
+}
+
+/** 单只木箱 */
+function addCrate(x, y, w, d, h) {
+  addBox(x, y, w, d, h, 'wood');
+  addBox(x - 1, y + d * 0.32, w + 2, 3, 3, 'metal', { z: h * 0.5 });
+  addShadow(x + w / 2, y + d / 2, w * 0.62, d * 0.55, 0.26);
+}
+
+/** 木桶：木条桶身 + 两道铁箍 + 木盖
+ *  之前用纯金属圆柱，俯视时顶面是一块深蓝灰多边形，整只桶读成"黑色罐子"。
+ *  改成木身 + 深色铁箍后，纵向的木纹和两道箍的暗带能立刻说明这是桶。 */
+function addBarrel(x, y, r, h) {
+  addCylinder(x, y, 0, r, h - 4, 12, 'wood');
+  addCylinder(x, y, h * 0.20, r + 1.2, 4, 12, 'metal', { topFlat: '#39414c' });
+  addCylinder(x, y, h * 0.60, r + 1.2, 4, 12, 'metal', { topFlat: '#39414c' });
+  addCylinder(x, y, h - 4, r * 0.94, 4, 12, 'wood', { topFlat: '#7b5a36' });
+  addShadow(x + 3, y + 4, r * 1.5, r * 1.1, 0.34);
+}
+
+/** 贴墙管路：横管 + 两个法兰 */
+function addPipeRun(x, y, len) {
+  addBox(x, y, len, 15, 14, 'metal', { z: 5 });
+  addBox(x + 14, y - 3, 9, 21, 20, 'brass');
+  addBox(x + len - 23, y - 3, 9, 21, 20, 'brass');
+  addShadow(x + len / 2, y + 10, len * 0.5, 12, 0.24);
+}
+
+/** 工作台：台面 + 四条腿 + 下层板 */
+function addWorkbench(x, y, w, d) {
+  addBox(x, y, w, d, 7, 'wood', { z: 22 });
+  [[x + 4, y + 4], [x + w - 10, y + 4], [x + 4, y + d - 10], [x + w - 10, y + d - 10]].forEach((p) => {
+    addBox(p[0], p[1], 6, 6, 22, 'metal');
+  });
+  addBox(x + 6, y + 6, w - 12, d - 12, 4, 'metal', { z: 6 });
+  addBox(x + 12, y + 8, 24, 16, 10, 'metal', { z: 29 }); // 台面上的小机箱
+  addShadow(x + w / 2, y + d / 2, w * 0.55, d * 0.62, 0.28);
+}
+
+/** 碎石堆：3 块有厚度的石头 */
+function addRubble(x, y, seed) {
+  for (let i = 0; i < 3; i += 1) {
+    const ox = (hash01(seed + i, 3) - 0.5) * 26;
+    const oy = (hash01(seed + i, 7) - 0.5) * 18;
+    const s = 9 + hash01(seed + i, 11) * 10;
+    addBox(x + ox - s / 2, y + oy - s / 2, s, s * 0.8, 5 + hash01(seed + i, 13) * 8, 'stone');
+  }
+  addShadow(x + 2, y + 4, 24, 14, 0.26);
+}
+
+/** 工具箱：箱体 + 提手 */
+function addToolbox(x, y) {
+  addBox(x, y, 30, 18, 14, 'metal');
+  addBox(x + 10, y + 5, 10, 3, 6, 'metal', { z: 14 });
+  addShadow(x + 15, y + 9, 20, 12, 0.28);
+}
+
+/** 断柱：下半截粗柱 + 上半截细柱 + 缺口处一块碎茬，避免从上看读成"桶口" */
+function addBrokenPillar(x, y, r, h) {
+  addCylinder(x, y, 0, r, h * 0.7, 12, 'stone');
+  addCylinder(x, y, h * 0.7, r * 0.84, h * 0.3, 12, 'stone', { topFlat: '#75797f' });
+  // 碎茬压在柱顶边缘（不是立在正中），读成"被打断"，而不是一个开口
+  addBox(x - r * 0.95, y - r * 0.85, r * 0.85, r * 0.7, 3, 'stone', { z: h - 2, topFlat: '#83878e' });
+  addShadow(x + 4, y + 5, r * 1.6, r * 1.1, 0.32);
+}
+
+/** 配电柜 */
+function addCabinet(x, y, w, d, h) {
+  addBox(x, y, w, d, h, 'metal');
+  addBox(x + 3, y + d - 1, w - 6, 2, h - 10, 'wallDark', { z: 5 });
+  addBox(x + w * 0.5 - 2, y + d - 2, 4, 3, 8, 'brass', { z: h * 0.5 });
+  addShadow(x + w / 2, y + d / 2, w * 0.7, d * 0.7, 0.30);
+}
+
+/** 火盆：盆体 + 发光炭面 + 光晕 */
+function addBrazier(x, y, r, h) {
+  addCylinder(x, y, 0, r, h, 10, 'metal');
+  addCylinder(x, y, h, r * 0.82, 3, 10, 'gold', { topFlat: '#ffb347' });
+  addGlow(x, y, h + 6, 70, 'rgba(255, 160, 60, 0.3)');
+  addShadow(x + 3, y + 4, r * 1.5, r * 1.1, 0.32);
+}
+
+/**
+ * 祭坛（首领房专用）：两级石基座 + 金面 + 中央信标 + 金光
+ * 从上看要读成"层层收分的台子"，所以做成三级收分，而不是一块金板压一块石板。
+ * @param {number} x 中心 x  @param {number} y 中心 y
+ */
+function addAltar(x, y) {
+  addBox(x - 76, y - 40, 152, 80, 8, 'stone', { topFlat: '#5a5d63' });
+  addBox(x - 60, y - 30, 120, 60, 8, 'stone', { z: 8, topFlat: '#6b6f76' });
+  addBox(x - 46, y - 22, 92, 44, 6, 'gold', { z: 16, topFlat: '#e8c25e' });
+  addBox(x - 8, y - 8, 16, 16, 14, 'brass', { z: 22, topFlat: '#ffd98a' });
+  addGlow(x, y, 40, 100, 'rgba(255, 186, 64, 0.26)');
+  addShadow(x + 4, y + 6, 84, 44, 0.34);
+}
+
+/* ----------------------------------------------------------------------------
+   5.2b 三套布局（起点房 10 件 / 起点房 25 件 / 首领房 10 件）
+   ----------------------------------------------------------------------------
+   坐标全部按 1216×896 重新排：内墙范围 x 18..1198、y 18..878，
+   布点贴墙、中心战斗区留空；南墙后 48px 为不可见带，装饰不放进去。
+   墙厚/件尺寸保持物理值（18 / 96 / 单件 30–140），不随房间面积放大。
+   -------------------------------------------------------------------------- */
+const LAYOUTS = {
+  // 起点房：沿用当前密度 10 件
+  start: {
+    stairs: null,
+    props: [
+      { t: 'crateStack', x: 100, y: 100 },
+      { t: 'crate', x: 238, y: 74, w: 38, d: 34, h: 26 },
+      { t: 'barrel', x: 118, y: 262, r: 17, h: 38 },
+      { t: 'pipe', x: 470, y: 26, len: 330 },
+      { t: 'workbench', x: 900, y: 764, w: 120, d: 46 },
+      { t: 'rubble', x: 660, y: 796, seed: 7 },
+      { t: 'barrel', x: 1100, y: 764, r: 16, h: 34 },
+      { t: 'toolbox', x: 760, y: 74 },
+      { t: 'pillar', x: 1118, y: 500, r: 16, h: 46 },
+      { t: 'cabinet', x: 1106, y: 100, w: 26, d: 22, h: 44 }
+    ]
+  },
+  // 起点房：等密度 25 件（10 × 2.56 的换算结果，等你看图拍板）
+  dense: {
+    stairs: null,
+    props: [
+      { t: 'crateStack', x: 100, y: 100 },
+      { t: 'crate', x: 238, y: 74, w: 38, d: 34, h: 26 },
+      { t: 'crate', x: 302, y: 84, w: 32, d: 30, h: 22 },
+      { t: 'barrel', x: 118, y: 262, r: 17, h: 38 },
+      { t: 'barrel', x: 96, y: 338, r: 16, h: 34 },
+      { t: 'pipe', x: 470, y: 26, len: 330 },
+      // 第二段管路也贴北墙：横在空地上会读成一根悬空的杆
+      { t: 'pipe', x: 60, y: 26, len: 230 },
+      { t: 'workbench', x: 900, y: 764, w: 120, d: 46 },
+      { t: 'workbench', x: 300, y: 770, w: 110, d: 44 },
+      { t: 'rubble', x: 660, y: 796, seed: 7 },
+      { t: 'rubble', x: 1000, y: 800, seed: 19 },
+      { t: 'barrel', x: 1100, y: 764, r: 16, h: 34 },
+      { t: 'barrel', x: 1088, y: 694, r: 17, h: 34 },
+      { t: 'toolbox', x: 760, y: 74 },
+      { t: 'toolbox', x: 560, y: 74 },
+      { t: 'pillar', x: 1118, y: 500, r: 16, h: 46 },
+      { t: 'pillar', x: 60, y: 700, r: 14, h: 38 },
+      { t: 'cabinet', x: 1106, y: 100, w: 26, d: 22, h: 44 },
+      { t: 'cabinet', x: 1106, y: 166, w: 26, d: 22, h: 44 },
+      { t: 'crate', x: 1120, y: 300, w: 36, d: 32, h: 24 },
+      { t: 'crate', x: 1124, y: 368, w: 32, d: 30, h: 22 },
+      { t: 'barrel', x: 80, y: 540, r: 15, h: 32 },
+      { t: 'rubble', x: 430, y: 96, seed: 31 },
+      { t: 'crateStack', x: 1040, y: 62 },
+      { t: 'toolbox', x: 200, y: 700 }
+    ]
+  },
+  // 首领房：楼梯 + 两火盆 + 三断柱 + 祭坛 + 两堆碎砾 + 一条管路 = 10 件
+  boss: {
+    stairs: { x0: 575, yFront: 196 },
+    props: [
+      { t: 'brazier', x: 452, y: 150, r: 16, h: 34 },
+      { t: 'brazier', x: 732, y: 150, r: 16, h: 34 },
+      { t: 'pillar', x: 300, y: 270, r: 22, h: 62 },
+      { t: 'pillar', x: 886, y: 270, r: 22, h: 62 },
+      { t: 'pillar', x: 1080, y: 640, r: 16, h: 42 },
+      { t: 'altar', x: 608, y: 392 },
+      { t: 'rubble', x: 180, y: 760, seed: 11 },
+      { t: 'rubble', x: 1010, y: 780, seed: 23 },
+      // 管路贴北墙走，不要横在房间中间——浮在空地上会被读成一根悬空的杆
+      { t: 'pipe', x: 60, y: 26, len: 250 }
+    ]
+  },
+  // 首领房定版：25 件（10 件基础 + 15 件补密，仍只贴墙、中心留给祭坛与战斗）
+  bossDense: {
+    stairs: { x0: 575, yFront: 196 },
+    props: [
+      { t: 'brazier', x: 452, y: 150, r: 16, h: 34 },
+      { t: 'brazier', x: 732, y: 150, r: 16, h: 34 },
+      { t: 'pillar', x: 300, y: 270, r: 22, h: 62 },
+      { t: 'pillar', x: 886, y: 270, r: 22, h: 62 },
+      { t: 'pillar', x: 1080, y: 640, r: 16, h: 42 },
+      { t: 'altar', x: 608, y: 392 },
+      { t: 'rubble', x: 180, y: 760, seed: 11 },
+      { t: 'rubble', x: 1010, y: 780, seed: 23 },
+      { t: 'pipe', x: 60, y: 26, len: 250 },
+      // 以下 15 件为补密
+      { t: 'crateStack', x: 96, y: 620 },
+      { t: 'crate', x: 150, y: 690, w: 38, d: 34, h: 26 },
+      { t: 'crate', x: 200, y: 730, w: 32, d: 30, h: 22 },
+      { t: 'barrel', x: 60, y: 360, r: 17, h: 38 },
+      { t: 'barrel', x: 60, y: 440, r: 16, h: 34 },
+      { t: 'barrel', x: 80, y: 520, r: 15, h: 32 },
+      { t: 'cabinet', x: 1120, y: 120, w: 26, d: 22, h: 44 },
+      { t: 'cabinet', x: 1120, y: 186, w: 26, d: 22, h: 44 },
+      { t: 'workbench', x: 860, y: 780, w: 120, d: 46 },
+      { t: 'toolbox', x: 320, y: 90 },
+      { t: 'toolbox', x: 980, y: 90 },
+      { t: 'rubble', x: 420, y: 800, seed: 41 },
+      { t: 'rubble', x: 700, y: 810, seed: 53 },
+      { t: 'crate', x: 1120, y: 400, w: 36, d: 32, h: 24 },
+      { t: 'crate', x: 1124, y: 468, w: 32, d: 30, h: 22 }
+    ]
+  }
+};
+
+/**
+ * 构建一件装饰，并在 scene.blobs 里登记旧画法用的平面贴片位置
+ * （旧渲染器只画椭圆/菱形贴片，需要知道每件东西的中心和半径）
+ * @param {Object} p 布局条目 {t, x, y, ...}
+ */
+function buildProp(p) {
+  let cx = p.x;
+  let cy = p.y;
+  let r = 20;
+  switch (p.t) {
+    case 'crateStack':
+      addCrateStack(p.x, p.y);
+      cx = p.x + 25; cy = p.y + 24; r = 34;
+      break;
+    case 'crate':
+      addCrate(p.x, p.y, p.w, p.d, p.h);
+      cx = p.x + p.w / 2; cy = p.y + p.d / 2; r = Math.max(p.w, p.d) * 0.62;
+      break;
+    case 'barrel':
+      addBarrel(p.x, p.y, p.r, p.h);
+      r = p.r * 1.15;
+      break;
+    case 'pipe':
+      addPipeRun(p.x, p.y, p.len);
+      cx = p.x + p.len / 2; cy = p.y + 8; r = p.len * 0.5;
+      break;
+    case 'workbench':
+      addWorkbench(p.x, p.y, p.w, p.d);
+      cx = p.x + p.w / 2; cy = p.y + p.d / 2; r = Math.max(p.w, p.d) * 0.55;
+      break;
+    case 'rubble':
+      addRubble(p.x, p.y, p.seed);
+      r = 20;
+      break;
+    case 'toolbox':
+      addToolbox(p.x, p.y);
+      cx = p.x + 15; cy = p.y + 9; r = 16;
+      break;
+    case 'pillar':
+      addBrokenPillar(p.x, p.y, p.r, p.h);
+      r = p.r * 1.5;
+      break;
+    case 'cabinet':
+      addCabinet(p.x, p.y, p.w, p.d, p.h);
+      cx = p.x + p.w / 2; cy = p.y + p.d / 2; r = Math.max(p.w, p.d) * 0.75;
+      break;
+    case 'brazier':
+      addBrazier(p.x, p.y, p.r, p.h);
+      r = p.r * 1.3;
+      break;
+    case 'altar':
+      addAltar(p.x, p.y);
+      r = 56;
+      break;
+    default:
+      break;
+  }
+  CUR.blobs.push({ x: cx, y: cy, r: r, kind: p.t });
+}
+
+/* ----------------------------------------------------------------------------
+   5.3 金色楼梯：6 级实体台阶（现在地图上只是一个菱形标记）
+   -------------------------------------------------------------------------- */
+/**
+ * 金色楼梯：6 级实体台阶（主文件里只是地上一个旋转 45° 的菱形标记）
+ * @param {number} x0 楼梯左边界（世界 x）
+ * @param {number} yFront 最下一级踏步的前沿（世界 y）
+ */
+function buildStairs(x0, yFront) {
+  const w = 66;
+  const depth = 21; const rise = 8; const steps = 6;
+  // 台阶由远到近：i=0 最远（最高）
+  for (let i = 0; i < steps; i += 1) {
+    const y = yFront - (i + 1) * depth;
+    const z = (i + 1) * rise;
+    addBox(x0, y, w, depth, z, 'gold');
+    // 踏步鼻线：亮黄铜薄条，1× 下就是"台阶边缘"的那道高光
+    addBox(x0, y + depth - 3, w, 3, 2, 'brass', { z: z });
+  }
+  // 两侧梯帮：把台阶"收"进一个整体，避免散落感
+  addBox(x0 - 8, yFront - steps * depth, 8, steps * depth, steps * rise + 10, 'brass');
+  addBox(x0 + w, yFront - steps * depth, 8, steps * depth, steps * rise + 10, 'brass');
+  // 落地阴影 + 金光
+  addShadow(x0 + w / 2, yFront + 4, 60, 26, 0.36);
+  addGlow(x0 + w / 2, yFront - steps * depth / 2, 26, 92, 'rgba(255, 194, 71, 0.18)');
+}
+
+/* ----------------------------------------------------------------------------
+   5.4 地面贴花：中心符文圈 + 四角节点（主文件 state.decor 的操作）
+   -------------------------------------------------------------------------- */
+function buildDecals() {
+  CUR.rune = { x: ROOM.w / 2, y: ROOM.h / 2, r: Math.min(ROOM.w, ROOM.h) * 0.28 };
+  CUR.nodes = [
+    { x: ROOM.wall + 18, y: ROOM.wall + 18 },
+    { x: ROOM.w - ROOM.wall - 18, y: ROOM.wall + 18 },
+    { x: ROOM.wall + 18, y: ROOM.h - ROOM.wall - 18 },
+    { x: ROOM.w - ROOM.wall - 18, y: ROOM.h - ROOM.wall - 18 }
+  ];
+  CUR.nodes.forEach((n) => {
+    addBox(n.x - 7, n.y - 7, 14, 14, 2.5, 'metal', { topFlat: '#1b3a4a' });
+  });
+}
+
+/**
+ * 组装一间房
+ * @param {string} kind LAYOUTS 的键：'start' | 'dense' | 'boss'
+ * @returns {Object} 该房间的场景容器（faces / shadows / glows / floor / blobs / stairs）
+ */
+function buildScene(kind) {
+  const layout = LAYOUTS[kind];
+  CUR = newScene();
+  buildFloor();
+  buildCorridors();     // SHOW_DOORS=false 时 DOORS 为空，这里是空循环
+  buildWalls();
+  buildDoors();         // 同上：门洞代码保留，开关关闭时不执行
+  buildBaseboards();
+  if (layout.stairs) {
+    buildStairs(layout.stairs.x0, layout.stairs.yFront);
+    // 旧画法只画一个菱形，记下它的中心（最下一级与最高一级的中间）
+    CUR.stairs = {
+      cx: layout.stairs.x0 + 33,
+      cy: layout.stairs.yFront - 6 * 21 / 2
+    };
+  }
+  layout.props.forEach((p) => buildProp(p));
+  buildDecals();
+  // 画家算法：按平均 y 排序（y 小的先画 = 更远）
+  CUR.faces.forEach((f) => {
+    let sy = 0;
+    f.pts.forEach((p) => { sy += p[1]; });
+    f.depth = sy / f.pts.length;
+  });
+  CUR.faces.sort((a, b) => a.depth - b.depth);
+  return CUR;
+}
+
+/* ============================================================================
+   6. 新场景渲染器（画家算法 + 贴图四边形 + 方向光）
+   ========================================================================== */
+const LIGHT_DIR = (() => {
+  const v = [-0.5, -0.62, 0.72];
+  const m = Math.hypot(v[0], v[1], v[2]);
+  return [v[0] / m, v[1] / m, v[2] / m];
+})();
+
+/** 面法线 → 明暗叠加色（ambient 0.80 + 方向光 0.35） */
+function shadeOverlay(n) {
+  const d = Math.max(-1, Math.min(1, n[0] * LIGHT_DIR[0] + n[1] * LIGHT_DIR[1] + n[2] * LIGHT_DIR[2]));
+  const s = 0.80 + 0.35 * d;
+  if (s >= 1) return { c: '255, 247, 228', a: Math.min(0.20, (s - 1) * 0.62) };
+  return { c: '2, 5, 10', a: Math.min(0.40, (1 - s) * 0.72) };
+}
+
+/**
+ * 把纹理按仿射映射铺到四边形上
+ * 前提：四边形是平行四边形（盒子/墙/台阶投影后都满足），否则返回 null
+ */
+function affineForQuad(pts, tw, th) {
+  const p0 = pts[0]; const p1 = pts[1]; const p3 = pts[3];
+  const ux = p1[0] - p0[0]; const uy = p1[1] - p0[1];
+  const vx = p3[0] - p0[0]; const vy = p3[1] - p0[1];
+  return { a: ux / tw, b: uy / tw, c: vx / th, d: vy / th, e: p0[0], f: p0[1] };
+}
+
+/** 画一个面：裁剪 → 贴图 → 方向光明暗 → 细描边 */
+function drawFace(ctx, f, v) {
+  if (f.mat === 'none') return;
+  const pts = f.pts.map((p) => project(p, v));
+  const path = new Path2D();
+  path.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < pts.length; i += 1) path.lineTo(pts[i][0], pts[i][1]);
+  path.closePath();
+
+  ctx.save();
+  ctx.clip(path);
+  ctx.fillStyle = f.flat || MAT_COLOR[f.mat] || '#4a4e55';
+  ctx.fill(path);
+
+  const tex = TEX[f.mat];
+  if (tex && !f.flat && pts.length === 4) {
+    const m = affineForQuad(pts, tex.width, tex.height);
+    ctx.setTransform(v.dpr * m.a, v.dpr * m.b, v.dpr * m.c, v.dpr * m.d, v.dpr * m.e, v.dpr * m.f);
+    ctx.drawImage(tex, 0, 0);
+    ctx.setTransform(v.dpr, 0, 0, v.dpr, 0, 0);
+  }
+
+  const sh = shadeOverlay(f.n);
+  ctx.fillStyle = 'rgba(' + sh.c + ', ' + sh.a.toFixed(3) + ')';
+  ctx.fill(path);
+  if (f.rim) {
+    ctx.strokeStyle = 'rgba(4, 7, 12, 0.42)';
+    ctx.lineWidth = 0.8;
+    ctx.stroke(path);
+  }
+  ctx.restore();
+}
+
+/** 背景：近黑 + 极淡网格，衬托场景边界 */
+function drawBackground(ctx, v) {
+  ctx.fillStyle = '#05070b';
+  ctx.fillRect(0, 0, v.cssW, v.cssH);
+  const g = ctx.createRadialGradient(v.cssW * 0.5, v.cssH * 0.45, 40, v.cssW * 0.5, v.cssH * 0.45, v.cssW * 0.62);
+  g.addColorStop(0, 'rgba(22, 32, 46, 0.55)');
+  g.addColorStop(1, 'rgba(4, 6, 10, 0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, v.cssW, v.cssH);
+}
+
+const DEBUG_OFF = new Set(((new URLSearchParams(location.search).get('off')) || '').split(',').filter(Boolean));
+const DEBUG_FLAT = new URLSearchParams(location.search).get('flat') === '1';
+
+/** 地面：整张贴图 + 中心光池
+ *  @param {CanvasRenderingContext2D} ctx 画布上下文
+ *  @param {Object} v 视图参数
+ *  @param {Object} sc 场景容器（读 sc.floor）
+ */
+function drawFloor(ctx, v, sc) {
+  const pts = sc.floor.pts.map((p) => project(p, v));
+  const path = new Path2D();
+  path.moveTo(pts[0][0], pts[0][1]);
+  for (let i = 1; i < 4; i += 1) path.lineTo(pts[i][0], pts[i][1]);
+  path.closePath();
+  ctx.save();
+  ctx.clip(path);
+  if (DEBUG_FLAT) {
+    ctx.fillStyle = '#4a4e54';
+    ctx.fill(path);
+    ctx.restore();
+    return;
+  }
+  const m = affineForQuad(pts, TEX.floor.width, TEX.floor.height);
+  ctx.setTransform(v.dpr * m.a, v.dpr * m.b, v.dpr * m.c, v.dpr * m.d, v.dpr * m.e, v.dpr * m.f);
+  ctx.drawImage(TEX.floor, 0, 0);
+  ctx.setTransform(v.dpr, 0, 0, v.dpr, 0, 0);
+  // 中心补光：内圈比墙边亮，压住四边 AO 的闷感
+  const c = project([ROOM.w / 2, ROOM.h / 2, 0], v);
+  // 光池半径按房间短边取 0.45，房间放大后中心补光不会缩成一小圈
+  const pool = ctx.createRadialGradient(c[0], c[1], 0, c[0], c[1], Math.min(ROOM.w, ROOM.h) * 0.45 * v.zoom);
+  pool.addColorStop(0, 'rgba(214, 232, 255, 0.05)');
+  pool.addColorStop(0.55, 'rgba(214, 232, 255, 0.02)');
+  pool.addColorStop(1, 'rgba(214, 232, 255, 0)');
+  ctx.fillStyle = pool;
+  ctx.fill(path);
+  ctx.restore();
+}
+
+/** 乘算阴影：椭圆的软投影 */
+function drawShadow(ctx, s, v) {
+  const p = project([s.x, s.y, 0], v);
+  const rx = s.rx * v.zoom;
+  const ry = s.ry * v.zoom;
+  ctx.save();
+  ctx.translate(p[0], p[1]);
+  ctx.scale(1, ry / rx);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, rx);
+  g.addColorStop(0, 'rgba(0, 0, 0, ' + s.a.toFixed(3) + ')');
+  g.addColorStop(0.62, 'rgba(0, 0, 0, ' + (s.a * 0.45).toFixed(3) + ')');
+  g.addColorStop(1, 'rgba(0, 0, 0, 0)');
+  ctx.fillStyle = g;
+  ctx.beginPath();
+  ctx.arc(0, 0, rx, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+/** 中心符文圈：贴地虚线环（保留主文件 state.decor 的视觉语义）
+ *  @param {Object} sc 场景容器（读 sc.rune）
+ */
+function drawRune(ctx, v, sc) {
+  const r = sc.rune;
+  const c = project([r.x, r.y, 0], v);
+  ctx.save();
+  ctx.setLineDash([4 * v.zoom, 10 * v.zoom]);
+  ctx.strokeStyle = 'rgba(176, 133, 255, 0.22)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(c[0], c[1], r.r * v.zoom, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.strokeStyle = 'rgba(98, 230, 255, 0.12)';
+  ctx.beginPath();
+  ctx.arc(c[0], c[1], r.r * 0.62 * v.zoom, 0, Math.PI * 2);
+  ctx.stroke();
+  for (let i = 0; i < 6; i += 1) {
+    const a = (Math.PI / 3) * i;
+    ctx.fillStyle = 'rgba(176, 133, 255, 0.26)';
+    ctx.fillRect(c[0] + Math.cos(a) * r.r * v.zoom - 1.5, c[1] + Math.sin(a) * r.r * v.zoom - 1.5, 3, 3);
+  }
+  ctx.restore();
+}
+
+/** 发光点叠加（lighter）：只做气氛，不影响读数
+ *  @param {Object} sc 场景容器（读 sc.glows）
+ */
+function drawGlows(ctx, v, sc) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  sc.glows.forEach((g) => {
+    const p = project([g.x, g.y, g.z], v);
+    const r = g.r * v.zoom;
+    const grd = ctx.createRadialGradient(p[0], p[1], 0, p[0], p[1], r);
+    grd.addColorStop(0, g.color);
+    grd.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grd;
+    ctx.beginPath();
+    ctx.arc(p[0], p[1], r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  ctx.restore();
+}
+
+/** 墙脚 AO：四面内墙向房内 34px 的软渐变，让墙与地面交界不是一条硬线 */
+function drawWallAO(ctx, v) {
+  const T = ROOM.wall; const W = ROOM.w; const H = ROOM.h;
+  const strips = [
+    { x: T, y: T, w: W - T * 2, h: 36, dir: 'top', a: 0.42 },
+    { x: T, y: H - T - 42, w: W - T * 2, h: 42, dir: 'bottom', a: 0.5 },
+    { x: T, y: T, w: 36, h: H - T * 2, dir: 'left', a: 0.42 },
+    { x: W - T - 42, y: T, w: 42, h: H - T * 2, dir: 'right', a: 0.5 }
+  ];
+  strips.forEach((s) => {
+    const p0 = project([s.x, s.y, 0], v);
+    const p1 = project([s.x + s.w, s.y + s.h, 0], v);
+    let grad;
+    if (s.dir === 'top') grad = ctx.createLinearGradient(0, p0[1], 0, p0[1] + s.h * v.zoom);
+    else if (s.dir === 'bottom') grad = ctx.createLinearGradient(0, p1[1], 0, p1[1] - s.h * v.zoom);
+    else if (s.dir === 'left') grad = ctx.createLinearGradient(p0[0], 0, p0[0] + s.w * v.zoom, 0);
+    else grad = ctx.createLinearGradient(p1[0], 0, p1[0] - s.w * v.zoom, 0);
+    grad.addColorStop(0, 'rgba(2, 5, 9, ' + s.a + ')');
+    grad.addColorStop(0.55, 'rgba(2, 5, 9, ' + (s.a * 0.32).toFixed(3) + ')');
+    grad.addColorStop(1, 'rgba(2, 5, 9, 0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(p0[0], p0[1], p1[0] - p0[0], p1[1] - p0[1]);
+  });
+}
+
+/** 门洞光溢出：从洞口朝房心的一道青色楔形，暗示"洞后面有光" */
+function drawDoorSpills(ctx, v) {
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter';
+  DOORS.forEach((door) => {
+    const horizontal = door.side === 'top' || door.side === 'bottom';
+    let pts;
+    if (horizontal) {
+      const sign = door.side === 'top' ? 1 : -1;
+      const sy = door.side === 'top' ? ROOM.wall : ROOM.h - ROOM.wall;
+      pts = [[door.o1 + 12, sy, 0.9], [door.o2 - 12, sy, 0.9],
+        [door.o2 + 6, sy + sign * 118, 0.9], [door.o1 - 6, sy + sign * 118, 0.9]];
+    } else {
+      const sign = door.side === 'left' ? 1 : -1;
+      const sx = door.side === 'left' ? ROOM.wall : ROOM.w - ROOM.wall;
+      pts = [[sx, door.o1 + 12, 0.9], [sx + sign * 118, door.o1 - 6, 0.9],
+        [sx + sign * 118, door.o2 + 6, 0.9], [sx, door.o2 - 12, 0.9]];
+    }
+    const pp = pts.map((p) => project(p, v));
+    const path = new Path2D();
+    path.moveTo(pp[0][0], pp[0][1]);
+    for (let i = 1; i < 4; i += 1) path.lineTo(pp[i][0], pp[i][1]);
+    path.closePath();
+    // 渐变必须沿"洞口 → 房心"的轴线走（取近边中点 → 远边中点）。
+    // 之前直接拿 p0→p2 做渐变，方向是斜的，特写下会露出一条硬斜边。
+    const nearX = (pp[0][0] + pp[1][0]) / 2; const nearY = (pp[0][1] + pp[1][1]) / 2;
+    const farX = (pp[2][0] + pp[3][0]) / 2; const farY = (pp[2][1] + pp[3][1]) / 2;
+    const g = ctx.createLinearGradient(nearX, nearY, farX, farY);
+    g.addColorStop(0, 'rgba(98, 230, 255, 0.055)');
+    g.addColorStop(0.45, 'rgba(98, 230, 255, 0.022)');
+    g.addColorStop(1, 'rgba(98, 230, 255, 0)');
+    ctx.fillStyle = g;
+    ctx.fill(path);
+  });
+  ctx.restore();
+}
+
+/** 画布暗角 */
+function drawVignette(ctx, v) {
+  const g = ctx.createRadialGradient(v.cssW * 0.5, v.cssH * 0.48, v.cssH * 0.3, v.cssW * 0.5, v.cssH * 0.48, v.cssH * 0.78);
+  g.addColorStop(0, 'rgba(0,0,0,0)');
+  g.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, v.cssW, v.cssH);
+}
+
+/** 新场景主渲染
+ *  @param {CanvasRenderingContext2D} ctx 画布上下文
+ *  @param {Object} v 视图参数
+ *  @param {Object} sc 要渲染的场景容器
+ */
+function renderNew(ctx, v, sc) {
+  ctx.setTransform(v.dpr, 0, 0, v.dpr, 0, 0);
+  drawBackground(ctx, v);
+  // 走廊地板（在房间之外，先画）
+  ctx.save();
+  DOORS.forEach((door) => {
+    const L = 86;
+    let pts = null;
+    if (door.side === 'top') pts = [[door.o1, -34, -1], [door.o2, -34, -1], [door.o2, 0, -1], [door.o1, 0, -1]];
+    if (door.side === 'left') pts = [[-L, door.o1, -1], [0, door.o1, -1], [0, door.o2, -1], [-L, door.o2, -1]];
+    if (door.side === 'right') pts = [[ROOM.w, door.o1, -1], [ROOM.w + L, door.o1, -1], [ROOM.w + L, door.o2, -1], [ROOM.w, door.o2, -1]];
+    const pp = pts.map((p) => project(p, v));
+    const path = new Path2D();
+    path.moveTo(pp[0][0], pp[0][1]);
+    for (let i = 1; i < 4; i += 1) path.lineTo(pp[i][0], pp[i][1]);
+    path.closePath();
+    ctx.save(); ctx.clip(path);
+    const m = affineForQuad(pp, TEX.corridor.width, TEX.corridor.height);
+    ctx.setTransform(v.dpr * m.a, v.dpr * m.b, v.dpr * m.c, v.dpr * m.d, v.dpr * m.e, v.dpr * m.f);
+    ctx.drawImage(TEX.corridor, 0, 0);
+    ctx.restore();
+  });
+  ctx.restore();
+
+  drawFloor(ctx, v, sc);
+  if (!DEBUG_OFF.has('ao')) drawWallAO(ctx, v);
+  if (!DEBUG_OFF.has('spill')) drawDoorSpills(ctx, v);
+  if (!DEBUG_OFF.has('shadow')) sc.shadows.forEach((s) => drawShadow(ctx, s, v));
+  drawRune(ctx, v, sc);
+  if (!DEBUG_OFF.has('faces')) sc.faces.forEach((f) => drawFace(ctx, f, v));
+  drawGlows(ctx, v, sc);
+  if (!DEBUG_OFF.has('vignette')) drawVignette(ctx, v);
+}
+
+/* ============================================================================
+   7. 旧画法渲染器：按主文件 bakeScene 的 2D 参数复刻
+   ----------------------------------------------------------------------------
+   地面 = 64px 地砖 + 白噪 + 污渍；墙 = 一圈 18px 平带（无厚度）；
+   门 = 墙带上一段发光条；装饰 = 无投影的椭圆/多边形；楼梯 = 旋转 45° 的菱形。
+   这一段刻意保留"平"的观感，用来做同机位对照，而不是截图。
+   ========================================================================== */
+/**
+ * 旧画法渲染（同一相机、同一房间尺寸，只换画法）
+ * @param {CanvasRenderingContext2D} ctx 画布上下文
+ * @param {Object} v 视图参数
+ * @param {Object} sc 场景容器（读 sc.blobs 贴片位置、sc.stairs 菱形位置）
+ */
+function renderOld(ctx, v, sc) {
+  ctx.setTransform(v.dpr, 0, 0, v.dpr, 0, 0);
+  ctx.fillStyle = '#05070b';
+  ctx.fillRect(0, 0, v.cssW, v.cssH);
+
+  ctx.save();
+  ctx.translate(v.ox, v.oy);
+  ctx.scale(v.zoom, v.zoom);
+
+  const T = ROOM.wall; const W = ROOM.w; const H = ROOM.h;
+
+  // 外墙带（连成一圈，门洞不真的开）
+  const ring = ctx.createLinearGradient(0, -T, 0, H + T);
+  ring.addColorStop(0, 'rgba(78, 86, 98, 0.97)');
+  ring.addColorStop(0.45, 'rgba(46, 52, 62, 0.97)');
+  ring.addColorStop(1, 'rgba(12, 16, 23, 0.98)');
+  ctx.fillStyle = ring;
+  ctx.beginPath();
+  ctx.roundRect(-T, -T, W + T * 2, H + T * 2, 14);
+  ctx.fill();
+
+  // 顶面受光条 + 外轮廓压边
+  ctx.fillStyle = 'rgba(188, 198, 212, 0.24)';
+  ctx.fillRect(-T + 10, -T + 1, W + T * 2 - 20, 6);
+  ctx.strokeStyle = 'rgba(2, 5, 10, 0.92)';
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.roundRect(-T, -T, W + T * 2, H + T * 2, 14);
+  ctx.stroke();
+
+  // 墙带细节：铆钉 + 分缝
+  ctx.strokeStyle = 'rgba(170, 174, 180, 0.12)';
+  ctx.lineWidth = 1;
+  for (let x = -T + 20; x < W + T - 14; x += 46) {
+    ctx.beginPath(); ctx.moveTo(x, -T + 2); ctx.lineTo(x, -T + T - 2); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x, H + 2); ctx.lineTo(x, H + T - 2); ctx.stroke();
+  }
+  for (let y = 20; y < H - 14; y += 46) {
+    ctx.beginPath(); ctx.moveTo(-T + 2, y); ctx.lineTo(-2, y); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(W + 2, y); ctx.lineTo(W + T - 2, y); ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(190, 220, 250, 0.13)';
+  for (let x = -T + 20; x < W + T - 16; x += 46) {
+    ctx.fillRect(x, -T + 8, 2, 2);
+    ctx.fillRect(x, H + T - 10, 2, 2);
+  }
+
+  // 地面底色
+  const base = ctx.createLinearGradient(0, 0, 0, H);
+  base.addColorStop(0, '#484a4d');
+  base.addColorStop(1, '#3f4144');
+  ctx.fillStyle = base;
+  ctx.fillRect(0, 0, W, H);
+
+  // 64px 地砖（交错明暗 + 2px 砖缝）
+  const tile = 64;
+  const cols = Math.ceil(W / tile);
+  const rows = Math.ceil(H / tile);
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      const x = col * tile;
+      const y = row * tile;
+      const even = (row + col) % 2 === 0;
+      const vv = (hash01(row + 3, col + 7) - 0.5) * 0.06;
+      const alpha = Math.min(0.22, Math.max(0, (even ? 0.062 : 0.021) + vv));
+      ctx.fillStyle = 'rgba(255,255,255,' + alpha.toFixed(3) + ')';
+      ctx.fillRect(x + 1, y + 1, tile - 2, tile - 2);
+      ctx.fillStyle = 'rgba(0,0,0,0.30)';
+      ctx.fillRect(x + 1, y + tile - 2, tile - 2, 2);
+      ctx.fillRect(x + tile - 2, y + 1, 2, tile - 2);
+    }
+  }
+
+  // 噪点与污渍
+  for (let i = 0; i < 700; i += 1) {
+    ctx.fillStyle = 'rgba(255,255,255,' + (hash01(i + 1, 3) * 0.05).toFixed(3) + ')';
+    ctx.fillRect(hash01(i + 4, 7) * W, hash01(i + 6, 11) * H, 1.5, 1.5);
+  }
+  for (let i = 0; i < 5; i += 1) {
+    const px = 40 + hash01(i + 2, 5) * (W - 80);
+    const py = 40 + hash01(i + 8, 9) * (H - 80);
+    const g = ctx.createRadialGradient(px, py, 0, px, py, 60);
+    g.addColorStop(0, 'rgba(10, 11, 13, 0.28)');
+    g.addColorStop(1, 'rgba(10, 11, 13, 0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(px, py, 60, 0, Math.PI * 2); ctx.fill();
+  }
+
+  // 符文圈（虚线环）
+  ctx.save();
+  ctx.setLineDash([4, 10]);
+  ctx.strokeStyle = 'rgba(176,133,255,0.16)';
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(W / 2, H / 2, Math.min(W, H) * 0.28, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.restore();
+
+  // 四角节点（平面小方框）
+  [[T + 18, T + 18], [W - T - 18, T + 18], [T + 18, H - T - 18], [W - T - 18, H - T - 18]].forEach((p) => {
+    ctx.strokeStyle = 'rgba(62, 230, 255, 0.22)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(p[0] - 5, p[1] - 5, 10, 10);
+    ctx.fillStyle = 'rgba(62, 230, 255, 0.35)';
+    ctx.fillRect(p[0] - 1.5, p[1] - 1.5, 3, 3);
+  });
+
+  // 装饰：只有平面轮廓，没有投影（这就是旧画法的"贴片感"）
+  // 位置来自当前场景的 blobs，所以 10 件版和 25 件版能共用同一段旧画法
+  sc.blobs.forEach((b, i) => {
+    // 管路是长条，用椭圆会摊成一块巨大的圆斑；单独画成扁条才读得出是管子
+    if (b.kind === 'pipe') {
+      const hh = 9;
+      ctx.fillStyle = 'rgba(80, 84, 90, 0.95)';
+      ctx.fillRect(b.x - b.r, b.y - hh / 2, b.r * 2, hh);
+      ctx.strokeStyle = 'rgba(12, 15, 20, 0.75)';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(b.x - b.r, b.y - hh / 2, b.r * 2, hh);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.06)';
+      ctx.fillRect(b.x - b.r, b.y - hh / 2, b.r * 2, 1.5);
+      return;
+    }
+    const r = Math.max(7, b.r * 0.55);
+    // 旧画法的贴片要能和新画法的体积对上号，所以填充比上一轮提亮一档
+    ctx.fillStyle = 'rgba(108, 112, 119, 0.96)';
+    ctx.beginPath();
+    ctx.ellipse(b.x, b.y, r, r * 0.68, hash01(i, 3) * 3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(10, 13, 18, 0.8)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.beginPath();
+    ctx.ellipse(b.x - r * 0.25, b.y - r * 0.3, r * 0.42, r * 0.24, 0, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // 门：墙带上一段发光条 + 小门牌（地面没有洞）
+  DOORS.forEach((door) => {
+    const horizontal = door.side === 'top' || door.side === 'bottom';
+    const cx = horizontal ? door.cx : (door.side === 'left' ? 0 : W);
+    const cy = horizontal ? (door.side === 'top' ? 0 : H) : door.cy;
+    const len = 56;
+    const g = horizontal
+      ? ctx.createLinearGradient(cx - len, 0, cx + len, 0)
+      : ctx.createLinearGradient(0, cy - len, 0, cy + len);
+    g.addColorStop(0, 'rgba(98, 230, 255, 0)');
+    g.addColorStop(0.5, 'rgba(98, 230, 255, 0.42)');
+    g.addColorStop(1, 'rgba(98, 230, 255, 0)');
+    ctx.fillStyle = g;
+    if (horizontal) ctx.fillRect(cx - len, cy - 13, len * 2, 26);
+    else ctx.fillRect(cx - 13, cy - len, 26, len * 2);
+    // 门牌
+    ctx.fillStyle = 'rgba(10, 18, 26, 0.9)';
+    ctx.fillRect(cx - 9, cy - 9, 18, 18);
+    ctx.strokeStyle = 'rgba(98, 230, 255, 0.55)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(cx - 9, cy - 9, 18, 18);
+  });
+
+  // 金色楼梯：旋转 45° 的菱形标记 + 3 道横线（只有首领房才画）
+  if (sc.stairs) {
+    const sx = sc.stairs.cx; const sy = sc.stairs.cy;
+    const glow = ctx.createRadialGradient(sx, sy, 2, sx, sy, 62);
+    glow.addColorStop(0, 'rgba(255, 194, 71, 0.32)');
+    glow.addColorStop(1, 'rgba(255, 194, 71, 0)');
+    ctx.fillStyle = glow;
+    ctx.beginPath(); ctx.arc(sx, sy, 62, 0, Math.PI * 2); ctx.fill();
+    ctx.save();
+    ctx.translate(sx, sy);
+    ctx.rotate(Math.PI / 4);
+    ctx.fillStyle = 'rgba(60, 44, 10, 0.65)';
+    ctx.fillRect(-17, -17, 34, 34);
+    ctx.strokeStyle = 'rgba(255, 194, 71, 0.85)';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(-17, -17, 34, 34);
+    for (let i = -8; i <= 8; i += 8) {
+      ctx.strokeStyle = 'rgba(255, 194, 71, 0.55)';
+      ctx.beginPath(); ctx.moveTo(-12, i); ctx.lineTo(12, i); ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  ctx.restore();
+
+  // 暗角
+  const vg = ctx.createRadialGradient(v.cssW * 0.5, v.cssH * 0.48, v.cssH * 0.3, v.cssW * 0.5, v.cssH * 0.48, v.cssH * 0.78);
+  vg.addColorStop(0, 'rgba(0,0,0,0)');
+  vg.addColorStop(1, 'rgba(0,0,0,0.55)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, v.cssW, v.cssH);
+}
+
+/* ============================================================================
+   8. 视图 / 启动 / 实测统计
+   ========================================================================== */
+
+/* 三套场景（boot 时构建）：起点房 10 件 / 起点房 25 件 / 首领房 10 件 */
+const SCENES = {};
+
+/**
+ * 创建视图参数：内部固定尺寸渲染，再交给浏览器等比缩放显示
+ * @param {HTMLCanvasElement} canvas 目标画布
+ * @param {number} fx 房心 x（世界坐标）
+ * @param {number} fy 房心 y（世界坐标）
+ * @param {number} zoom 缩放（0.85 = 游戏同款）
+ * @param {number} [fixedW] 内部 CSS 宽（不传则读画布 clientWidth）
+ * @param {number} [fixedH] 内部 CSS 高（不传则读画布 clientHeight）
+ * @returns {Object} 视图参数
+ */
+function viewFor(canvas, fx, fy, zoom, fixedW, fixedH) {
+  const dpr = 2;
+  const cssW = Math.max(1, Math.round(fixedW || canvas.clientWidth || canvas.width));
+  const cssH = Math.max(1, Math.round(fixedH || canvas.clientHeight || canvas.height));
+  canvas.width = Math.round(cssW * dpr);
+  canvas.height = Math.round(cssH * dpr);
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.imageSmoothingEnabled = true;
+  return {
+    dpr: dpr, cssW: cssW, cssH: cssH, zoom: zoom,
+    ox: cssW / 2 - fx * zoom,
+    oy: cssH / 2 - fy * zoom + 20
+  };
+}
+
+/** 绘制三组对照（起点房新旧 / 首领房新旧 / 密度 10 vs 25） */
+function renderCompare() {
+  const jobs = [
+    { id: 'cvStartOld', scene: 'start', mode: 'old' },
+    { id: 'cvStartNew', scene: 'start', mode: 'new' },
+    { id: 'cvBossOld', scene: 'boss', mode: 'old' },
+    { id: 'cvBossNew', scene: 'boss', mode: 'new' },
+    { id: 'cvDen10', scene: 'start', mode: 'new' },
+    { id: 'cvDen25', scene: 'dense', mode: 'new' }
+  ];
+  jobs.forEach((job) => {
+    const canvas = document.getElementById(job.id);
+    // 对照图统一 1120×880：1216×896 在 0.85 下约 1034×762，四周留出墙高抬升的余量
+    const v = viewFor(canvas, ROOM.w / 2, ROOM.h / 2, CAMERA.zoom, 1120, 880);
+    const ctx = canvas.getContext('2d');
+    if (job.mode === 'old') renderOld(ctx, v, SCENES[job.scene]);
+    else renderNew(ctx, v, SCENES[job.scene]);
+  });
+}
+
+/** 绘制四张特写（640×460 内部尺寸） */
+function renderCloseups() {
+  const list = [
+    { id: 'cvStairs', scene: 'boss', fx: 608, fy: 133, zoom: 2.4 },
+    { id: 'cvJunction', scene: 'start', fx: 700, fy: 44, zoom: 2.8 },
+    { id: 'cvDecor', scene: 'start', fx: 160, fy: 140, zoom: 2.4 },
+    { id: 'cvBossClose', scene: 'boss', fx: 608, fy: 392, zoom: 1.8 }
+  ];
+  list.forEach((item) => {
+    const canvas = document.getElementById(item.id);
+    const v = viewFor(canvas, item.fx, item.fy, item.zoom, 640, 460);
+    renderNew(canvas.getContext('2d'), v, SCENES[item.scene]);
+  });
+}
+
+/**
+ * 实测：三角面数 / 贴图字节 / 单帧绘制耗时（口径：起点房 10 件场景）
+ * 耗时用离屏画布 1120×880 重复渲染 6 次取平均，只用 performance.now()，
+ * 不引用任何外部数字；这是 headless 的绘制耗时，不能当游戏内帧率。
+ */
+function measure() {
+  const sc = SCENES.start;
+  let tris = 0;
+  sc.faces.forEach((f) => { tris += Math.max(1, f.pts.length - 2); });
+
+  let raw = 0;
+  let png = 0;
+  Object.keys(TEX).forEach((k) => {
+    const c = TEX[k];
+    raw += c.width * c.height * 4;
+    const url = c.toDataURL('image/png');
+    png += Math.round((url.length - url.indexOf(',') - 1) * 3 / 4);
+  });
+
+  const W = 1120; const H = 880;
+  const off = makeCanvas(W, H);
+  const og = off.getContext('2d');
+  const v = {
+    dpr: 1, cssW: W, cssH: H, zoom: CAMERA.zoom,
+    ox: W / 2 - (ROOM.w / 2) * CAMERA.zoom,
+    oy: H / 2 - (ROOM.h / 2) * CAMERA.zoom + 20
+  };
+  const N = 6;
+  const t0 = performance.now();
+  for (let i = 0; i < N; i += 1) renderNew(og, v, sc);
+  const ms = (performance.now() - t0) / N;
+
+  const walkable = ((ROOM.w - ROOM.wall * 2) * (ROOM.h - ROOM.wall * 2)) / (ROOM.w * ROOM.h);
+
+  document.getElementById('statTri').textContent = String(tris);
+  document.getElementById('statTex').textContent = (raw / 1024).toFixed(0) + ' KB raw / ' + (png / 1024).toFixed(0) + ' KB PNG';
+  document.getElementById('statMs').textContent = ms.toFixed(1) + ' ms';
+  document.getElementById('statWalk').textContent = (walkable * 100).toFixed(2) + '%';
+
+  return { tris: tris, raw: raw, png: png, ms: ms, walkable: walkable };
+}
+
+/* 单张出图配置（供截图脚本用，内部尺寸固定，截图窗口与之一致） */
+const SHOT_MAP = {
+  'start-old': { scene: 'start', mode: 'old', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  'start-new': { scene: 'start', mode: 'new', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  'boss-old': { scene: 'boss', mode: 'old', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  'boss-new': { scene: 'boss', mode: 'new', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  'den10': { scene: 'start', mode: 'new', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  'den25': { scene: 'dense', mode: 'new', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  // 定版：起点房 / 首领房都是 25 件密度
+  'final-start': { scene: 'dense', mode: 'new', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  'final-boss': { scene: 'bossDense', mode: 'new', fx: 608, fy: 448, zoom: 0.85, w: 1120, h: 880 },
+  'stairs': { scene: 'boss', mode: 'new', fx: 608, fy: 133, zoom: 2.4, w: 640, h: 460 },
+  'junction': { scene: 'start', mode: 'new', fx: 700, fy: 44, zoom: 2.8, w: 640, h: 460 },
+  'decor': { scene: 'start', mode: 'new', fx: 160, fy: 140, zoom: 2.4, w: 640, h: 460 },
+  'boss-close': { scene: 'boss', mode: 'new', fx: 608, fy: 392, zoom: 1.8, w: 640, h: 460 }
+};
+
+/**
+ * 单张出图模式（?shot=start-new 等）
+ * @param {string} kind SHOT_MAP 的键
+ */
+function renderShot(kind) {
+  const cfg = SHOT_MAP[kind] || SHOT_MAP['start-new'];
+  const stage = document.getElementById('shotStage');
+  const canvas = document.getElementById('cvShot');
+  document.body.classList.add('shot');
+  // 画布与舞台都锁到出图尺寸，截图窗口按同一尺寸开，保证 1:1
+  canvas.style.width = cfg.w + 'px';
+  canvas.style.height = cfg.h + 'px';
+  stage.style.width = cfg.w + 'px';
+  stage.style.height = cfg.h + 'px';
+  requestAnimationFrame(() => {
+    const v = viewFor(canvas, cfg.fx, cfg.fy, cfg.zoom, cfg.w, cfg.h);
+    const ctx = canvas.getContext('2d');
+    if (cfg.mode === 'old') renderOld(ctx, v, SCENES[cfg.scene]);
+    else renderNew(ctx, v, SCENES[cfg.scene]);
+    stage.setAttribute('data-ready', '1');
+  });
+}
+
+/** 入口 */
+function boot() {
+  buildTextures();
+  SCENES.start = buildScene('start');
+  SCENES.dense = buildScene('dense');
+  SCENES.boss = buildScene('boss');
+  SCENES.bossDense = buildScene('bossDense');
+  const params = new URLSearchParams(location.search);
+  const shot = params.get('shot');
+  // ?dump=stats：把三套场景的面数/投影/发光数打到页面上，供命令行 --dump-dom 读取
+  if (params.get('dump') === 'stats') {
+    const out = {};
+    ['start', 'dense', 'boss', 'bossDense'].forEach((k) => {
+      let t = 0;
+      SCENES[k].faces.forEach((f) => { t += Math.max(1, f.pts.length - 2); });
+      out[k] = { tris: t, shadows: SCENES[k].shadows.length, glows: SCENES[k].glows.length, blobs: SCENES[k].blobs.length };
+    });
+    let raw = 0;
+    Object.keys(TEX).forEach((k) => { raw += TEX[k].width * TEX[k].height * 4; });
+    out.texRawKB = Math.round(raw / 1024);
+    // 两套定版场景的单帧绘制耗时：1120×880 离屏画布各重绘 6 次取平均
+    // （只是本机 headless 的绘制耗时，不能当帧率）
+    const off = makeCanvas(1120, 880);
+    const og = off.getContext('2d');
+    const vOff = {
+      dpr: 1, cssW: 1120, cssH: 880, zoom: CAMERA.zoom,
+      ox: 1120 / 2 - (ROOM.w / 2) * CAMERA.zoom,
+      oy: 880 / 2 - (ROOM.h / 2) * CAMERA.zoom + 20
+    };
+    ['dense', 'bossDense'].forEach((k) => {
+      renderNew(og, vOff, SCENES[k]); // 预热一帧：首帧包含贴图首次上传，不能计入均值
+      const t0 = performance.now();
+      for (let i = 0; i < 6; i += 1) renderNew(og, vOff, SCENES[k]);
+      out['ms_' + k] = Number(((performance.now() - t0) / 6).toFixed(1));
+    });
+    const box = document.getElementById('err');
+    box.style.display = 'block';
+    box.textContent = 'STATS ' + JSON.stringify(out);
+    document.body.setAttribute('data-ready', '1');
+    return;
+  }
+  if (params.get('dump') === 'floor') {
+    document.body.classList.add('shot');
+    const canvas = document.getElementById('cvShot');
+    canvas.width = TEX.floor.width;
+    canvas.height = TEX.floor.height;
+    canvas.style.width = TEX.floor.width + 'px';
+    canvas.style.height = TEX.floor.height + 'px';
+    canvas.getContext('2d').drawImage(TEX.floor, 0, 0);
+    return;
+  }
+  if (shot) {
+    renderShot(shot);
+    return;
+  }
+  renderCompare();
+  renderCloseups();
+  measure();
+  document.body.setAttribute('data-ready', '1');
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+  setTimeout(boot, 0);
+} else {
+  window.addEventListener('DOMContentLoaded', boot);
+}
+</script>
+</body>
+</html>

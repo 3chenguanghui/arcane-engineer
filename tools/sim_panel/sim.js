@@ -20,13 +20,16 @@ const C = require('./config');
  * 焚稿（ash）模型常量
  * ---------------------------------------------------------------------------
  * 与主文件 ASH_CONFIG 同源（首源 index_arcane_v2.html L41246）：
- *   perStack 0.06 / maxStacks 4 / blastRatio 0.20 / blastBossCap 0.06
+ *   perStack 0.06 / hpCostPct 0.06 / maxStacks 4 / blastRatio 0.20 / blastBossCap 0.06
  *   shieldTime 8s / shieldAether 25 / echoCasts 3 / echoCostMul 0.5
+ * hpCostPct 与主文件 ASH_CONFIG.hpCostPct 同源（2026-11-09 落地 0.06）：
+ *   改主文件那个值，必须同步改这里，否则模拟器按旧代价定价。
  * 默认 enabled=false：不传 ov.ash 时，本文件的原有数值路径逐位不变。
  * ------------------------------------------------------------------------- */
 const ASH = {
   enabled: false,
   perStack: 0.06,
+  hpCostPct: 0.06,
   maxStacks: 4,
   blastRatio: 0.20,
   blastBossCap: 0.06,
@@ -35,6 +38,62 @@ const ASH = {
   echoCasts: 3,
   echoCostMul: 0.5
 };
+
+/* ---------------------------------------------------------------------------
+ * 升级选卡估值 · 「秤」（2026-11-09 修秤）
+ * ---------------------------------------------------------------------------
+ * 旧版问题：optionPool 里所有伤害卡写死 value=0.10，三张卡分数完全相同，
+ *   levelUp 的 reduce 永远取第一个，singleDps 只剩布尔门槛作用 →
+ *   "新卡测不出价值"。
+ * 新版：伤害卡的 value 由「单次爆发」独立计权，按各自机制分化。
+ *   burstOf(card) = 面板单发伤害 × 段数 × 每发期望命中数
+ *                   （范围 2.26 / 单体 1.18，沿用本文件既有的 groupEff 系数）
+ *   value = 0.10 × burstOf / burstRef
+ * 锚点说明：burstRef = 65.32 = 基础池 11 张伤害卡 burst 均值（固定，不随加卡漂移）；
+ *   11 张卡 value 的均值恒为 0.10（与旧常数量纲一致），卡与卡之间靠爆发分开。
+ *   Q7 决策：方案 A（2026-11-09）——保分化、不抬总量，历史绝对数/红线继续可用。
+ *
+ * 【越界不是 bug · 数学必然，别来"修"】
+ *   恒有「均值 = 0.10」+「要求卡与卡分化」两条同时成立，伤害卡 value 就必然跨过
+ *   强化 0.12 和位移 0.05 这两条相邻档位。基础池 11 张卡的 burst 极差是 5.53 倍
+ *   （坍缩黑洞 117.52 / 回旋刃 21.24）；线性映射 + 均值锚定 0.10 之后，
+ *   若强行全体 ≤0.12，最高卡的 burst 必须 ≤78.4（实际 117.52，矛盾）；
+ *   若强行全体 ≥0.05，最低卡的 burst 必须 ≥32.66（实际 21.24，矛盾）。
+ *   所以下面这「三高两低」是结构决定的，**不是权重写错**：
+ *     高于强化 0.12（3 张）：坍缩黑洞 0.180 / 熔岩地裂 0.159 / 符文雷 0.138
+ *     低于位移 0.05（2 张）：火球 0.043 / 回旋刃 0.033
+ *   定位差别：这三张是「高爆发·低频」的范围/布防卡（冷却长、单次清场强），
+ *   与融合 0.24 不是同一层——融合是**两条卡合成一张**的稀有度溢价，
+ *   burst 并未翻倍；越界卡只是把"单次爆发"这一维度顶到高位，数量、冷却、
+ *   稳定性都不如融合产物。想要它们回到 0.12 以下，只能放弃分化或放弃均值锚定，
+ *   二者都会让这套秤重新失效（回到"所有伤害卡同分"）。
+ * ------------------------------------------------------------------------- */
+const CARD_VALUE = {
+  valueBase: 0.10,      // 旧统一常数的量纲锚点（11 张伤害卡 value 均值）
+  burstRef: 65.32,      // burst 均值锚点（11 张基础伤害卡，固定不随加卡漂移）
+  aoeHits: 2.26,       // 范围卡每发期望命中数
+  singleHits: 1.18     // 单体卡每发期望命中数
+};
+
+/**
+ * 计算一张伤害卡的"单次爆发"面板值。
+ * @param {Object} m 魔法卡定义
+ * @returns {number} 单次施放的期望总伤（面板）
+ */
+function burstOf(m) {
+  if (!m || m.damage <= 0) return 0;
+  const hits = m.aoe ? CARD_VALUE.aoeHits : CARD_VALUE.singleHits;
+  return m.damage * (m.segments || 1) * hits;
+}
+
+/**
+ * 伤害卡在升级三选一里的伤害权重 value。
+ * @param {Object} m 魔法卡定义
+ * @returns {number} value（0 伤害卡返回 0，治疗卡口径由调用方单独给）
+ */
+function damageCardValue(m) {
+  return CARD_VALUE.valueBase * (burstOf(m) / CARD_VALUE.burstRef);
+}
 
 /* ---------------------------------------------------------------------------
  * 随机数
@@ -277,8 +336,12 @@ function createPlayer(profile, ov) {
     ashBurns: 0,                     // 本局焚卡次数
     ashRites: { blast: 0, shield: 0, echo: 0 },   // 三种仪式各结算了几次
     ashEchoCasts: 0,                 // 回响剩余半价施法次数（仅记账）
-    ashPerStack: (o.ash && o.ash.perStack != null) ? Number(o.ash.perStack) : ASH.perStack,      // 每层灰烬增伤
-    ashMaxStacks: (o.ash && o.ash.maxStacks != null) ? Number(o.ash.maxStacks) : ASH.maxStacks,  // 灰烬层数上限
+    /* ashPerStack / ashMaxStacks：与 ashPreRoom 共用同一套校验。
+       以前是裸 Number()，传 'abc' 会变成 NaN → 伤害/承伤/统计全变 NaN，存档序列化成 null。 */
+    ashPerStack: ashNum(o.ash, 'perStack', ASH.perStack, 0),                        // 每层灰烬增伤（0 合法：归因用）
+    ashMaxStacks: ashNum(o.ash, 'maxStacks', ASH.maxStacks, 1, true, {
+      belowHint: '0 等于开着却永不焚卡，与 enabled:false 矛盾'
+    }),                                                                              // 灰烬层数上限
     level: 1,
     xp: 0,
     xpNeed: C.XP.baseNeed,
@@ -501,6 +564,43 @@ function ashResolve(ov) {
 }
 
 /**
+ * 读焚稿数值字段：只有缺省（null/undefined）才回落到默认值，其它情况必须是合法有限数。
+ * 为什么不用 `Number(x) || def`：0 会被吞成默认值；而 `NaN > 0 === false` 会让
+ * 盾/灰爆/回响中的一个仪式静默消失，整局数字看着正常但机制已经没了。
+ * @param {object} cfg ashResolve 的结果（或任意覆写对象，如 ov）
+ * @param {string} key 字段名
+ * @param {number} def 缺省值（ASH 里的同名字段）
+ * @param {number} min 允许下限：0 = 该仪式可被 0 关闭；1 = 必须为正
+ * @param {boolean} [mustInt] 是否必须是整数（maxStacks 用 true）
+ * @param {object} [opt] 可选：label 报错前缀、hint 非有限值的后果、exclusive 下限是否"必须大于"、belowHint 低于下限的补充说明
+ * @returns {number} 校验后的数值
+ */
+function ashNum(cfg, key, def, min, mustInt, opt) {
+  if (!cfg || cfg[key] == null) return def;
+  const o = opt || {};
+  const label = o.label || '焚稿配置';
+  const hint = o.hint || '非法值会让盾/灰爆/回响中的一个仪式静默消失';
+  const raw = cfg[key];
+  if (typeof raw === 'string' && raw.trim() === '') {
+    throw new Error(label + ' ' + key + ' 是空字符串：' + hint);
+  }
+  const n = Number(raw);
+  if (!Number.isFinite(n)) {
+    throw new Error(label + ' ' + key + ' 不是有限数（' + String(raw) + '）：' + hint);
+  }
+  if (mustInt && !Number.isInteger(n)) {
+    throw new Error(label + ' ' + key + ' 必须是整数（当前 ' + n + '）');
+  }
+  const below = o.exclusive ? n <= min : n < min;
+  if (below) {
+    throw new Error(label + ' ' + key + ' = ' + n + '，'
+      + (o.exclusive ? '必须大于 ' : '低于允许下限 ') + min
+      + (o.belowHint ? '（' + o.belowHint + '）' : ''));
+  }
+  return n;
+}
+
+/**
  * 灰烬增伤倍率：1 + 层数 × 6%（封顶 4 层 → 1.24）。
  * @param {object} p 玩家
  * @returns {number}
@@ -573,10 +673,11 @@ function ashChooseBurn(p) {
  * @returns {'blast'|'shield'|'echo'}
  */
 function ashChooseRite(p, info, cfg) {
-  const on = (key, def) => ((cfg && cfg[key] != null ? Number(cfg[key]) : def) > 0);
-  const shieldOn = on('shieldTime', ASH.shieldTime);
-  const blastOn = on('blastRatio', ASH.blastRatio);
-  const echoOn = on('echoCasts', ASH.echoCasts);
+  /* 以前是 `(cfg[key] != null ? Number(cfg[key]) : def) > 0`：
+     垃圾值 → NaN > 0 = false → 该仪式被静默关掉。现在非法值直接抛错。 */
+  const shieldOn = ashNum(cfg, 'shieldTime', ASH.shieldTime, 0) > 0;
+  const blastOn = ashNum(cfg, 'blastRatio', ASH.blastRatio, 0) > 0;
+  const echoOn = ashNum(cfg, 'echoCasts', ASH.echoCasts, 0) > 0;
   const hpFrac = p.hpMax > 0 ? p.hp / p.hpMax : 1;
   if (hpFrac < 0.45 && shieldOn) return 'shield';   // 残血：优先保命
   if (info.isBoss && echoOn) return 'echo';         // 首领：三连半价爆发 > 6% 封顶的灰爆
@@ -596,9 +697,18 @@ function ashChooseRite(p, info, cfg) {
  */
 function ashTakenMul(p, cfg) {
   if (!cfg || !cfg.enabled) return 1;
-  const pct = cfg.hpCostPct == null ? 0 : Number(cfg.hpCostPct);
+  /* 这里以前是 `== null ? 0`：漏传代价就静默按"零代价"跑，数看着正常但整局是错的。
+     现在缺字段直接抛错——要"无代价"必须显式写 hpCostPct: 0（归因对照就是这么传的）。 */
+  if (cfg.hpCostPct == null) {
+    throw new Error('ashTakenMul: 焚稿已启用但 cfg.hpCostPct 未定义。'
+      + '静默默认 0 会按"零代价"跑完整局，必须显式传 0（对照）或正数（代价）。');
+  }
+  const pct = Number(cfg.hpCostPct);
+  if (!Number.isFinite(pct) || pct < 0) {
+    throw new Error('ashTakenMul: cfg.hpCostPct 非法（' + cfg.hpCostPct + '），应为 ≥0 的有限数');
+  }
   if (!pct) return 1;
-  const cap = cfg.maxStacks == null ? ASH.maxStacks : Number(cfg.maxStacks);
+  const cap = ashNum(cfg, 'maxStacks', ASH.maxStacks, 1, true);
   const stacks = Math.max(0, Math.min(cap, p.ash || 0));
   return 1 / Math.max(0.5, 1 - pct * stacks);
 }
@@ -614,7 +724,10 @@ function ashTakenMul(p, cfg) {
  */
 function ashPreRoom(p, info, cfg, mods, ov) {
   if (!cfg || !cfg.enabled) return null;
-  const maxStacks = Number(cfg.maxStacks) || ASH.maxStacks;
+  /* 上限必须是 ≥1 的整数：0 会让"开着却永不焚卡"，与 enabled:false 矛盾，按非法处理 */
+  const maxStacks = ashNum(cfg, 'maxStacks', ASH.maxStacks, 1, true, {
+    belowHint: '0 只对"可被关闭的仪式"字段合法；maxStacks 为 0 等于开着却永不焚卡，与 enabled:false 矛盾'
+  });
   if ((p.ash || 0) >= maxStacks) return null;          // 灰烬已满，不再烧
   if ((p.deck || []).length <= 1) return null;         // 最后一张保护
   const cardId = ashChooseBurn(p);
@@ -629,10 +742,10 @@ function ashPreRoom(p, info, cfg, mods, ov) {
   const rite = ashChooseRite(p, info, cfg);
   p.ashRites[rite] = (p.ashRites[rite] || 0) + 1;
 
-  const blastRatio = cfg.blastRatio == null ? ASH.blastRatio : Number(cfg.blastRatio);
-  const blastBossCap = cfg.blastBossCap == null ? ASH.blastBossCap : Number(cfg.blastBossCap);
-  const shieldTime = cfg.shieldTime == null ? ASH.shieldTime : Number(cfg.shieldTime);
-  const echoCasts = cfg.echoCasts == null ? ASH.echoCasts : Number(cfg.echoCasts);
+  const blastRatio = ashNum(cfg, 'blastRatio', ASH.blastRatio, 0);
+  const blastBossCap = ashNum(cfg, 'blastBossCap', ASH.blastBossCap, 0);
+  const shieldTime = ashNum(cfg, 'shieldTime', ASH.shieldTime, 0);
+  const echoCasts = ashNum(cfg, 'echoCasts', ASH.echoCasts, 0);
   const fx = { cardId, rite };
   if (rite === 'blast') {
     if (info.isBoss) {
@@ -909,8 +1022,16 @@ function simulateBoss(p, ctx) {
        总承伤不变（时间线性），只改变回血节点与死亡判定的粒度。 */
     const boundary = phase2 ? 0 : Math.floor(ctx.hp * C.BOSS.phaseThreshold);
     /* 段长：默认 10% 血一条（让阶段回血能在打到一半时触发）；
-       bossChunkFrac=0.5 可复现"旧版两段式"口径，用于解释历史基线差异。 */
-    const chunkFrac = (ctx.ov && Number(ctx.ov.bossChunkFrac)) || 0.1;
+       bossChunkFrac=0.5 可复现"旧版两段式"口径，用于解释历史基线差异。
+       这里以前是 `Number(...) || 0.1`：传 0 会被吞成 0.1。但 0 不是"不分块"——
+       chunkHp 会被 Math.max(1, …) 抬到 1 点，guard 400 次后首领仍存活 → 白送。
+       所以 0 / 负数 / 垃圾值一律抛错，只有"不传"才用默认 0.1。 */
+    const chunkFrac = ashNum(ctx.ov, 'bossChunkFrac', 0.1, 0, false, {
+      label: '首领结算',
+      hint: '非法值会让首领结算静默退回默认段长',
+      exclusive: true,
+      belowHint: '段长必须 > 0：0 会让每段只扣 1 点血，guard 400 次循环后首领仍存活，等于白送'
+    });
     const chunkHp = Math.max(1, Math.min(hp - boundary, Math.ceil(ctx.hp * chunkFrac)));
     const segmentTime = chunkHp / Math.max(1, singleDps);
     /* 灰盾：前 shieldTime 秒承伤 ×0.5 */
@@ -969,11 +1090,12 @@ function simulateBoss(p, ctx) {
  * ------------------------------------------------------------------------- */
 
 /**
- * 枚举当前可选的升级项。
+ * 技能段候选池：魔法 + 治疗 + 科技 + 融合（不含遗物）。
+ * 遗物拆到 passivePool，对齐主文件"技能段/被动段互不混池"。
  * @param {Object} p 玩家
  * @returns {Array<Object>} 选项
  */
-function optionPool(p) {
+function skillPool(p) {
   const options = [];
   // 融合：拥有对应魔法 + 科技
   C.FUSION.forEach((f) => {
@@ -991,7 +1113,7 @@ function optionPool(p) {
       options.push({ kind: 'magic', id: m.id, name: m.name, value: 0.08, survival: 0.10, data: m });
       return;
     }
-    options.push({ kind: 'magic', id: m.id, name: m.name, value: 0.10, survival: 0.01, data: m });
+    options.push({ kind: 'magic', id: m.id, name: m.name, value: damageCardValue(m), survival: 0.01, data: m });
   });
   // 科技
   Object.keys(C.TECH).forEach((id) => {
@@ -1009,6 +1131,17 @@ function optionPool(p) {
     if (id === 'magnet') { value = 0.01; survival = 0.01; }
     options.push({ kind: 'tech', id, name: t.name, value, survival, data: t });
   });
+  return options;
+}
+
+/**
+ * 被动段候选池：只有遗物（对齐主文件 passive 阶段，不与伤害卡同池）。
+ * 已满层遗物不出现；池空时调用方跳过本次被动段。
+ * @param {Object} p 玩家
+ * @returns {Array<Object>} 选项
+ */
+function passivePool(p) {
+  const options = [];
   // 遗物
   Object.keys(C.RELIC).forEach((id) => {
     const r = C.RELIC[id];
@@ -1029,6 +1162,16 @@ function optionPool(p) {
     options.push({ kind: 'relic', id, name: r.name, value, survival, data: r });
   });
   return options;
+}
+
+/**
+ * 按阶段取候选池。stage 缺省走技能段（旧调用点行为不变）。
+ * @param {Object} p 玩家
+ * @param {string} [stage] 'skill' | 'passive'
+ * @returns {Array<Object>} 选项
+ */
+function optionPool(p, stage) {
+  return stage === 'passive' ? passivePool(p) : skillPool(p);
 }
 
 /**
@@ -1058,22 +1201,35 @@ function optionEffective(p, opt) {
 }
 
 /**
- * 一次升级三选一：按 profile.buildIQ 决定"按数值选"还是"随机选"。
+ * 一次升级抽卡：按 profile.buildIQ 决定"按数值选"还是"随机选"。
  * @param {Object} p 玩家
  * @param {Function} rng 随机函数
- * @param {Function} [rec] 可选探针回调，收到本次三选一的完整信息（选项/有效性/是否全空）
+ * @param {Function} [rec] 可选探针回调，收到本次抽卡的完整信息（选项/有效性/是否全空）
+ * @param {string} [stage] 'skill'（默认，4 张，魔法/科技/融合）| 'passive'（3 张，只出遗物）
  * @returns {Object|null} 选中的项
  */
-function levelUp(p, rng, rec) {
-  const pool = optionPool(p);
+function levelUp(p, rng, rec, stage) {
+  const pool = optionPool(p, stage);
   if (!pool.length) return null;
-  const choices = shuffle(rng, pool).slice(0, 3);
+  /* 选项数对齐主文件：技能段 REWARD_CHOICES_CONFIG.count（4），被动段 XP_CONFIG.passiveCount（3） */
+  const count = stage === 'passive'
+    ? (C.SIM_PARAMS.passiveCount || 3)
+    : (C.SIM_PARAMS.skillCount || 4);
+  const choices = shuffle(rng, pool).slice(0, count);
   const effective = choices.map((o) => optionEffective(p, o));
   /* 评分：伤害提升占 70%，生存提升占 30%。
      角色「成长偏向」可以在不改选项池的前提下，调整这两项的权重
-     （默认 null → 0.7 / 0.3，与原逻辑一致）。 */
+     （默认 null → 0.7 / 0.3，与原逻辑一致）。
+
+     回削 E（2026-11-09）：乘上 optionEffective。
+     旧式只按 value/survival 打分，等于默认「所有卡都一定能生效」——
+     治疗卡已有时、护盾卡已有时、以及熔岩地裂这种进不了主槽的卡，
+     全会拿到满额分数，模型因此主动去选空卡。实测代价：空转率 52.2%，
+     且拿掉熔岩地裂通关率反而 +3.98pp（系统性诱导玩家踩坑）。
+     现在把必然空转的卡打到 -1e9：只要池里有任何真能生效的卡，
+     它就不会被选中；四个都无效时仍按原 value 排序（不会崩）。 */
   const bias = p.growthBias || { value: 0.7, survival: 0.3 };
-  const score = (o) => o.value * bias.value + o.survival * bias.survival;
+  const score = (o) => (optionEffective(p, o) ? 1 : -1e9) * (o.value * bias.value + o.survival * bias.survival);
   let chosen;
   if (rng() < p.profile.buildIQ) {
     chosen = choices.reduce((best, o) => (score(o) > score(best) ? o : best), choices[0]);
@@ -1081,8 +1237,26 @@ function levelUp(p, rng, rec) {
     chosen = pick(rng, choices);
   }
   applyOption(p, chosen, rng);
-  p.level += 1;
+  /* 等级只由技能段推进：被动段是同一次升级附带的额外奖励，不能重复加级
+     （否则每 3 级会多涨 1 级，等级曲线与实机脱钩）。 */
+  if (stage !== 'passive') p.level += 1;
   if (rec) rec({ choices, effective, chosen, allDud: effective.every((v) => !v) });
+  return chosen;
+}
+
+/**
+ * 一次完整升级：技能段抽卡 + 命中被动级时额外一次遗物专属抽卡。
+ * 所有"真实升级"入口都应该走这里，保证与主文件的两段奖励一致。
+ * @param {Object} p 玩家
+ * @param {Function} rng 随机函数
+ * @param {Function} [rec] 探针回调（只收技能段）
+ * @returns {Object|null} 技能段选中的项
+ */
+function levelUpFull(p, rng, rec) {
+  const chosen = levelUp(p, rng, rec, 'skill');
+  if (C.SIM_PARAMS.passiveEvery > 0 && p.level % C.SIM_PARAMS.passiveEvery === 0) {
+    levelUp(p, rng, null, 'passive');
+  }
   return chosen;
 }
 
@@ -1335,7 +1509,20 @@ function bossStats(floor, diff, ov) {
   /* C1-15 硬闸门：F20 压系数（与主文件 bossHpCapForFloor 同步；显式覆盖时不生效） */
   if (!capOverride && floor >= 20) cap *= (C.BOSS.hpCapF20Scale || 1);
   const hpFloorOverride = (o.bossHpMulByFloor && o.bossHpMulByFloor[floor]) || 1;
-  let hp = Math.min(cap, C.BOSS.hpBase * Math.pow(C.BOSS.hpFloorMul, steps) * diff.hpMul * (o.bossHpMul || 1) * hpFloorOverride);
+  /* 回削 E（2026-11-09）：删除死配置 bossHpMul。
+     它原先写在 Math.min(cap, …) 内部 → 被 hpCap 封顶，永远无效（静默降级）。
+     要拉长首领段就改 C.BOSS.hpCap；传 bossHpMul 现在会直接抛错，不再静默吞掉。
+     登记见 docs/静默降级清单.md。 */
+  if (o.bossHpMul != null && o.bossHpMul !== 1) {
+    throw new Error('bossHpMul 已废弃：它位于 Math.min(hpCap, …) 内部，永远被 hpCap 封顶。请改 C.BOSS.hpCap。');
+  }
+  let hp = Math.min(cap, C.BOSS.hpBase * Math.pow(C.BOSS.hpFloorMul, steps) * diff.hpMul * hpFloorOverride);
+  /* 第五批 A-1：浅层首领血量阶梯（与主文件 SHALLOW_TUNING_CONFIG 同源，只 ≤maxFloor 生效） */
+  const shallowConf = C.BOSS.shallow || { maxFloor: 5, bossHpScaleByFloor: {} };
+  if (floor <= (shallowConf.maxFloor || 5)) {
+    const shallowMap = o.shallowBossHpScaleByFloor || shallowConf.bossHpScaleByFloor || {};
+    hp *= shallowMap[floor] || 1;
+  }
   if (floor % 6 === 0) hp *= C.BOSS.regionBossHpMul;
   hp *= deepHpMulAt(floor);   // F19 起 ×1.1（与主文件 deepHpMulOf 对齐）
   hp = Math.round(Math.min(cap * 2, hp));
@@ -1369,7 +1556,7 @@ function runOne(seed, profile, difficulty, overrides) {
   const startCards = [];
   for (let i = 0; i < (ov.startLevels || 0); i += 1) {
     const before = p.magics.slice();
-    const chosen = levelUp(p, rng);          // levelUp 内部已经 +1 级，不要再手动加
+    const chosen = levelUpFull(p, rng);      // 起手额外等级同样走两段奖励，levelUp 内部已 +1 级
     if (chosen) {
       startCards.push({
         kind: chosen.kind,
@@ -1397,6 +1584,7 @@ function runOne(seed, profile, difficulty, overrides) {
     relics: {},
     fusionCount: 0,
     roomsCleared: 0,
+    levelAt5: null,      // M2 口径：进入第 5 层（即 F5 首领前）时的等级，未到 F5 为 null
     level: 1,
     seconds: 0,
     forgeUses: 0,              // B2-a 探针：熔炉房实际兑换了几次能力强化
@@ -1491,7 +1679,7 @@ function runOne(seed, profile, difficulty, overrides) {
         if (p.embers >= cost) {
           p.embers -= cost;
           result.forgeUses += 1;
-          levelUp(p, rng);
+          levelUpFull(p, rng);
         }
         continue;
       }
@@ -1506,6 +1694,8 @@ function runOne(seed, profile, difficulty, overrides) {
 
       if (room.type === 'boss') {
         const stats = bossStats(floor, diff, ov);
+        /* M2 口径：F5 首领开打前记录等级，与真机探针「到首领前 14 级」同口径对照 */
+        if (floor === 5) result.levelAt5 = p.level;
         /* 探针：首领房入场补给（P2：按"已损生命"比例回复；默认 0 = 不改）。
            必须在采样 entryHp 之前生效，否则 entryHp 记录的是补给前的血量。 */
         const entryHealFrac = (ov.bossEntryHealFracByFloor && ov.bossEntryHealFracByFloor[floor]) || 0;
@@ -1633,8 +1823,12 @@ function runOne(seed, profile, difficulty, overrides) {
       /* B2-a：击杀累积余烬（普通 1 / 只、精英 3 / 只），供熔炉房消费 */
       p.embers += enc.enemyIds.length
         * (room.type === 'elite' ? C.ROOM.emberPerEliteKill : C.ROOM.emberPerKill);
+      /* M2 口径修正（2026-11-14）：精英房按 elite 档发经验。
+         主文件 XP_CONFIG.killXp = {normal:10, elite:35, boss:120}，且击杀经验读 enemy.elite；
+         旧版不分房型一律发 10，导致 F1–F5 少发约 900 XP、F5 首领前少 1 级。 */
+      const killXp = room.type === 'elite' ? C.XP.killXp.elite : C.XP.killXp.normal;
       for (let k = 0; k < enc.enemyIds.length; k += 1) {
-        gainXp(p, C.XP.killXp.normal, rng);
+        gainXp(p, killXp, rng);
         // 精英击杀回复（默认口径每层都回；parity 只算节奏层）
         if (room.type === 'elite' && rhythmGate) {
           healElite += applyHeal(p, p.hpMax * C.ECONOMY.eliteKillHealRatio * (ov.healMul || 1) * (ov.deepHealMul || 1));
@@ -1743,7 +1937,7 @@ function gainXp(p, amount, rng) {
     p.xp -= p.xpNeed;
     // 注意：等级只在这里由 levelUp 内部 +1 一次，不要再手动 p.level += 1
     // （旧版两处都加，导致等级翻倍、xp 曲线提前变陡，手牌数量被系统性低估）
-    levelUp(p, rng);
+    levelUpFull(p, rng);      // 技能段 4 选 1；命中被动级时额外一次遗物三选一
     p.xpNeed = Math.round(C.XP.baseNeed * Math.pow(C.XP.growth, p.level - 1));
   }
 }
@@ -1782,6 +1976,8 @@ function createAgg() {
     clearRooms: 0,
     seconds: 0,
     levels: 0,
+    levels5: 0,          // M2：到达 F5 首领的局数（分母）
+    levels5Sum: 0,       // M2：这些局在 F5 首领前的等级合计
     completed5: 0
   };
 }
@@ -1824,6 +2020,8 @@ function addRun(agg, r) {
   agg.clearRooms += r.roomsCleared;
   agg.seconds += r.seconds;
   agg.levels += r.level;
+  /* M2：F5 首领前等级（只统计真正走到 F5 首领的局） */
+  if (r.levelAt5 != null) { agg.levels5 += 1; agg.levels5Sum += r.levelAt5; }
   agg.fusionRuns += r.fusionCount > 0 ? 1 : 0;
   agg.fusionTotal += r.fusionCount;
   if (r.primaryMagic) {
@@ -1872,6 +2070,8 @@ function mergeAgg(a, b) {
   a.clearRooms += b.clearRooms;
   a.seconds += b.seconds;
   a.levels += b.levels;
+  a.levels5 += b.levels5;
+  a.levels5Sum += b.levels5Sum;
   a.completed5 += b.completed5;
   return a;
 }
@@ -1897,5 +2097,6 @@ function histPercentile(hist, binSize, q) {
 
 module.exports = {
   mulberry32, runSeed, runOne, createAgg, addRun, mergeAgg, histPercentile,
-  magicById, collectMods, playerOffense, bossStats, diffAt, isRhythmFloor
+  magicById, collectMods, playerOffense, bossStats, diffAt, isRhythmFloor,
+  optionPool, burstOf, damageCardValue, CARD_VALUE
 };
