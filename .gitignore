@@ -24,3 +24,31 @@ node_modules/
 Thumbs.db
 desktop.ini
 .DS_Store
+
+# ===== 收口（2026-11-22）：大体积素材与产物不入库 =====
+# 主文件 index_arcane_v2.html 是自包含单文件：脚本、样式、贴图、音频全部内联，
+# 下面这些目录只在本机保留，游戏运行不依赖从仓库读取，因此不进 Git 历史。
+docs/
+参赛材料/
+视觉规范/
+sprites/
+shots_v2520/
+
+# 历史手改备份（文件名自带版本/时间，且文件本体 5 MB 级，需要时可从历史重建）
+index_arcane_v2.bak*
+*.iter-bak
+index_arcane.html.bak*
+bak_*.html
+_bak_*.html
+tools/_ctrl_snap_*.html
+
+# 探针 / 模拟器 / 审计的产物（跑一次就能重新生成）
+tools/sim_panel/
+tools/rhythm_out/
+tools/merge_audit/
+tools/boot_out/
+tools/.seedwork/
+tools/__pycache__/
+__pycache__/
+*.pyc
+
