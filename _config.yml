@@ -1,0 +1,7 @@
+# GitHub Pages（Jekyll）构建配置
+# 目的：说明文档不参与 Jekyll 处理，避免文档里的 {{ }} 被当成 Liquid 模板语法而中断构建。
+# 注意：只影响 Pages 站点产物，不影响 GitHub 仓库首页对 README.md 的展示。
+exclude:
+  - "*.md"
+  - "**/*.md"
+  - docs

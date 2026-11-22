@@ -885,7 +885,7 @@ function currentWeaponTag() {
  * 只回答一件事：把这张卡拿到手，会不会和"当前武器标签"凑出一条新配方。
  * 返回的 text 固定 ≤12 个字（最长「与镜像双刃可融合」9 字），供卡面一句话提示。
  * @param {Object} option 奖励选项（需含 kind / id）
- * @returns {{fusion:Object, text:string}|null}
+ * @returns {% raw %}{{fusion:Object, text:string}|null}{% endraw %}
  */
 function weaponFusionHintForOption(option) {
   if (!WEAPON_TAG_CONFIG.enabled) return null;
