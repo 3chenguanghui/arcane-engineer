@@ -2417,6 +2417,9 @@
   .codex-card { width: min(880px, 95vw); }
   .codex-card.is-help { width: min(820px, 94vw); }
   .codex-card.is-tree { width: min(1080px, 96vw); }
+  /* 技能树给卡片一个确定高度：节点区按 flex 占满剩余空间，
+     底部检查器（丢弃按钮）与图例固定可见，不被 max-height 裁切。 */
+  .codex-card.is-tree { height: min(720px, 88vh); }
   /* 帮助面板：两列小卡（左操作 / 右楼层与难度），敌人表横跨底部 */
   .help-grid {
     display: grid;
@@ -2617,11 +2620,21 @@
      这里让树区域自己滚动（保留头部的进度/可凑出清单不动），
      底部节点不再被卡片裁掉；滚动条做细化处理，不抢视觉。 */
   .codex-card.is-tree .tree-wrap {
-    flex: 1 1 auto;
+    /* flex-basis 用 0：节点区只占"剩余高度"，底部检查器（含丢弃按钮）和
+       图例永远不会被卡片 max-height 裁掉；节点多了在树区内部滚动。 */
+    flex: 1 1 0;
     min-height: 0;
     overflow-y: auto;
     overscroll-behavior: contain;
     padding-right: 8px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(126, 164, 214, 0.45) transparent;
+  }
+  /* 检查器固定吃自己的内容高度，不参与收缩，保证丢弃按钮可见 */
+  .codex-card.is-tree .tree-inspector {
+    flex: 0 0 auto;
+    max-height: min(210px, 30vh);
+    overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: rgba(126, 164, 214, 0.45) transparent;
   }
@@ -2876,6 +2889,59 @@
   }
   .tree-inspector .i-stats b { color: #dceeff; }
   .tree-inspector .i-empty { font-size: var(--fs-xs); color: var(--text-3); line-height: 1.7; }
+  /* 融合说明：一句话一条（和谁融 → 融出什么 → 有什么用） */
+  .tree-inspector .i-fuse { margin-top: 4px; }
+  .tree-inspector .i-fuse-how { font-size: 11px; color: var(--text-3); line-height: 1.55; }
+  .tree-inspector .i-fuse-how b { color: var(--gold); }
+  .tree-inspector .i-fuse-row {
+    font-size: 11.5px;
+    line-height: 1.6;
+    color: rgba(196, 218, 240, 0.9);
+    padding-left: 2px;
+  }
+  .tree-inspector .i-fuse-row b { color: #ffd98a; }
+  .tree-inspector .i-fuse-row.is-on { color: rgba(150, 240, 190, 0.92); }
+  .tree-inspector .i-fuse-row.is-on b { color: #9ff3c2; }
+  /* 丢弃技能：详情里的二次确认按钮与后果说明（细条排版，不挤压节点区） */
+  .tree-inspector .i-discard {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed rgba(255, 138, 61, 0.24);
+  }
+  .tree-inspector .i-discard-btn {
+    padding: 3px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    background: rgba(58, 33, 22, 0.72);
+    border: 1px solid rgba(255, 138, 61, 0.5);
+    color: #ffb27a;
+    font-size: 12px;
+    font-family: var(--mono);
+  }
+  .tree-inspector .i-discard-btn:hover { background: rgba(90, 48, 28, 0.82); }
+  .tree-inspector .i-discard-btn.is-armed {
+    background: #6a2a14;
+    border-color: #ff7a2f;
+    color: #fff2e4;
+  }
+  .tree-inspector .i-discard-note { font-size: 11px; color: rgba(255, 157, 107, 0.82); line-height: 1.5; }
+  /* 首次打开技能界面的一次性引导条：两句话，内嵌不弹窗 */
+  .tree-discard-guide {
+    margin-top: 6px;
+    padding: 7px 10px;
+    border: 1px dashed rgba(255, 194, 71, 0.34);
+    border-radius: var(--r-md);
+    background: rgba(255, 194, 71, 0.06);
+    font-size: 11.5px;
+    line-height: 1.65;
+    color: rgba(232, 216, 178, 0.86);
+  }
+  .tree-discard-guide[hidden] { display: none; }
+  .tree-discard-guide b { color: var(--gold); font-weight: 600; }
   .tree-legend {
     display: flex;
     gap: 12px;
@@ -7003,6 +7069,17 @@ display: flex; flex-direction: column; gap: 8px;
 }
 
 </style>
+<!-- project-iterate: SEO/分享/无障碍增强（只读加法，不改原逻辑） -->
+<meta name="description" content="单文件 Canvas 2D 实时肉鸽：三选一卡池、五层构筑与战斗数值，全在一个 HTML 里。" />
+<meta name="theme-color" content="#080e18" />
+<meta property="og:title" content="烬 · 陈光辉作品集" />
+<meta property="og:description" content="单文件 Canvas 2D 实时肉鸽：三选一卡池、五层构筑与战斗数值，全在一个 HTML 里。" />
+<style id="iter-a11y">
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{
+animation-duration:.01ms!important;animation-iteration-count:1!important;
+transition-duration:.01ms!important;scroll-behavior:auto!important}}
+:focus-visible{outline:2px solid #7fb4f0!important;outline-offset:2px}
+</style>
 </head>
 <body>
 
@@ -7020,7 +7097,7 @@ display: flex; flex-direction: column; gap: 8px;
     <div class="boot-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="bootFill"></i></div>
     <div class="boot-meta"><b id="bootPct">0%</b><span id="bootTip">正在解析引擎</span></div>
   </div>
-  <div class="boot-ver" id="bootVer">v2.5.24</div>
+  <div class="boot-ver" id="bootVer">v2.5.25</div>
 </div>
 <script>
 /* 启动载入层控制器（零依赖，放在 <body> 最前，先于游戏主脚本执行）
@@ -7627,7 +7704,7 @@ display: flex; flex-direction: column; gap: 8px;
   }
 
   /**
-   * 全局 error 捕获（capture=true 才能收到 <script>/<img> 等资源缺失）
+   * 全局 error 捕获（capture=true 才能收到 <script>/<img alt="烬 界面截图" loading="lazy" /> 等资源缺失）
    * @param {ErrorEvent} event 事件
    * @returns {void}
    */
@@ -8069,6 +8146,10 @@ display: flex; flex-direction: column; gap: 8px;
         <button type="button" id="skillTreeClose" class="btn">关闭 <kbd>T</kbd></button>
       </div>
       <div id="treeProgress" class="tree-progress"></div>
+      <div id="treeDiscardGuide" class="tree-discard-guide" hidden>
+        <div><b>丢弃</b>：技能树里点一张已拥有的魔法卡，点「丢弃」；键盘用数字键选卡，按两次 Enter 确认。</div>
+        <div>丢了本局拿不回，只能等后续奖励再抽到；依赖它的融合会一起消失；最后一张魔法卡不能丢。</div>
+      </div>
       <div id="treeReady" class="tree-ready"></div>
       <!-- W 批：三输入关系说明条（当前武器标签 → 可合成配方），不用说明书 -->
       <div id="treeWeaponBridge" class="tree-weapon-bridge"></div>
@@ -8955,7 +9036,7 @@ const GAME_CONFIG = {
   /* 旧名清单：存档迁移标记用，改名后旧档仍可读（不参与任何展示） */
   legacyTitles: ['奥术工程师'],
   /* 第 6 轮 · 发布包：版本号是唯一真源 —— 标题页、关于面板、说明页都由它生成 */
-  version: '2.5.24',
+  version: '2.5.25',
   releaseName: '烬 · 纯魔法爽感版',
   /* 作者署名：唯一真源。标题页 / 关于面板 / 设置页脚 / 发布包说明四处都由它生成，
      改这一处四处同步变化，不在各处硬编码。 */
@@ -11359,7 +11440,10 @@ const ROOM_SCALE_CONFIG = {
  */
 const FLOOR_STRUCTURE_CONFIG = {
   enabled: true,
-  roomsPerFloor: 10,    // 固定房间数（含起点与首领）：1 出生 + 8 内容 + 1 首领
+  /* v2.5.25（玩家症状 5「每层关卡太少，三步就到 boss」）：10 → 12 间。
+     1 出生 + 10 内容 + 1 首领；配合 applyLayeredTopology 的"通用一维链"，
+     玩家每层要走 10 步才到首领，且不能回头、不能跳房间。 */
+  roomsPerFloor: 12,    // 固定房间数（含起点与首领）：1 出生 + 10 内容 + 1 首领
   minExits: 2,          // 非首领房最少出口数
   maxExits: 3,          // 非首领房最多出口数
   chordChance: 0.6,     // 给环形图加一条弦的概率（让部分房有 3 个出口）
@@ -14386,21 +14470,21 @@ const ENEMY_BUDGET_CONFIG = {
     3: { battle: [18, 18], elite: [6, 6], hpScale: 0.227 },   // v2.5.21：14→18 只
     4: { battle: [18, 18], elite: [7, 7], hpScale: 0.277 },   // v2.5.21：14→18 只
     5: { battle: [18, 18], elite: [7, 7], hpScale: 0.405 },   // v2.5.21：14→18 只
-    6: { battle: [7, 7], elite: [5, 5], hpScale: 0.515 },
-    7: { battle: [7, 7], elite: [5, 5], hpScale: 0.467 },
-    8: { battle: [7, 8], elite: [5, 6], hpScale: 0.428 },
-    9: { battle: [8, 8], elite: [6, 6], hpScale: 0.394 },
-    10: { battle: [8, 8], elite: [6, 6], hpScale: 0.394 },
-    11: { battle: [8, 8], elite: [6, 6], hpScale: 0.388 },
-    12: { battle: [8, 8], elite: [6, 6], hpScale: 0.385 },
-    13: { battle: [8, 8], elite: [6, 6], hpScale: 0.395 },
-    14: { battle: [8, 8], elite: [6, 6], hpScale: 0.400 },
-    15: { battle: [8, 8], elite: [6, 6], hpScale: 0.406 },
-    16: { battle: [8, 8], elite: [6, 6], hpScale: 0.414 },
-    17: { battle: [8, 8], elite: [6, 6], hpScale: 0.422 },
-    18: { battle: [8, 8], elite: [6, 6], hpScale: 0.429 },
-    19: { battle: [8, 8], elite: [6, 6], hpScale: 0.478 },
-    20: { battle: [8, 9], elite: [6, 7], hpScale: 0.466 }
+    6: { battle: [14, 14], elite: [6, 6], hpScale: 0.433 },   // v2.5.25 实测补：F5→F6 清房 25.5s→16.7s 断崖，10→14 只（+密度≈15）把时长拉回 ~23s；hpScale 不动
+    7: { battle: [13, 13], elite: [6, 6], hpScale: 0.392 },   // v2.5.25 实测补：10→13 只（+密度≈15），F7 实测 9.0/23.7s 方差大，按体量补中位
+    8: { battle: [11, 11], elite: [6, 7], hpScale: 0.350 },   // v2.5.25：7–8→11 只
+    9: { battle: [11, 11], elite: [7, 7], hpScale: 0.340 },   // v2.5.25：8→11 只
+    10: { battle: [12, 12], elite: [7, 7], hpScale: 0.315 },  // v2.5.25：8→12 只
+    11: { battle: [12, 12], elite: [7, 7], hpScale: 0.310 },  // v2.5.25：8→12 只
+    12: { battle: [13, 13], elite: [7, 7], hpScale: 0.288 },  // v2.5.25：8→13 只
+    13: { battle: [13, 13], elite: [7, 7], hpScale: 0.295 },  // v2.5.25：8→13 只
+    14: { battle: [13, 13], elite: [7, 7], hpScale: 0.299 },  // v2.5.25：8→13 只
+    15: { battle: [14, 14], elite: [7, 7], hpScale: 0.284 },  // v2.5.25：8→14 只
+    16: { battle: [14, 14], elite: [7, 7], hpScale: 0.290 },  // v2.5.25：8→14 只
+    17: { battle: [15, 15], elite: [7, 7], hpScale: 0.278 },  // v2.5.25：8→15 只
+    18: { battle: [15, 15], elite: [7, 7], hpScale: 0.283 },  // v2.5.25：8→15 只
+    19: { battle: [16, 16], elite: [7, 7], hpScale: 0.298 },  // v2.5.25：8→16 只
+    20: { battle: [16, 16], elite: [7, 7], hpScale: 0.305 }   // v2.5.25：8–9→16 只
   },
   rampEnabled: true,             // 验收脚本改区间（setBudget）时会临时关掉，保证旧断言可复现
   mixMin: 5,                     // 同场混编至少几种
@@ -15634,6 +15718,18 @@ function nextRoomChoices(maxChoices) {
   /* v2.2.2：分层图现在有"同层换道边"（A 道 ↔ B 道，深度相同），
      所以深度只用来排序，不再当硬过滤条件；硬过滤只认"是否去过"。 */
   const cap = maxChoices || ROOM_PICKER_CONFIG.maxChoices;
+  /* v2.5.25（症状 3「选房还能走回去」/ 症状 4「一选就跳到首领房」）：
+     一维链只允许"下一步"。图上有 depthOf 且标记 chain 时，候选只有 depth === 当前+1
+     的邻房 —— 来路（depth-1）不再出现在面板里，也不存在同层并排或跨层边，
+     所以既回不了头、也跳不过普通房。6/8/10 房的旧图没有 chain 标记，行为保持原样。 */
+  const chainGraph = !!(state.floorGraph && state.floorGraph.chain);
+  const curDepth = depthOfRoom[curId];
+  const forwardOnly = (id) => {
+    if (!chainGraph) return true;
+    const d = depthOfRoom[id];
+    if (curDepth === undefined || d === undefined) return true;
+    return d === curDepth + 1;
+  };
   /* v2.5.21 · P0 死局：每轮重算前清掉上一轮写在房间上的"强行放行"特权，
      否则玩家离开这间房之后，它仍然会绕过首领门禁 */
   if (state.rooms && typeof state.rooms.forEach === 'function') {
@@ -15642,7 +15738,7 @@ function nextRoomChoices(maxChoices) {
   roomChoiceFallback = false;
   roomChoiceForced = false;
   roomPickForcedId = -1;
-  const fresh = sortIds(neighbors.filter((id) => !seen(id)));
+  const fresh = sortIds(neighbors.filter((id) => !seen(id) && forwardOnly(id)));
   /* 候选集 = "门禁之后仍然进得去"的房间（与渲染 / 传送共用 roomEnterableNow） */
   const freshOpen = fresh.filter((id) => roomEnterableNow(state.rooms[id], cur));
   if (freshOpen.length) return freshOpen.slice(0, cap);
@@ -15666,7 +15762,8 @@ function nextRoomChoices(maxChoices) {
   /* 边界 2：本层已无未探索的相邻房（图退化 / 全图走完）。退回"回访"避免卡死，
      但 roomChoiceFallback=true，UI 会明写"以下为回访"，不让它冒充新房间 */
   roomChoiceFallback = true;
-  const back = sortIds(neighbors.slice());
+  /* v2.5.25：链上"回访"也不给回头路，只保留前向房（正常不会走到这里） */
+  const back = sortIds(neighbors.filter((id) => forwardOnly(id)));
   const backOpen = back.filter((id) => roomEnterableNow(state.rooms[id], cur));
   if (backOpen.length) return backOpen.slice(0, cap);
   /* v2.5.21 · 兜底 B：连回访房都进不去（极端退化图）。同样强开一间，
@@ -18588,7 +18685,7 @@ function spawnPricedWave(room) {
   for (let i = 0; i < count; i += 1) {
     const angle = (Math.PI * 2 / count) * i + state.elapsed * 0.3;
     const rr = Math.min(room.w, room.h) * 0.2;
-    const spot = nudgeOutOfBlockers(room.cx + Math.cos(angle) * rr, room.cy + Math.sin(angle) * rr, 26);
+    const spot = pickEnemySpawnPoint(room, room.cx + Math.cos(angle) * rr, room.cy + Math.sin(angle) * rr, 26);
     const pick = pool[Math.floor(roomHash01(room, 21 + i) * pool.length) % pool.length];
     spawnEnemy(pick, spot.x, spot.y, state.floor, { roomId: room.id });
   }
@@ -23533,6 +23630,189 @@ function nudgeOutOfBlockers(x, y, radius) {
   return { x: x, y: y };
 }
 
+/* v2.5.25（症状 10「怪物刷进房间的遮挡物里」）：
+   刷怪落点统计。同名只读探针会读这三个数，运行期只增不减、不影响玩法。 */
+const SPAWN_STATS = { total: 0, nudged: 0, inOcclusion: 0 };
+
+/* v2.5.25 A/B：刷怪落点是否避让房间家具 / 爆炸桶。
+   关闭后 spawnPointClear 退回"只看可走 + 房型"，用于无头探针跑"修前"对照；
+   默认 true，玩法与修后完全一致。 */
+const SPAWN_PROP_GUARD = { enabled: true };
+
+/**
+ * 取房间主体物的"视觉矩形"（会挡住怪、但不参与碰撞的家具）
+ * ------------------------------------------------------------
+ * 与 paintRoomPropV2 用同一套公式：propBox 的顶面在 (x,y,w,h)，
+ * 立面再向下延伸 lift，所以遮挡范围是 y → y+h+lift。
+ * 只列会压住敌人身体的实体家具；纯地面光斑 / 色块不返回。
+ * @param {Object} room 房间
+ * @returns {Array<{x:number,y:number,w:number,h:number}>} 矩形列表
+ */
+function roomOcclusionRects(room) {
+  if (!room || typeof ROOM_PROP_V2_CONFIG === 'undefined' || !ROOM_PROP_V2_CONFIG.enabled) return [];
+  const k = roomPropK(room);
+  const cx = room.cx;
+  const cy = room.cy;
+  const out = [];
+  const put = (x, y, w, h) => { out.push({ x: x, y: y, w: w, h: h }); };
+  switch (room.type) {
+    case 'shop': {
+      const w = 300 * k;
+      const h = 34 * k;
+      const lift = 58 * k;
+      const y = room.y + 230 * k;
+      put(cx - w / 2, y, w, h + lift);
+      [-1, 1].forEach((side) => {
+        const sx = side < 0 ? room.x + 70 : room.x + room.w - 190 * k;
+        put(sx, y - 74 * k, 120 * k, 26 * k + 96 * k);
+      });
+      put(cx - 84 * k, y - 96 * k, 168 * k, 46 * k + 10 * k);
+      break;
+    }
+    case 'chest': {
+      const bw = 108 * k;
+      const bh = 40 * k;
+      const by = cy - 4 * k;
+      put(cx - bw / 2, by - 28 * k, bw, bh * 1.45 + 44 * k + 28 * k);
+      break;
+    }
+    case 'rest':
+    case 'start': {
+      const gy = cy + 16 * k;
+      put(cx - 46 * k, gy - 64 * k, 92 * k, 124 * k);
+      break;
+    }
+    case 'forge': {
+      put(cx - 110 * k, cy - 40 * k, 220 * k, 60 * k + 150 * k);
+      put(cx - 22 * k, cy - 236 * k, 44 * k, 40 * k + 140 * k);
+      put(cx + 150 * k, cy + 56 * k, 86 * k, 26 * k + 36 * k);
+      break;
+    }
+    case 'survival': {
+      put(cx - 56 * k, cy + 8, 112 * k, 40 * k + 30 * k);
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach((p) => {
+        put(cx + p[0] * room.w * 0.30 - 14 * k, cy + p[1] * room.h * 0.30, 28 * k, 24 * k + 96 * k);
+      });
+      break;
+    }
+    case 'curse': {
+      put(cx - 60 * k, cy - 16 * k, 120 * k, 36 * k + 150 * k);
+      put(cx - 34 * k, cy - 100 * k, 68 * k, 100 * k);
+      break;
+    }
+    case 'vault': {
+      put(cx - 34 * k, room.y + 40 * k, 68 * k, 24 * k + 120 * k);
+      break;
+    }
+    default:
+      break;
+  }
+  return out;
+}
+
+/**
+ * 圆与一组矩形（可外扩 pad）是否相交
+ * @param {number} x 圆心 x
+ * @param {number} y 圆心 y
+ * @param {number} r 半径
+ * @param {Array<{x:number,y:number,w:number,h:number}>} rects 矩形列表
+ * @param {number} [pad] 额外外扩
+ * @returns {boolean} 是否相交
+ */
+function circleHitsRects(x, y, r, rects, pad) {
+  if (!rects || !rects.length) return false;
+  const p = pad || 0;
+  for (let i = 0; i < rects.length; i += 1) {
+    const rc = rects[i];
+    const nx = Math.max(rc.x - p, Math.min(x, rc.x + rc.w + p));
+    const ny = Math.max(rc.y - p, Math.min(y, rc.y + rc.h + p));
+    if ((x - nx) * (x - nx) + (y - ny) * (y - ny) < r * r) return true;
+  }
+  return false;
+}
+
+/**
+ * 判断某个落点能否站下一只怪（可走 + 不被家具/爆炸桶压住）
+ * @param {Object} room 房间
+ * @param {number} x 落点 x
+ * @param {number} y 落点 y
+ * @param {number} radius 怪物体型半径
+ * @returns {boolean} 是否合法
+ */
+function spawnPointClear(room, x, y, radius) {
+  const r = Math.max(6, radius || 26);
+  if (!pointInRoomShape(room, x, y, Math.max(6, r - 6))) return false;
+  if (!isWalkableCircle(x, y, r)) return false;
+  if (!SPAWN_PROP_GUARD.enabled) return true;
+  if (!room._occRects) room._occRects = roomOcclusionRects(room);
+  if (circleHitsRects(x, y, r, room._occRects, 0)) return false;
+  const barrels = (state.props && state.props.barrels) || [];
+  for (let i = 0; i < barrels.length; i += 1) {
+    const b = barrels[i];
+    if (dist(x, y, b.x, b.y) < r + (b.r || 13)) return false;
+  }
+  return true;
+}
+
+/**
+ * 选一个"看得见、打得到"的刷怪点
+ * ------------------------------------------------------------
+ * 1) 先按原坐标做碰撞修正（nudgeOutOfBlockers）；
+ * 2) 若压在家具 / 爆炸桶 / 房型缺口里，按确定性螺旋向外找最近合法点；
+ * 3) 全部失败才退回房心，并记一次 inOcclusion 供探针核对。
+ * 螺旋不依赖 Math.random，同一房间重开落位一致。
+ * @param {Object} room 房间
+ * @param {number} x 期望点 x
+ * @param {number} y 期望点 y
+ * @param {number} [radius] 怪物体型半径
+ * @returns {{x:number,y:number}} 合法落点
+ */
+function pickEnemySpawnPoint(room, x, y, radius) {
+  const r = Math.max(8, radius || 26);
+  SPAWN_STATS.total += 1;
+  const base = nudgeOutOfBlockers(x, y, r);
+  if (spawnPointClear(room, base.x, base.y, r)) return base;
+  SPAWN_STATS.nudged += 1;
+  for (let ring = 1; ring <= 8; ring += 1) {
+    const rad = r + ring * 14;
+    const steps = 6 + ring * 2;
+    for (let i = 0; i < steps; i += 1) {
+      const a = (Math.PI * 2 / steps) * i + ring * 0.7;
+      const nx = x + Math.cos(a) * rad;
+      const ny = y + Math.sin(a) * rad;
+      if (!spawnPointClear(room, nx, ny, r)) continue;
+      const fixed = nudgeOutOfBlockers(nx, ny, r);
+      if (spawnPointClear(room, fixed.x, fixed.y, r)) {
+        SPAWN_STATS.inOcclusion += 1;
+        return fixed;
+      }
+    }
+  }
+  /* 螺旋都失败（例如期望点正好压在柜台正中）时，最后做一次粗网格兜底：
+     取房内离期望点最近的合法格点，保证"一定不进道具"，而不是退回可能压在道具里的房心。 */
+  let bestFallback = null;
+  let bestFallbackD2 = Infinity;
+  for (let gy = room.y + 24; gy <= room.y + room.h - 24; gy += 28) {
+    for (let gx = room.x + 24; gx <= room.x + room.w - 24; gx += 28) {
+      if (!spawnPointClear(room, gx, gy, r)) continue;
+      const dx = gx - x;
+      const dy = gy - y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < bestFallbackD2) {
+        bestFallbackD2 = d2;
+        bestFallback = { x: gx, y: gy };
+      }
+    }
+  }
+  if (bestFallback) {
+    SPAWN_STATS.inOcclusion += 1;
+    return bestFallback;
+  }
+  const safe = nudgeOutOfBlockers(room.cx, room.cy, r);
+  if (!spawnPointClear(room, safe.x, safe.y, r)) SPAWN_STATS.inOcclusion += 1;
+  return safe;
+}
+
 /**
  * 判断圆形角色能否站在指定位置（圆要完整落在房间/走廊的并集内）
  * @param {number} x 圆心 x
@@ -23757,51 +24037,44 @@ function assignRoomTypes(spawnRoom, stairRoom) {
  * generateFloor 里那行 stairRoom.type='boss' 无条件改掉；随机权重的休整房则被
  * 保底二(≥2 战斗) / 保底三(≥1 宝箱或事件) / 保底四(商店) / 保底五(生存) 在 3 个空位里轮流吃掉。
  * 因此这里改成"层计划表"：每层的内容房槽位由表定死，任何让位规则之后再做一次定稿。
- * v2.2.9 起每层 8 个内容槽（10 间房），表必须写满；兜底补位只作保险。
+ * v2.5.25 起每层 10 个内容槽（12 间房），表必须写满；兜底补位只作保险。
  */
 const ROOM_MIX_CONFIG = {
   enabled: true,
-  /* F1–F20：每层 8 个内容房槽位（不含出生房 / 首领房），共 1 出生 + 8 内容 + 1 首领 = 10 间。
+  /* F1–F20：每层 10 个内容房槽位（不含出生房 / 首领房），共 1 出生 + 10 内容 + 1 首领 = 12 间。
      ------------------------------------------------------------
-     v2.2.9（第三批）：每层房间 8 → 10。做法是「先把计划表补到 8 槽，再改 roomsPerFloor」，
-     所以下面每一层的**前 6 槽与 v2.2.8 完全一致**（v2.2.8 的 6 槽 = 前 3 槽显式 + 3 槽兜底补位），
-     只在其后追加第 7、8 槽。
-     追加规则（用户口径）：只放「1 间 battle + 1 个该层还没出现过的非战斗房型」，
+     v2.5.25（玩家症状 5「每层关卡太少，三步就到 boss」）：8 槽 → 10 槽。
+     做法与 v2.2.9 的 8 槽一致：**前 8 槽一字不改**，只在末尾追加第 9、10 槽。
+     追加规则：只放「1 间 battle + 1 个该层还没出现过的非战斗房型」，
      因此同层非战斗房型仍然两两不同，D2 唯一性校验一行未放宽。
+     第 9/10 槽不用 event 凑数（会被事件率闸门在非命中层还原成普通房）。
      兜底循环（applyRoomMixPlan 里的 battle/rest/chest 补位）只作保险：
-     20 层全部显式写满 8 槽后，正常路径永远走不到它。
-     约束：同层"非战斗房型不得重复"（applyRoomMixPlan 的 D2 校验）。
-     历史（6 房时代）的设计占比记录在 .screenshots/balance 与第二批报告里，此处不再复述。 */
+     20 层全部显式写满 10 槽后，正常路径永远走不到它。
+     约束：同层"非战斗房型不得重复"（applyRoomMixPlan 的 D2 校验）。 */
   plan: {
-    /* 前 5 层沿用 R 批节奏（3–4 间战斗房 + 1 精英 + 宝箱 + 休整），
-       第 7 槽 battle、第 8 槽补一个本层没有的非战斗房型。
-       第 8 槽只用 shop / cache / forge：event 会被 15% 事件闸门在"非命中层"还原成普通房，
-       放进计划表等于没写，所以不拿它凑槽。 */
-    1: ['battle', 'battle', 'battle', 'battle', 'chest', 'rest', 'battle', 'shop'],
-    2: ['battle', 'battle', 'battle', 'elite', 'chest', 'rest', 'battle', 'cache'],
-    3: ['battle', 'battle', 'battle', 'battle', 'chest', 'rest', 'battle', 'shop'],
-    4: ['battle', 'battle', 'battle', 'elite', 'chest', 'rest', 'battle', 'cache'],
-    5: ['battle', 'battle', 'battle', 'survival', 'chest', 'rest', 'battle', 'shop'],
-    /* F6–F20：前 6 槽 = v2.2.8 的实际生效值（3 槽显式 + 兜底 battle/rest/chest）。
-       F7 / F11 / F17 旧值是 battle/rest/chest + battle/rest/chest → rest 与 chest 各出现两次，
-       这正是 8 房时代 F7 抛「[D2] duplicate non-battle room type」的根因；
-       这里把重复的 rest 换回 battle、重复的 chest 换成 shop，
-       房型构成不变（战斗 4 / 宝箱 1 / 休整 1）、唯一性成立。 */
-    6: ['battle', 'elite', 'cache', 'battle', 'rest', 'chest', 'battle', 'shop'],
-    7: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge'],
-    8: ['battle', 'elite', 'event', 'battle', 'rest', 'chest', 'battle', 'shop'],
-    9: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'cache'],
-    10: ['battle', 'elite', 'survival', 'battle', 'rest', 'chest', 'battle', 'shop'],
-    11: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge'],
-    12: ['battle', 'elite', 'shop', 'battle', 'rest', 'chest', 'battle', 'cache'],
-    13: ['battle', 'rest', 'forge', 'battle', 'battle', 'chest', 'battle', 'shop'],
-    14: ['battle', 'elite', 'cache', 'battle', 'rest', 'chest', 'battle', 'shop'],
-    15: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'forge'],
-    16: ['battle', 'elite', 'rest', 'battle', 'battle', 'chest', 'battle', 'shop'],
-    17: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge'],
-    18: ['battle', 'elite', 'event', 'battle', 'rest', 'chest', 'battle', 'shop'],
-    19: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'cache'],
-    20: ['battle', 'elite', 'rest', 'battle', 'battle', 'chest', 'battle', 'shop']
+    /* 前 5 层沿用 R 批节奏（3–4 间战斗房 + 1 精英 + 宝箱 + 休整）。
+       v2.5.25：第 9 槽固定 battle（把"房间变多"变成"多打一间"），第 10 槽补一个本层没有的非战斗房型。 */
+    1: ['battle', 'battle', 'battle', 'battle', 'chest', 'rest', 'battle', 'shop', 'battle', 'cache'],
+    2: ['battle', 'battle', 'battle', 'elite', 'chest', 'rest', 'battle', 'cache', 'battle', 'shop'],
+    3: ['battle', 'battle', 'battle', 'battle', 'chest', 'rest', 'battle', 'shop', 'battle', 'cache'],
+    4: ['battle', 'battle', 'battle', 'elite', 'chest', 'rest', 'battle', 'cache', 'battle', 'shop'],
+    5: ['battle', 'battle', 'battle', 'survival', 'chest', 'rest', 'battle', 'shop', 'battle', 'cache'],
+    /* F6–F20：前 8 槽 = v2.2.9 的实际生效值，v2.5.25 追加第 9/10 槽（同上规则）。 */
+    6: ['battle', 'elite', 'cache', 'battle', 'rest', 'chest', 'battle', 'shop', 'battle', 'forge'],
+    7: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge', 'battle', 'cache'],
+    8: ['battle', 'elite', 'event', 'battle', 'rest', 'chest', 'battle', 'shop', 'battle', 'cache'],
+    9: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'cache', 'battle', 'forge'],
+    10: ['battle', 'elite', 'survival', 'battle', 'rest', 'chest', 'battle', 'shop', 'battle', 'cache'],
+    11: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge', 'battle', 'cache'],
+    12: ['battle', 'elite', 'shop', 'battle', 'rest', 'chest', 'battle', 'cache', 'battle', 'forge'],
+    13: ['battle', 'rest', 'forge', 'battle', 'battle', 'chest', 'battle', 'shop', 'battle', 'cache'],
+    14: ['battle', 'elite', 'cache', 'battle', 'rest', 'chest', 'battle', 'shop', 'battle', 'forge'],
+    15: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'forge', 'battle', 'cache'],
+    16: ['battle', 'elite', 'rest', 'battle', 'battle', 'chest', 'battle', 'shop', 'battle', 'cache'],
+    17: ['battle', 'rest', 'chest', 'battle', 'battle', 'shop', 'battle', 'forge', 'battle', 'cache'],
+    18: ['battle', 'elite', 'event', 'battle', 'rest', 'chest', 'battle', 'shop', 'battle', 'cache'],
+    19: ['battle', 'rest', 'shop', 'battle', 'battle', 'chest', 'battle', 'cache', 'battle', 'forge'],
+    20: ['battle', 'elite', 'rest', 'battle', 'battle', 'chest', 'battle', 'shop', 'battle', 'cache']
   },
   fallback: ['battle', 'rest', 'chest'],
   /* 只有这些楼层允许出现精英房 / 精英路线（原先"第 2 层起每层必有精英"= 每层 1 间） */
@@ -23966,7 +24239,18 @@ function applyRoomMixPlan(spawnRoom, stairRoom) {
     });
   }
   if (!keepEliteIds.length) {
-    for (let i = 0; i < plan.length; i += 1) if (plan[i] === 'elite') plan[i] = 'chest';
+    /* v2.5.25（12 房一维链暴露的连带 bug）：链上没有"支线"，designEliteRoute 给不出
+       精英路线，于是 keepEliteIds 为空 —— 旧代码把计划表里的 elite 一律改成 chest，
+       和表里本来就有的宝箱撞成两间，F2/F4/F6… 全部抛 [D2] duplicate chest。
+       现在按"该层尚未出现的非战斗房型"依次补一个；补不到才退回 battle
+       （battle 不属于唯一性约束，永远不会再撞）。 */
+    const spareKinds = ['cache', 'forge', 'shop', 'survival', 'event'];
+    for (let i = 0; i < plan.length; i += 1) {
+      if (plan[i] !== 'elite') continue;
+      const used = plan.filter((type) => type !== 'elite');
+      const pick = spareKinds.find((kind) => used.indexOf(kind) < 0);
+      plan[i] = pick || 'battle';
+    }
   } else if (plan.indexOf('elite') < 0) {
     plan[0] = 'elite';
   }
@@ -25929,6 +26213,52 @@ function applyLayeredTopology(graph, rooms, spawnId, stairId) {
   const sorted = content.slice().sort((a, b) => (
     a.cx !== b.cx ? a.cx - b.cx : (a.cy !== b.cy ? a.cy - b.cy : a.id - b.id)
   ));
+  /* v2.5.25 · 通用一维链（12 房及以上走这里，房间数继续往上加也不用再写分支）
+     ------------------------------------------------------------
+     玩家反馈三条：选房能走回头路 / 一选就摸到首领 / 每层房间太少。
+     根因是这里只写死了 6 / 8 / 10 三档，roomsPerFloor 一改就 return false，
+     调用方回退 attachLoopRoutes 的环图 —— 环上首领可能一跳就到，也能原路返回。
+     这一支把内容房按横坐标串成一条直链：出生 → 内容1 → … → 内容N → 首领。
+     每间房只有"来路 + 去路"两条边（度数 2，落在 minExits=2 / maxExits=3 内），
+     深度严格 +1，因此不可能跳过任何房间、也不可能回头。 */
+  if (content.length >= 10) {
+    /* 蛇形排序：先按"列"分组（room.col 是铺位阶段定下的列号），列内按纵坐标排，
+       奇数列反向。这样相邻两间房要么同列上下相邻、要么跨一列高度接近，
+       传送落点不会在地图上左右来回跳；纯按 cx 排序时每列内部顺序是随机的。 */
+    const columns = {};
+    content.forEach((room) => {
+      const key = Number.isFinite(room.col) ? room.col : Math.round(room.cx);
+      (columns[key] = columns[key] || []).push(room);
+    });
+    const colKeys = Object.keys(columns).map(Number).sort((a, b) => a - b);
+    const serpentine = [];
+    colKeys.forEach((key, colIndex) => {
+      const group = columns[key].slice().sort((a, b) => (a.cy - b.cy) || (a.id - b.id));
+      if (colIndex % 2 === 1) group.reverse();
+      group.forEach((room) => serpentine.push(room));
+    });
+    const chain = [spawnId].concat(serpentine.map((room) => room.id)).concat([stairId]);
+    const chainEdges = [];
+    const chainDepth = {};
+    for (let i = 0; i < chain.length - 1; i += 1) chainEdges.push([chain[i], chain[i + 1]]);
+    chain.forEach((id, i) => { chainDepth[id] = i; });
+    graph.treeEdges = chainEdges.slice();
+    graph.loopEdges = [];
+    graph.edges = chainEdges;
+    graph.candidates = chainEdges.slice();
+    /* 路线只留一条：链上没有第二种走法，留 4 条会重复，验收脚本会误判"有多路线" */
+    graph.routes = [chain.slice()];
+    graph.routeVariety = null;
+    graph.depthOf = chainDepth;
+    graph.layered = true;
+    /* v2.5.25：链式标记 + 整条链的顺序。两处下游要读它：
+       ① validateTeleportFloorLayout 允许链两端度数为 1；
+       ② assertChainTopology 用"每层恰好 1 间"校验链形态。 */
+    graph.chain = true;
+    graph.chainIds = chain.slice();
+    rooms.forEach((room) => { room.depth = chainDepth[room.id]; });
+    return true;
+  }
   /* v2.2.9 · 10 房版分层：出生 + 4 层 × 2 间 + 首领 = 1/2/2/2/2/1
      ------------------------------------------------------------
      与 8 房版同构，只是多推一层：每层 A/B 两条道并排，层内一条"换道"边，
@@ -26077,6 +26407,63 @@ function applyLayeredTopology(graph, rooms, spawnId, stairId) {
 }
 
 /**
+ * v2.5.25 · 链式分层图断言（roomsPerFloor = 12 时走这条）
+ * ------------------------------------------------------------
+ * 链路形态与 6/8/10 房的"双子层"不同：每层只有 1 间房，所以旧的
+ * expectEdges / expectLayers 定值全部不适用。这里只校验链式设计的四条硬约束：
+ *   ① 链首 = 出生房、链尾 = 首领房、链长度 = 房间数；
+ *   ② 深度严格 0..N-1，每层恰好 1 间（不能跳层、不能并排）；
+ *   ③ 每条边两端深度差 === 1（不能跨层、不能回头）；
+ *   ④ 出生房不直连首领房。
+ * 失败时与旧断言一致：console.error + 统计 + strict 抛错（抛错会让换层中断，
+ * 所以这里必须与生成器保持同一口径，不能放宽到"看着对就行"）。
+ * @param {Object} graph 图结构（必须带 chainIds / depthOf）
+ * @param {Array} rooms 房间列表
+ * @param {number} spawnId 出生房 id
+ * @param {number} stairId 首领房 id
+ * @returns {boolean} 是否通过
+ */
+function assertChainTopology(graph, rooms, spawnId, stairId) {
+  const problems = [];
+  const depthOf = graph.depthOf || {};
+  const chain = graph.chainIds || [];
+  const edges = graph.edges || [];
+  if (chain.length !== rooms.length) problems.push('chainLen=' + chain.length + '/' + rooms.length);
+  if (chain[0] !== spawnId) problems.push('chainHead=' + chain[0] + '/' + spawnId);
+  if (chain[chain.length - 1] !== stairId) problems.push('chainTail=' + chain[chain.length - 1] + '/' + stairId);
+  if (edges.length !== Math.max(0, chain.length - 1)) problems.push('chainEdges=' + edges.length);
+  chain.forEach((id, index) => {
+    if (depthOf[id] !== index) problems.push('chainDepth ' + id + '=' + depthOf[id] + '/' + index);
+  });
+  edges.forEach((edge) => {
+    const d1 = depthOf[edge[0]];
+    const d2 = depthOf[edge[1]];
+    if (d1 === undefined || d2 === undefined || Math.abs(d1 - d2) !== 1) {
+      problems.push('chainEdge ' + edge[0] + '-' + edge[1] + ' depth ' + d1 + '/' + d2);
+    }
+  });
+  const counts = new Array(chain.length).fill(0);
+  rooms.forEach((room) => {
+    const d = depthOf[room.id];
+    if (d >= 0 && d < chain.length) counts[d] += 1;
+  });
+  const badLayer = counts.findIndex((n) => n !== 1);
+  if (badLayer >= 0) problems.push('chainLayers=' + counts.join('/'));
+  if (edges.some((edge) => (
+    (edge[0] === spawnId && edge[1] === stairId) || (edge[1] === spawnId && edge[0] === stairId)
+  ))) problems.push('spawn-boss adjacent');
+  LAYERED_STATS.floors += 1;
+  if (problems.length) {
+    const msg = '[D5] chain topology violation: ' + problems.join('; ');
+    console.error(msg);
+    LAYERED_STATS.violations += 1;
+    if (LAYERED_CONFIG.strict) throw new Error(msg);
+    return false;
+  }
+  return true;
+}
+
+/**
  * 分层拓扑断言（D5）
  * ------------------------------------------------------------
  * 校验 4 件事：出生房深度 0、首领深度 = 最大深度、每条边深度差 0 或 1、
@@ -26090,6 +26477,8 @@ function applyLayeredTopology(graph, rooms, spawnId, stairId) {
 function assertLayeredTopology(graph, rooms, spawnId, stairId) {
   const problems = [];
   const depthOf = (graph && graph.depthOf) || {};
+  /* v2.5.25：链式图（12 房）走独立断言，不参与下面的 6/8/10 定值校验 */
+  if (graph && graph.chain) return assertChainTopology(graph, rooms, spawnId, stairId);
   /* v2.2.2：两种合法形态——6 房（1/2/2/1）与 8 房（1/2/2/2/1）。
      v2.2.9：新增 10 房（1/2/2/2/2/1，14 条边，首领深度 5）。
      8 / 10 房每层两间之间有一条"换道"边，同层边深度相等，所以允许 |差|=0；
@@ -28056,6 +28445,11 @@ function validateTeleportFloorLayout(graph, rooms, spawnId, stairId) {
   if (!rooms[spawnId] || !rooms[stairId]) return false;
   if (!Array.isArray(graph.edges) || !graph.edges.length) return false;
   const degreeOf = (id) => graph.edges.filter((edge) => edge[0] === id || edge[1] === id).length;
+  /* v2.5.25：一维链的"出生房"和"首领前一间"天然只有 1 扇门（链端），
+     不能按 minExits=2 卡。其余房间仍必须 2–3 扇门，保证不是断头路。 */
+  const chainIds = graph.chain ? (graph.chainIds || []) : null;
+  const chainEndA = chainIds ? chainIds[0] : null;
+  const chainEndB = chainIds ? chainIds[chainIds.length - 2] : null;
   for (let i = 0; i < rooms.length; i += 1) {
     const id = rooms[i].id;
     if (id === stairId) {
@@ -28063,6 +28457,9 @@ function validateTeleportFloorLayout(graph, rooms, spawnId, stairId) {
          除此之外仍然不放宽：首领永远是死胡同（没有出口），也不能 0 入口成孤岛。 */
       const maxEntrance = graph.layered ? 2 : 1;
       if (degreeOf(id) < 1 || degreeOf(id) > maxEntrance) return false;
+    } else if (chainIds && (id === chainEndA || id === chainEndB)) {
+      const deg = degreeOf(id);
+      if (deg < 1 || deg > FLOOR_STRUCTURE_CONFIG.maxExits) return false;
     } else {
       const deg = degreeOf(id);
       if (deg < FLOOR_STRUCTURE_CONFIG.minExits || deg > FLOOR_STRUCTURE_CONFIG.maxExits) return false;
@@ -29019,11 +29416,15 @@ function spawnEnemiesForFloor(floorNumber, spawnRoom) {
          否则敌人会卡在柱子或切角块里，一进房就"贴墙抽搐"。
          半径取 26（比普通怪大一圈，覆盖精英 1.3× 体型），避免"按小体型算合法、
          生成时变大后反而压进缺口"这类错位。 */
-      const spot = nudgeOutOfBlockers(centerX + Math.cos(angle) * rr, centerY + Math.sin(angle) * rr, 26);
-      /* C1-5b 兜底：前移后的点若落进"形状缺口"（八边形切角 / L 形凹口 / 圆盘外），
+      /* v2.5.25（症状 10）：落点统一走 pickEnemySpawnPoint ——
+         在原有"可走 + 在房型内"之上，再避开房间家具（柜台/熔炉/祭龛等）
+         与爆炸桶，只落在看得见、打得到的空地。 */
+      const spot = pickEnemySpawnPoint(room, centerX + Math.cos(angle) * rr, centerY + Math.sin(angle) * rr, 26);
+      /* C1-5b 兜底：前移后的点若仍落进"形状缺口"（八边形切角 / L 形凹口 / 圆盘外），
          就退回改前的房心阵位重算一次，绝不把怪生成到走不到的地方（否则整层清不掉）。 */
       if (!pointInRoomShape(room, spot.x, spot.y, 16)) {
-        const safe = nudgeOutOfBlockers(
+        const safe = pickEnemySpawnPoint(
+          room,
           room.cx + (centerX - anchorX) + Math.cos(angle) * rr,
           room.cy + (centerY - anchorY) + Math.sin(angle) * rr,
           26
@@ -29338,7 +29739,8 @@ const DENSITY_CONFIG = {
      精英房仍受 eliteRoomCap=7 约束，首领房由 spawnBoss() 独立生成，两者都不经过这条上限。 */
   roomCap: 18,                        // 本房总数量硬上限（含排队）；v2.2.8:12→14，v2.5.21:14→18
   /* v2.5.21：10 → 14 —— 与首批数量一起抬（只抬总量不抬同屏，玩家进门看到的还是 8 只） */
-  aliveCap: 14,                       // 同屏硬上限（超过就排队）
+  /* v2.5.25（症状 9）：14 → 16 —— F6+ 首批抬到 12 后，同屏上限必须跟上，否则排队反而拉长清场 */
+  aliveCap: 16,                       // 同屏硬上限（超过就排队）
   /* D3：第二批怪进场阈值——场上剩 ≤1 只才补（v2.2.8 起改为 ≤3 只，见下行） */
   secondWaveAlive: 3,                // v2.2.8（第二批 A6）：1 → 3，避免清房末尾只剩 1 只时干等补员
   /* D3：出生预警时长（秒）——预警期内无敌、不结算碰撞，玩家能看清怪的外形 */
@@ -29449,15 +29851,22 @@ function enemyWaveFirst(room, count, floorNumber) {
   if (room.type === 'battle') {
     /* v2.5.21：F1–F5 首批下限 8 → 10，占比 0.55 → 0.56。
        18 只时首批 = max(10, ceil(18×0.56)=11) = 11，后两段 4 + 3 → 11+4+3；
-       F6+ 仍按 7 起步（总量与同屏上限本次只对 F1–F5 普通战斗房生效）。 */
-    const first = Math.min(count, Math.max(f <= 5 ? 10 : 7, Math.ceil(count * 0.56)));
+       v2.5.25（症状 9「怪物太少」）：F6+ 首批下限 7 → 9。F6–F20 总量提到 10–16 只后，
+       首批 9 只保证"进门第一眼"和 F1–F5 同一密度，剩余仍分两段补员。 */
+    /* v2.5.25（症状 9「同屏数量和每房波次都要加」）：
+       F1–F5 保持首批下限 10、占比 0.56（18 只 → 11 只，仍分 11+4+3 三段）；
+       F6+ 首批下限 9 → 12（改前 F6 只有 9 只同屏，比 F1 还空），
+       剩余部分改成三段补员：18 只 = 12+2+2+2（四波），14 只 = 12+1+1（三波）。
+       只动"什么时候出场"，不动单只血量与总血曲线。 */
+    const first = Math.min(count, Math.max(f <= 5 ? 10 : 12, Math.ceil(count * (f <= 5 ? 0.56 : 0.6))));
     room.waveBatchSize = first;
     /* 断波阈值：场上剩 ≤ max(2, ceil(first×0.4)) 只才补下一段。
        取首批 40% 而不是固定 1：7 只的首批等剩 3 只就补，
        不必先把 4 只零散怪磨完才继续，空场感更少。 */
     room.secondWaveAlive = Math.max(2, Math.ceil(first * 0.4));
-    /* 每次补员上限：剩余数量对半分两段，形成"第二波 / 第三波" */
-    room.waveChunk = Math.max(1, Math.ceil((count - first) / 2));
+    /* 每次补员上限：v2.5.25 起剩余部分切成三段（F1–F5 仍两段），
+       形成"第二 / 第三 / 第四波"；18 只 F6+ 实测为 12+2+2+2。 */
+    room.waveChunk = Math.max(1, Math.ceil((count - first) / (f <= 5 ? 2 : 3)));
     /* 第二波起从房间另一侧（镜面）出场，见 mirroredSpawnPoint */
     room.waveMirror = true;
     /* 验收用：每次补员落位写一行诊断（镜面成没成、与原坐标差多少、离玩家多远） */
@@ -29543,6 +29952,8 @@ function mirroredSpawnPoint(room, plan) {
     const my = (2 * cy - oy) + Math.sin(ang) * jitter;
     if (!pointInRoomShape(room, mx, my, margin)) continue;
     if (!isWalkableCircle(mx, my, bodyR)) continue;
+    /* v2.5.25（症状 10）：第二波镜像点同样要避开家具与爆炸桶 */
+    if (!spawnPointClear(room, mx, my, bodyR)) continue;
     if (dist(mx, my, px, py) < minPlayerDist) continue;
     if (room.mirrorLog) {
       room.mirrorLog.push({
@@ -29610,6 +30021,43 @@ function tickEnemyWaves(dt) {
   });
 }
 
+/* v2.5.25（症状 7 / 8「怪物没有随层数变强、整体强度不够，别只加血」）：
+   改前逐层成长只有"血量"（rampByFloor.hpScale + 深度档），伤害与移速在 F13 之前恒为 1，
+   F13 之后才由 deep 机制每档 +5% / +4%。玩家在 F1–F12 感到"每层怪都一个样"。
+   这里补一层纯数值压力：伤害、移速按层线性抬，F13 起交给 deep 继续，两条曲线不重复叠加。
+     伤害：每层 +7%，12 层 = +84%（精英吃 70%，避免精英房时长继续拉长）
+     移速：每层 +2%，12 层 = +24%（上限仍受 GAME_CONFIG.speedScaleCap 约束）
+   首领由 spawnBoss 独立实现、召唤物与镜像诱饵也不参与 —— 三者数值一个都不动。 */
+const ENEMY_FLOOR_POWER_CONFIG = {
+  enabled: true,
+  spanFloors: 20,        // v2.5.25：12 → 20，F1–F21 都由本表负责，强度曲线更长
+  damagePerFloor: 0.09,  // v2.5.25：0.07 → 0.09（F1→F6 +45%，F1→F10 +81%）
+  speedPerFloor: 0.025,  // v2.5.25：0.02 → 0.025（F1→F6 +12.5%）
+  attackRatePerFloor: 0.03, // v2.5.25 新增第三轴：攻击频率 +3%/层（出手更密，不是只加血）
+  attackRateMax: 1.4,    // 攻击频率封顶 +40%，避免高层变成弹幕
+  eliteScale: 0.7        // 精英只吃 70%
+};
+
+/* v2.5.25：精英房数量 5–6 → 6–7 只后，hpScale 反算会让单只变软；
+   这个常数把精英的总血压回 "+12%" 档，避免"多放怪 = 精英变弱"。 */
+const ELITE_RAMP_HP_MUL = 1.18;
+
+/**
+ * 计算"逐层压力"的伤害 / 移速乘区
+ * @param {number} floorNumber 层数
+ * @param {boolean} elite 是否精英
+ * @returns {{damage:number, speed:number}} 两个 ≥1 的乘区
+ */
+function enemyFloorPowerOf(floorNumber, elite) {
+  const cfg = ENEMY_FLOOR_POWER_CONFIG;
+  if (!cfg.enabled) return { damage: 1, speed: 1, rate: 1 };
+  const span = Math.max(0, Math.min(cfg.spanFloors, (Number(floorNumber) || 1) - 1));
+  const k = span * (elite ? cfg.eliteScale : 1);
+  /* v2.5.25：第三轴·攻击频率。射手重置开火间隔、近战出手硬直都除以它。 */
+  const rate = Math.min(cfg.attackRateMax, 1 + span * cfg.attackRatePerFloor * (elite ? cfg.eliteScale : 1));
+  return { damage: 1 + k * cfg.damagePerFloor, speed: 1 + k * cfg.speedPerFloor, rate: rate };
+}
+
 function spawnEnemy(typeId, x, y, floorNumber, opts) {
   const o = opts || {};
   const conf = ENEMY_BY_ID[typeId] || ENEMY_CONFIG[0];
@@ -29649,9 +30097,12 @@ function spawnEnemy(typeId, x, y, floorNumber, opts) {
   const hpRoom = (o.roomId != null) ? state.rooms[o.roomId] : null;
   /* 第 13 项：逐层血量平滑从"仅预算房"扩展到全部战斗/精英房。
      计数预算仍只从 F6 起生效（enemyBudgetApplies 不动），
-     教学层只改单只血量，不改刷怪数量。 */
+     教学层只改单只血量，不改刷怪数量。
+     v2.5.25：F6+ 战斗房 7–9 → 10–16 只，hpScale 按"总血 +12%"反算后单只血量会降；
+     精英数量同步 5–6 → 6–7，这里补 1.18 让精英总血也维持 +12% 档位，
+     否则"多放怪"会把精英房变软（与症状 8「整体强度不够」相反）。 */
   const budgetHpScale = (hpRoom && (hpRoom.type === 'battle' || hpRoom.type === 'elite'))
-    ? rampHpScale(floorNumber) : 1;
+    ? rampHpScale(floorNumber) * (hpRoom.type === 'elite' ? ELITE_RAMP_HP_MUL : 1) : 1;
   const hpMul = diff.hpMul * (elite ? diff.eliteHpMul : 1) * pressure * (o.hpMulExtra || 1)
     * (weak ? weak.hpMul : 1) * budgetHpScale
     * deepHpMulOf(floorNumber);
@@ -29662,6 +30113,8 @@ function spawnEnemy(typeId, x, y, floorNumber, opts) {
     affix2 && affix2.id === 'swift' ? affix2.speedMul : 0
   );
   const eliteSpeedMul = elite ? (affixSpeedMul || 0.85) : 1;
+  /* v2.5.25：逐层压力（症状 7/8）。召唤物与镜像诱饵保持原样，避免分裂/召唤链被放大。 */
+  const floorPower = (o.summoned || o.mirror) ? { damage: 1, speed: 1 } : enemyFloorPowerOf(floorNumber, elite);
   /* C1-11：globalHpMul 是全局基础血量乘区（默认 0.9），与 sim_panel 的 GAME.enemyHpMul 同源。
      放在最外层，精英 ×2.2、词缀护盾、挑战倍率等既有乘区全部保留。 */
   /* v2.5.17 · 普通怪专属乘区（症状 7）：只作用于"战斗房里的普通怪"。
@@ -29714,11 +30167,11 @@ function spawnEnemy(typeId, x, y, floorNumber, opts) {
     /* 第 14 项 · 挑战 5「疾行」：敌人移动速度 +10%（与难度 / 深层倍率相乘，不改基线） */
     /* 第 26 项：层词缀（淘金/过载等）在这一处乘进移速，不改刷怪数量 */
     speed: conf.speed * speedScale * eliteSpeedMul * diff.speedMul * (weak ? weak.speedMul : 1)
-      * deepSpeedMulOf(floorNumber) * challengeSpeedMul() * floorModMul('enemySpeed'),
+      * deepSpeedMulOf(floorNumber) * challengeSpeedMul() * floorModMul('enemySpeed') * floorPower.speed,
     radius: conf.radius * (elite ? 1.3 : 1),
     /* 第 14 项 · 挑战 8「高压」：接触伤害 +12% */
     damage: Math.max(1, Math.round(conf.damage * (elite ? 1.25 : 1) * diff.damageMul
-      * (weak ? weak.damageMul : 1) * deepDamageMulOf(floorNumber) * challengeDamageMul())),
+      * (weak ? weak.damageMul : 1) * deepDamageMulOf(floorNumber) * challengeDamageMul() * floorPower.damage)),
     color: conf.color,
     shape: conf.shape,
     hitCooldown: 0,
@@ -29755,6 +30208,8 @@ function spawnEnemy(typeId, x, y, floorNumber, opts) {
     enemy.shieldHp = enemy.intrinsicShield;
   }
 
+  /* v2.5.25（症状 7/8）：逐层攻击频率乘区，射手开火间隔与近战硬直都读它 */
+  enemy.attackRateMul = floorPower.rate || 1;
   state.nextEnemyId += 1;
   /* D3：房间怪（非召唤/镜像/首领）出生后进入 0.45s 预警期——
      预警期内画面上能看清模型，但不吃伤害、不结算碰撞（见 updateEnemies / damageEnemy）。
@@ -30791,6 +31246,10 @@ function grantBossTreasure(chest) {
   // 大奥能球，回一口续航
   state.pickups.push({ kind: 'aether', x: chest.x + 6, y: chest.y + 4, value: 60, life: 16 });
   showToast('首领宝箱已开启 · 史诗 + 结晶', 'success');
+  /* v2.5.25（症状 1）：奖品结算完就把宝箱收走。
+     宝箱和楼梯几乎同点，留着它会让"下一次按 E"还可能落在宝箱上（虽然已开箱会 return false），
+     收走后 E 直接命中楼梯，玩家不会再觉得"按了没反应还要再按一次"。 */
+  if (state.bossChest === chest) state.bossChest = null;
 }
 
 /**
@@ -30872,6 +31331,15 @@ function onBossDefeated(boss) {
   // 楼梯立刻可用（不等"全层清空"的旧判定）
   state.stairs.active = true;
   state.stairs.bossUnlocked = true;
+  /* v2.5.25（症状 1 / 6）：开放层的"钥匙锁"在首领倒下这一刻直接解除。
+     原因：钥匙只藏在宝箱 / 事件 / 精英房，而宝箱房要首领败后才解封；
+     12 房单向前进又回不去拿钥匙 —— 实测第 3 层 boss.defeated=true 而 keysFound=0，
+     楼梯永远锁着，玩家以为游戏断了。这里同步清 HUD / 小地图读的 locked 标记，
+     避免"交互放行了、界面还画着锁"。 */
+  if (state.openFloor && state.openFloor.active && state.openFloor.stairsLocked) {
+    state.openFloor.stairsLocked = false;
+    state.stairs.locked = false;
+  }
 
   /* 第 6 轮 · 档案：首领击杀累计（"首个首领 / 首领终结者"） */
   metaBumpStat('bossKills', 1);
@@ -30890,6 +31358,9 @@ function onBossDefeated(boss) {
 
   // P5：默认把奖品装进"实体宝箱"，玩家过去按 E 才结算（旧逻辑保留在 else 里做 A/B）
   if (BOSS_CHEST_CONFIG.enabled) {
+    /* v2.5.25：最后一层的通关计时必须在"宝箱模式提前 return"之前挂上，
+       否则玩家如果没去开箱（或直接走楼梯），通关面板永远不会出现。 */
+    if (isFinalFloorRun()) state.victoryTimer = GAME_CONFIG.victoryDelay;
     state.bossChest = {
       x: boss.x,
       y: boss.y,
@@ -50758,6 +51229,75 @@ function ashRemoveCard(cardId) {
   return true;
 }
 
+/* ============================================================
+   第三组 · 丢弃技能（Discard）
+   ------------------------------------------------------------
+   设计边界（全部沿用现有规则，不新造一套）：
+     · 只丢魔法卡：移除逻辑直接复用 ashRemoveCard（清槽 / 清冷却 / 清融合）
+     · 最后一张魔法卡不可丢：沿用 ashBurnableCards 的防死局规则
+     · 科技模块不可丢：现有代码没有科技移除 / 装置回收规则
+     · 融合产物不是卡组技能卡，不能单独丢；组件卡丢掉时由 ashRemoveCard 一并移除
+   ============================================================ */
+
+/** 技能树里已进入"再点一次确认"状态的魔法卡 id（null = 未武装） */
+let discardArmedId = null;
+/** 技能树详情当前展示的节点（供键盘 Enter 判断能不能丢） */
+let treeDetailKind = null;
+let treeDetailId = null;
+
+/**
+ * 丢弃一张已拥有的魔法卡
+ * ------------------------------------------------------------
+ * 复用 ashRemoveCard 完成所有引用清理，再按"彻底回收"口径删掉获得楼层。
+ * @param {string} cardId 要丢弃的魔法卡 id
+ * @returns {{ok:boolean, reason?:string, fusions?:string[]}} 结果；fusions 为被一并移除的融合名
+ */
+function discardSkill(cardId) {
+  if (!state || !Array.isArray(state.ownedMagic)) return { ok: false, reason: 'no-state' };
+  if (state.ownedMagic.indexOf(cardId) < 0) return { ok: false, reason: 'not-owned' };
+  const card = MAGIC_BY_ID[cardId];
+  if (!card) return { ok: false, reason: 'unknown-card' };
+  /* 防死局：ashBurnableCards 在只剩最后一张时返回空数组，这里直接沿用同一边界 */
+  if (!ashBurnableCards().some((item) => item.id === cardId)) {
+    if (typeof showToast === 'function') showToast('最后一张魔法卡不能丢弃', 'warn');
+    return { ok: false, reason: 'last-card' };
+  }
+
+  /* 先把会被一并移除的融合名记下来，提示里说清楚后果 */
+  const lostFusions = (state.fusions || []).filter((fid) => {
+    const fusion = (typeof getFusionById === 'function') ? getFusionById(fid) : null;
+    return fusion && fusion.magic === cardId;
+  }).map((fid) => {
+    const fusion = (typeof getFusionById === 'function') ? getFusionById(fid) : null;
+    return (fusion && fusion.name) || fid;
+  });
+
+  /* 唯一移除实现：清卡组 / 主卡 / 双槽 / 冷却 / 依赖融合 */
+  if (!ashRemoveCard(cardId)) return { ok: false, reason: 'remove-failed' };
+  /* 彻底回收：获得楼层角标也清掉，重新抽到时按新楼层记录（与 endOpeningGift 同口径） */
+  if (state.cardFloor) delete state.cardFloor['magic:' + cardId];
+
+  discardArmedId = null;
+  if (typeof showToast === 'function') {
+    showToast('已丢弃「' + card.name + '」'
+      + (lostFusions.length ? ' · 融合「' + lostFusions.join('」「') + '」一并失效' : ''), 'warn');
+  }
+  /* 面板里丢的：立即重建技能树（进度、节点三态、检查器全部同步） */
+  if (state.mode === 'skilltree' && typeof buildSkillTree === 'function') buildSkillTree();
+  return { ok: true, fusions: lostFusions };
+}
+
+/**
+ * 某张魔法卡当前是否允许丢弃（技能树按钮 / 键盘 Enter 共用同一判据）
+ * @param {string} cardId 魔法卡 id
+ * @returns {boolean} true = 已拥有且不是最后一张
+ */
+function canDiscardSkill(cardId) {
+  if (!state || !Array.isArray(state.ownedMagic)) return false;
+  if (state.ownedMagic.indexOf(cardId) < 0) return false;
+  return ashBurnableCards().some((item) => item.id === cardId);
+}
+
 /**
  * 结算一个灰烬仪式（立即生效）
  * @param {string} rite 'blast' | 'shield' | 'echo'
@@ -54634,7 +55174,7 @@ function updateEnemies(dt) {
         enemy.fireTimer -= dt;
         if (enemy.fireTimer <= 0 && distance < 470) {
           fireEnemyBullet(enemy, dx, dy, distance);
-          enemy.fireTimer = (conf.fireInterval || 2.2) * rand(0.85, 1.15);
+          enemy.fireTimer = (conf.fireInterval || 2.2) * rand(0.85, 1.15) / (enemy.attackRateMul || 1);
         }
       } else if (ai === 'blink') {
         // 闪现型：先追击，蓄力结束后闪到玩家附近（落点同样被限制在房间内）
@@ -54796,7 +55336,7 @@ function updateEnemies(dt) {
             damagePlayer(enemy.damage, enemy.x, enemy.y, { kind: 'contact', name: enemy.name });
             player.contactLock = GAME_CONFIG.contactLock;
             enemy.hitCooldown = GAME_CONFIG.contactInterval;
-            enemy.recover = ENEMY_WINDUP_CONFIG.recover;
+            enemy.recover = ENEMY_WINDUP_CONFIG.recover / (enemy.attackRateMul || 1);
             // 吸血词缀：按"实际掉血"回血（被无敌帧挡下就不回）
             if (enemyHasAffix(enemy, 'vampiric')) {
               const dealt = Math.max(0, beforeHp - state.player.hp);
@@ -58252,11 +58792,23 @@ function interactStairs() {
   // B 开放层：下楼只认钥匙，不要求清场（"够钥匙就走"是玩家的选择）
   const open = !!(state.openFloor && state.openFloor.active);
   if (open) {
-    if (state.openFloor.stairsLocked) {
+    /* v2.5.25（症状 1「打完 boss 进不了下一层」/ 症状 6「进不了第三关」）：
+       开放层的钥匙原本是唯一开锁条件，但钥匙只藏在宝箱 / 事件 / 精英房，
+       其中宝箱房要首领倒下才解封 —— 玩家单向前进到首领房后根本回不去拿钥匙。
+       实测第 3 层：boss.defeated=true 而 keysFound=0，楼梯永远锁着。
+       现在首领倒下即视为"本层出口已开"：钥匙只影响"能不能不打 boss 就下楼"。 */
+    const bossDone = !!(state.boss && state.boss.defeated);
+    if (state.openFloor.stairsLocked && !bossDone) {
       const left = Math.max(0, state.openFloor.keysNeeded - state.openFloor.keysFound);
       showToast('楼梯被锁 · 还需 ' + left + ' 把钥匙（藏在宝箱/事件/精英房）', 'warn');
       playSfx('ui', 0.4);
       return false;
+    }
+    if (state.openFloor.stairsLocked && bossDone) {
+      /* 兜底：万一别的路径没清锁，这里也放行，避免再次卡死 */
+      state.openFloor.stairsLocked = false;
+      if (state.stairs) state.stairs.locked = false;
+      showToast('首领已败 · 楼梯直接放行', 'good');
     }
   } else {
     // M2 Boss：楼梯只认"首领已被击败"，不再强制要求全层清空
@@ -58281,17 +58833,92 @@ function interactStairs() {
   return true;
 }
 
+/* v2.5.25（症状 2「下一层要卡一下才进得去」）：换层可见遮罩（单例 DOM）。
+   原来 playSceneFade 之后紧接着同步跑 generateFloor，整段重活都压在同一帧里，
+   玩家看到的就是"画面冻住"而不是"正在下去"。现在先画这层遮罩、让出一帧，再跑生成。 */
+let descendCurtainEl = null;
+
 /**
- * 下楼：层数 +1、重生成地图与敌人、奥能回满
- * @returns {boolean} 是否成功下楼
+ * 显示换层遮罩（懒创建，避免每层重建节点）
+ * @param {number} floorNumber 即将进入的层数
+ * @returns {void}
+ */
+function showDescendCurtain(floorNumber) {
+  if (!descendCurtainEl) {
+    descendCurtainEl = document.createElement('div');
+    descendCurtainEl.id = 'descendCurtain';
+    descendCurtainEl.style.cssText = 'position:fixed;inset:0;z-index:150;display:none;'
+      + 'flex-direction:column;align-items:center;justify-content:center;gap:8px;'
+      + 'background:radial-gradient(circle at 50% 46%, rgba(8,18,30,0.88), rgba(2,4,8,0.97));'
+      + 'color:#8fe9ff;font-size:18px;letter-spacing:3px;pointer-events:none;'
+      + 'opacity:0;transition:opacity 0.1s linear;';
+    descendCurtainEl.innerHTML = '<div>下潜中…</div>'
+      + '<div id="descendCurtainSub" style="font-size:12px;color:rgba(178,206,226,0.72);'
+      + 'letter-spacing:1px;">正在生成下一层</div>';
+    document.body.appendChild(descendCurtainEl);
+  }
+  const sub = descendCurtainEl.querySelector('#descendCurtainSub');
+  if (sub) sub.textContent = '正在生成第 ' + floorNumber + ' 层';
+  descendCurtainEl.style.display = 'flex';
+  /* 读一次 offsetWidth 强制回流：display:none → flex 的同帧里设置 opacity 不会有过渡 */
+  void descendCurtainEl.offsetWidth;
+  descendCurtainEl.style.opacity = '1';
+}
+
+/**
+ * 隐藏换层遮罩（放在 finally 里调用，生成抛错也不会留一层黑幕）
+ * @returns {void}
+ */
+function hideDescendCurtain() {
+  if (!descendCurtainEl) return;
+  descendCurtainEl.style.opacity = '0';
+  descendCurtainEl.style.display = 'none';
+}
+
+/**
+ * 下楼（对外入口）：只负责"可见反馈 + 锁输入 + 推迟重活"
+ * @returns {boolean} 是否成功排队下楼
  */
 function descendFloor() {
   if (state.mode !== 'playing' || state.status !== 'playing') return false;
+  if (state.descendPending) return false;   // 连按 E 不重复排队
+  state.descendPending = true;
+  state.transitionLock = true;              // 期间屏蔽键盘，避免换层中误操作
+  const tStart = performance.now();
+  const perf = { fadeCallMs: 0, curtainMs: 0, raf1Ms: 0, raf2Ms: 0, genMs: 0, uiMs: 0, totalMs: 0 };
 
   // 第 8 轮 · 组 4：先压黑再换层，视觉上是一次完整淡入淡出（镜头推拉）
   /* C1 · 转场瘦身：0.52 → 0.26（playSceneFade 的总时长 ≈ duration × 1.04 秒），
      配合 dissolve 的 0.28s，整段换层遮罩收在 0.3s 以内。 */
   playSceneFade(0.26, 'descend');
+  perf.fadeCallMs = Math.round(performance.now() - tStart);
+  showDescendCurtain(state.floor + 1);
+  perf.curtainMs = Math.round(performance.now() - tStart);
+  /* 双 rAF：第一帧把遮罩真正提交到屏幕，第二帧再跑生成。
+     少这一次让帧，遮罩和生成会落在同一帧里，玩家看到的仍然是冻结画面。 */
+  requestAnimationFrame(() => {
+    perf.raf1Ms = Math.round(performance.now() - tStart);
+    requestAnimationFrame(() => {
+      perf.raf2Ms = Math.round(performance.now() - tStart);
+      try {
+        descendFloorNow(tStart, perf);
+      } finally {
+        hideDescendCurtain();
+        state.transitionLock = false;
+        state.descendPending = false;
+      }
+    });
+  });
+  return true;
+}
+
+/**
+ * 下楼（重活）：层数 +1、重生成地图与敌人、奥能回满
+ * @param {number} tStart descendFloor 开始计时的 performance.now()
+ * @param {Object} perf 分段耗时容器（由 descendFloor 创建）
+ * @returns {boolean} 是否成功下楼
+ */
+function descendFloorNow(tStart, perf) {
 
   /* 第 6 轮 · 元进度：离开这一层时还是"无伤"→ 记一次无伤清层（成就口径） */
   if (state.floorNoHit !== false) {
@@ -58310,7 +58937,9 @@ function descendFloor() {
   // 换层后像素块再逐个散开，露出新楼层——避免换图时的硬切
   startPixelDissolve();
 
+  const tGen0 = performance.now();
   generateFloor(state.floor);
+  perf.genMs = Math.round(performance.now() - tGen0);
   /* v1.5.5 C2-1：深层回血节奏 —— 进入 F12/F15/F18/F20 时给一次可预期回复。
      放在 generateFloor 之后：此时玩家已在新层出生点，飘字位置与血量都对。 */
   resetDeepHealBossBucket();
@@ -58328,9 +58957,11 @@ function descendFloor() {
   // F 批：下楼 = S2 重演出（换层这种"整局级"事件必须够分量）
   fxTierEvent('descend', { x: state.player.x, y: state.player.y });
 
+  const tUi0 = performance.now();
   updateHUD();
   renderDeck();
   drawMinimap();
+  perf.uiMs = Math.round(performance.now() - tUi0);
   flashScreen('rgba(62, 230, 255, 0.12)');
   // U-fx：下楼整屏演出（档位 3）——在像素溶解之上叠一层"下坠光束"，换层更有分量
   const descendCfg = PIXEL_FX_CONFIG.descend;
@@ -58359,6 +58990,9 @@ function descendFloor() {
   spiritLore(state.themeId);
   // D1：纯叙事事件 —— 按楼层确定性地补一句塔语（零税，不调 rng、不写战斗/抽牌状态）
   omenSay(state.floor);
+  /* v2.5.25：四段耗时只读落盘，给探针量"卡在哪一段"（不参与任何玩法判定） */
+  perf.totalMs = Math.round(performance.now() - tStart);
+  state.perfDescend = perf;
   return true;
 }
 
@@ -60255,13 +60889,7 @@ function buildTreeDetailHtml(kind, id) {
   const partners = FUSION_CONFIG.filter((fusion) => (
     kind === 'magic' ? fusion.magic === id : fusion.tech === id
   ));
-  const partnerText = partners.length > 0
-    ? partners.map((fusion) => {
-      const other = kind === 'magic' ? (TECH_BY_ID[fusion.tech] || {}) : (MAGIC_BY_ID[fusion.magic] || {});
-      const otherTag = kind === 'magic' ? '科技' : '魔法';
-      return '<b>' + (other.name || '?') + '</b>（' + otherTag + '）→ ' + fusion.name;
-    }).join('　·　')
-    : '这一项暂时没有融合配方';
+  const recipeHtml = buildFusionRecipeHtml(kind, id, partners);
 
   const stats = kind === 'magic'
     ? '消耗 <b>' + conf.cost + '</b> 奥能　·　冷却 <b>' + conf.cooldown + 's</b>　·　伤害 <b>'
@@ -60273,7 +60901,68 @@ function buildTreeDetailHtml(kind, id) {
     + (kind === 'magic' ? '魔法' : '科技') + '</span>'
     + '<span class="i-tag">' + (owned ? '已解锁' : '可解锁 · 层奖励 / 精英掉落') + '</span></div>'
     + '<div class="i-desc">' + conf.desc + '</div>'
-    + '<div class="i-stats">' + stats + '<br>可融合：' + partnerText + '</div>';
+    + '<div class="i-stats">' + stats + '<br>' + recipeHtml + '</div>'
+    + buildTreeDiscardHtml(kind, id, owned);
+}
+
+/**
+ * 生成技能详情里的融合说明
+ * ------------------------------------------------------------
+ * 每一项一句：和谁融 → 融出什么 → 有什么用；「怎么融」只在标题说一次。
+ * 不写成长篇说明书，也不改动配方/触发逻辑，只读 FUSION_CONFIG。
+ * @param {string} kind 节点类型（magic / tech）
+ * @param {string} id 节点 id
+ * @param {Array<Object>} partners 与该节点有关的融合配置
+ * @returns {string} HTML 片段
+ */
+function buildFusionRecipeHtml(kind, id, partners) {
+  const how = '<div class="i-fuse-how">怎么融：两张都拥有时按 <b>F</b>'
+    + '（清掉第一间战斗房后解锁，主技能优先）</div>';
+  if (!partners || partners.length === 0) {
+    return '<div class="i-fuse">' + how
+      + '<div class="i-fuse-row">和谁融：暂无组合</div></div>';
+  }
+  const rows = partners.map((fusion) => {
+    const other = kind === 'magic' ? (TECH_BY_ID[fusion.tech] || {}) : (MAGIC_BY_ID[fusion.magic] || {});
+    const otherTag = kind === 'magic' ? '科技' : '魔法';
+    const on = (state.fusions || []).indexOf(fusion.id) >= 0;
+    return '<div class="i-fuse-row' + (on ? ' is-on' : '') + '">'
+      + (on ? '✓ ' : '· ')
+      + '和「' + otherTag + ' · ' + (other.name || '?') + '」'
+      + ' → 融出「<b>' + fusion.name + '</b>」：'
+      + fusion.desc
+      + '</div>';
+  }).join('');
+  return '<div class="i-fuse">' + how + rows + '</div>';
+}
+
+/**
+ * 生成技能树详情里的「丢弃」区块（鼠标入口 + 后果说明）
+ * ------------------------------------------------------------
+ * 只有已拥有且不是最后一张的魔法卡才给按钮；科技模块没有移除规则，不显示入口。
+ * @param {string} kind 节点类型
+ * @param {string} id 节点 id
+ * @param {boolean} owned 是否已拥有
+ * @returns {string} HTML 片段；不适用时返回空串
+ */
+function buildTreeDiscardHtml(kind, id, owned) {
+  if (kind !== 'magic' || !owned) return '';
+  if (!canDiscardSkill(id)) {
+    return '<div class="i-discard"><span class="i-discard-note">'
+      + '最后一张魔法卡不能丢弃（否则无牌可打）</span></div>';
+  }
+  const armed = discardArmedId === id;
+  /* 会被一并移除的已激活融合：提示里点名，避免玩家丢完才发现融合没了 */
+  const lostNames = FUSION_CONFIG
+    .filter((fusion) => fusion.magic === id && (state.fusions || []).indexOf(fusion.id) >= 0)
+    .map((fusion) => fusion.name);
+  return '<div class="i-discard">'
+    + '<button type="button" class="i-discard-btn' + (armed ? ' is-armed' : '') + '"'
+    + ' data-discard-id="' + id + '">'
+    + (armed ? '再点一次确认丢弃' : '丢弃这张魔法卡') + '</button>'
+    + '<span class="i-discard-note">本局拿不回 · 后续奖励可再抽到'
+    + (lostNames.length ? ' · 融合「' + lostNames.join('」「') + '」会一并消失' : '')
+    + '</span></div>';
 }
 
 /**
@@ -60282,6 +60971,9 @@ function buildTreeDetailHtml(kind, id) {
  * @param {string} id 节点 id
  */
 function renderTreeDetail(kind, id) {
+  /* 记下当前详情节点：键盘 Enter 需要知道"现在选中的是哪张魔法卡" */
+  treeDetailKind = kind || null;
+  treeDetailId = id || null;
   if (!ui.treeInspector) return;
   ui.treeInspector.innerHTML = buildTreeDetailHtml(kind, id);
 }
@@ -60477,6 +61169,8 @@ function buildTreeWeaponBridgeHtml() {
  */
 function buildSkillTree() {
   if (!ui.treeMagicCol || !ui.treeTechCol || !ui.treeFusionCol) return;
+  /* 每次重建都退出"再点一次确认"状态，避免上一次的武装残留到新节点 */
+  discardArmedId = null;
 
   // 三列节点
   /* C1 批：5 条武器标签配方已删，融合列与进度分母都等于 FUSION_CONFIG 的实际条目数。 */
@@ -60512,6 +61206,8 @@ function buildSkillTree() {
 
   // 检查器默认提示
   renderTreeDetail(null, null);
+  // 第一次打开技能界面时，内嵌显示"怎么丢 / 丢了会怎样"两句话
+  syncDiscardGuide();
 
   // 首开时清空选中态，避免上一次的焦点残留在新一局
   if (state.fusions.length === 0 && state.ownedMagic.length === 0) treeFocusId = null;
@@ -60520,6 +61216,31 @@ function buildSkillTree() {
   requestAnimationFrame(() => {
     drawTreeLinks();
   });
+}
+
+/**
+ * 首次打开技能界面的一次性引导条
+ * ------------------------------------------------------------
+ * 复用既有 ONBOARD 存档（arcane_onboard_v1 的 seen 表）：
+ * 没有 discardGuide 键才显示，显示后立即记下，之后不再出现；不弹窗、不阻塞操作。
+ * @returns {void}
+ */
+function syncDiscardGuide() {
+  if (typeof document === 'undefined') return;
+  const el = document.getElementById('treeDiscardGuide');
+  if (!el) return;
+  if (ONBOARD_CONFIG && ONBOARD_CONFIG.enabled === false) {
+    el.hidden = true;
+    return;
+  }
+  const seen = loadOnboardSeen();
+  if (seen.discardGuide) {
+    el.hidden = true;
+    return;
+  }
+  el.hidden = false;
+  seen.discardGuide = true;
+  saveOnboardSeen(seen);
 }
 
 /* ============================================================
@@ -65642,7 +66363,12 @@ function spawnSurvivalWave(room) {
       if (!isWalkableCircle(x, y, 16)) continue;
       if (isWalkBlocked(x, y, 16)) continue;
       if (dist(x, y, state.player.x, state.player.y) < U11B_CONFIG.spawnMinDist) continue;
-      spawnEnemy(type, x, y, state.floor, { roomId: room.id });
+      /* v2.5.25（症状 10）：随机点原本只过"可走 / 不挡"，会落进祭坛与四角柱这些
+         纯视觉道具里。统一走 pickEnemySpawnPoint 再挪到空地，同时复检离玩家距离，
+         保证"不刷进道具"与"不在玩家脸上"两条规则同时成立。 */
+      const spot = pickEnemySpawnPoint(room, x, y, 16);
+      if (dist(spot.x, spot.y, state.player.x, state.player.y) < U11B_CONFIG.spawnMinDist) continue;
+      spawnEnemy(type, spot.x, spot.y, state.floor, { roomId: room.id });
       spawned += 1;
       break;
     }
@@ -68140,6 +68866,66 @@ function handleKeyDown(event) {
     return;
   }
 
+  // 技能树面板：数字键选卡 → Enter 两次确认丢弃 → Esc 先取消确认，再按才关面板
+  // 按键全部沿用现有习惯（卡面数字角标 / Enter 确认 / Esc 取消），不新增组合键
+  if (state.mode === 'skilltree') {
+    if (action === 'escape') {
+      if (discardArmedId) {
+        discardArmedId = null;
+        renderTreeDetail(treeDetailKind, treeDetailId);
+        if (typeof showToast === 'function') showToast('已取消丢弃', 'info');
+      } else {
+        closeActivePanel();
+      }
+      return;
+    }
+    if (action === 'start') {
+      const targetId = (treeDetailKind === 'magic') ? treeDetailId : null;
+      if (!targetId) return;
+      if (discardArmedId === targetId) {
+        discardSkill(targetId);
+      } else if (canDiscardSkill(targetId)) {
+        discardArmedId = targetId;
+        renderTreeDetail('magic', targetId);
+        if (typeof showToast === 'function') showToast('再按一次 Enter 确认丢弃', 'warn');
+      } else if (typeof showToast === 'function') {
+        showToast('最后一张魔法卡不能丢弃', 'warn');
+      }
+      return;
+    }
+    const magicKeys = ['magic1', 'magic2', 'magic3', 'magic4', 'magic5', 'magic6', 'magic7', 'magic8', 'magic9'];
+    const magicIndex = magicKeys.indexOf(action);
+    if (magicIndex >= 0) {
+      const conf = MAGIC_CONFIG[magicIndex];
+      if (!conf) return;
+      if (state.ownedMagic.indexOf(conf.id) < 0) {
+        if (typeof showToast === 'function') showToast('还没有获得「' + conf.name + '」', 'info');
+        return;
+      }
+      /* 选卡：清掉旧武装，高亮对应节点，右侧详情显示丢弃入口 */
+      discardArmedId = null;
+      treeFocusId = null;
+      if (ui.treeWrap) {
+        ui.treeWrap.querySelectorAll('.tree-node').forEach((item) => {
+          item.classList.remove('is-focus', 'is-parent');
+        });
+      }
+      const node = ui.treeWrap ? ui.treeWrap.querySelector('[data-tree-node="magic:' + conf.id + '"]') : null;
+      if (node) {
+        node.classList.add('is-focus');
+        if (node.scrollIntoView) node.scrollIntoView({ block: 'nearest' });
+      }
+      renderTreeDetail('magic', conf.id);
+      highlightTreeLinks('magic', conf.id);
+      if (typeof showToast === 'function') showToast('已选中「' + conf.name + '」· Enter 丢弃', 'info');
+      return;
+    }
+    if (action === state.mode) closePanel(state.mode);
+    else if (action === 'codex') closePanel('codex');
+    else if (action === 'restart') restartRun();
+    return;
+  }
+
   // 全屏面板（帮助 / 技能树 / 设置）：Esc 或同名快捷键关闭，R 重开，其它按键不响应
   if (isPanelMode(state.mode)) {
     if (action === 'escape') closeActivePanel();
@@ -69127,6 +69913,8 @@ function bindEvents() {
       if (!treeFocusId) renderTreeDetail(null, null);
     });
     ui.treeWrap.addEventListener('click', (event) => {
+      /* 点树里的任何节点都先退出丢弃确认态，避免误把上一张的武装带到新选择 */
+      discardArmedId = null;
       const node = event.target.closest('[data-tree-node]');
       if (node) {
         const parts = node.getAttribute('data-tree-node').split(':');
@@ -69144,6 +69932,23 @@ function bindEvents() {
       }
       const link = event.target.closest('[data-tree-link]');
       if (link) focusTreeFusion(link.getAttribute('data-tree-link'));
+    });
+  }
+
+  /* 丢弃技能 · 鼠标入口：详情里的按钮（事件委托，详情每次重建都有效）
+     第一次点只武装，第二次点同一张才真正丢弃 —— 不弹 confirm，不打断面板。 */
+  if (ui.treeInspector) {
+    ui.treeInspector.addEventListener('click', (event) => {
+      const btn = event.target.closest('[data-discard-id]');
+      if (!btn) return;
+      const id = btn.getAttribute('data-discard-id');
+      if (discardArmedId !== id) {
+        discardArmedId = id;
+        renderTreeDetail('magic', id);
+        if (typeof showToast === 'function') showToast('再点一次「丢弃」确认', 'warn');
+        return;
+      }
+      discardSkill(id);
     });
   }
 
@@ -78986,7 +79791,7 @@ function init() {
   window.__errors = [];
   // 第 18 项：全局异常同样进入崩溃兜底；标题页异常只记录，不打断玩家点开始
   window.addEventListener('error', (event) => {
-    /* 补丁 · 资源加载失败（<script>/<img>/<audio> 等）没有 error 对象，交给独立应急面板显示真实 URL，
+    /* 补丁 · 资源加载失败（<script>/<img alt="烬 界面截图" loading="lazy" />/<audio> 等）没有 error 对象，交给独立应急面板显示真实 URL，
        避免把"缺一张图"误判成渲染崩溃并弹出 unknown。 */
     if (!event.error && event.target && event.target !== window && event.target.tagName) {
       try {
