@@ -1490,6 +1490,9 @@
     background: var(--fc, #ffc247); box-shadow: 0 0 6px var(--fc, #ffc247);
   }
   .card-tip .ct-fuse .fx.is-ready { color: var(--gold); }
+  /* G1-3：已融合 = 状态行，不是"可操作"；取消金色发光，免得玩家反复去按 F */
+  .card-tip .ct-fuse .fx.is-owned { color: rgba(168, 191, 220, 0.62); }
+  .card-tip .ct-fuse .fx.is-owned i { background: rgba(168, 191, 220, 0.35); box-shadow: none; }
   .card-tip .ct-foot {
     margin-top: 7px;
     font-family: var(--mono);
@@ -6704,6 +6707,348 @@ body.ui-v2 .hud-deck .mini-card .m-floor{display:none}
   .room-card:hover{transform:none}
 }
 /* ===== ARC v3 P9 END ===== */
+
+/* ===== ARC v4 R1 · 选房「星图议厅」 =====
+   目标：把"三张平面卡"改成一座可读的路线控制台：
+     左：整层拓扑星图（当前位置 / 可选节点 / 通往楼梯的方向）
+     右：路线台账式候选（序号刻面 + 房型 + 威胁 + 收益 + 层深位置）
+   材质只用 CSS 渐变模拟金属/晶体，不引外部字体与图片；配色收敛为
+   墨底 + 青（科技）+ 金（秘仪）+ 红（危险）三主色。 */
+#roomPicker{
+  padding:16px;
+  background:
+    radial-gradient(120% 80% at 50% -12%, rgba(24,74,98,.52), transparent 62%),
+    radial-gradient(90% 70% at 100% 112%, rgba(120,86,32,.16), transparent 64%),
+    rgba(2,5,9,.84);
+  backdrop-filter:blur(7px) saturate(.92);
+}
+#roomPicker .rp-shell{
+  position:relative;
+  width:min(1120px,100%);
+  max-height:calc(100vh - 32px);
+  overflow:auto;
+  padding:22px 28px 16px;
+  border:1px solid rgba(120,205,235,.22);
+  border-radius:18px;
+  background:
+    repeating-linear-gradient(90deg,rgba(255,255,255,.017) 0 1px,transparent 1px 5px),
+    radial-gradient(120% 90% at 50% 0%,rgba(22,58,78,.5),transparent 58%),
+    linear-gradient(180deg,rgba(11,22,33,.975),rgba(5,11,18,.99));
+  box-shadow:
+    0 0 0 1px rgba(3,8,12,.9),
+    0 30px 100px rgba(0,0,0,.75),
+    inset 0 1px 0 rgba(190,235,255,.14),
+    inset 0 0 90px rgba(18,62,84,.16);
+  scrollbar-width:thin;
+  scrollbar-color:rgba(98,232,255,.3) transparent;
+}
+#roomPicker .rp-shell::before{
+  content:"";position:absolute;left:20px;right:20px;top:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(98,232,255,.55),rgba(242,198,109,.42),transparent);
+}
+#roomPicker .rp-shell::after{
+  content:"";position:absolute;inset:9px;border-radius:12px;pointer-events:none;opacity:.45;
+  background:
+    linear-gradient(#62e8ff,#62e8ff) left top/16px 1px no-repeat,
+    linear-gradient(#62e8ff,#62e8ff) left top/1px 16px no-repeat,
+    linear-gradient(#62e8ff,#62e8ff) right top/16px 1px no-repeat,
+    linear-gradient(#62e8ff,#62e8ff) right top/1px 16px no-repeat,
+    linear-gradient(#62e8ff,#62e8ff) left bottom/16px 1px no-repeat,
+    linear-gradient(#62e8ff,#62e8ff) left bottom/1px 16px no-repeat,
+    linear-gradient(#62e8ff,#62e8ff) right bottom/16px 1px no-repeat,
+    linear-gradient(#62e8ff,#62e8ff) right bottom/1px 16px no-repeat;
+}
+#roomPicker .rp-head{
+  display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 22px;
+  padding-bottom:13px;border-bottom:1px solid rgba(120,205,235,.14);
+}
+#roomPicker .rp-kicker{
+  flex:1 1 100%;display:flex;align-items:center;gap:10px;
+  font-family:var(--mono);font-size:10px;letter-spacing:.26em;
+  color:rgba(140,200,225,.66);text-transform:uppercase;
+}
+#roomPicker .rp-kicker::before{content:"";width:28px;height:1px;background:linear-gradient(90deg,transparent,#62e8ff)}
+#roomPicker .rp-kicker b{color:#f2c66d;font-weight:600;letter-spacing:.18em}
+#roomPickerTitle{
+  margin:0;font-size:clamp(24px,3vw,34px);line-height:1.12;font-weight:600;
+  letter-spacing:.06em;color:#eaf6ff;text-shadow:0 0 30px rgba(98,232,255,.16);
+}
+#roomPicker .rp-sub{
+  flex:1 1 auto;min-width:220px;text-align:right;font-size:12px;line-height:1.65;
+  color:rgba(160,195,216,.78);
+}
+#roomPicker .rp-sub b{color:#f2c66d;font-family:var(--mono);font-weight:600}
+#roomPicker .rp-body{
+  display:grid;grid-template-columns:minmax(0,.92fr) minmax(0,1.08fr);
+  gap:22px;padding:15px 0 4px;min-height:396px;
+}
+#roomPicker .rp-map-wrap{
+  position:relative;min-width:0;padding:12px 12px 10px;
+  border:1px solid rgba(120,205,235,.13);border-radius:12px;
+  background:
+    radial-gradient(90% 80% at 50% 20%,rgba(20,60,80,.26),transparent 70%),
+    linear-gradient(180deg,rgba(8,18,28,.82),rgba(4,10,16,.62));
+  box-shadow:inset 0 0 46px rgba(10,40,55,.32);
+}
+#roomPicker .rp-map-head{
+  display:flex;justify-content:space-between;align-items:center;gap:8px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  color:rgba(150,190,212,.62);text-transform:uppercase;
+}
+#roomPicker .rp-map-head b{color:#8fe9ff;font-weight:600}
+#roomPicker .rp-legend{display:flex;gap:10px;font-size:9px;letter-spacing:.04em;color:rgba(150,190,212,.55)}
+#roomPicker .rp-legend i{font-style:normal;color:#f2c66d}
+#roomPickerMap{display:block;width:100%;height:292px;margin-top:4px}
+#roomPicker .rp-map-foot{
+  margin-top:4px;padding-top:8px;border-top:1px solid rgba(120,205,235,.1);
+  font-size:11.5px;line-height:1.65;color:rgba(175,208,228,.8);
+}
+#roomPicker .rp-map-foot b{color:#f2c66d;font-family:var(--mono)}
+#roomPicker .rp-choice{position:relative;display:flex;flex-direction:column;min-width:0}
+/* 右栏刻尺：把候选区做成一台"通路台账"，空白处也有刻度语义 */
+#roomPicker .rp-choice::after{
+  content:"";position:absolute;right:-7px;top:10px;bottom:6px;width:1px;pointer-events:none;
+  background:repeating-linear-gradient(180deg,rgba(98,232,255,.3) 0 1px,transparent 1px 14px);
+  opacity:.55;
+}
+#roomPicker .rp-choice-head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;
+  color:rgba(150,190,212,.62);text-transform:uppercase;
+}
+#roomPicker .rp-choice-head b{color:#8fe9ff;font-weight:600}
+#roomPickerList{
+  display:flex;flex:1;flex-direction:column;justify-content:center;gap:11px;position:relative;
+  padding:8px 0 0 16px;perspective:900px;
+}
+#roomPickerList::before{
+  content:"";position:absolute;left:4px;top:10px;bottom:8px;width:1px;
+  background:linear-gradient(180deg,transparent,rgba(98,232,255,.35),rgba(242,198,109,.28),transparent);
+}
+#roomPicker .room-card{
+  flex:1 1 0;width:100%;min-height:96px;max-height:176px;text-align:left;position:relative;overflow:hidden;
+  display:grid;grid-template-columns:36px 54px minmax(0,1fr) auto;
+  grid-template-areas:"ord icon main key";align-items:center;gap:14px;
+  padding:13px 15px 12px 13px;border-radius:12px;
+  border:1px solid rgba(120,205,235,.16);
+  background:
+    linear-gradient(100deg,rgba(255,255,255,.05),transparent 34%),
+    repeating-linear-gradient(90deg,rgba(255,255,255,.019) 0 1px,transparent 1px 4px),
+    linear-gradient(180deg,rgba(15,28,40,.95),rgba(7,14,22,.96));
+  box-shadow:
+    inset 0 1px 0 rgba(200,240,255,.08),
+    inset 0 -18px 30px rgba(0,0,0,.28),
+    0 8px 24px rgba(0,0,0,.35);
+  transition:transform .18s var(--ease),border-color .18s var(--ease),box-shadow .18s var(--ease);
+  animation:rpCardIn .42s var(--ease) both;
+}
+#roomPicker .room-card::before{
+  content:"";position:absolute;left:0;top:0;bottom:0;width:2px;opacity:.8;
+  background:linear-gradient(180deg,transparent,var(--rc),transparent);
+}
+#roomPicker .room-card::after{
+  content:"";position:absolute;top:-40%;bottom:-40%;left:-34%;width:36%;
+  background:linear-gradient(90deg,transparent,rgba(190,240,255,.1),transparent);
+  transform:translateX(-170%) skewX(-16deg);transition:transform .62s ease;
+  pointer-events:none;
+}
+#roomPicker .room-card:hover::after{transform:translateX(430%) skewX(-16deg)}
+#roomPicker .room-card:hover{
+  transform:translateY(-3px) rotateX(1.2deg) rotateY(-1.1deg);
+  border-color:rgba(150,230,255,.42);
+  box-shadow:
+    inset 0 1px 0 rgba(210,245,255,.14),
+    0 16px 34px rgba(0,0,0,.46),
+    0 0 24px rgba(70,180,220,.12);
+}
+#roomPicker .room-card:focus-visible{outline:1px solid var(--rc);outline-offset:3px}
+#roomPicker .room-card:hover .rc-icon::before{
+  border-color:rgba(160,235,255,.5);
+  box-shadow:inset 0 0 22px rgba(70,190,230,.28),0 0 18px rgba(70,190,230,.16);
+}
+#roomPicker .room-card .ricon{transition:transform .18s var(--ease)}
+#roomPicker .room-card:hover .ricon{transform:scale(1.07)}
+/* 选定·刻印：卡片进入"已押注"态，其余候选降权，右端盖下启程印 */
+#roomPicker .room-card.is-armed{
+  transform:translateY(-2px) scale(1.006);
+  border-color:rgba(242,198,109,.78);
+  box-shadow:
+    inset 0 0 0 1px rgba(242,198,109,.34),
+    0 18px 42px rgba(0,0,0,.55),
+    0 0 44px rgba(242,198,109,.2);
+  animation:none;
+}
+#roomPicker .room-card.is-dim{opacity:.38;filter:saturate(.4) brightness(.8);pointer-events:none}
+#roomPicker .room-card.is-armed .rc-key{opacity:0}
+#roomPicker .rc-seal{
+  position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;
+  transition:opacity .1s linear;
+}
+#roomPicker .room-card.is-armed .rc-seal{opacity:1}
+#roomPicker .rc-seal i{
+  position:absolute;left:0;right:0;bottom:0;height:2px;transform-origin:left center;
+  background:linear-gradient(90deg,#62e8ff,#f2c66d);
+  box-shadow:0 0 12px rgba(242,198,109,.55);
+  animation:rpSealBar .38s linear both;
+}
+#roomPicker .rc-seal b{
+  position:absolute;right:14px;top:50%;width:52px;height:52px;margin-top:-26px;
+  display:flex;align-items:center;justify-content:center;border-radius:50%;
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;color:#1a1206;
+  background:radial-gradient(circle at 34% 28%,#ffe9b8,#f2c66d 58%,#b8862e);
+  box-shadow:0 0 0 1px rgba(255,236,196,.5),0 0 26px rgba(242,198,109,.55),inset 0 0 12px rgba(255,255,255,.35);
+  animation:rpSealStamp .32s var(--ease) both;
+}
+#roomPicker .room-card.is-armed .rc-main{filter:brightness(1.12)}
+#roomPicker .room-card[data-locked="1"]{opacity:.55;filter:saturate(.45);cursor:not-allowed}
+#roomPicker .room-card[data-locked="1"] .rc-ord::after{animation:none;opacity:.12}
+#roomPicker .rc-ord{
+  grid-area:ord;position:relative;width:36px;height:40px;display:flex;
+  align-items:center;justify-content:center;font-family:var(--mono);
+  font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--rc);
+}
+#roomPicker .rc-ord::before{
+  content:"";position:absolute;inset:0;z-index:0;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(0,0,0,.42));
+  box-shadow:inset 0 0 0 1px rgba(180,225,245,.16);
+}
+#roomPicker .rc-ord::after{
+  content:"";position:absolute;inset:-3px;z-index:0;opacity:.22;
+  clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+  border:1px solid var(--rc);animation:rpBreath 3.4s ease-in-out infinite;
+}
+#roomPicker .rc-ord span{position:relative;z-index:1}
+#roomPicker .rc-icon{
+  grid-area:icon;position:relative;width:54px;height:54px;
+  display:flex;align-items:center;justify-content:center;
+}
+#roomPicker .rc-icon::before{
+  content:"";position:absolute;inset:5px;transform:rotate(45deg);
+  border:1px solid rgba(160,225,245,.2);
+  background:radial-gradient(circle at 50% 40%,rgba(98,232,255,.12),transparent 70%);
+  box-shadow:inset 0 0 18px rgba(60,170,210,.12);
+}
+#roomPicker .room-card .ricon{
+  width:42px;height:42px;margin:0;position:relative;z-index:1;
+  filter:drop-shadow(0 0 8px var(--rc));
+}
+#roomPicker .rc-main{grid-area:main;min-width:0;display:flex;flex-direction:column;gap:3px}
+#roomPicker .rc-top{display:flex;align-items:center;gap:10px;min-width:0}
+#roomPicker .rc-type{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;
+  color:rgba(150,200,222,.68);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#roomPicker .rc-depth{
+  margin-left:auto;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;
+  color:rgba(242,198,109,.75);white-space:nowrap;
+}
+#roomPicker .rc-name{
+  font-size:19px;line-height:1.2;font-weight:600;letter-spacing:.05em;color:#eaf6ff;
+}
+#roomPicker .rc-spec{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:end;
+  gap:10px 18px;margin-top:7px;padding-top:7px;
+  border-top:1px solid rgba(120,205,235,.12);
+}
+#roomPicker .rc-cell{min-width:0;display:flex;flex-direction:column;gap:2px}
+#roomPicker .rc-lab{
+  font-family:var(--mono);font-size:8px;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(130,170,194,.52);
+}
+#roomPicker .rc-risk{display:inline-flex;align-items:center;gap:5px;color:var(--rc)}
+#roomPicker .rc-risk i{
+  width:6px;height:6px;transform:rotate(45deg);
+  background:rgba(120,150,170,.22);box-shadow:inset 0 0 0 1px rgba(160,200,220,.3);
+}
+#roomPicker .rc-risk i.on{background:var(--rc);box-shadow:0 0 7px var(--rc)}
+#roomPicker .rc-risk em{
+  font-style:normal;font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  color:rgba(210,232,244,.9);
+}
+#roomPicker .rc-reward{
+  font-size:11.5px;line-height:1.35;color:rgba(190,218,234,.82);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#roomPicker .rc-pos{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.07em;line-height:1.4;
+  color:rgba(135,172,196,.68);white-space:nowrap;
+}
+#roomPicker .rc-lock{margin-top:2px;font-size:10.5px;color:#ffb0b8}
+#roomPicker .rc-badge{
+  position:absolute;right:12px;top:-1px;padding:2px 7px;z-index:2;
+  font-family:var(--mono);font-size:9px;letter-spacing:.12em;color:#f2c66d;
+  border:1px solid rgba(242,198,109,.45);border-bottom-left-radius:6px;border-bottom-right-radius:6px;
+  background:rgba(30,22,8,.8);
+}
+#roomPicker .rc-key{
+  grid-area:key;align-self:stretch;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:5px;min-width:44px;
+  padding-left:12px;border-left:1px solid rgba(120,205,235,.12);
+}
+#roomPicker .rc-key b{
+  display:flex;width:27px;height:27px;align-items:center;justify-content:center;
+  border:1px solid var(--rc);border-radius:4px;font-family:var(--mono);
+  font-size:12px;color:var(--rc);box-shadow:inset 0 0 10px rgba(255,255,255,.04);
+}
+#roomPicker .rc-key span{font-size:8.5px;letter-spacing:.14em;color:rgba(150,190,212,.55)}
+#roomPicker #roomPickerGuide{margin-top:12px}
+#roomPicker #roomPickerNote{
+  min-height:15px;margin-top:8px;padding-top:8px;
+  border-top:1px solid rgba(120,205,235,.1);letter-spacing:.03em;
+}
+#roomPicker .rp-foot{
+  margin-top:9px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:9px;letter-spacing:.12em;
+  color:rgba(130,170,192,.5);text-transform:uppercase;
+}
+@keyframes rpCardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes rpBreath{0%,100%{opacity:.16}50%{opacity:.58}}
+@keyframes rpSealBar{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes rpSealStamp{from{opacity:0;transform:scale(1.45) rotate(-18deg)}to{opacity:1;transform:scale(1) rotate(0)}}
+@media (max-width:860px){
+  #roomPicker{padding:8px}
+  #roomPicker .rp-shell{padding:16px 14px 11px;border-radius:14px;max-height:calc(100vh - 16px)}
+  #roomPicker .rp-head{padding-bottom:9px}
+  #roomPicker .rp-sub{text-align:left;font-size:11px}
+  #roomPicker .rp-body{grid-template-columns:1fr;gap:12px;padding-top:11px}
+  #roomPicker .rp-map-wrap{padding:10px}
+  #roomPickerMap{height:156px}
+  #roomPickerList{padding-left:14px;justify-content:flex-start}
+  #roomPicker .room-card{
+    flex:none;
+    grid-template-columns:30px 46px minmax(0,1fr);
+    grid-template-areas:"ord icon main" "key key key";
+    gap:8px 10px;padding:11px 12px 9px;
+  }
+  #roomPicker .rc-spec{grid-template-columns:auto minmax(0,1fr);gap:6px 14px;margin-top:6px;padding-top:6px}
+  #roomPicker .rc-cell:nth-child(2){grid-column:1/-1}
+  #roomPicker .rc-cell:nth-child(3){grid-column:2;grid-row:1;align-items:flex-end}
+  #roomPicker .rc-ord{width:30px;height:34px;font-size:12px}
+  #roomPicker .rc-name{font-size:17px}
+  #roomPicker .rc-depth{display:none}
+  #roomPicker .rc-type{font-size:9px;letter-spacing:.14em}
+  #roomPicker .rc-pos{font-size:9px}
+  #roomPicker .rc-key{
+    flex-direction:row;align-items:center;justify-content:flex-start;gap:8px;
+    border-left:0;border-top:1px solid rgba(120,205,235,.1);
+    padding:7px 0 0;min-width:0;
+  }
+  #roomPicker .rc-key b{width:22px;height:22px;font-size:11px}
+}
+@media (max-width:420px){
+  #roomPicker .rp-legend{display:none}
+  #roomPickerMap{height:132px}
+  #roomPickerTitle{font-size:22px}
+  #roomPicker .rc-spec{gap:5px 10px}
+  #roomPicker .rc-reward{font-size:10.5px}
+}
+@media (prefers-reduced-motion: reduce){
+  #roomPicker .room-card{animation:none;transition:none}
+  #roomPicker .room-card:hover{transform:none}
+  #roomPicker .rc-ord::after{animation:none}
+}
+/* ===== ARC v4 R1 END ===== */
 
 /* ===== ARC v3 P10 ===== */
 /* 1) HUD 条底槽：8bit 灰渐变 + 噪点底 + 内阴影，替代原来的半透明蓝块。
@@ -15524,6 +15869,9 @@ const ROOM_PICKER_CONFIG = {
 const ROOM_PICKER_STATS = { opened: 0, picks: 0, denied: 0, lastPick: null };
 let roomPickerEl = null;
 let roomPickerOpen = false;
+/* 选房"刻印"阶段：{ id, timer }。点击/数字键先刻印，380ms 后自动启程，
+   再次点击同一张或按 Enter 可立即启程；Esc / 关闭面板会撤销。 */
+let roomPickerArmed = null;
 let routeHintEl = null;
 let routeHintSig = '';
 
@@ -15791,20 +16139,34 @@ function ensureRoomPickerDom() {
   if (roomPickerEl) return roomPickerEl;
   const wrap = document.createElement('div');
   wrap.id = 'roomPicker';
-  wrap.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;'
-    + 'background:rgba(3,7,12,0.62);z-index:130;';
-  wrap.innerHTML = '<div style="width:min(820px,calc(100vw - 28px));max-height:calc(100vh - 40px);overflow:auto;'
-    + 'padding:20px 22px;'
-    + 'border:1px solid rgba(62,230,255,0.45);border-radius:var(--r-md);background:rgba(8,16,26,0.97);'
-    + 'box-shadow:0 18px 60px rgba(0,0,0,0.65);">'
-    + '<div style="display:flex;justify-content:space-between;align-items:baseline;gap:18px;flex-wrap:wrap;">'
-    + '<div id="roomPickerTitle" style="font-size:var(--fs-lg);color:#8fe9ff;letter-spacing:1px;">选择下一间</div>'
-    + '<div style="font-size:var(--fs-sm);color:rgba(180,210,230,0.72);">'
-    + (touchCapable() ? '点卡片选房 · 再点「选房」键关闭' : 'Q 开关 · 数字键 1/2/3 选择 · Esc 关闭 · 也可鼠标点击')
+  wrap.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:130;';
+  const touchHint = touchCapable()
+    ? '点卡片进入 · 再点「选房」键关闭'
+    : '数字键 1/2/3 选择 · Esc 关闭';
+  wrap.innerHTML =
+    '<div class="rp-shell" role="dialog" aria-modal="true" aria-labelledby="roomPickerTitle">'
+    + '<header class="rp-head">'
+    +   '<div class="rp-kicker">ARCANE ROUTE // FLOOR <b id="roomPickerFloorNo">--</b></div>'
+    +   '<div id="roomPickerTitle">选择下一间</div>'
+    +   '<div class="rp-sub" id="roomPickerSub"></div>'
+    + '</header>'
+    + '<div class="rp-body">'
+    +   '<aside class="rp-map-wrap" aria-label="本层拓扑">'
+    +     '<div class="rp-map-head"><span>本层拓扑 · <b>TOPOLOGY</b></span>'
+    +       '<span class="rp-legend"><i>◆</i>当前　<i>◇</i>可选　<i>✦</i>楼梯</span></div>'
+    +     '<canvas id="roomPickerMap" width="720" height="420" aria-hidden="true"></canvas>'
+    +     '<div class="rp-map-foot" id="roomPickerMapFoot"></div>'
+    +   '</aside>'
+    +   '<section class="rp-choice" aria-label="候选房间">'
+    +     '<div class="rp-choice-head"><span>可选通路 · <b>PASSAGES</b></span>'
+    +       '<span id="rpChoiceCount"></span></div>'
+    +     '<div id="roomPickerList"></div>'
+    +     '<div id="roomPickerGuide" style="display:none;"></div>'
+    +     '<div id="roomPickerNote"></div>'
+    +   '</section>'
     + '</div>'
-    + '</div><div id="roomPickerGuide" style="display:none;margin-top:14px;"></div>'
-    + '<div id="roomPickerList" style="margin-top:16px;"></div>'
-    + '<div id="roomPickerNote" style="margin-top:12px;font-size:var(--fs-sm);color:#ffc247;"></div></div>';
+    + '<div class="rp-foot"><span>' + touchHint + '</span><span>ARC · CHAMBER SELECT</span></div>'
+    + '</div>';
   document.body.appendChild(wrap);
   wrap.addEventListener('mousedown', (event) => {
     if (event.target === wrap) closeRoomPicker();
@@ -15817,11 +16179,18 @@ function ensureRoomPickerDom() {
  * 重绘浮层里的 2–3 张房卡
  * @returns {void}
  */
-/* P8 · 选房卡类化：房间类型 → 语义色类（颜色定义在 P7 的 CSS，不在 JS 里） */
+/* P8 · 选房卡类化：房型 → 三色语义（青=科技 / 金=秘仪收益 / 红=危险）。
+   颜色定义仍在 CSS，渐变与字面感全部由 #roomPicker 作用域接管。 */
 const ROOM_TONE = {
-  start: 'good', battle: 'tech', elite: 'bad', chest: 'gold',
-  event: 'tech', sacrifice: 'gold', wager: 'good', boss: 'bad'
+  start: 'gold', battle: 'tech', elite: 'bad', chest: 'gold',
+  event: 'tech', sacrifice: 'gold', wager: 'gold', curse: 'bad',
+  rest: 'gold', shop: 'gold', survival: 'bad', forge: 'gold',
+  cache: 'gold', vault: 'gold', boss: 'bad'
 };
+
+/* 选房星图的即时数据：render 时算一次，绘制循环只读，避免每帧重算候选 */
+let roomPickerMapData = { curId: -1, ids: [], bossDepth: 0, curDepth: 0, rooms: null };
+let roomPickerMapRaf = 0;
 
 function renderRoomPicker() {
   ensureRoomPickerDom();
@@ -15839,6 +16208,32 @@ function renderRoomPicker() {
   /* D5：只显示"下一层"的房间（深度 +1）；清单与出口光点、小地图徽标共用 nextRoomChoices */
   const depthOfRoom = (state.floorGraph && state.floorGraph.depthOf) || {};
   const ids = nextRoomChoices();
+  const bossDepth = (state.boss && Number.isFinite(depthOfRoom[state.boss.roomId]))
+    ? depthOfRoom[state.boss.roomId] : 0;
+  const curDepth = Number.isFinite(depthOfRoom[curId]) ? depthOfRoom[curId] : 0;
+  const remainToStairs = Math.max(0, bossDepth - curDepth);
+  const touch = touchCapable();
+  const pad2 = (n) => String(n).padStart(2, '0');
+
+  roomPickerMapData = { curId, ids: ids.slice(), bossDepth, curDepth, rooms: state.rooms };
+
+  const floorEl = document.getElementById('roomPickerFloorNo');
+  if (floorEl) floorEl.textContent = pad2(state.floor);
+  const subEl = document.getElementById('roomPickerSub');
+  if (subEl) {
+    subEl.innerHTML = '当前 <b>第 ' + curDepth + ' 段</b> · 楼梯尚余 <b>' + remainToStairs + ' 段</b>'
+      + ' · ' + (touch ? '点卡片进入' : '按 <b>1/2/3</b> 选择 · <b>Esc</b> 关闭');
+  }
+  const footEl = document.getElementById('roomPickerMapFoot');
+  if (footEl) {
+    footEl.innerHTML = '你在这里：<b>第 ' + curDepth + ' 段</b> · 本层共 <b>' + bossDepth + ' 段</b>'
+      + '<br>' + (ids.length
+        ? '金色虚线标出本次可选入口，箭头方向通往楼梯。'
+        : '本层已无未探索的相邻房间。');
+  }
+  const countEl = document.getElementById('rpChoiceCount');
+  if (countEl) countEl.textContent = ids.length + ' 条';
+
   /* v2.2.7：回访候选不许"长得跟新房间一样"。
      v2.5.16：玩家读不懂"回访"、且看着像报错 —— 文案全改成"探完 / 已探索 / 回头"。 */
   const titleEl = document.getElementById('roomPickerTitle');
@@ -15846,63 +16241,73 @@ function renderRoomPicker() {
     titleEl.textContent = roomChoiceForced
       ? '唯一通路 · 只能走这一间'
       : (roomChoiceFallback ? '本层已探完 · 可回头' : '选择下一间');
-    titleEl.style.color = (roomChoiceForced || roomChoiceFallback) ? '#ffc247' : '#8fe9ff';
+    titleEl.style.color = (roomChoiceForced || roomChoiceFallback) ? '#f2c66d' : '#eaf6ff';
   }
   /* v2.5.21 · 新手一次性选房引导（并入既有 ONBOARD 教学存档） */
   renderRoomPickerGuide();
-  ids.forEach((id) => {
+  ids.forEach((id, index) => {
     const room = state.rooms[id];
     /* v2.5.21：候选数组可能夹着失效 id（被这里跳过）。序号按"已渲染卡片数"算，
        否则会出现玩家截图那种"只有一张卡却写着 2"，数字键也会对不上 */
     if (!room) return;
     const no = list.children.length + 1;
     const info = roomCardLines(room);
-    /* 融合：卡片序号做成"圈号"，与地面光点徽标、小地图徽标同一个视觉符号 */
-    const accent = roomAccent(room.type);
-    const card = document.createElement('button');
-    card.type = 'button';
-    card.dataset.roomId = String(id);
-    /* P8 · 选房卡类化：颜色/边框/底色交给 .room-card 类（P7 CSS），这里只留布局必需项 */
     const tone = ROOM_TONE[room.type] || 'tech';
+    const toneColor = tone === 'bad' ? '#ff5a6e' : (tone === 'gold' ? '#f2c66d' : '#62e8ff');
     const enterable = canEnterRoom(room);
     const gateText = gateReason(room);
     const forcedText = roomForcedPassageNote(room);
-    card.className = 'room-card t-' + tone
-      + (room.type === 'wager' ? ' hatch' : '')      + (enterable ? '' : ' is-locked');
+    const stepNo = Number.isFinite(depthOfRoom[id]) ? depthOfRoom[id] : 0;
+    const remain = Math.max(0, bossDepth - stepNo);
+    const conf = ROOM_TYPE_CONFIG.types[room.type] || ROOM_TYPE_CONFIG.types.battle;
+    const risk = Math.max(0, Math.min(3, conf.risk || 0));
+    const riskLabel = (DOOR_INFO_CONFIG.riskLabels && DOOR_INFO_CONFIG.riskLabels[risk]) || '常规';
+    const riskTip = (DOOR_INFO_CONFIG.tipByType && DOOR_INFO_CONFIG.tipByType[room.type]) || conf.name;
+    const badge = forcedText ? '唯一通路' : (roomChoiceFallback ? '已探索' : '');
+    const extraLabel = (info.labels && info.labels.length) ? ' · ' + info.labels[0] : '';
+    const pips = [0, 1, 2].map((i) => '<i class="' + (i < risk ? 'on' : '') + '"></i>').join('');
+
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.dataset.roomId = String(id);
+    /* 颜色/边框/材质交给 #roomPicker 作用域的 CSS，这里只留布局与入场节奏 */
+    card.className = 'room-card t-' + tone + (enterable ? '' : ' is-locked');
     card.dataset.locked = enterable ? '0' : '1';
     card.style.cssText = 'cursor:' + (enterable ? 'pointer' : 'not-allowed') + ';'
-      + (enterable ? '' : 'opacity:0.62;');
-    const stepNo = depthOfRoom[id];
-    /* ③-1 v2.5.5：卡片只放四件事 —— 图标与名称 / 风险或收益一句话 / 分隔线 / 按键提示 */
-    const conf = ROOM_TYPE_CONFIG.types[room.type] || ROOM_TYPE_CONFIG.types.battle;
-    const riskLabel = (DOOR_INFO_CONFIG.riskLabels && DOOR_INFO_CONFIG.riskLabels[conf.risk]) || '常规';
-    const riskTip = (DOOR_INFO_CONFIG.tipByType && DOOR_INFO_CONFIG.tipByType[room.type]) || conf.name;
-    const riskLine = riskLabel + ' · ' + riskTip;
+      + 'animation-delay:' + (index * 70) + 'ms;';
     card.setAttribute('aria-label',
-      info.name + ' · ' + riskLine + ' · '
-      + (forcedText ? forcedText + ' · ' : '')
-      + (enterable ? (touchCapable() ? '点按选择' : '按 ' + no + ' 选择')
-        : (gateText || '本房清完后可选')));
-    card.innerHTML = (forcedText
-      ? '<div class="rflag">唯一通路</div>'
-      : (roomChoiceFallback ? '<div class="rflag">已探索</div>' : ''))
-      + '<div class="rline">'
-      + '<span class="rnum">' + no + '</span>'
-      + '<span class="rname">' + info.name + '</span>'
-      + (stepNo > 0 ? '<span class="rdepth">STEP ' + stepNo + '</span>' : '')
+      info.name + ' · ' + riskLabel + ' · ' + riskTip
+      + ' · 第 ' + stepNo + ' 段，距楼梯 ' + remain + ' 段'
+      + (badge ? ' · ' + badge : '')
+      + (enterable ? (touch ? ' · 点按进入' : ' · 按 ' + no + ' 选择')
+        : ' · ' + (gateText || '本房清完后可选')));
+    card.innerHTML =
+      (badge ? '<span class="rc-badge">' + badge + '</span>' : '')
+      + '<div class="rc-ord"><span>' + pad2(no) + '</span></div>'
+      + '<div class="rc-icon"><canvas class="ricon" width="56" height="56" aria-hidden="true"></canvas></div>'
+      + '<div class="rc-main">'
+      +   '<div class="rc-top">'
+      +     '<span class="rc-type">' + (conf.en || 'ROOM') + ' · ' + conf.name + '</span>'
+      +     '<span class="rc-depth">STEP ' + pad2(stepNo) + ' / ' + pad2(bossDepth) + '</span>'
+      +   '</div>'
+      +   '<div class="rc-name">' + info.name + '</div>'
+      +   '<div class="rc-spec">'
+      +     '<div class="rc-cell"><span class="rc-lab">威胁</span>'
+      +       '<span class="rc-risk">' + pips + '<em>' + riskLabel + '</em></span></div>'
+      +     '<div class="rc-cell"><span class="rc-lab">可得</span>'
+      +       '<span class="rc-reward" title="' + riskTip + '">' + riskTip + '</span></div>'
+      +     '<div class="rc-cell"><span class="rc-lab">位置</span>'
+      +       '<span class="rc-pos">'
+      +         (room.type === 'boss' ? '首领房 · 楼梯所在' : '第 ' + stepNo + ' 段 · 距楼梯 ' + remain + ' 段')
+      +         extraLabel
+      +       '</span></div>'
+      +   '</div>'
+      +   (enterable ? '' : '<div class="rc-lock">' + (gateText || '清完本房后可选') + '</div>')
       + '</div>'
-      + '<canvas class="ricon" width="56" height="56" aria-hidden="true"></canvas>'
-      + '<div class="rrisk">' + riskLine + '</div>'
-      + '<div class="rsep"></div>'
-      + '<div class="rkey">'
-      + (enterable
-        ? (touchCapable()
-          ? (forcedText ? '点卡片进入 · 唯一通路' : '点卡片选择')
-          : (forcedText
-            ? '按 <b>' + no + '</b> 强行进入 · 可点击'
-            : '按 <b>' + no + '</b> 选择 · 可点击'))
-        : '<span>' + (gateText || '清完本房后可选') + '</span>')
-      + '</div>';
+      + '<div class="rc-key"><b>' + no + '</b><span>'
+      +   (enterable ? (touch ? '点按' : '选择') : '锁定')
+      + '</span></div>'
+      + '<span class="rc-seal" aria-hidden="true"><i></i><b>启程</b></span>';
     card.addEventListener('mousedown', (event) => {
       event.preventDefault();
       event.stopPropagation();
@@ -15918,7 +16323,7 @@ function renderRoomPicker() {
     const iconCv = card.querySelector('.ricon');
     if (iconCv && typeof drawRoomTypeGlyph === 'function') {
       const iconCtx = iconCv.getContext('2d');
-      if (iconCtx) drawRoomTypeGlyph(iconCtx, 28, 28, 20, room.type, accent);
+      if (iconCtx) drawRoomTypeGlyph(iconCtx, 28, 28, 20, room.type, toneColor);
     }
   });
   if (note) {
@@ -15937,6 +16342,267 @@ function renderRoomPicker() {
       noteText = '这几间都打过；往深处走请回有楼梯的那间';
     }
     note.textContent = noteText;
+  }
+  if (roomPickerEl && roomPickerEl.style.display !== 'none') drawRoomPickerMap(0);
+}
+
+/**
+ * 房型语义色 → 星图用色（与卡片同一套三主色）
+ * @param {string} tone tech / gold / bad
+ * @returns {string} 十六进制色
+ */
+function rpMapToneColor(tone) {
+  if (tone === 'bad') return '#ff5a6e';
+  if (tone === 'gold') return '#f2c66d';
+  return '#62e8ff';
+}
+
+/**
+ * 在当前 canvas 上下文里描一个正六边形（只建路径，不 fill/stroke）
+ * @param {CanvasRenderingContext2D} g 上下文
+ * @param {number} cx 圆心 x
+ * @param {number} cy 圆心 y
+ * @param {number} r 半径
+ * @param {number} rot 起始旋转角
+ * @returns {void}
+ */
+function rpHexPath(g, cx, cy, r, rot) {
+  g.beginPath();
+  for (let i = 0; i < 6; i += 1) {
+    const a = rot + i * Math.PI / 3;
+    const x = cx + Math.cos(a) * r;
+    const y = cy + Math.sin(a) * r;
+    if (i === 0) g.moveTo(x, y);
+    else g.lineTo(x, y);
+  }
+  g.closePath();
+}
+
+/**
+ * 绘制选房星图
+ * ------------------------------------------------------------
+ * 复用楼层生成已有的 state.rooms / floorGraph.edges 坐标，不改任何生成逻辑：
+ *   - 灰色虚线：已探明的普通连接
+ *   - 金色流动虚线：从"当前"通向本次候选的入口
+ *   - 双环金点：当前所在；带数字菱形：可选的下一间；✦：楼梯所在
+ * 坐标按楼层包围盒等比缩放，桌面与 390 窄屏共用同一套画法。
+ * @param {number} timeSec 动画时间（秒），静态截图传 0
+ * @returns {void}
+ */
+function drawRoomPickerMap(timeSec) {
+  const cv = document.getElementById('roomPickerMap');
+  if (!cv) return;
+  const rect = cv.getBoundingClientRect();
+  const cssW = Math.max(220, Math.round(rect.width || 520));
+  const cssH = Math.max(110, Math.round(rect.height || 292));
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const pw = Math.round(cssW * dpr);
+  const ph = Math.round(cssH * dpr);
+  if (cv.width !== pw || cv.height !== ph) { cv.width = pw; cv.height = ph; }
+  const g = cv.getContext('2d');
+  if (!g) return;
+  const t = timeSec || 0;
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, cssW, cssH);
+
+  /* 底：冷色辉光 + 刻度网格 + 同心环，制造"测绘台"而不是列表底 */
+  const glow = g.createRadialGradient(cssW * 0.5, cssH * 0.45, 6, cssW * 0.5, cssH * 0.45, Math.max(cssW, cssH) * 0.72);
+  glow.addColorStop(0, 'rgba(30,92,118,.32)');
+  glow.addColorStop(0.55, 'rgba(12,40,56,.14)');
+  glow.addColorStop(1, 'rgba(4,10,16,0)');
+  g.fillStyle = glow;
+  g.fillRect(0, 0, cssW, cssH);
+  g.strokeStyle = 'rgba(120,205,235,.065)';
+  g.lineWidth = 1;
+  for (let x = 24; x < cssW; x += 38) {
+    g.beginPath(); g.moveTo(x + 0.5, 0); g.lineTo(x + 0.5, cssH); g.stroke();
+  }
+  for (let y = 20; y < cssH; y += 38) {
+    g.beginPath(); g.moveTo(0, y + 0.5); g.lineTo(cssW, y + 0.5); g.stroke();
+  }
+  g.strokeStyle = 'rgba(98,232,255,.055)';
+  [0.3, 0.55, 0.8].forEach((k) => {
+    g.beginPath();
+    g.arc(cssW * 0.5, cssH * 0.5, Math.min(cssW, cssH) * k / 2, 0, Math.PI * 2);
+    g.stroke();
+  });
+
+  const data = roomPickerMapData;
+  const rooms = data.rooms || state.rooms || {};
+  const ids = Object.keys(rooms);
+  if (!ids.length) return;
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  ids.forEach((id) => {
+    const r = rooms[id];
+    if (!r) return;
+    minX = Math.min(minX, r.x);
+    minY = Math.min(minY, r.y);
+    maxX = Math.max(maxX, r.x + r.w);
+    maxY = Math.max(maxY, r.y + r.h);
+  });
+  if (!Number.isFinite(minX)) return;
+  const scale = Math.min((cssW - 34) / Math.max(1, maxX - minX), (cssH - 30) / Math.max(1, maxY - minY));
+  const ox = (cssW - (maxX - minX) * scale) / 2 - minX * scale;
+  const oy = (cssH - (maxY - minY) * scale) / 2 - minY * scale;
+  const X = (x) => ox + x * scale;
+  const Y = (y) => oy + y * scale;
+  const candSet = new Set(data.ids.map(Number));
+  const curId = data.curId;
+
+  /* 连线：普通探索线暗、当前→候选线金色流动 */
+  const edges = (state.floorGraph && state.floorGraph.edges) || [];
+  edges.forEach((edge) => {
+    const a = rooms[edge[0]];
+    const b = rooms[edge[1]];
+    if (!a || !b) return;
+    const route = (Number(edge[0]) === curId && candSet.has(Number(edge[1])))
+      || (Number(edge[1]) === curId && candSet.has(Number(edge[0])));
+    g.beginPath();
+    g.moveTo(X(a.cx), Y(a.cy));
+    g.lineTo(X(b.cx), Y(b.cy));
+    if (route) {
+      g.strokeStyle = 'rgba(242,198,109,.62)';
+      g.lineWidth = 1.7;
+      g.setLineDash([6, 7]);
+      g.lineDashOffset = -((t * 26) % 13);
+    } else {
+      g.strokeStyle = 'rgba(110,160,185,.16)';
+      g.lineWidth = 1;
+      g.setLineDash([2, 5]);
+      g.lineDashOffset = 0;
+    }
+    g.stroke();
+  });
+  g.setLineDash([]);
+  g.lineDashOffset = 0;
+
+  const nodeR = (r) => Math.max(4, Math.min(10, Math.min(r.w, r.h) * scale * 0.09));
+
+  /* 节点：六边形底 + 候选菱形序号 + 当前脉冲金环 */
+  ids.forEach((idKey) => {
+    const id = Number(idKey);
+    const r = rooms[idKey];
+    if (!r) return;
+    const cx = X(r.cx);
+    const cy = Y(r.cy);
+    const nr = nodeR(r);
+    const tone = ROOM_TONE[r.type] || 'tech';
+    const color = rpMapToneColor(tone);
+    const isCur = id === curId;
+    const candIdx = data.ids.indexOf(id);
+    const isCand = candIdx >= 0;
+    const isVisited = !!(r.visited || r.cleared || isCur);
+
+    rpHexPath(g, cx, cy, nr + 2, Math.PI / 6);
+    if (isCand) {
+      g.fillStyle = 'rgba(6,18,26,.9)';
+      g.fill();
+      g.strokeStyle = color;
+      g.lineWidth = 1.6;
+      g.stroke();
+    } else if (isCur) {
+      g.fillStyle = 'rgba(30,24,8,.9)';
+      g.fill();
+      g.strokeStyle = 'rgba(242,198,109,.9)';
+      g.lineWidth = 1.8;
+      g.stroke();
+    } else if (isVisited) {
+      g.fillStyle = 'rgba(10,26,36,.9)';
+      g.fill();
+      g.strokeStyle = 'rgba(120,190,215,.35)';
+      g.lineWidth = 1;
+      g.stroke();
+    } else {
+      g.fillStyle = 'rgba(8,14,20,.85)';
+      g.fill();
+      g.strokeStyle = 'rgba(110,150,172,.22)';
+      g.lineWidth = 1;
+      g.stroke();
+    }
+
+    if (isCur) {
+      const pulse = 0.5 + 0.5 * Math.sin(t * 2.2);
+      g.beginPath();
+      g.arc(cx, cy, nr + 6 + pulse * 2, 0, Math.PI * 2);
+      g.strokeStyle = 'rgba(242,198,109,' + (0.28 + pulse * 0.34).toFixed(3) + ')';
+      g.lineWidth = 1.4;
+      g.stroke();
+    }
+
+    if (isCand) {
+      g.beginPath();
+      g.moveTo(cx, cy - nr);
+      g.lineTo(cx + nr, cy);
+      g.lineTo(cx, cy + nr);
+      g.lineTo(cx - nr, cy);
+      g.closePath();
+      g.fillStyle = color;
+      g.globalAlpha = 0.22;
+      g.fill();
+      g.globalAlpha = 1;
+      g.strokeStyle = color;
+      g.lineWidth = 1.4;
+      g.stroke();
+      g.fillStyle = color;
+      g.font = '700 10px "Bahnschrift","Segoe UI",sans-serif';
+      g.textAlign = 'center';
+      g.textBaseline = 'middle';
+      g.fillText(String(candIdx + 1), cx, cy + 0.5);
+    }
+  });
+
+  /* 标签：只标"当前 / 候选 / 楼梯"，避免把整层文字铺满 */
+  const curRoom = rooms[curId];
+  g.textAlign = 'center';
+  g.textBaseline = 'top';
+  if (curRoom) {
+    g.font = '10px "Microsoft YaHei",sans-serif';
+    g.fillStyle = 'rgba(242,198,109,.92)';
+    g.fillText('当前', X(curRoom.cx), Y(curRoom.cy) + nodeR(curRoom) + 6);
+  }
+  data.ids.forEach((id) => {
+    const r = rooms[id];
+    if (!r) return;
+    const conf = ROOM_TYPE_CONFIG.types[r.type] || ROOM_TYPE_CONFIG.types.battle;
+    g.font = '10px "Microsoft YaHei",sans-serif';
+    g.fillStyle = 'rgba(190,225,240,.86)';
+    g.fillText(conf.name, X(r.cx), Y(r.cy) + nodeR(r) + 6);
+  });
+  const bossRoom = state.boss ? rooms[state.boss.roomId] : null;
+  if (bossRoom) {
+    g.font = '12px "Segoe UI Symbol",sans-serif';
+    g.fillStyle = 'rgba(242,198,109,.9)';
+    g.fillText('✦', X(bossRoom.cx), Y(bossRoom.cy) - nodeR(bossRoom) - 18);
+  }
+}
+
+/**
+ * 启动星图动画（只画线流动与当前脉冲，不做大面积闪烁）
+ * @returns {void}
+ */
+function startRoomPickerMapAnim() {
+  stopRoomPickerMapAnim();
+  const reduce = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  if (reduce) {
+    drawRoomPickerMap(0);
+    return;
+  }
+  const tick = (ts) => {
+    if (!roomPickerOpen) { roomPickerMapRaf = 0; return; }
+    drawRoomPickerMap(ts / 1000);
+    roomPickerMapRaf = requestAnimationFrame(tick);
+  };
+  roomPickerMapRaf = requestAnimationFrame(tick);
+}
+
+/**
+ * 停止星图动画（关闭面板时调用，避免后台空转）
+ * @returns {void}
+ */
+function stopRoomPickerMapAnim() {
+  if (roomPickerMapRaf) {
+    cancelAnimationFrame(roomPickerMapRaf);
+    roomPickerMapRaf = 0;
   }
 }
 
@@ -15999,6 +16665,12 @@ function openRoomPicker() {
   renderRoomPicker();
   roomPickerEl.style.display = 'flex';
   roomPickerOpen = true;
+  /* 面板变为可见后再量 canvas 尺寸，否则 getBoundingClientRect 全是 0 */
+  requestAnimationFrame(() => {
+    if (!roomPickerOpen) return;
+    drawRoomPickerMap(0);
+    startRoomPickerMapAnim();
+  });
   /* ③-1 v2.5.5：打开即把焦点放到第一张卡，键盘焦圈可见 */
   const firstCard = roomPickerEl.querySelector('#roomPickerList .room-card');
   if (firstCard) firstCard.focus({ preventScroll: true });
@@ -16013,6 +16685,7 @@ function openRoomPicker() {
 function closeRoomPicker() {
   if (roomPickerEl) roomPickerEl.style.display = 'none';
   roomPickerOpen = false;
+  stopRoomPickerMapAnim();
 }
 
 /**
@@ -16498,8 +17171,387 @@ function resolveRoomTeleport(wx, wy, curId) {
   return { targetId: targetId, door: door, anchor: anchor };
 }
 
+/* ============================================================
+   G1-1 · 房间行进（选房不再瞬间跳过去）
+   ------------------------------------------------------------
+   作者反馈：点卡片后画面直接切到目标房，像"跳"过去。
+   改法：把"写坐标"拆成"沿折线走过去 → 到达后再提交"。
+     · 路径：玩家 → 源房出口 → 两房缝隙中点 → 目标房入口 → 落点
+     · 时长：路程 / speed 折算，夹在 minDur–maxDur
+     · 期间：脚本接管移动、玩家无敌、镜头跟随；到达才写 currentRoomId
+   ============================================================ */
+const ROOM_TRAVEL_CONFIG = {
+  enabled: true,      // A/B 回退：false 时 performRoomTeleport 仍走旧的黑场瞬移
+  speed: 560,         // 行进速度（px/s），只影响时长，不参与碰撞
+  minDur: 0.72,
+  maxDur: 1.45,
+  pad: 18             // 出入口离墙内缩，避免贴墙擦边
+};
+
 /**
- * 执行传送：淡入 → 全黑瞬间换位置 → 淡出，并在落点闪一下
+ * 是否正在房间行进（输入 / 相机 / 渲染统一判断）
+ * @returns {boolean}
+ */
+function isRoomTraveling() {
+  return !!(state && state.roomTravel && state.roomTravel.active);
+}
+
+/**
+ * 把点夹在房间矩形内侧
+ * @param {Object} room 房间
+ * @param {number} x 世界 x
+ * @param {number} y 世界 y
+ * @param {number} pad 内缩像素
+ * @returns {{x:number,y:number}}
+ */
+function clampPointInRoom(room, x, y, pad) {
+  return {
+    x: clamp(x, room.x + pad, room.x + room.w - pad),
+    y: clamp(y, room.y + pad, room.y + room.h - pad)
+  };
+}
+
+/**
+ * 构造"一间一间走过去"的折线路径
+ * ------------------------------------------------------------
+ * 源房出口 = 从玩家朝目标方向延长到源房边界的点；
+ * 目标入口 = 从落点朝来源方向延长到目标房边界的点；
+ * 两点之间是两房之间的空隙（传送结构没有走廊，所以用中点承接）。
+ * @param {number} fromRoomId 源房 id
+ * @param {Object} room 目标房
+ * @param {{x:number,y:number}} land 落点
+ * @param {{x:number,y:number}} from 玩家起点
+ * @returns {{path:Array,segs:Array<number>,len:number}}
+ */
+function buildRoomTravelPath(fromRoomId, room, land, from) {
+  const pad = ROOM_TRAVEL_CONFIG.pad;
+  const path = [{ x: from.x, y: from.y }];
+  const src = state.rooms[fromRoomId];
+
+  /** 从起点沿 (dx,dy) 延长到矩形边界的距离 */
+  const edgeDist = (rect, ox, oy, dx, dy) => {
+    let t = Infinity;
+    if (dx > 0.001) t = Math.min(t, (rect.x + rect.w - pad - ox) / dx);
+    if (dx < -0.001) t = Math.min(t, (rect.x + pad - ox) / dx);
+    if (dy > 0.001) t = Math.min(t, (rect.y + rect.h - pad - oy) / dy);
+    if (dy < -0.001) t = Math.min(t, (rect.y + pad - oy) / dy);
+    return Number.isFinite(t) ? Math.max(0, t) : 0;
+  };
+
+  if (src) {
+    const dx = land.x - from.x;
+    const dy = land.y - from.y;
+    const len = Math.hypot(dx, dy) || 1;
+    const t = Math.min(edgeDist(src, from.x, from.y, dx, dy), len);
+    path.push({ x: from.x + (dx / len) * t, y: from.y + (dy / len) * t });
+  }
+
+  const dx2 = from.x - land.x;
+  const dy2 = from.y - land.y;
+  const len2 = Math.hypot(dx2, dy2) || 1;
+  const t2 = Math.min(edgeDist(room, land.x, land.y, dx2, dy2), len2);
+  const entry = { x: land.x + (dx2 / len2) * t2, y: land.y + (dy2 / len2) * t2 };
+  const exit = path[path.length - 1];
+  /* 缝隙中点：两房相距很远时，画面会先离开源房、穿过黑场、再进入目标房 */
+  path.push({ x: (exit.x + entry.x) / 2, y: (exit.y + entry.y) / 2 });
+  path.push(entry);
+  path.push({ x: land.x, y: land.y });
+
+  /* 去重：相邻点过近会让镜头在房门口"抖一下" */
+  const clean = [path[0]];
+  for (let i = 1; i < path.length; i += 1) {
+    const prev = clean[clean.length - 1];
+    if (Math.hypot(path[i].x - prev.x, path[i].y - prev.y) >= 10) clean.push(path[i]);
+    else clean[clean.length - 1] = path[i];
+  }
+  const segs = [];
+  let len = 0;
+  for (let i = 1; i < clean.length; i += 1) {
+    const d = Math.hypot(clean[i].x - clean[i - 1].x, clean[i].y - clean[i - 1].y);
+    segs.push(d);
+    len += d;
+  }
+  return { path: clean, segs: segs, len: len };
+}
+
+/**
+ * 按归一化进度（已缓动）在折线上取点
+ * @param {Object} rt 行进状态
+ * @param {number} eased 0–1
+ * @returns {{x:number,y:number}}
+ */
+function sampleRoomTravelPath(rt, eased) {
+  let remain = rt.len * eased;
+  for (let i = 0; i < rt.segs.length; i += 1) {
+    const seg = rt.segs[i];
+    if (remain <= seg || i === rt.segs.length - 1) {
+      const k = seg > 0 ? clamp(remain / seg, 0, 1) : 1;
+      const a = rt.path[i];
+      const b = rt.path[i + 1];
+      return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k };
+    }
+    remain -= seg;
+  }
+  return rt.path[rt.path.length - 1];
+}
+
+/**
+ * 到达后的唯一提交点（走路 / 旧瞬移共用）
+ * @param {Object} room 目标房
+ * @param {{x:number,y:number}} land 落点
+ * @param {{x:number,y:number}} from 起点
+ * @param {Object} opts { fromRoomId, floorAtCall }
+ * @param {Object|null} walk 行进状态（null = 旧瞬移）
+ * @returns {boolean} 是否提交成功
+ */
+function finishRoomArrival(room, land, from, opts, walk) {
+  /* 这 1 秒里已经换层 / 被别的逻辑搬走，本次传送作废（例如中途下楼、代价房退回） */
+  if (state.floor !== opts.floorAtCall || state.currentRoomId !== opts.fromRoomId) return false;
+  const player = state.player;
+  player.x = land.x;
+  player.y = land.y;
+  player.vx = 0;
+  player.vy = 0;
+  state.currentRoomId = room.id;
+  /* 选房卡片走路到达：只更新房间号，不做"首次进房"的黑场淡入（视觉上人已经走进来了） */
+  if (walk && walk.viaPicker) state._skipRoomFadeFor = room.id;
+  /* v2.2.7 · "选过的房间还能再选"修复（写入点 1/2）：
+     改前只靠 updateRoomLogic 每帧调 trackBacktrack 写 visited。实测（tools/diag_keys_rooms.js）
+     传送进房后 1.4s 内 room.visited 仍为 false、BACKTRACK_STATS.entries 不增长，
+     而 seen() 只看 visited / cleared —— 于是休整 / 宝箱 / 事件这类"没有 cleared"的房
+     被走过一次后仍会回到候选里。这里在"确认落到目标房"的同一处直接记账。 */
+  room.visited = true;
+  if (state.backtrack && state.backtrack.visited) state.backtrack.visited[room.id] = true;
+  if (typeof tutorialOnEvent === 'function') tutorialOnEvent('room');
+  /* 进房即把"按 E 放行窗口"关掉：传送过去后出门仍需重新确认，避免一次操作连穿两间 */
+  const re = ensureRoomEntryState();
+  re.lastRoomId = room.id;
+  re.armedUntil = 0;
+  re.armedRoomId = -1;
+  /* 走路到达时镜头已经跟着人；只有旧瞬移才需要精确居中 */
+  if (!walk && typeof snapCamera === 'function') snapCamera();
+  if (typeof revealRoom === 'function') revealRoom(room);
+  if (typeof showRouteHint === 'function') showRouteHint(room); // 进房 5 秒"可前往"提示
+  if (typeof spawnPixelShatter === 'function') {
+    if (!walk) spawnPixelShatter(from.x, from.y, ROOM_TELEPORT_CONFIG.flashColor);
+    spawnPixelShatter(land.x, land.y, ROOM_TELEPORT_CONFIG.flashColor);
+  }
+  ROOM_TELEPORT_STATS.count += 1;
+  /* 落点安全读数在"落地那一瞬间"取，不能等几秒后再量（怪会追上来） */
+  let nearest = null;
+  (state.enemies || []).forEach((e) => {
+    if (!e || e.dead || e.hp <= 0) return;
+    const d = Math.hypot(e.x - land.x, e.y - land.y);
+    if (nearest == null || d < nearest) nearest = Math.round(d);
+  });
+  ROOM_TELEPORT_STATS.last = {
+    from: { x: Math.round(from.x), y: Math.round(from.y) },
+    to: { x: Math.round(land.x), y: Math.round(land.y) },
+    roomId: room.id,
+    retired: land.retired,
+    nearestEnemyAtLanding: nearest,
+    wallGapAtLanding: Math.round(Math.min(land.x - room.x, room.x + room.w - land.x,
+      land.y - room.y, room.y + room.h - land.y)),
+    walked: !!walk,
+    walkMs: walk ? Math.round(walk.dur * 1000) : 0,
+    walkPathPx: walk ? Math.round(walk.len) : 0,
+    at: Math.round((state.elapsed || 0) * 1000) / 1000
+  };
+  return true;
+}
+
+/**
+ * 发起房间行进
+ * @param {number} targetId 目标房 id
+ * @param {Object} room 目标房
+ * @param {{x:number,y:number}} land 落点
+ * @param {{x:number,y:number}} from 起点
+ * @param {number} fromRoomId 源房 id
+ * @param {number} floorAtCall 发起时层数
+ * @returns {boolean} 是否已发起
+ */
+function beginRoomTravel(targetId, room, land, from, fromRoomId, floorAtCall) {
+  if (isRoomTraveling()) return false;
+  if (state.mode !== 'playing' || state.status !== 'playing') return false;
+  const built = buildRoomTravelPath(fromRoomId, room, land, from);
+  if (!built.segs.length) return false;
+  const dur = clamp(built.len / ROOM_TRAVEL_CONFIG.speed, ROOM_TRAVEL_CONFIG.minDur, ROOM_TRAVEL_CONFIG.maxDur);
+  state.roomTravel = {
+    active: true,
+    fromRoomId: fromRoomId,
+    targetId: targetId,
+    floorAtCall: floorAtCall,
+    from: { x: from.x, y: from.y },
+    land: { x: land.x, y: land.y },
+    path: built.path,
+    segs: built.segs,
+    len: built.len,
+    t: 0,
+    dur: dur,
+    dust: 0,
+    trail: []
+  };
+  const player = state.player;
+  /* 行进期间无敌：避免目标房远处的弹幕/光环在"还没进门"时先扣血 */
+  player.invuln = Math.max(player.invuln || 0, dur + 0.3);
+  player.vx = 0;
+  player.vy = 0;
+  if (typeof playSfx === 'function') playSfx('ui', 0.5);
+  return true;
+}
+
+/**
+ * 每帧推进房间行进；到达那一帧才提交坐标与房间
+ * @param {number} dt 时间步长
+ * @returns {void}
+ */
+function updateRoomTravel(dt) {
+  const rt = state.roomTravel;
+  if (!rt || !rt.active) return;
+  if (state.floor !== rt.floorAtCall) { state.roomTravel = null; return; }
+  const player = state.player;
+  const prevX = player.x;
+  const prevY = player.y;
+  rt.t += dt;
+  const raw = clamp(rt.t / rt.dur, 0, 1);
+  /* smoothstep：起脚与落脚都收力，中段最快，避免匀速像"滑冰" */
+  const eased = raw * raw * (3 - 2 * raw);
+  const pos = sampleRoomTravelPath(rt, eased);
+  player.x = pos.x;
+  player.y = pos.y;
+  player.vx = dt > 0 ? (pos.x - prevX) / dt : 0;
+  player.vy = dt > 0 ? (pos.y - prevY) / dt : 0;
+  if (Math.hypot(player.vx, player.vy) > 8) {
+    player.facingAngle = Math.atan2(player.vy, player.vx);
+    player.facingSource = 'move';
+  }
+  /* 足迹：每 6px 记一个点，绘制层按年龄淡出 */
+  const lastTrail = rt.trail[rt.trail.length - 1];
+  if (!lastTrail || Math.hypot(pos.x - lastTrail.x, pos.y - lastTrail.y) >= 6) {
+    rt.trail.push({ x: pos.x, y: pos.y, age: 0 });
+    if (rt.trail.length > 40) rt.trail.shift();
+  }
+  for (let i = 0; i < rt.trail.length; i += 1) rt.trail[i].age += dt;
+  while (rt.trail.length && rt.trail[0].age > 0.55) rt.trail.shift();
+  if (raw >= 1) {
+    const room = state.rooms[rt.targetId];
+    const ok = room ? finishRoomArrival(room, rt.land, rt.from, rt, rt) : false;
+    state.roomTravel = null;
+    if (!ok) {
+      /* 提交被丢弃（换层/被搬走）：保持在当前位置，不回滚，等下一帧房间逻辑接管 */
+      player.vx = 0;
+      player.vy = 0;
+    }
+  }
+}
+
+/**
+ * 画行进光轨：世界层，地板之上、实体之下
+ * - 双层描边 + 流动虚线，两端各一个符文圈
+ * - 足迹按年龄淡出，制造"刚刚有人跑过"的残迹
+ * @returns {void}
+ */
+function drawRoomTravelTrail() {
+  const rt = state.roomTravel;
+  if (!rt || !rt.active || rt.path.length < 2) return;
+  const t = state.elapsed || 0;
+  ctx.save();
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  /* 1) 暗底，让光轨压在复杂地板上也能读清 */
+  ctx.beginPath();
+  ctx.moveTo(rt.path[0].x, rt.path[0].y);
+  for (let i = 1; i < rt.path.length; i += 1) ctx.lineTo(rt.path[i].x, rt.path[i].y);
+  ctx.strokeStyle = 'rgba(6, 14, 22, 0.55)';
+  ctx.lineWidth = 26;
+  ctx.stroke();
+  /* 2) 外发光 */
+  ctx.strokeStyle = 'rgba(62, 230, 255, 0.22)';
+  ctx.lineWidth = 13;
+  ctx.stroke();
+  /* 3) 流动虚线 */
+  ctx.setLineDash([18, 14]);
+  ctx.lineDashOffset = -(t * 130) % 32;
+  ctx.strokeStyle = 'rgba(174, 244, 255, 0.85)';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.lineDashOffset = 0;
+  /* 4) 两端符文圈 */
+  const ends = [rt.path[0], rt.path[rt.path.length - 1]];
+  for (let i = 0; i < ends.length; i += 1) {
+    const p = ends[i];
+    ctx.strokeStyle = i === 0 ? 'rgba(62, 230, 255, 0.5)' : 'rgba(255, 209, 102, 0.75)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 22, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([5, 7]);
+    ctx.lineDashOffset = (i === 0 ? 1 : -1) * t * 22;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 30, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  /* 5) 足迹 */
+  for (let i = 0; i < rt.trail.length; i += 1) {
+    const p = rt.trail[i];
+    const a = Math.max(0, 1 - p.age / 0.55);
+    ctx.fillStyle = 'rgba(174, 244, 255, ' + (a * 0.35).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, 3 + a * 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+/**
+ * 画行进 HUD（屏幕层）：前往 · 房型 · 第 N 间 + 进度条
+ * @param {number} viewW 视口宽
+ * @param {number} viewH 视口高
+ * @returns {void}
+ */
+function drawRoomTravelHud(viewW, viewH) {
+  const rt = state.roomTravel;
+  if (!rt || !rt.active) return;
+  const room = state.rooms[rt.targetId];
+  if (!room) return;
+  const meta = (typeof ROOM_TYPE_CONFIG !== 'undefined' && ROOM_TYPE_CONFIG.types[room.type])
+    ? ROOM_TYPE_CONFIG.types[room.type] : { name: '房间', color: '#3ee6ff' };
+  const u = clamp(rt.t / rt.dur, 0, 1);
+  const w = Math.min(420, viewW - 40);
+  const h = 52;
+  const x = (viewW - w) / 2;
+  const y = 74;
+  ctx.save();
+  ctx.fillStyle = 'rgba(6, 14, 22, 0.78)';
+  ctx.strokeStyle = hexToRgba(meta.color, 0.55);
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(x, y, w, h, 8);
+  else ctx.rect(x, y, w, h);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = hexToRgba(meta.color, 0.95);
+  ctx.font = '600 13px "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.textBaseline = 'middle';
+  const step = Number.isFinite(room.depth) ? room.depth + 1 : 1;
+  ctx.fillText('前往 · ' + meta.name + ' · 第 ' + step + ' 间', x + 14, y + 19);
+  ctx.fillStyle = 'rgba(207, 239, 255, 0.7)';
+  ctx.font = '11px "Microsoft YaHei", sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(Math.round(u * 100) + '%', x + w - 14, y + 19);
+  /* 进度条 */
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.fillRect(x + 14, y + 36, w - 28, 4);
+  ctx.fillStyle = hexToRgba(meta.color, 0.9);
+  ctx.fillRect(x + 14, y + 36, (w - 28) * u, 4);
+  ctx.restore();
+}
+
+/**
+ * 执行传送：默认走"看得见的走路"，ROOM_TRAVEL_CONFIG.enabled=false 时退回旧黑场瞬移
  * @param {number} targetId 目标房 id
  * @param {Object} door 目标房那一侧的门（算落点用）
  * @returns {boolean} 是否已发起传送
@@ -16514,6 +17566,13 @@ function performRoomTeleport(targetId, door) {
   let committed = false;
   // 有门走旧落点（门内侧）；传送结构没有门，改用"离墙 ≥100px 的房内安全点"
   const land = door ? teleportLandingPoint(room, door) : teleportLandingPointInRoom(room, from.x, from.y);
+  if (ROOM_TRAVEL_CONFIG.enabled) {
+    const started = beginRoomTravel(targetId, room, land, from, fromRoomId, floorAtCall);
+    /* 标记"这次行进来自选房卡片"：到达后跳过 0.18s 的进房黑场淡入，
+       否则玩家刚走完就会再闪一次黑，仍会被读成"瞬移"。 */
+    if (started && state.roomTravel) state.roomTravel.viaPicker = true;
+    return started;
+  }
   const apply = () => {
     /* v2.2.5：改前这里是 playSceneFade 的 atPeak，靠 sceneFadeRuntime.token 校验。
        实测（tools/diag_teleport.js 用例 C）：传送发起后 146ms 内只要有另一次转场
@@ -16525,50 +17584,8 @@ function performRoomTeleport(targetId, door) {
     /* 这 146ms 里已经换层 / 被别的逻辑搬走，本次传送作废（例如中途下楼、代价房退回） */
     if (state.floor !== floorAtCall || state.currentRoomId !== fromRoomId) return;
     committed = true;
-    const player = state.player;
-    player.x = land.x;
-    player.y = land.y;
-    player.vx = 0;
-    player.vy = 0;
-    state.currentRoomId = room.id;
-    /* v2.2.7 · "选过的房间还能再选"修复（写入点 1/2）：
-       改前只靠 updateRoomLogic 每帧调 trackBacktrack 写 visited。实测（tools/diag_keys_rooms.js）
-       传送进房后 1.4s 内 room.visited 仍为 false、BACKTRACK_STATS.entries 不增长，
-       而 seen() 只看 visited / cleared —— 于是休整 / 宝箱 / 事件这类"没有 cleared"的房
-       被走过一次后仍会回到候选里。这里在"确认落到目标房"的同一处直接记账。 */
-    room.visited = true;
-    if (state.backtrack && state.backtrack.visited) state.backtrack.visited[room.id] = true;
-    if (typeof tutorialOnEvent === 'function') tutorialOnEvent('room');
-    /* 进房即把"按 E 放行窗口"关掉：传送过去后出门仍需重新确认，避免一次操作连穿两间 */
-    const re = ensureRoomEntryState();
-    re.lastRoomId = room.id;
-    re.armedUntil = 0;
-    re.armedRoomId = -1;
-    if (typeof snapCamera === 'function') snapCamera();   // 传送必须精确居中，不能靠相机插值追
-    if (typeof revealRoom === 'function') revealRoom(room);
-    if (typeof showRouteHint === 'function') showRouteHint(room); // 进房 5 秒"可前往"提示
-    if (typeof spawnPixelShatter === 'function') {
-      spawnPixelShatter(from.x, from.y, ROOM_TELEPORT_CONFIG.flashColor);
-      spawnPixelShatter(land.x, land.y, ROOM_TELEPORT_CONFIG.flashColor);
-    }
-    ROOM_TELEPORT_STATS.count += 1;
-    /* 落点安全读数在"落地那一瞬间"取，不能等几秒后再量（怪会追上来） */
-    let nearest = null;
-    (state.enemies || []).forEach((e) => {
-      if (!e || e.dead || e.hp <= 0) return;
-      const d = Math.hypot(e.x - land.x, e.y - land.y);
-      if (nearest == null || d < nearest) nearest = Math.round(d);
-    });
-    ROOM_TELEPORT_STATS.last = {
-      from: { x: Math.round(from.x), y: Math.round(from.y) },
-      to: { x: Math.round(land.x), y: Math.round(land.y) },
-      roomId: room.id,
-      retired: land.retired,
-      nearestEnemyAtLanding: nearest,
-      wallGapAtLanding: Math.round(Math.min(land.x - room.x, room.x + room.w - land.x,
-        land.y - room.y, room.y + room.h - land.y)),
-      at: Math.round((state.elapsed || 0) * 1000) / 1000
-    };
+    /* 提交逻辑统一收口到 finishRoomArrival（走路路径也走同一处，避免两份口径漂移） */
+    finishRoomArrival(room, land, from, { fromRoomId: fromRoomId, floorAtCall: floorAtCall }, null);
   };
   /* noLock = true：传送不锁动作键，避免淡入淡出期间吞掉玩家的下一次点击 */
   playSceneFade(ROOM_TELEPORT_CONFIG.fadeDuration, 'room', apply, true);
@@ -22563,6 +23580,8 @@ function createInitialState() {
       noHitTimer: 0
     },
     cam: { x: 0, y: 0 },
+    /* G1-1：房间行进状态（null = 不在走路；结构见 beginRoomTravel） */
+    roomTravel: null,
     keys: {},
     /* 第 17 项 · 手柄：方向与键盘分开存，互不覆盖；按钮按下沿只触发一次 */
     padKeys: { left: false, right: false, up: false, down: false },
@@ -24800,6 +25819,9 @@ function onRoomCleared(room) {
  */
 function updateRoomLogic(dt) {
   if (state.mode !== 'playing' || state.status !== 'playing') return;
+  /* G1-1：行进途中玩家在两房之间，不能在缝隙里把 currentRoomId 写成 -1，
+     也不能提前触发进房/落闸；到达那一帧由 updateRoomTravel 统一提交。 */
+  if (state.roomTravel && state.roomTravel.active) return;
 
   // M2-1 隐藏房：先处理"撞墙潜入 / 撞墙返回"。
   // 它会把玩家瞬移，所以必须早于下面的 roomAt / 迷雾判定，
@@ -24877,7 +25899,9 @@ function updateRoomLogic(dt) {
     // 第 8 轮 · 组 4：首次踏入一间新房时给一次极短的淡入，强化"进入房间"的边界感
     if (state._roomFadeId !== room.id) {
       state._roomFadeId = room.id;
-      playSceneFade(0.18, 'room', null, true);
+      /* 选房走路到达已经跳过黑场；其余进房方式（E 门、旧瞬移回退）保持原有 0.18s 淡入 */
+      if (state._skipRoomFadeFor === room.id) state._skipRoomFadeFor = 0;
+      else playSceneFade(0.18, 'room', null, true);
     }
   } else {
     const corridorIndex = corridorIndexAt(player.x, player.y);
@@ -32384,9 +33408,11 @@ function buildCardFusionLines(kind, id) {
         : state.ownedMagic.includes(partnerId);
       const activated = state.fusions.includes(fusion.id);
       let status = '还缺 ' + (partner ? partner.name : partnerId);
-      if (activated) status = '已激活';
+      /* G1-3：已融合只作为"图鉴/状态"显示，不再给 is-ready 金色呼吸，
+         也不再说"可按 F 融合"——否则玩家会以为还能再操作一次。 */
+      if (activated) status = '已融合 · 已生效';
       else if (partnerOwned) status = '可按 F 融合';
-      return '<div class="fx' + (activated || partnerOwned ? ' is-ready' : '')
+      return '<div class="fx' + (activated ? ' is-owned' : (partnerOwned ? ' is-ready' : ''))
         + '" style="--fc:' + (fusion.color || '#ffc247') + '"><i></i><span>'
         + (partner ? partner.name : partnerId) + ' → ' + fusion.name + ' · ' + status + '</span></div>';
     }).join('');
@@ -34126,6 +35152,8 @@ function drawMinimap() {
  * @returns {Object} 目标相机左上角坐标
  */
 function getCameraTarget(forceCenter) {
+  /* G1-1：行进期间镜头必须跟着跑，不能靠死区"等人走出边界才追" */
+  if (state.roomTravel && state.roomTravel.active) forceCenter = true;
   const worldW = GAME_CONFIG.worldWidth;
   const worldH = GAME_CONFIG.worldHeight;
   // P7：相机拉远后，可见世界尺寸 = 屏幕 / zoom；死区与边界都按"世界尺寸"计算
@@ -34202,6 +35230,12 @@ function updateCamera(dt) {
     if (state.milestoneCam.t <= 0) state.milestoneCam = null;
   }
   if (dt <= 0) {
+    state.cam.x = target.x;
+    state.cam.y = target.y;
+    return;
+  }
+  /* G1-1：行进中玩家连续位移，插值滞后会被读成"镜头没跟"；这一小段直接锁到目标 */
+  if (state.roomTravel && state.roomTravel.active) {
     state.cam.x = target.x;
     state.cam.y = target.y;
     return;
@@ -34538,6 +35572,8 @@ function render() {
   drawStairs();
   /* 传送结构：房间内的出口光点（1/2/3 与 Q 浮层卡片一致），没有走廊时靠它指路 */
   drawRoomExits();
+  /* G1-1：选房行进光轨（地面信号层，压在实体之下，避免盖住玩家和怪） */
+  drawRoomTravelTrail();
   // P5：首领实体宝箱（画在拾取物之前，玩家/碎片会自然盖住箱脚）
   drawBossChest();
   drawPickups();
@@ -34610,6 +35646,9 @@ function render() {
 
   // C1：挑战条（条件 / 剩余时间），画在屏幕层，迷雾也盖不住
   drawChallengeBanner();
+
+  // G1-1：选房行进 HUD（前往哪一间 + 进度），只在走路那 1 秒多出现
+  drawRoomTravelHud(viewW, viewH);
 
   // M1-5 自绘准星：画在所有屏幕层之上，保证永远不被特效盖住
   drawCrosshair();
@@ -41486,11 +42525,107 @@ function drawInteractFrame(x, y, halfW, halfH, color, label, opts) {
 }
 
 /**
- * 画楼梯：清场后才出现，金色菱形 + 提示文字
+ * 画封印态楼梯（首领未死 / 本房未清）
+ * ------------------------------------------------------------
+ * 作者反馈：改前首领未死时 drawStairs 直接 return，屏幕上没有任何"楼梯在哪"的信息。
+ * 这里保留位置与方向：冷色暗光 + 暗色菱框 + 转动封印环 + 玩家→楼梯的地面虚线箭头 + 说明牌。
+ * 只做视觉提示，不参与交互判定；interactStairs 仍按"清场 / 首领已败"决定能否下楼。
+ * @param {{x:number, y:number}} stairs 楼梯坐标
+ * @returns {void}
+ */
+function drawSealedStairs(stairs) {
+  const t = state.elapsed || 0;
+  const pulse = 0.5 + 0.5 * Math.sin(t * 2.1);
+  const tone = '126, 158, 196';
+  const player = state.player;
+  const d = Math.hypot(player.x - stairs.x, player.y - stairs.y);
+
+  /* 1) 方向指引：离得较远时，画一条贴地流动虚线 + 箭头，告诉玩家往哪走 */
+  if (d > 150) {
+    const ang = Math.atan2(stairs.y - player.y, stairs.x - player.x);
+    const sx = player.x + Math.cos(ang) * 30;
+    const sy = player.y + Math.sin(ang) * 30;
+    const ex = stairs.x - Math.cos(ang) * 52;
+    const ey = stairs.y - Math.sin(ang) * 52;
+    ctx.save();
+    ctx.setLineDash([8, 10]);
+    ctx.lineDashOffset = -(t * 46) % 18;
+    ctx.strokeStyle = 'rgba(' + tone + ', ' + (0.16 + pulse * 0.08).toFixed(3) + ')';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(sx, sy);
+    ctx.lineTo(ex, ey);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.lineDashOffset = 0;
+    ctx.fillStyle = 'rgba(' + tone + ', ' + (0.38 + pulse * 0.16).toFixed(3) + ')';
+    ctx.beginPath();
+    ctx.moveTo(ex, ey);
+    ctx.lineTo(ex - Math.cos(ang - 0.42) * 14, ey - Math.sin(ang - 0.42) * 14);
+    ctx.lineTo(ex - Math.cos(ang + 0.42) * 14, ey - Math.sin(ang + 0.42) * 14);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  /* 2) 很弱的冷色光晕：能看见"这里有东西"，但不读作已激活 */
+  const glow = ctx.createRadialGradient(stairs.x, stairs.y, 4, stairs.x, stairs.y, 58);
+  glow.addColorStop(0, 'rgba(' + tone + ', ' + (0.08 + pulse * 0.05).toFixed(3) + ')');
+  glow.addColorStop(1, 'rgba(' + tone + ', 0)');
+  ctx.fillStyle = glow;
+  ctx.beginPath();
+  ctx.arc(stairs.x, stairs.y, 58, 0, Math.PI * 2);
+  ctx.fill();
+
+  /* 3) 暗色菱形框（虚线）：与激活态同形，玩家能认出"这是楼梯" */
+  ctx.save();
+  ctx.translate(stairs.x, stairs.y);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = 'rgba(8, 16, 26, 0.62)';
+  ctx.strokeStyle = 'rgba(' + tone + ', 0.42)';
+  ctx.lineWidth = 1.6;
+  ctx.setLineDash([6, 6]);
+  ctx.fillRect(-16, -16, 32, 32);
+  ctx.strokeRect(-16, -16, 32, 32);
+  ctx.setLineDash([]);
+  ctx.restore();
+
+  /* 4) 转动缺口环：读作"锁着"，不是"可按 E" */
+  ctx.save();
+  ctx.translate(stairs.x, stairs.y);
+  ctx.rotate(t * 0.6);
+  ctx.strokeStyle = 'rgba(255, 170, 120, ' + (0.25 + pulse * 0.18).toFixed(3) + ')';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, 0, 27, 0.3, Math.PI * 2 - 0.3);
+  ctx.stroke();
+  ctx.restore();
+
+  /* 5) 中央封印字 + 说明牌 */
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = '600 15px "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(' + tone + ', 0.92)';
+  ctx.fillText('封', stairs.x, stairs.y);
+  ctx.font = '12px "Microsoft YaHei", sans-serif';
+  ctx.fillStyle = 'rgba(190, 208, 226, 0.8)';
+  ctx.fillText(touchText('楼梯 · 首领封印'), stairs.x, stairs.y - 34);
+  ctx.restore();
+}
+
+/**
+ * 画楼梯：首领未死时画"封印态"，清场后才转为金色激活
  */
 function drawStairs() {
   const open = !!(state.openFloor && state.openFloor.active);
-  if (!state.stairs || (!state.floorCleared && !open)) return;
+  if (!state.stairs) return;
+  /* 首领未死 / 本房未清：楼梯仍在原位置，用封印态提示"在这里、但还不能下"，
+     不再整段 return（改前屏幕上完全没有楼梯信息）。只影响绘制，交互判定仍在 interactStairs。 */
+  if (!state.floorCleared && !open) {
+    drawSealedStairs(state.stairs);
+    return;
+  }
 
   const stairs = state.stairs;
   const pulse = 0.5 + 0.5 * Math.sin(state.elapsed * 4);
@@ -50355,6 +51490,14 @@ function sprintSightClear(x0, y0, x1, y1) {
 function updatePlayer(dt) {
   const player = state.player;
 
+  /* G1-1：房间行进期间由脚本接管移动——不读输入、不做碰撞、不施法，
+     只推进折线位置并让动画层继续跑（否则角色会定格成"滑行雕像"）。 */
+  if (state.roomTravel && state.roomTravel.active) {
+    updateRoomTravel(dt);
+    updatePlayerAnim(dt);
+    return;
+  }
+
   /* 验收专用姿态定格：只在 __roamDebug.setPose 打开时生效，
      正常游戏 state.debugPose 恒为 null，不会影响任何手感。 */
   if (state.debugPose === 'attack') {
@@ -51767,6 +52910,9 @@ function getMagicDamage(magic, fusion) {
  */
 function castPrimary() {
   if (state.mode !== 'playing' || state.status !== 'playing') return false;
+
+  /* G1-1：行进中禁止施法（触屏的按下即施法也走这里） */
+  if (isRoomTraveling()) return false;
 
   // P3：并联回路关闭时完全等价于旧版单卡施法
   if (DUAL_CONFIG.enabled === false || !state.dual) {
@@ -53833,6 +54979,9 @@ function castHeal(magic, fusion) {
  */
 function castDevice() {
   if (state.mode !== 'playing' || state.status !== 'playing') return false;
+
+  /* G1-1：行进中禁止放装置 */
+  if (isRoomTraveling()) return false;
 
   const tech = getActiveTech();
   if (!tech) {
@@ -57986,6 +59135,10 @@ function fusionHintForOption(option) {
     fusion[option.kind] === option.id && state.fusions.indexOf(fusion.id) < 0
   ));
   if (pairs.length === 0) {
+    /* G1-3：这张卡参与的配方都已经融合过 → 不再输出"无融合"占位行。
+       只有"本来就没有任何配方"的卡才保留 none 状态。 */
+    const allPairs = FUSION_CONFIG.filter((fusion) => fusion[option.kind] === option.id);
+    if (allPairs.length > 0) return null;
     return {
       state: 'none', fusionId: null, fusionName: '', partnerName: '',
       /* B2 · 卡面只留一句"没有配方"；"可单独使用"这层意思对玩家是默认预期，不再占字 */
@@ -58919,6 +60072,8 @@ function descendFloor() {
  * @returns {boolean} 是否成功下楼
  */
 function descendFloorNow(tStart, perf) {
+  /* G1-1：换层必须掐掉残留的行进状态，否则新层的玩家会被上一层的折线拽走 */
+  state.roomTravel = null;
 
   /* 第 6 轮 · 元进度：离开这一层时还是"无伤"→ 记一次无伤清层（成就口径） */
   if (state.floorNoHit !== false) {
@@ -60765,7 +61920,8 @@ function buildTreeNodeHtml(kind, id) {
 
   // 状态角标：三态文案不同，一眼能读出"现在能不能拿 / 能不能融"
   let stateLabel = '已解锁';
-  if (st === 'ready' && kind === 'fusion') stateLabel = '可凑出';
+  if (kind === 'fusion' && st === 'owned') stateLabel = '已融合';
+  else if (st === 'ready' && kind === 'fusion') stateLabel = '可凑出';
   else if (st === 'ready') stateLabel = '可解锁';
   else if (st === 'locked') stateLabel = '锁定';
   if (almost) stateLabel = '差一张可合';
@@ -60783,7 +61939,7 @@ function buildTreeNodeHtml(kind, id) {
   } else {
     const magicName = (MAGIC_BY_ID[conf.magic] || {}).name || '?';
     const techName = (TECH_BY_ID[conf.tech] || {}).name || '?';
-    if (st === 'owned') meta = '已激活 · 按 F 使用';
+    if (st === 'owned') meta = '已激活 · 常驻生效';
     else if (st === 'ready') meta = '两者齐备 · 按 F 融合';
     else {
       const miss = [];
@@ -60822,6 +61978,13 @@ function buildTreeReadyHtml() {
     return '<span>可凑出的融合</span>' + ready.map((fusion) => (
       '<span class="ready-chip">' + fusion.glyph + ' ' + fusion.name + ' · 按 F</span>'
     )).join('');
+  }
+
+  /* G1-3：全部配方都合完时，不再提示"去凑融合/先拿魔法+科技"；
+     配方本身仍能从下面节点查到，这里只做完成态收口。 */
+  if (state.fusions.length >= FUSION_CONFIG.length) {
+    return '<span>全部融合技已完成</span>'
+      + '<span class="ready-chip is-missing">配方仍可在节点与连线中查看</span>';
   }
 
   const almost = FUSION_CONFIG
@@ -60880,7 +62043,9 @@ function buildTreeDetailHtml(kind, id) {
       + '<span class="i-tag">' + stateText + '</span></div>'
       + '<div class="i-desc">' + fusion.desc + '</div>'
       + '<div class="i-stats">来源：<b>' + magic.name + '</b> + <b>' + tech.name + '</b>'
-      + '　·　融合后按 <b>F</b> 释放（有独立冷却）</div>';
+      + '　·　' + (st === 'owned'
+        ? '已激活 · 已并入技能循环'
+        : '融合后按 <b>F</b> 释放（有独立冷却）') + '</div>';
   }
 
   const conf = kind === 'magic' ? MAGIC_BY_ID[id] : TECH_BY_ID[id];
@@ -68729,6 +69894,12 @@ function triggerDescend() {
  */
 function handleKeyDown(event) {
   if (!state) return;
+  /* G1-1：房间行进只占用约 1 秒，期间除 Esc 外一律吞键，
+     避免"走着走着放了个技能 / 开了面板"打断过场。 */
+  if (isRoomTraveling() && event.key !== 'Escape') {
+    event.preventDefault();
+    return;
+  }
   /* 三角色：选择页打开时吞掉所有按键，Esc 也不能关闭（避免"无角色"状态） */
   if (__charSelectOpen) {
     /* 长按产生的自动重复不算玩家输入：否则"按住 Enter 开始"会顺手确认默认角色，
@@ -69044,6 +70215,8 @@ function updateMouseWorld(event) {
  */
 function handleCanvasMouseDown(event) {
   if (!state || state.mode !== 'playing' || state.status !== 'playing') return;
+  /* G1-1：行进期间不响应点房/开门/施法，鼠标位置仍更新（松手后照常） */
+  if (isRoomTraveling()) return;
   updateMouseWorld(event);
 
   if (event.button === 0) {
@@ -71167,6 +72340,22 @@ function installDebugApi() {
   };
 
   window.__roamDebug = {
+    /**
+     * G1-1 选房行进只读口：验收脚本用它证明"有人和镜头一起移动"
+     * @returns {Object|null} {from,to,dur,pathLen,t,progress,path}
+     */
+    roomTravel() {
+      const rt = state.roomTravel;
+      if (!rt || !rt.active) return null;
+      return {
+        from: rt.from, to: rt.land, targetId: rt.targetId,
+        dur: Math.round(rt.dur * 1000) / 1000,
+        pathLen: Math.round(rt.len),
+        t: Math.round(rt.t * 1000) / 1000,
+        progress: Math.round(clamp(rt.t / rt.dur, 0, 1) * 1000) / 1000,
+        path: rt.path.map((p) => ({ x: Math.round(p.x), y: Math.round(p.y) }))
+      };
+    },
     /**
      * ③-2 v2.5.5：房型轮廓预览口（只读，不改任何状态）
      * 验收脚本用它在独立画布上以 16px / 灰度绘制，确认"不只靠色相"。
